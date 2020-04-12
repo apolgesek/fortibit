@@ -1,11 +1,10 @@
 {
-  "name": "angular-electron",
-  "version": "7.0.1",
-  "description": "Angular 9 with Electron (Typescript + SASS + Hot Reload)",
-  "homepage": "https://github.com/maximegris/angular-electron",
+  "name": "hasloc",
+  "version": "0.0.0",
+  "description": "Password manager",
   "author": {
-    "name": "Maxime GRIS",
-    "email": "maxime.gris@gmail.com"
+    "name": "Arkadiusz Półgęsek",
+    "email": "arek.polgesek@gmail.com"
   },
   "keywords": [
     "angular",
