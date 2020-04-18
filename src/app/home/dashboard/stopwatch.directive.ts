@@ -1,0 +1,35 @@
+import { Directive, Input, AfterViewInit, ElementRef, OnInit } from '@angular/core';
+
+@Directive({
+  selector: '[appStopwatch]'
+})
+export class StopwatchDirective implements OnInit, AfterViewInit {
+
+  @Input('appStopwatch') seconds: number; 
+  public remainingTime: number;
+  
+  private interval: NodeJS.Timeout;
+
+  constructor(private element: ElementRef) { }
+
+  ngOnInit(): void {
+    this.remainingTime = this.seconds;
+  }
+
+  ngAfterViewInit() {
+    this.updateCountdown();
+    this.interval = setInterval(() => {
+      this.updateCountdown();
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.interval);
+  }
+
+  private updateCountdown() {
+    this.element.nativeElement.innerHTML = `${this.remainingTime / 1000}s left`;
+    this.remainingTime += -1000;
+  }
+
+}

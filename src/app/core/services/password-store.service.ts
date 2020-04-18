@@ -1,6 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { ElectronService } from './electron/electron.service';
 import { Router } from '@angular/router';
 
@@ -12,6 +11,9 @@ export class PasswordStoreService {
   public passwordList: any[] = [];
   public lifeLeft: number;
   public clearIntervalSource$: Observable<any>;
+  public dateSaved: Date;
+  public selectedPassword: any;
+  public rowIndex: number;
 
   public isInvalidPassword = false;
 
@@ -44,6 +46,7 @@ export class PasswordStoreService {
           this.clearAll();
           deserializedPasswords.forEach(entry => {
             this.addEntry(entry);
+            this.setDateSaved();
           });
         });
       })
@@ -51,14 +54,33 @@ export class PasswordStoreService {
 
   addEntry(entryModel: any) {
     this._passwordListSource.next(entryModel);
+    this.clearDateSaved();
+  }
+
+  editEntry(rowIndex: number) {
+    // send event to main process
+  }
+
+  deleteEntry() {
+    this.passwordList.splice(this.rowIndex, 1);
+    this.clearDateSaved();
   }
 
   clearAll() {
     this.passwordList = [];
+    this.clearDateSaved();
   }
 
   clearCounter() {
     this._clearIntervalSource.next();
+  }
+
+  clearDateSaved() {
+    this.dateSaved = undefined;
+  }
+
+  setDateSaved() {
+    this.dateSaved = new Date();
   }
 
 }

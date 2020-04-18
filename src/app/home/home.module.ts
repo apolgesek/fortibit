@@ -8,6 +8,7 @@ import {MessagesModule} from 'primeng/messages';
 import {MessageModule} from 'primeng/message';
 import {TableModule} from 'primeng/table';
 import {DropdownModule} from 'primeng/dropdown';
+import {InputTextareaModule} from 'primeng/inputtextarea';
 
 import { HomeRoutingModule } from './home-routing.module';
 
@@ -17,15 +18,17 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PasswordListComponent } from './password-list/password-list.component';
 import { NewEntryComponent } from './new-entry/new-entry.component';
+import { StopwatchDirective } from './dashboard/stopwatch.directive';
 
 @NgModule({
-  declarations: [HomeComponent, DashboardComponent, PasswordListComponent, NewEntryComponent],
+  declarations: [HomeComponent, DashboardComponent, PasswordListComponent, NewEntryComponent, StopwatchDirective],
   imports: [
     CommonModule,
     SharedModule,
     HomeRoutingModule,
     CardModule,
     InputTextModule,
+    InputTextareaModule,
     ButtonModule,
     ReactiveFormsModule,
     MessageModule,

@@ -6,17 +6,38 @@
             type="button"
             label="Add entry"
             class="ui-button-success"
+            icon="pi pi-plus"
+            iconPos="left"
             (click)="openNewEntryWindow()">
         </button>
         <button
             pButton
             type="button"
-            label="Save"
             class="ui-button-info"
             icon="pi pi-save"
             iconPos="left"
+            [disabled]="!isAnyPassword || isDateSaved"
             (click)="saveDatabase()">
         </button>
+        <button
+            pButton
+            type="button"
+            class="ui-button-warning"
+            icon="pi pi-pencil"
+            iconPos="left"
+            [disabled]="!isRowSelected"
+            (click)="openEditEntryWindow()">
+        </button>
+        <button
+            pButton
+            type="button"
+            class="ui-button-danger"
+            icon="pi pi-trash"
+            iconPos="left"
+            [disabled]="!isRowSelected"
+            (click)="openDeleteEntryWindow()">
+        </button>
+        <input type="text" pInputText placeholder="Search" />
     </div>
 </nav>
 
@@ -24,13 +45,12 @@
 
 <p-toast position="bottom-right" [hideTransitionOptions]="'0ms'">
     <ng-template let-message pTemplate="message">
-        <div #countRef style="text-align: center; display: flex; align-items: center;">
+        <div style="text-align: center; display: flex; align-items: center;">
             <i class="pi pi-exclamation-triangle" style="font-size: 3em"></i>
             <div>
                 <div style="font-weight: bold;">{{message.summary}}</div>
-                <span *ngIf="!initCounter && getLife(message.detail); else counter"></span>
+                <div class="seconds-left" [appStopwatch]="message.life"></div>
             </div>
-            <ng-template #counter>{{ passwordStore.lifeLeft | seconds }}s left</ng-template>
         </div>
     </ng-template>
 </p-toast>

@@ -18,9 +18,11 @@ export class NewEntryComponent implements OnInit {
 
   ngOnInit(): void {
     this.newEntryForm = this._fb.group({
+      title: ['', Validators.required],
       username: ['', Validators.required],
       value: ['', Validators.required],
-      url: ['']
+      url: [''],
+      notes: ['']
     });
   }
 

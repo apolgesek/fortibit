@@ -22,7 +22,7 @@ function createWindow(): BrowserWindow {
   win = new BrowserWindow({
     x: 0,
     y: 0,
-    width: 800,
+    width: 960,
     height: 600,
     webPreferences: {
       nodeIntegration: true,
@@ -93,7 +93,7 @@ try {
       x: 0,
       y: 0,
       width: 600,
-      height: 400,
+      height: 600,
       webPreferences: {
         nodeIntegration: true,
         allowRunningInsecureContent: (serve) ? true : false,

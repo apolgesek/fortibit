@@ -2,6 +2,19 @@
     .ui-button-text-icon-left .ui-button-icon-left {
         margin-top: -.5rem;
     }
+
+    .ui-button-success {
+        margin-right: 0.5rem;
+    }
+
+    .ui-button-warning {
+        margin-left: 2rem;
+        margin-right: 0.5rem;
+    }
+
+    .ui-button-danger {
+        margin-right: 2rem;
+    }
 }
 
 
@@ -30,10 +43,6 @@
         flex: 1;
         text-align: right;
         margin-right: 1rem;
-
-        .ui-button-success {
-            margin-right: 1rem;
-        }
     }
 
 }

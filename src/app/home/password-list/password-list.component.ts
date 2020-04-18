@@ -10,8 +10,14 @@ import { MessageService } from 'primeng/api';
 })
 export class PasswordListComponent implements OnInit, OnDestroy {
 
+  private _selectedRow: any;
+
   get passwordList() {
     return this.passwordStore.passwordList;
+  }
+
+  get selectedRow() {
+    return this.passwordStore.selectedPassword;
   }
 
   private newEntryAddedListener: (event: Electron.IpcRendererEvent, ...args: any[]) => void = (_, newEntryModel) => {
@@ -35,7 +41,17 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     this.electronService.ipcRenderer.send('copyToClipboard', data);
     this.toastService.clear();
     this.passwordStore.clearCounter();
-    this.toastService.add({severity:'success', summary:'Copied to clipboard!', life: 15000, detail: '15000' });
+    this.toastService.add({severity:'success', summary:'Copied to clipboard!', life: 15000 });
+  }
+
+  editEntry(rowIndex: number) {
+    this.passwordStore.editEntry(rowIndex);
+  }
+
+  selectRow(password: any, rowIndex: number) {
+    this._selectedRow = password;
+    this.passwordStore.selectedPassword = password;
+    this.passwordStore.rowIndex = rowIndex;
   }
 
   ngOnDestroy(): void {

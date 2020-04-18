@@ -3,6 +3,13 @@
     <div class="ui-g ui-fluid">
         <div class="ui-g-12 ui-md-4">
             <div class="ui-inputgroup">
+                <span class="ui-inputgroup-addon"><i class="pi pi-bookmark" style="line-height: 1.25;"></i></span>
+                <input type="text" formControlName="title" pInputText placeholder="Title">         
+            </div>
+        </div>
+
+        <div class="ui-g-12 ui-md-4">
+            <div class="ui-inputgroup">
                 <span class="ui-inputgroup-addon"><i class="pi pi-user" style="line-height: 1.25;"></i></span>
                 <input type="text" formControlName="username" pInputText placeholder="Username">         
             </div>
@@ -17,11 +24,17 @@
                 
         <div class="ui-g-12 ui-md-4">
             <div class="ui-inputgroup">
-                <span class="ui-inputgroup-addon">URL</span>
+                <span class="ui-inputgroup-addon"><i class="pi pi-globe" style="line-height: 1.25;"></i></span>
                 <input type="text" formControlName="url" pInputText placeholder="Website">      
             </div>
         </div>
 
+        <div class="ui-g-12 ui-md-4">
+            <div class="ui-inputgroup">
+                <span class="ui-inputgroup-addon"><i class="pi pi-info" style="line-height: 1.25;"></i></span>
+                <textarea formControlName="notes" pInputTextarea placeholder="Optional note"></textarea>     
+            </div>
+        </div>
         <button pButton type="submit" label="Confirm" class="confirm-btn ui-button-success"></button>
     </div>
 </form>
