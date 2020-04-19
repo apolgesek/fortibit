@@ -1,5 +1,5 @@
 <nav class="main-nav">
-    <h2 class="brand"><img src="../../../assets/images/lock.svg" class="brand-logo"> haslock</h2>
+    <h2 class="brand"><img [src]="logoURL" class="brand-logo"> haslock</h2>
     <div class="menu-panel">
         <button
             pButton
@@ -17,7 +17,7 @@
             icon="pi pi-save"
             iconPos="left"
             [disabled]="!isAnyPassword || isDateSaved"
-            (click)="saveDatabase()">
+            (click)="trySaveDatabase()">
         </button>
         <button
             pButton
@@ -55,4 +55,39 @@
     </ng-template>
 </p-toast>
 
-<p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+<p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle" [modal]="true"></p-confirmDialog>
+
+<p-dialog [(visible)]="isNewPasswordDialogShown" [modal]="true">
+    <p-header>
+        Please provide master password
+    </p-header>
+    <div style="display: flex; align-items: center; margin: 1rem 0">
+        <i class="pi pi-info-circle"></i>
+        Password must be at least&nbsp;<strong>6</strong>&nbsp;characters long
+    </div>
+    <div class="ui-g-12">
+        <div class="ui-inputgroup">
+            <span class="ui-inputgroup-addon"><i class="pi pi-key" style="line-height: 1.25;"></i></span>
+            <input type="password" [(ngModel)]="newPassword" pPassword placeholder="New password" style="width: 100%">         
+        </div>
+    </div>
+    
+    <div class="ui-g-12">
+        <div class="ui-inputgroup">
+            <span class="ui-inputgroup-addon"><i class="pi pi-key" style="line-height: 1.25;"></i></span>
+            <input type="password" [(ngModel)]="newPasswordRepeat" pInputText placeholder="Repeat password" style="width: 100%">   
+        </div>
+    </div>
+    <p-footer>
+        <button
+            pButton
+            type="button"
+            label="Confirm"
+            [disabled]="newPassword.length < 6 || newPassword !== newPasswordRepeat"
+            class="ui-button-success"
+            (click)="saveNewDatabase()">
+        </button>
+    </p-footer>
+</p-dialog>
+
+

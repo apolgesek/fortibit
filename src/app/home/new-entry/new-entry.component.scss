@@ -1,9 +1,13 @@
-:host {
+:host ::ng-deep {
     padding: 2rem;
     display: block;
 
     h3 {
         margin: auto 0.5rem;
+    }
+
+    .ui-message-error {
+        margin: 1rem 0 0;
     }
 
     .ui-fluid {

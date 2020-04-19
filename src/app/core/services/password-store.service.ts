@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { ElectronService } from './electron/electron.service';
 import { map, shareReplay } from 'rxjs/operators';
 import { Subject, combineLatest, BehaviorSubject, Observable } from 'rxjs';
-import { MessageService } from 'primeng/api';
 
 @Injectable({
   providedIn: 'root'
@@ -16,9 +15,9 @@ export class PasswordStoreService {
   public dateSaved: Date;
   public selectedPassword: any;
   public rowIndex: number;
-
   public isInvalidPassword = false;
-
+  public filePath: string;
+  
   private _searchPhraseSource: BehaviorSubject<any> = new BehaviorSubject<any>('');
   private _outputPasswordListSource: Subject<any> = new Subject<any>();
 
@@ -26,19 +25,19 @@ export class PasswordStoreService {
     private electronService: ElectronService,
     private router: Router,
     private zone: NgZone,
-    private toastService: MessageService
-    ) {
+  ) {
       this.filteredList$ = combineLatest(this._outputPasswordListSource, this._searchPhraseSource).pipe(
         map(([passwords, searchPhrase]) => this.matchEntries(passwords, searchPhrase)),
         shareReplay()
       );
 
-      this.electronService.ipcRenderer.on('onContentDecrypt', (_, serializedPasswords: string) => {
+      this.electronService.ipcRenderer.on('onContentDecrypt', (_, { decrypted, file }) => {
         this.zone.run(() => {
           let deserializedPasswords: any[] = [];
           try {
-             deserializedPasswords = JSON.parse(serializedPasswords);
+             deserializedPasswords = JSON.parse(decrypted);
              this.isInvalidPassword = false;
+             this.filePath = file;
              this.router.navigate(['/dashboard']);
           } catch (err) {
             this.isInvalidPassword = true;
@@ -85,9 +84,8 @@ export class PasswordStoreService {
     this.dateSaved = new Date();
   }
 
-  saveDatabase() {
-    this.electronService.ipcRenderer.send('saveFile', this.passwordList);
-    this.toastService.add({severity: 'success', summary: 'Passwords saved', life: 5000});
+  saveDatabase(newPassword: string) {
+    this.electronService.ipcRenderer.send('saveFile', {passwordList: this.passwordList, newPassword});
     this.setDateSaved();
   }
 

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ElectronService } from '../../core/services';
 import { PasswordStoreService } from '../../core/services/password-store.service';
 import { ConfirmationService } from 'primeng/api';
+const logoURL = require('../../../assets/images/lock.svg');
 
 @Component({
   selector: 'app-dashboard',
@@ -10,11 +11,9 @@ import { ConfirmationService } from 'primeng/api';
 })
 export class DashboardComponent {
 
-  constructor(
-    private electronService: ElectronService,
-    private passwordStore: PasswordStoreService,
-    private confirmDialogService: ConfirmationService
-  ) { }
+  public isNewPasswordDialogShown = false;
+  public newPassword: string = '';
+  public newPasswordRepeat: string = '';
 
   get isAnyPassword(): boolean {
     return this.passwordStore.passwordList.length > 0;
@@ -27,6 +26,16 @@ export class DashboardComponent {
   get isRowSelected() {
     return this.passwordStore.selectedPassword;
   }
+
+  get logoURL() {
+    return logoURL;
+  }
+
+  constructor(
+    private electronService: ElectronService,
+    private passwordStore: PasswordStoreService,
+    private confirmDialogService: ConfirmationService
+  ) { }
 
   openNewEntryWindow() {
     this.electronService.ipcRenderer.send('openNewEntryWindow');
@@ -50,8 +59,17 @@ export class DashboardComponent {
     this.passwordStore.filterEntries(event.target.value);
   }
 
-  saveDatabase() {
-    this.passwordStore.saveDatabase();
+  trySaveDatabase() {
+    if (!this.passwordStore.filePath) {
+      this.isNewPasswordDialogShown = true;
+    } else {
+      this.passwordStore.saveDatabase(null);
+    }
+  }
+
+  saveNewDatabase() {
+    this.passwordStore.saveDatabase(this.newPassword);
+    this.isNewPasswordDialogShown = false;
   }
 
 }

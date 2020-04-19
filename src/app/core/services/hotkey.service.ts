@@ -12,7 +12,7 @@ export class HotkeyService {
 
   saveDatabase = (event: KeyboardEvent) => {
       if (event.key === 's' && this.isMetaKeyPressed(event)) {
-        this.passwordService.saveDatabase(); 
+        // handle hotkey for password save action
       }
   }
 

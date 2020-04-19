@@ -20,7 +20,7 @@ export class NewEntryComponent implements OnInit {
   ngOnInit(): void {
     this.newEntryForm = this._fb.group({
       id: [''],
-      title: ['', Validators.required],
+      title: [''],
       username: ['', Validators.required],
       value: ['', Validators.required],
       url: [''],
@@ -35,6 +35,10 @@ export class NewEntryComponent implements OnInit {
   }
 
   addNewEntry() {
+    Object.values(this.newEntryForm.controls).forEach(control => {
+      control.markAsDirty();
+    });
+
     if (this.newEntryForm.valid) {
       this.electronService.ipcRenderer.send('newEntry', this.newEntryForm.value);
     }

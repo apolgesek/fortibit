@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog, clipboard, SaveDialogReturnValue }
 import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
+
 const crypto = require('crypto');
 
 // AES-256 Counter encryption mode
@@ -15,6 +16,7 @@ const args = process.argv.slice(1),
 
 let clearClipboardTimeout: NodeJS.Timeout;
 let file: string;
+let currentPassword: string;
 
 function createWindow(): BrowserWindow {
 
@@ -103,9 +105,10 @@ try {
       newEntryWindow.loadURL('http://localhost:4200/#/new-entry');
     } else {
       newEntryWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'dist/index.html', '#', 'new-entry'),
+        pathname: `${__dirname}/dist/index.html`,
         protocol: 'file:',
-        slashes: true
+        slashes: true,
+        hash: 'new-entry'
       }));
     }
 
@@ -143,9 +146,10 @@ try {
       newEntryWindow.loadURL('http://localhost:4200/#/new-entry');
     } else {
       newEntryWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'dist/index.html', '#', 'new-entry'),
+        pathname: `${__dirname}/dist/index.html`,
         protocol: 'file:',
-        slashes: true
+        slashes: true,
+        hash: 'new-entry'
       }));
     }
   
@@ -154,12 +158,16 @@ try {
     });
   });
 
-  ipcMain.on('saveFile', async (_, dataSnapshot: any[]) => {
+  ipcMain.on('saveFile', async (_, { passwordList, newPassword }) => {
     let savePath: SaveDialogReturnValue = { filePath: file, canceled: false };
+    let output;
     if (!file) {
       savePath = await dialog.showSaveDialog(win, {});
+      console.log(newPassword);
+      output = encrypt(passwordList, newPassword);
+    } else {
+      output = encrypt(passwordList, currentPassword);
     }
-    const output = encrypt(dataSnapshot, 'zse4rfvcx');
     const finalFilePath = savePath.filePath.endsWith(ext) ? savePath.filePath : savePath.filePath + ext;
 
     fs.writeFile(finalFilePath, output.iv + ':' + output.encrypted, () => {});
@@ -190,9 +198,18 @@ try {
   ipcMain.on('authAttempt', (_, password) => {
     fs.readFile(file, (_, data) => {
       const decrypted = decrypt(data, password);
-      win.webContents.send('onContentDecrypt', decrypted);
+      currentPassword = password;
+      win.webContents.send('onContentDecrypt', {decrypted, file});
     });
-  })
+  });
+
+  app.setAboutPanelOptions({
+    applicationName: "Haslock", 
+    applicationVersion: "0.0.1",
+    version: "0.0.1",
+    copyright: "Copyright © 2020 by Arkadiusz Półgęsek",
+    authors: ["Arkadiusz Półgęsek"],
+  });
 
 } catch (e) {
   // Catch Error

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ElectronService } from '../core/services';
 import { PasswordStoreService } from '../core/services/password-store.service';
+const logoURL = require('../../assets/images/lock.svg');
 
 @Component({
   selector: 'app-home',
@@ -15,6 +16,10 @@ export class HomeComponent implements OnInit {
 
   get isInvalid() {
     return this.passwordStore.isInvalidPassword;
+  }
+
+  get logoURL() {
+    return logoURL;
   }
 
   constructor(
