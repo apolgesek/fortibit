@@ -49,8 +49,10 @@
             <i class="pi pi-exclamation-triangle" style="font-size: 3em"></i>
             <div>
                 <div style="font-weight: bold;">{{message.summary}}</div>
-                <div class="seconds-left" [appStopwatch]="message.life"></div>
+                <div *ngIf="message.detail === 'clipboard'" class="seconds-left" [appStopwatch]="message.life"></div>
             </div>
         </div>
     </ng-template>
 </p-toast>
+
+<p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>

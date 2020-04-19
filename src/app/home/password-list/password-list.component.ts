@@ -37,7 +37,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
   copyToClipboard(data: string) {
     this.electronService.ipcRenderer.send('copyToClipboard', data);
     this.toastService.clear();
-    this.toastService.add({ severity:'success', summary:'Copied to clipboard!', life: 15000 });
+    this.toastService.add({ severity:'success', summary:'Copied to clipboard!', life: 15000, detail: 'clipboard' });
   }
 
   selectRow(password: any, rowIndex: number) {

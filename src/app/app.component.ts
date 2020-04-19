@@ -3,6 +3,9 @@ import { ElectronService } from './core/services';
 import { TranslateService } from '@ngx-translate/core';
 import { AppConfig } from '../environments/environment';
 import { Router } from '@angular/router';
+import { fromEvent } from 'rxjs';
+import { PasswordStoreService } from './core/services/password-store.service';
+import { HotkeyService } from './core/services/hotkey.service';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +17,9 @@ export class AppComponent implements AfterViewInit {
     public electronService: ElectronService,
     private translate: TranslateService,
     private router: Router,
-    private zone: NgZone
+    private zone: NgZone,
+    private passwordService: PasswordStoreService,
+    private hotkeyService: HotkeyService
   ) {
     translate.setDefaultLang('en');
     console.log('AppConfig', AppConfig);
@@ -32,6 +37,10 @@ export class AppComponent implements AfterViewInit {
       this.zone.run(() => {
         this.router.navigateByUrl('/home');
       });
+    });
+
+    fromEvent(window, 'keydown').subscribe((event: KeyboardEvent) => {
+      this.hotkeyService.intercept(event);
     });
   }
 

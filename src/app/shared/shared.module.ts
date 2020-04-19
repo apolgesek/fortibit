@@ -6,6 +6,9 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
+import {ConfirmDialogModule} from 'primeng/confirmdialog';
+import {ConfirmationService} from 'primeng/api';
+
 import { PageNotFoundComponent } from './components/';
 import { WebviewDirective } from './directives/';
 import { FormsModule } from '@angular/forms';
@@ -14,8 +17,8 @@ import { SecondsPipe } from './pipes/seconds.pipe';
 
 @NgModule({
   declarations: [PageNotFoundComponent, WebviewDirective, LoadingOverlayComponent, SecondsPipe],
-  imports: [CommonModule, TranslateModule, FormsModule, BrowserAnimationsModule, ToastModule],
-  providers: [MessageService],
+  imports: [CommonModule, TranslateModule, FormsModule, BrowserAnimationsModule, ToastModule, ConfirmDialogModule],
+  providers: [MessageService, ConfirmationService],
   exports: [
     TranslateModule,
     WebviewDirective,
@@ -23,6 +26,7 @@ import { SecondsPipe } from './pipes/seconds.pipe';
     LoadingOverlayComponent,
     BrowserAnimationsModule,
     ToastModule,
+    ConfirmDialogModule,
     SecondsPipe
   ]
 })

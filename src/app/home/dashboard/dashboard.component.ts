@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ElectronService } from '../../core/services';
 import { PasswordStoreService } from '../../core/services/password-store.service';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +12,8 @@ export class DashboardComponent {
 
   constructor(
     private electronService: ElectronService,
-    private passwordStore: PasswordStoreService
+    private passwordStore: PasswordStoreService,
+    private confirmDialogService: ConfirmationService
   ) { }
 
   get isAnyPassword(): boolean {
@@ -35,7 +37,13 @@ export class DashboardComponent {
   }
 
   openDeleteEntryWindow() {
-    this.passwordStore.deleteEntry();
+    console.log(this.confirmDialogService);
+    this.confirmDialogService.confirm({
+      message: 'Are you sure you want to delete this entry?',
+      accept: () => {
+        this.passwordStore.deleteEntry();
+      }
+    });
   }
 
   searchEntries(event: any) {
@@ -43,8 +51,7 @@ export class DashboardComponent {
   }
 
   saveDatabase() {
-    this.electronService.ipcRenderer.send('saveFile', this.passwordStore.passwordList);
-    this.passwordStore.setDateSaved();
+    this.passwordStore.saveDatabase();
   }
 
 }

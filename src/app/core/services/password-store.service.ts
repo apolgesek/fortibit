@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ElectronService } from './electron/electron.service';
 import { map, shareReplay } from 'rxjs/operators';
 import { Subject, combineLatest, BehaviorSubject, Observable } from 'rxjs';
+import { MessageService } from 'primeng/api';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,8 @@ export class PasswordStoreService {
   constructor(
     private electronService: ElectronService,
     private router: Router,
-    private zone: NgZone
+    private zone: NgZone,
+    private toastService: MessageService
     ) {
       this.filteredList$ = combineLatest(this._outputPasswordListSource, this._searchPhraseSource).pipe(
         map(([passwords, searchPhrase]) => this.matchEntries(passwords, searchPhrase)),
@@ -81,6 +83,12 @@ export class PasswordStoreService {
 
   setDateSaved() {
     this.dateSaved = new Date();
+  }
+
+  saveDatabase() {
+    this.electronService.ipcRenderer.send('saveFile', this.passwordList);
+    this.toastService.add({severity: 'success', summary: 'Passwords saved', life: 5000});
+    this.setDateSaved();
   }
 
   private populateEntries(deserializedPasswords: any[]) {

@@ -19,6 +19,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { PasswordListComponent } from './password-list/password-list.component';
 import { NewEntryComponent } from './new-entry/new-entry.component';
 import { StopwatchDirective } from './dashboard/stopwatch.directive';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @NgModule({
   declarations: [HomeComponent, DashboardComponent, PasswordListComponent, NewEntryComponent, StopwatchDirective],
@@ -33,6 +34,7 @@ import { StopwatchDirective } from './dashboard/stopwatch.directive';
     ReactiveFormsModule,
     MessageModule,
     MessagesModule,
+    ConfirmDialogModule,
     TableModule,
     DropdownModule
   ]
