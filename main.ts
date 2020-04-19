@@ -83,6 +83,41 @@ try {
     }
   });
 
+  ipcMain.on('openEditEntryWindow', (_, data) => {
+    newEntryWindow = new BrowserWindow({
+      x: 0,
+      y: 0,
+      width: 600,
+      height: 600,
+      webPreferences: {
+        nodeIntegration: true,
+        allowRunningInsecureContent: (serve) ? true : false,
+      },
+      resizable: false
+    });
+
+    if (serve) {
+      require('electron-reload')(__dirname, {
+        electron: require(`${__dirname}/node_modules/electron`)
+      });
+      newEntryWindow.loadURL('http://localhost:4200/#/new-entry');
+    } else {
+      newEntryWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'dist/index.html', '#', 'new-entry'),
+        protocol: 'file:',
+        slashes: true
+      }));
+    }
+
+    newEntryWindow.webContents.on('did-finish-load', () => {
+      newEntryWindow.webContents.send('entryDataSent', data);
+    });
+
+    newEntryWindow.on('closed', () => {
+      newEntryWindow = null;
+    });
+  });
+
   ipcMain.on('openNewEntryWindow', () => {
     if (newEntryWindow) {
       newEntryWindow.moveTop();

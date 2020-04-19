@@ -13,6 +13,11 @@
                 <span class="ui-inputgroup-addon"><i class="pi pi-user" style="line-height: 1.25;"></i></span>
                 <input type="text" formControlName="username" pInputText placeholder="Username">         
             </div>
+            <p-message
+                *ngIf="newEntryForm.get('username').invalid && newEntryForm.get('username').dirty"
+                severity="error"
+                text="Username is required">
+            </p-message>
         </div>
         
         <div class="ui-g-12 ui-md-4">
@@ -20,6 +25,11 @@
                 <span class="ui-inputgroup-addon"><i class="pi pi-key" style="line-height: 1.25;"></i></span>
                 <input type="password" formControlName="value" pInputText placeholder="Password">   
             </div>
+            <p-message
+                *ngIf="newEntryForm.get('value').invalid && newEntryForm.get('value').dirty"
+                severity="error"
+                text="Password is required">
+            </p-message>
         </div>
                 
         <div class="ui-g-12 ui-md-4">

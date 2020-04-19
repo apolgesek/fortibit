@@ -37,7 +37,7 @@
             [disabled]="!isRowSelected"
             (click)="openDeleteEntryWindow()">
         </button>
-        <input type="text" pInputText placeholder="Search" />
+        <input type="text" (input)="searchEntries($event)" pInputText placeholder="Search" />
     </div>
 </nav>
 

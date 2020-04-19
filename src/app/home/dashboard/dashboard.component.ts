@@ -30,8 +30,16 @@ export class DashboardComponent {
     this.electronService.ipcRenderer.send('openNewEntryWindow');
   }
 
+  openEditEntryWindow() {
+    this.electronService.ipcRenderer.send('openEditEntryWindow', this.passwordStore.selectedPassword);
+  }
+
   openDeleteEntryWindow() {
     this.passwordStore.deleteEntry();
+  }
+
+  searchEntries(event: any) {
+    this.passwordStore.filterEntries(event.target.value);
   }
 
   saveDatabase() {

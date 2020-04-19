@@ -10,18 +10,15 @@ import { MessageService } from 'primeng/api';
 })
 export class PasswordListComponent implements OnInit, OnDestroy {
 
-  private _selectedRow: any;
-
-  get passwordList() {
-    return this.passwordStore.passwordList;
-  }
+  public passwordList$ = this.passwordStore.filteredList$;
 
   get selectedRow() {
     return this.passwordStore.selectedPassword;
   }
 
+  private _selectedRow: any;
   private newEntryAddedListener: (event: Electron.IpcRendererEvent, ...args: any[]) => void = (_, newEntryModel) => {
-    this.zone.run(()=>{
+    this.zone.run(() => {
       this.passwordStore.addEntry(newEntryModel);
    });
   };
@@ -40,12 +37,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
   copyToClipboard(data: string) {
     this.electronService.ipcRenderer.send('copyToClipboard', data);
     this.toastService.clear();
-    this.passwordStore.clearCounter();
-    this.toastService.add({severity:'success', summary:'Copied to clipboard!', life: 15000 });
-  }
-
-  editEntry(rowIndex: number) {
-    this.passwordStore.editEntry(rowIndex);
+    this.toastService.add({ severity:'success', summary:'Copied to clipboard!', life: 15000 });
   }
 
   selectRow(password: any, rowIndex: number) {

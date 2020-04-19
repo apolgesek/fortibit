@@ -40,7 +40,8 @@
   "dependencies": {
     "@angular/cdk": "9.2.0",
     "primeicons": "^2.0.0",
-    "primeng": "^8.0.0"
+    "primeng": "^8.0.0",
+    "uuid": "7.0.3"
   },
   "devDependencies": {
     "@angular/animations": "9.0.2",

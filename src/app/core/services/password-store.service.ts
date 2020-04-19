@@ -1,7 +1,9 @@
 import { Injectable, NgZone } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
-import { ElectronService } from './electron/electron.service';
 import { Router } from '@angular/router';
+import { v4 as uuidv4 } from 'uuid';
+import { ElectronService } from './electron/electron.service';
+import { map, shareReplay } from 'rxjs/operators';
+import { Subject, combineLatest, BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,28 +11,25 @@ import { Router } from '@angular/router';
 export class PasswordStoreService {
 
   public passwordList: any[] = [];
-  public lifeLeft: number;
-  public clearIntervalSource$: Observable<any>;
+  public filteredList$: Observable<any[]>;
   public dateSaved: Date;
   public selectedPassword: any;
   public rowIndex: number;
 
   public isInvalidPassword = false;
 
-  private _passwordListSource: Subject<any> = new Subject<any>();
-  private _clearIntervalSource: Subject<any> = new Subject<any>();
+  private _searchPhraseSource: BehaviorSubject<any> = new BehaviorSubject<any>('');
+  private _outputPasswordListSource: Subject<any> = new Subject<any>();
 
   constructor(
     private electronService: ElectronService,
     private router: Router,
     private zone: NgZone
     ) {
-    this._passwordListSource.asObservable()
-      .pipe().subscribe((data) => {
-        this.passwordList = [...this.passwordList, data];
-      });
-
-      this.clearIntervalSource$ = this._clearIntervalSource.asObservable().pipe();
+      this.filteredList$ = combineLatest(this._outputPasswordListSource, this._searchPhraseSource).pipe(
+        map(([passwords, searchPhrase]) => this.matchEntries(passwords, searchPhrase)),
+        shareReplay()
+      );
 
       this.electronService.ipcRenderer.on('onContentDecrypt', (_, serializedPasswords: string) => {
         this.zone.run(() => {
@@ -44,35 +43,36 @@ export class PasswordStoreService {
             return;
           }
           this.clearAll();
-          deserializedPasswords.forEach(entry => {
-            this.addEntry(entry);
-            this.setDateSaved();
-          });
+          this.populateEntries(deserializedPasswords);
+          this.setDateSaved();
         });
       })
   }
 
   addEntry(entryModel: any) {
-    this._passwordListSource.next(entryModel);
+    if (entryModel.id) {
+      let entryIdx = this.passwordList.findIndex(p => p.id === entryModel.id);
+      this.passwordList[entryIdx] = entryModel;
+    } else {
+      this.passwordList.push({...entryModel, id: uuidv4()});
+    }
+    this._outputPasswordListSource.next(this.passwordList);
     this.clearDateSaved();
-  }
-
-  editEntry(rowIndex: number) {
-    // send event to main process
   }
 
   deleteEntry() {
     this.passwordList.splice(this.rowIndex, 1);
+    this._outputPasswordListSource.next(this.passwordList);
     this.clearDateSaved();
+  }
+
+  filterEntries(value: string) {
+    this._searchPhraseSource.next(value);
   }
 
   clearAll() {
     this.passwordList = [];
     this.clearDateSaved();
-  }
-
-  clearCounter() {
-    this._clearIntervalSource.next();
   }
 
   clearDateSaved() {
@@ -81,6 +81,23 @@ export class PasswordStoreService {
 
   setDateSaved() {
     this.dateSaved = new Date();
+  }
+
+  private populateEntries(deserializedPasswords: any[]) {
+    this.passwordList = deserializedPasswords;
+    this._outputPasswordListSource.next(this.passwordList);
+  }
+
+  private matchEntries(passwords: any[], phrase: string) {
+    if (!phrase) {
+      return passwords;
+    }
+    return passwords.filter(p => {
+      return p.title.includes(phrase)
+        || p.username.includes(phrase)
+        || p.url.includes(phrase)
+        || p.notes.includes(phrase);
+    });
   }
 
 }

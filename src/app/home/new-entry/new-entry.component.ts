@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ElectronService } from '../../core/services';
 
@@ -13,17 +13,25 @@ export class NewEntryComponent implements OnInit {
 
   constructor(
     private _fb: FormBuilder,
-    private electronService: ElectronService
+    private electronService: ElectronService,
+    private zone: NgZone,
   ) { }
 
   ngOnInit(): void {
     this.newEntryForm = this._fb.group({
+      id: [''],
       title: ['', Validators.required],
       username: ['', Validators.required],
       value: ['', Validators.required],
       url: [''],
       notes: ['']
     });
+
+    this.electronService.ipcRenderer.on('entryDataSent', (_, data) => {
+      this.zone.run(() => {
+        this.newEntryForm.patchValue(data);
+      });
+    })
   }
 
   addNewEntry() {
