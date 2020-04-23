@@ -5,10 +5,10 @@
 </div>
 <div class="container">
   <form #ngForm (ngSubmit)="onLoginSubmit($event)" [formGroup]="loginForm">
-  <p-card class="sign-in">
-    <app-loading-overlay *ngIf="isOverlayActive"></app-loading-overlay>
-    <div class="ui-g ui-fluid">
-      <div class="ui-g-12">
+    <p-card class="sign-in">
+      <div class="ui-g ui-fluid">
+        <div class="ui-g-12">
+          <p class="file-path">File path: {{ filePath }}</p>
           <div class="ui-inputgroup">
               <span class="ui-inputgroup-addon"><i class="pi pi-key" style="line-height: 1.25;"></i></span>
               <input type="password" formControlName="password" pInputText placeholder="Password">   
@@ -23,12 +23,12 @@
             severity="error"
             text="Password is invalid">
           </p-message>
+        </div>
       </div>
-  </div>
-    <p-footer>
-      <a [routerLink]="['/dashboard']" class="navigate-dashboard">Go to Dashboard</a>
-      <button pButton type="submit" label="OK" class="ui-button-success"></button>
-    </p-footer>
-  </p-card>
+      <p-footer>
+        <a [routerLink]="['/dashboard']" class="navigate-dashboard">Go to Dashboard</a>
+        <button pButton type="submit" label="OK" class="ui-button-success"></button>
+      </p-footer>
+    </p-card>
   </form>
 </div>

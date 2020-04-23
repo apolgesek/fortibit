@@ -33,8 +33,9 @@ export class AppComponent implements AfterViewInit {
       console.log('Mode web');
     }
 
-    this.electronService.ipcRenderer.on('providePassword', () => {
+    this.electronService.ipcRenderer.on('providePassword', (_, filePath) => {
       this.zone.run(() => {
+        this.passwordService.filePath = filePath;
         this.router.navigateByUrl('/home');
       });
     });

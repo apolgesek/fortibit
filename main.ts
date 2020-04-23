@@ -1,22 +1,19 @@
 import { app, BrowserWindow, ipcMain, dialog, clipboard, SaveDialogReturnValue } from 'electron';
+
 import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
 
-const crypto = require('crypto');
-
-// AES-256 Counter encryption mode
-const algorithm = 'aes-256-ctr';
-const ext = '.hslc';
+import { EncryptionProvider } from './src/app/core/encryption/encryption-provider';
 
 let win: BrowserWindow = null;
-let newEntryWindow: BrowserWindow = null;
 const args = process.argv.slice(1),
     serve = args.some(val => val === '--serve');
 
 let clearClipboardTimeout: NodeJS.Timeout;
 let file: string;
 let currentPassword: string;
+const ext = '.hslc';
 
 function createWindow(): BrowserWindow {
 
@@ -85,98 +82,20 @@ try {
     }
   });
 
-  ipcMain.on('openEditEntryWindow', (_, data) => {
-    newEntryWindow = new BrowserWindow({
-      x: 0,
-      y: 0,
-      width: 600,
-      height: 600,
-      webPreferences: {
-        nodeIntegration: true,
-        allowRunningInsecureContent: (serve) ? true : false,
-      },
-      resizable: false
-    });
-
-    if (serve) {
-      require('electron-reload')(__dirname, {
-        electron: require(`${__dirname}/node_modules/electron`)
-      });
-      newEntryWindow.loadURL('http://localhost:4200/#/new-entry');
-    } else {
-      newEntryWindow.loadURL(url.format({
-        pathname: `${__dirname}/dist/index.html`,
-        protocol: 'file:',
-        slashes: true,
-        hash: 'new-entry'
-      }));
-    }
-
-    newEntryWindow.webContents.on('did-finish-load', () => {
-      newEntryWindow.webContents.send('entryDataSent', data);
-    });
-
-    newEntryWindow.on('closed', () => {
-      newEntryWindow = null;
-    });
-  });
-
-  ipcMain.on('openNewEntryWindow', () => {
-    if (newEntryWindow) {
-      newEntryWindow.moveTop();
-      return;
-    }
-
-    newEntryWindow = new BrowserWindow({
-      x: 0,
-      y: 0,
-      width: 600,
-      height: 600,
-      webPreferences: {
-        nodeIntegration: true,
-        allowRunningInsecureContent: (serve) ? true : false,
-      },
-      resizable: false
-    });
-
-    if (serve) {
-      require('electron-reload')(__dirname, {
-        electron: require(`${__dirname}/node_modules/electron`)
-      });
-      newEntryWindow.loadURL('http://localhost:4200/#/new-entry');
-    } else {
-      newEntryWindow.loadURL(url.format({
-        pathname: `${__dirname}/dist/index.html`,
-        protocol: 'file:',
-        slashes: true,
-        hash: 'new-entry'
-      }));
-    }
-  
-    newEntryWindow.on('closed', () => {
-      newEntryWindow = null;
-    });
-  });
-
   ipcMain.on('saveFile', async (_, { passwordList, newPassword }) => {
     let savePath: SaveDialogReturnValue = { filePath: file, canceled: false };
     let output;
+    const stringData = JSON.stringify(passwordList);
     if (!file) {
       savePath = await dialog.showSaveDialog(win, {});
-      console.log(newPassword);
-      output = encrypt(passwordList, newPassword);
+      output = EncryptionProvider.encryptString(stringData, newPassword);
     } else {
-      output = encrypt(passwordList, currentPassword);
+      output = EncryptionProvider.encryptString(stringData, currentPassword);
     }
     const finalFilePath = savePath.filePath.endsWith(ext) ? savePath.filePath : savePath.filePath + ext;
 
-    fs.writeFile(finalFilePath, output.iv + ':' + output.encrypted, () => {});
+    fs.writeFile(finalFilePath, output, () => {});
     file = finalFilePath;
-  });
-
-  ipcMain.on('newEntry', (_, newEntryModel) => {
-    win.webContents.send('onNewEntryAdded', newEntryModel);
-    newEntryWindow.close();
   });
 
   ipcMain.on('copyToClipboard', (_, value: string) => {
@@ -192,14 +111,18 @@ try {
       return;
     }
     file = filePath;
-    win.webContents.send('providePassword');
+    win.webContents.send('providePassword', file);
   });
 
   ipcMain.on('authAttempt', (_, password) => {
     fs.readFile(file, (_, data) => {
-      const decrypted = decrypt(data, password);
-      currentPassword = password;
-      win.webContents.send('onContentDecrypt', {decrypted, file});
+      try {
+        const decrypted = EncryptionProvider.decryptString(data.toString(), password);
+        currentPassword = password;
+        win.webContents.send('onContentDecrypt', {decrypted, file});
+      } catch (e) {
+        win.webContents.send('onContentDecrypt', {decrypted: '*', file});
+      }
     });
   });
 
@@ -214,26 +137,4 @@ try {
 } catch (e) {
   // Catch Error
   // throw e;
-}
-
-function encrypt(data: any, password: string) {
-  const serializedPasswords = JSON.stringify(data);
-  let keyHashed = crypto.createHash('sha256').update(password).digest('base64').substr(0, 32);
-  // get random 128-bit initialization vector buffer equivalent to AES block size
-  const initializationVector: Buffer = crypto.randomBytes(16);
-  const cipher = crypto.Cipheriv(algorithm, keyHashed, initializationVector);
-  let encrypted = cipher.update(serializedPasswords, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-
-  return { iv: initializationVector.toString('hex'), encrypted };
-}
-
-function decrypt(data: Buffer, password: string): string {
-  const keyParts = data.toString().split(':');
-  let keyHashed = crypto.createHash('sha256').update(password).digest('base64').substr(0, 32);
-  const decipher = crypto.createDecipheriv(algorithm, keyHashed, Buffer.from(keyParts[0], 'hex'));
-  let decrypted: string = decipher.update(keyParts[1], 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-
-  return decrypted;
 }

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { ElectronService } from '../../core/services';
 import { PasswordStoreService } from '../../core/services/password-store.service';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, DialogService } from 'primeng/api';
+import { NewEntryComponent } from '../new-entry/new-entry.component';
 const logoURL = require('../../../assets/images/lock.svg');
 
 @Component({
@@ -32,21 +32,20 @@ export class DashboardComponent {
   }
 
   constructor(
-    private electronService: ElectronService,
     private passwordStore: PasswordStoreService,
-    private confirmDialogService: ConfirmationService
+    private confirmDialogService: ConfirmationService,
+    private dialogService: DialogService,
   ) { }
 
   openNewEntryWindow() {
-    this.electronService.ipcRenderer.send('openNewEntryWindow');
+    this.dialogService.open(NewEntryComponent, {width: '70%', header: 'Add new entry'});
   }
 
   openEditEntryWindow() {
-    this.electronService.ipcRenderer.send('openEditEntryWindow', this.passwordStore.selectedPassword);
+    this.dialogService.open(NewEntryComponent, {width: '70%', header: 'Edit entry', data: this.passwordStore.selectedPassword});
   }
 
   openDeleteEntryWindow() {
-    console.log(this.confirmDialogService);
     this.confirmDialogService.confirm({
       message: 'Are you sure you want to delete this entry?',
       accept: () => {

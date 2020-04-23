@@ -1,6 +1,7 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { ElectronService } from '../../core/services';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/api';
+import { PasswordStoreService } from '@app/core/services/password-store.service';
 
 @Component({
   selector: 'app-new-entry',
@@ -12,13 +13,14 @@ export class NewEntryComponent implements OnInit {
   public newEntryForm: FormGroup;
 
   constructor(
-    private _fb: FormBuilder,
-    private electronService: ElectronService,
-    private zone: NgZone,
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
+    private fb: FormBuilder,
+    private passwordService: PasswordStoreService,
   ) { }
 
   ngOnInit(): void {
-    this.newEntryForm = this._fb.group({
+    this.newEntryForm = this.fb.group({
       id: [''],
       title: [''],
       username: ['', Validators.required],
@@ -27,11 +29,9 @@ export class NewEntryComponent implements OnInit {
       notes: ['']
     });
 
-    this.electronService.ipcRenderer.on('entryDataSent', (_, data) => {
-      this.zone.run(() => {
-        this.newEntryForm.patchValue(data);
-      });
-    })
+    if (this.config.data) {
+      this.newEntryForm.patchValue(this.config.data);
+    }
   }
 
   addNewEntry() {
@@ -40,7 +40,8 @@ export class NewEntryComponent implements OnInit {
     });
 
     if (this.newEntryForm.valid) {
-      this.electronService.ipcRenderer.send('newEntry', this.newEntryForm.value);
+      this.passwordService.addEntry(this.newEntryForm.value);
+      this.ref.close();
     }
   }
 

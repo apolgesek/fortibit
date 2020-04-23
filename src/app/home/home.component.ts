@@ -12,7 +12,6 @@ const logoURL = require('../../assets/images/lock.svg');
 export class HomeComponent implements OnInit {
 
   public loginForm: FormGroup;
-  public isOverlayActive: boolean;
 
   get isInvalid() {
     return this.passwordStore.isInvalidPassword;
@@ -20,6 +19,10 @@ export class HomeComponent implements OnInit {
 
   get logoURL() {
     return logoURL;
+  }
+
+  get filePath() {
+    return this.passwordStore.filePath;
   }
 
   constructor(

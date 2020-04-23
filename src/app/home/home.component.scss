@@ -50,6 +50,11 @@
   display: block;
   width: 50%;
   margin: -2rem auto 0;
+
+  .file-path {
+    margin: 0.5rem 0 1rem;
+    word-break: break-all;
+  }
 }
 
 .navigate-dashboard {

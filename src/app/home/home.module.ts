@@ -20,6 +20,7 @@ import { PasswordListComponent } from './password-list/password-list.component';
 import { NewEntryComponent } from './new-entry/new-entry.component';
 import { StopwatchDirective } from './dashboard/stopwatch.directive';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogService } from 'primeng/api';
 
 @NgModule({
   declarations: [HomeComponent, DashboardComponent, PasswordListComponent, NewEntryComponent, StopwatchDirective],
@@ -37,6 +38,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     ConfirmDialogModule,
     TableModule,
     DropdownModule
-  ]
+  ],
+  providers: [ DialogService ],
+  entryComponents: [NewEntryComponent]
 })
 export class HomeModule {}

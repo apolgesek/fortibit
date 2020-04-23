@@ -8,6 +8,7 @@ import { MessageService } from 'primeng/api';
 
 import {DialogModule} from 'primeng/dialog';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
+import { DynamicDialogComponent } from 'primeng/dynamicdialog';
 import {ConfirmationService} from 'primeng/api';
 
 import {PasswordModule} from 'primeng/password';
