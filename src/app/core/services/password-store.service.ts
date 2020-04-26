@@ -38,14 +38,14 @@ export class PasswordStoreService {
              deserializedPasswords = JSON.parse(decrypted);
              this.isInvalidPassword = false;
              this.filePath = file;
+             this.clearAll();
+             this.populateEntries(deserializedPasswords);
+             this.setDateSaved();
              this.router.navigate(['/dashboard']);
           } catch (err) {
             this.isInvalidPassword = true;
             return;
           }
-          this.clearAll();
-          this.populateEntries(deserializedPasswords);
-          this.setDateSaved();
         });
       })
   }
@@ -57,13 +57,13 @@ export class PasswordStoreService {
     } else {
       this.passwordList.push({...entryModel, id: uuidv4()});
     }
-    this._outputPasswordListSource.next(this.passwordList);
+    this.notifyStream();
     this.clearDateSaved();
   }
 
   deleteEntry() {
     this.passwordList.splice(this.rowIndex, 1);
-    this._outputPasswordListSource.next(this.passwordList);
+    this.notifyStream();
     this.clearDateSaved();
   }
 
@@ -89,9 +89,12 @@ export class PasswordStoreService {
     this.setDateSaved();
   }
 
+  notifyStream() {
+    this._outputPasswordListSource.next(this.passwordList);
+  }
+
   private populateEntries(deserializedPasswords: any[]) {
     this.passwordList = deserializedPasswords;
-    this._outputPasswordListSource.next(this.passwordList);
   }
 
   private matchEntries(passwords: any[], phrase: string) {

@@ -2,6 +2,7 @@ import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import { ElectronService } from '../../core/services';
 import { PasswordStoreService } from '../../core/services/password-store.service';
 import { MessageService } from 'primeng/api';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-password-list',
@@ -10,7 +11,7 @@ import { MessageService } from 'primeng/api';
 })
 export class PasswordListComponent implements OnInit, OnDestroy {
 
-  public passwordList$ = this.passwordStore.filteredList$;
+  public passwordList$: Observable<any[]>;
 
   get selectedRow() {
     return this.passwordStore.selectedPassword;
@@ -27,11 +28,17 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     private electronService: ElectronService,
     private passwordStore: PasswordStoreService,
     private toastService: MessageService,
-    private zone: NgZone
-  ) { }
+    private zone: NgZone,
+  ) { 
+    this.passwordList$ = this.passwordStore.filteredList$;
+  }
 
   ngOnInit(): void {
     this.electronService.ipcRenderer.on('onNewEntryAdded', this.newEntryAddedListener);
+  }
+
+  ngAfterViewInit(): void {
+    this.passwordStore.notifyStream();
   }
 
   copyToClipboard(data: string) {

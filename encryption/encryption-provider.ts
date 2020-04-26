@@ -15,15 +15,15 @@ export class EncryptionProvider {
 
     public static encryptString(plaintext, password): string {
         // Generate a 128-bit salt using a CSPRNG.
-        let salt = crypto.randomBytes(EncryptionProvider.PBKDF2_SALT_SIZE);
+        let salt = crypto.randomBytes(this.PBKDF2_SALT_SIZE);
       
         // Derive a key using PBKDF2.
         let key = crypto.pbkdf2Sync(
             Buffer.from(password, "utf8"),
             salt,
-            EncryptionProvider.PBKDF2_ITERATIONS,
-            EncryptionProvider.ALGORITHM_KEY_SIZE,
-            EncryptionProvider.PBKDF2_NAME
+            this.PBKDF2_ITERATIONS,
+            this.ALGORITHM_KEY_SIZE,
+            this.PBKDF2_NAME
         );
       
         // Encrypt and prepend salt.
@@ -38,16 +38,16 @@ export class EncryptionProvider {
         let ciphertextAndNonceAndSalt = Buffer.from(base64CiphertextAndNonceAndSalt, "base64");
       
         // Create buffers of salt and ciphertextAndNonce.
-        let salt = ciphertextAndNonceAndSalt.slice(0, EncryptionProvider.PBKDF2_SALT_SIZE);
-        let ciphertextAndNonce = ciphertextAndNonceAndSalt.slice(EncryptionProvider.PBKDF2_SALT_SIZE);
+        let salt = ciphertextAndNonceAndSalt.slice(0, this.PBKDF2_SALT_SIZE);
+        let ciphertextAndNonce = ciphertextAndNonceAndSalt.slice(this.PBKDF2_SALT_SIZE);
       
         // Derive the key using PBKDF2.
         let key = crypto.pbkdf2Sync(
             Buffer.from(password, "utf8"),
             salt,
-            EncryptionProvider.PBKDF2_ITERATIONS,
-            EncryptionProvider.ALGORITHM_KEY_SIZE,
-            EncryptionProvider.PBKDF2_NAME
+            this.PBKDF2_ITERATIONS,
+            this.ALGORITHM_KEY_SIZE,
+            this.PBKDF2_NAME
         );
       
         // Decrypt and return result.
@@ -56,10 +56,10 @@ export class EncryptionProvider {
       
     private static encrypt(plaintext, key): Buffer {
         // Generate a 96-bit nonce using a CSPRNG.
-        let nonce = crypto.randomBytes(EncryptionProvider.ALGORITHM_NONCE_SIZE);
+        let nonce = crypto.randomBytes(this.ALGORITHM_NONCE_SIZE);
       
         // Create the cipher instance.
-        let cipher = crypto.createCipheriv(EncryptionProvider.ALGORITHM_NAME, key, nonce);
+        let cipher = crypto.createCipheriv(this.ALGORITHM_NAME, key, nonce);
       
         // Encrypt and prepend nonce.
         let ciphertext = Buffer.concat([ cipher.update(plaintext), cipher.final() ]);
@@ -69,15 +69,15 @@ export class EncryptionProvider {
       
     private static decrypt(ciphertextAndNonce, key): Buffer {
         // Create buffers of nonce, ciphertext and tag.
-        let nonce = ciphertextAndNonce.slice(0, EncryptionProvider.ALGORITHM_NONCE_SIZE);
+        let nonce = ciphertextAndNonce.slice(0, this.ALGORITHM_NONCE_SIZE);
         let ciphertext = ciphertextAndNonce.slice(
-            EncryptionProvider.ALGORITHM_NONCE_SIZE,
-            ciphertextAndNonce.length - EncryptionProvider.ALGORITHM_TAG_SIZE
+            this.ALGORITHM_NONCE_SIZE,
+            ciphertextAndNonce.length - this.ALGORITHM_TAG_SIZE
         );
-        let tag = ciphertextAndNonce.slice(ciphertext.length + EncryptionProvider.ALGORITHM_NONCE_SIZE);
+        let tag = ciphertextAndNonce.slice(ciphertext.length + this.ALGORITHM_NONCE_SIZE);
       
         // Create the cipher instance.
-        let cipher = crypto.createDecipheriv(EncryptionProvider.ALGORITHM_NAME, key, nonce);
+        let cipher = crypto.createDecipheriv(this.ALGORITHM_NAME, key, nonce);
       
         // Decrypt and return result.
         cipher.setAuthTag(tag);

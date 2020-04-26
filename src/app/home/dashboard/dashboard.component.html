@@ -1,5 +1,6 @@
 <nav class="main-nav">
     <h2 class="brand"><img [src]="logoURL" class="brand-logo"> haslock</h2>
+    <div class="file-location">{{ filePath }}</div>
     <div class="menu-panel">
         <button
             pButton
@@ -46,9 +47,8 @@
 <p-toast position="bottom-right" [hideTransitionOptions]="'0ms'">
     <ng-template let-message pTemplate="message">
         <div style="text-align: center; display: flex; align-items: center;">
-            <i class="pi pi-exclamation-triangle" style="font-size: 3em"></i>
-            <div>
-                <div style="font-weight: bold;">{{message.summary}}</div>
+            <div class="toast-inner">
+                <div class="toast-text">{{message.summary}}</div>
                 <div *ngIf="message.detail === 'clipboard'" class="seconds-left" [appStopwatch]="message.life"></div>
             </div>
         </div>

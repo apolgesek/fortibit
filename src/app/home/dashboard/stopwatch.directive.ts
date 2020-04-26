@@ -36,7 +36,7 @@ export class StopwatchDirective implements OnInit, AfterViewInit {
       clearInterval(this.interval);
       this.toastService.clear();
     }
-    this.element.nativeElement.innerHTML = `${this.remainingTime / 1000}s left`;
+    this.element.nativeElement.innerHTML = `${this.remainingTime / 1000}`;
     this.remainingTime += -1000;
   }
 

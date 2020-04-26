@@ -1,24 +1,29 @@
 {
-  "productName": "angular-electron",
+  "productName": "Hasloc",
   "directories": {
     "output": "release/"
   },
-    "files": [
-        "**/*",
-        "!**/*.ts",
-        "!*.code-workspace",
-        "!LICENSE.md",
-        "!package.json",
-        "!package-lock.json",
-        "!src/",
-        "!e2e/",
-        "!hooks/",
-        "!angular.json",
-        "!_config.yml",
-        "!karma.conf.js",
-        "!tsconfig.json",
-        "!tslint.json"
-    ],
+  "files": [
+      "**/*",
+      "!**/*.ts",
+      "!*.code-workspace",
+      "!LICENSE.md",
+      "!package.json",
+      "!package-lock.json",
+      "!src/",
+      "!e2e/",
+      "!hooks/",
+      "!angular.json",
+      "!_config.yml",
+      "!karma.conf.js",
+      "!tsconfig.json",
+      "!tslint.json"
+  ],
+  "fileAssociations": [{
+    "ext": "hslc",
+    "name": "Haslock File",
+    "role": "Editor"
+  }],
   "win": {
     "icon": "dist",
     "target": [
@@ -26,7 +31,6 @@
     ]
   },
   "mac": {
-    "icon": "dist",
     "target": [
       "dmg"
     ]

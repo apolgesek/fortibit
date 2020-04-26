@@ -5,6 +5,7 @@ import { HomeComponent } from './home.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PasswordListComponent } from './password-list/password-list.component';
 import { NewEntryComponent } from './new-entry/new-entry.component';
+import { OpenTypeGuard } from './open-type.guard';
 
 const routes: Routes = [
   {
@@ -13,6 +14,7 @@ const routes: Routes = [
   },
   {
     path: 'dashboard',
+    canActivate: [OpenTypeGuard],
     component: DashboardComponent,
     children: [
       {

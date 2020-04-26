@@ -3,8 +3,7 @@ import { app, BrowserWindow, ipcMain, dialog, clipboard, SaveDialogReturnValue }
 import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
-
-import { EncryptionProvider } from './src/app/core/encryption/encryption-provider';
+import { EncryptionProvider } from './encryption/encryption-provider';
 
 let win: BrowserWindow = null;
 const args = process.argv.slice(1),
@@ -13,6 +12,8 @@ const args = process.argv.slice(1),
 let clearClipboardTimeout: NodeJS.Timeout;
 let file: string;
 let currentPassword: string;
+let wasAppLoaded: boolean;
+
 const ext = '.hslc';
 
 function createWindow(): BrowserWindow {
@@ -67,11 +68,7 @@ try {
 
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {
-    // On OS X it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
       app.quit();
-    }
   });
 
   app.on('activate', () => {
@@ -80,6 +77,12 @@ try {
     if (win === null) {
       createWindow();
     }
+  });
+
+  // mac os open by file
+  // TODO: support windows - process.argv
+  app.on('open-file', (_, filePath) => {
+    file = filePath;
   });
 
   ipcMain.on('saveFile', async (_, { passwordList, newPassword }) => {
@@ -124,6 +127,14 @@ try {
         win.webContents.send('onContentDecrypt', {decrypted: '*', file});
       }
     });
+  });
+
+  ipcMain.handle('appOpenType', () => {
+    if (wasAppLoaded) {
+      return false;
+    }
+    wasAppLoaded = true;
+    return file;
   });
 
   app.setAboutPanelOptions({

@@ -31,6 +31,10 @@ export class DashboardComponent {
     return logoURL;
   }
 
+  get filePath() {
+    return this.passwordStore.filePath ? ".../" + this.passwordStore.filePath.split("/").slice(-2).join("/") : '';
+  }
+
   constructor(
     private passwordStore: PasswordStoreService,
     private confirmDialogService: ConfirmationService,
