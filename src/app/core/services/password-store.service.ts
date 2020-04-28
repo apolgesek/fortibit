@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { v4 as uuidv4 } from 'uuid';
 import { ElectronService } from './electron/electron.service';
 import { map, shareReplay } from 'rxjs/operators';
-import { Subject, combineLatest, BehaviorSubject, Observable } from 'rxjs';
+import { combineLatest, BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +19,9 @@ export class PasswordStoreService {
   public filePath: string;
   
   private _searchPhraseSource: BehaviorSubject<any> = new BehaviorSubject<any>('');
-  private _outputPasswordListSource: Subject<any> = new Subject<any>();
+  private _outputPasswordListSource: BehaviorSubject<any> = new BehaviorSubject<any>([]);
+
+  public searchPhrase$: Observable<string>;
 
   constructor(
     private electronService: ElectronService,
@@ -30,6 +32,8 @@ export class PasswordStoreService {
         map(([passwords, searchPhrase]) => this.matchEntries(passwords, searchPhrase)),
         shareReplay()
       );
+
+      this.searchPhrase$ = this._searchPhraseSource.asObservable().pipe();
 
       this.electronService.ipcRenderer.on('onContentDecrypt', (_, { decrypted, file }) => {
         this.zone.run(() => {

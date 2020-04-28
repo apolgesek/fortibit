@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy, AfterViewChecked } from '@angular/core';
 import { ElectronService } from '../../core/services';
 import { PasswordStoreService } from '../../core/services/password-store.service';
 import { MessageService } from 'primeng/api';
@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 export class PasswordListComponent implements OnInit, OnDestroy {
 
   public passwordList$: Observable<any[]>;
+  public searchPhrase$: Observable<string>;
 
   get selectedRow() {
     return this.passwordStore.selectedPassword;
@@ -31,20 +32,18 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     private zone: NgZone,
   ) { 
     this.passwordList$ = this.passwordStore.filteredList$;
+    this.searchPhrase$ = this.passwordStore.searchPhrase$;
   }
 
   ngOnInit(): void {
     this.electronService.ipcRenderer.on('onNewEntryAdded', this.newEntryAddedListener);
-  }
-
-  ngAfterViewInit(): void {
     this.passwordStore.notifyStream();
   }
 
   copyToClipboard(data: string) {
     this.electronService.ipcRenderer.send('copyToClipboard', data);
     this.toastService.clear();
-    this.toastService.add({ severity:'success', summary:'Copied to clipboard!', life: 15000, detail: 'clipboard' });
+    this.toastService.add({ severity: 'success', summary: 'Copied to clipboard!', life: 15000, detail: 'clipboard' });
   }
 
   selectRow(password: any, rowIndex: number) {

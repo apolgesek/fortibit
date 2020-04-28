@@ -16,11 +16,10 @@ import {PasswordModule} from 'primeng/password';
 import { PageNotFoundComponent } from './components/';
 import { WebviewDirective } from './directives/';
 import { FormsModule } from '@angular/forms';
-import { LoadingOverlayComponent } from './components/loading-overlay/loading-overlay.component';
 import { SecondsPipe } from './pipes/seconds.pipe';
 
 @NgModule({
-  declarations: [PageNotFoundComponent, WebviewDirective, LoadingOverlayComponent, SecondsPipe],
+  declarations: [PageNotFoundComponent, WebviewDirective, SecondsPipe],
   imports: [
     CommonModule,
     TranslateModule,
@@ -36,7 +35,6 @@ import { SecondsPipe } from './pipes/seconds.pipe';
     TranslateModule,
     WebviewDirective,
     FormsModule,
-    LoadingOverlayComponent,
     BrowserAnimationsModule,
     ToastModule,
     ConfirmDialogModule,

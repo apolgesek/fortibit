@@ -21,9 +21,10 @@ import { NewEntryComponent } from './new-entry/new-entry.component';
 import { StopwatchDirective } from './dashboard/stopwatch.directive';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogService } from 'primeng/api';
+import { TextEmphasizeDirective } from './password-list/text-emphasize.directive';
 
 @NgModule({
-  declarations: [HomeComponent, DashboardComponent, PasswordListComponent, NewEntryComponent, StopwatchDirective],
+  declarations: [HomeComponent, DashboardComponent, PasswordListComponent, NewEntryComponent, StopwatchDirective, TextEmphasizeDirective],
   imports: [
     CommonModule,
     SharedModule,
