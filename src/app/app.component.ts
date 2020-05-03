@@ -51,7 +51,9 @@ export class AppComponent implements AfterViewInit {
     }
 
     document.body.ondrop = (ev) => {
-      this.electronService.ipcRenderer.send('onFileDrop', ev.dataTransfer.files[0].path);
+      if (ev.dataTransfer.files.length) {
+        this.electronService.ipcRenderer.send('onFileDrop', ev.dataTransfer.files[0].path);
+      }
       ev.preventDefault();
     } 
   }

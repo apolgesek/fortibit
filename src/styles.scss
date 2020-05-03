@@ -71,3 +71,10 @@ html, body {
     }
   }
 }
+
+#drag-ghost {
+  width: 1rem;
+  height: 1rem;
+  background: transparent;
+  border: 2px dotted black;
+}

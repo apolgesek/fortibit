@@ -88,7 +88,7 @@ try {
   ipcMain.on('saveFile', async (_, { passwordList, newPassword }) => {
     let savePath: SaveDialogReturnValue = { filePath: file, canceled: false };
     let output;
-    const stringData = JSON.stringify(passwordList);
+    const stringData = JSON.stringify(passwordList, (k ,v) => (k === 'parent' ? undefined : v));
     if (!file) {
       savePath = await dialog.showSaveDialog(win, {});
       output = EncryptionProvider.encryptString(stringData, newPassword);

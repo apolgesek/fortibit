@@ -17,7 +17,7 @@
             class="ui-button-info"
             icon="pi pi-save"
             iconPos="left"
-            [disabled]="!isAnyPassword || isDateSaved"
+            [disabled]="isDateSaved"
             (click)="trySaveDatabase()">
         </button>
         <button
@@ -26,7 +26,7 @@
             class="ui-button-warning"
             icon="pi pi-pencil"
             iconPos="left"
-            [disabled]="!isRowSelected"
+            [disabled]="!isAnyPassword || !isRowSelected"
             (click)="openEditEntryWindow()">
         </button>
         <button
@@ -35,7 +35,7 @@
             class="ui-button-danger"
             icon="pi pi-trash"
             iconPos="left"
-            [disabled]="!isRowSelected"
+            [disabled]="!isAnyPassword || !isRowSelected"
             (click)="openDeleteEntryWindow()">
         </button>
         <input type="text" (input)="searchEntries($event)" pInputText placeholder="Search" />
