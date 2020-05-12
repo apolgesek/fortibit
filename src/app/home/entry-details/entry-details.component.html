@@ -1,0 +1,10 @@
+<div *ngIf="entry" class="details-container">
+    <div>
+        <p><span class="label">Title</span>: {{ entry.title }}</p>
+        <p><span class="label">User</span>: {{ entry.username }}</p>
+        <p *ngIf="entry.url"><span class="label">URL</span>: <a (click)="openUrl(entry.url)" href="#">{{ entry.url }}</a></p>
+    </div>
+    <div *ngIf="entry.notes">
+        <p><span class="label">Notes</span>: {{ entry.notes }}</p>
+    </div>
+</div>

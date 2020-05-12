@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { PasswordStoreService } from './core/services/password-store.service';
 import { HotkeyService } from './core/services/hotkey.service';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,8 @@ export class AppComponent implements AfterViewInit {
     private router: Router,
     private zone: NgZone,
     private passwordService: PasswordStoreService,
-    private hotkeyService: HotkeyService
+    private hotkeyService: HotkeyService,
+    private confirmationService: ConfirmationService
   ) {
     translate.setDefaultLang('en');
     console.log('AppConfig', AppConfig);
@@ -55,7 +57,19 @@ export class AppComponent implements AfterViewInit {
         this.electronService.ipcRenderer.send('onFileDrop', ev.dataTransfer.files[0].path);
       }
       ev.preventDefault();
-    } 
+    }
+
+    this.electronService.ipcRenderer.on('openCloseConfirmationWindow', () => {
+      this.zone.run(() => {
+        this.confirmationService.confirm({message: 'Save database changes before exiting Haslock?'});
+      });
+    })
+
+    window.onbeforeunload = (e) => {
+      this.electronService.ipcRenderer.send('onCloseAttempt');
+      e.returnValue = false; // equivalent to `return false` but not recommended
+    }
+
   }
 
 }

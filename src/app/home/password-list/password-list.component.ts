@@ -4,6 +4,7 @@ import { PasswordStoreService } from '../../core/services/password-store.service
 import { MessageService, TreeNode } from 'primeng/api';
 import { Observable } from 'rxjs';
 import { MenuItem } from 'primeng/api';
+import { PasswordEntry } from '@app/core/models/password-entry.model';
 
 @Component({
   selector: 'app-password-list',
@@ -11,16 +12,16 @@ import { MenuItem } from 'primeng/api';
   styleUrls: ['./password-list.component.scss'],
 })
 export class PasswordListComponent implements OnInit, OnDestroy {
-  public passwordList$: Observable<any[]>;
+  public passwordList$: Observable<PasswordEntry[]>;
   public searchPhrase$: Observable<string>;
   public contextMenuItems: MenuItem[];
   public databaseItems: MenuItem[];
 
-  get selectedRow() {
+  get selectedRow(): PasswordEntry {
     return this.passwordStore.selectedPassword;
   }
 
-  get selectedCategory() {
+  get selectedCategory(): TreeNode {
     return this.passwordStore.selectedCategory;
   }
 
@@ -40,11 +41,11 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     return this.passwordStore.isRenameModeOn;
   }
 
-  get draggedEntry() {
+  get draggedEntry(): PasswordEntry {
     return this.passwordStore.draggedEntry;
   }
 
-  private newEntryAddedListener: (event: Electron.IpcRendererEvent, ...args: any[]) => void = (_, newEntryModel) => {
+  private newEntryAddedListener: (event: Electron.IpcRendererEvent, ...args: PasswordEntry[]) => void = (_, newEntryModel) => {
     this.zone.run(() => {
       this.passwordStore.addEntry(newEntryModel);
    });
@@ -63,7 +64,6 @@ export class PasswordListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.electronService.ipcRenderer.on('onNewEntryAdded', this.newEntryAddedListener);
     this.passwordStore.notifyStream();
-    this.passwordStore.selectedCategory = this.passwordStore.files[0];
 
     this.contextMenuItems = [
       {
@@ -82,23 +82,24 @@ export class PasswordListComponent implements OnInit, OnDestroy {
         }
       } as MenuItem
     ];
+  }
 
-    this.databaseItems = [
-      {
-        label: 'Settings',
-        icon: 'pi pi-fw pi-cog',
-      } as MenuItem
-    ];
+  trackByFn(index: number, entry: PasswordEntry): string {
+    return entry.id;
   }
 
   copyToClipboard(data: string) {
+    if (!data) {
+      return;
+    }
     this.electronService.ipcRenderer.send('copyToClipboard', data);
     this.toastService.clear();
     this.toastService.add({ severity: 'success', summary: 'Copied to clipboard!', life: 15000, detail: 'clipboard' });
   }
 
   filterCategory(event: {node: TreeNode}) {
-    this.passwordStore.passwordList = event.node.data || [];
+    this.passwordStore.selectedCategory.data = event.node.data || [];
+    this.passwordStore.selectedPassword = undefined;
     this.passwordStore.resetSearch();
     this.passwordStore.notifyStream();
   }
@@ -109,7 +110,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectRow(password: any, rowIndex: number) {
+  selectRow(password: PasswordEntry, rowIndex: number) {
     this.passwordStore.selectedPassword = password;
     this.passwordStore.rowIndex = rowIndex;
   }
@@ -126,7 +127,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     this.passwordStore.isRenameModeOn = false;
   }
 
-  handleDragStart(event: DragEvent, rowData: any) {
+  handleDragStart(event: DragEvent, rowData: PasswordEntry) {
     this.passwordStore.draggedEntry = rowData;
     var elem = document.createElement("div");
     elem.id = "drag-ghost";
@@ -138,12 +139,12 @@ export class PasswordListComponent implements OnInit, OnDestroy {
   }
 
   handleDragEnd(event: DragEvent) {
-    this.passwordStore.draggedEntry = undefined;
     var ghost = document.getElementById("drag-ghost");
     if (ghost.parentNode) {
       ghost.parentNode.removeChild(ghost);
     }
     document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'auto');
+    this.passwordStore.draggedEntry = undefined;
   }
 
   ngOnDestroy(): void {

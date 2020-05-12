@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PasswordStoreService } from '../../core/services/password-store.service';
-import { ConfirmationService, DialogService } from 'primeng/api';
+import { DialogService } from 'primeng/api';
 import { NewEntryComponent } from '../new-entry/new-entry.component';
+import { PasswordEntry } from '@app/core/models/password-entry.model';
 const logoURL = require('../../../assets/images/lock.svg');
 
 @Component({
@@ -9,70 +10,71 @@ const logoURL = require('../../../assets/images/lock.svg');
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
 
-  public isNewPasswordDialogShown = false;
   public newPassword: string = '';
   public newPasswordRepeat: string = '';
-
-  get isAnyPassword(): boolean {
-    return this.passwordStore.passwordList.length > 0;
-  }
+  public selectedCategoryData: PasswordEntry[];
 
   get isDateSaved(): boolean {
     return !!this.passwordStore.dateSaved;
   }
 
-  get isRowSelected() {
-    return this.passwordStore.selectedPassword;
+  get isAnyPassword(): boolean {
+    return this.selectedCategoryData?.length > 0;
   }
 
-  get logoURL() {
+  get isRowSelected(): boolean {
+    return !!this.passwordStore.selectedPassword;
+  }
+
+  get logoURL(): string {
     return logoURL;
   }
 
-  get filePath() {
+  get filePath(): string {
     return this.passwordStore.filePath ? ".../" + this.passwordStore.filePath.split("/").slice(-2).join("/") : '';
+  }
+
+  get isNewPasswordDialogShown(): boolean {
+    return this.passwordStore.isNewPasswordDialogShown;
+  }
+
+  set isNewPasswordDialogShown(value: boolean) {
+    this.passwordStore.isNewPasswordDialogShown = value;
   }
 
   constructor(
     private passwordStore: PasswordStoreService,
-    private confirmDialogService: ConfirmationService,
     private dialogService: DialogService,
   ) { }
 
-  openNewEntryWindow() {
-    this.dialogService.open(NewEntryComponent, {width: '70%', header: 'Add new entry'});
+  ngOnInit(): void {
+    this.selectedCategoryData = this.passwordStore.selectedCategory?.data;
   }
 
-  openEditEntryWindow() {
-    this.dialogService.open(NewEntryComponent, {width: '70%', header: 'Edit entry', data: this.passwordStore.selectedPassword});
-  }
-
-  openDeleteEntryWindow() {
-    this.confirmDialogService.confirm({
-      message: 'Are you sure you want to delete this entry?',
-      accept: () => {
-        this.passwordStore.deleteEntry();
-      }
-    });
+  openAddEntryWindow() {
+    this.passwordStore.openAddEntryWindow();
   }
 
   searchEntries(event: any) {
     this.passwordStore.filterEntries(event.target.value);
   }
 
-  trySaveDatabase() {
-    if (!this.passwordStore.filePath) {
-      this.isNewPasswordDialogShown = true;
-    } else {
-      this.passwordStore.saveDatabase(null);
-    }
+  saveNewDatabase() {
+    this.passwordStore.saveNewDatabase(this.newPassword);
   }
 
-  saveNewDatabase() {
-    this.passwordStore.saveDatabase(this.newPassword);
-    this.isNewPasswordDialogShown = false;
+  trySaveDatabase() {
+    this.passwordStore.trySaveDatabase();
+  }
+
+  openEditEntryWindow() {
+    this.passwordStore.openEditEntryWindow();
+  }
+
+  openDeleteEntryWindow() {
+    this.passwordStore.openDeleteEntryWindow();
   }
 
 }

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, clipboard, SaveDialogReturnValue } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, clipboard, SaveDialogReturnValue, shell } from 'electron';
 
 import * as path from 'path';
 import * as url from 'url';
@@ -135,6 +135,15 @@ try {
     }
     wasAppLoaded = true;
     return file;
+  });
+
+  ipcMain.on('openUrl', (_, url: string) => {
+    shell.openExternal(url.includes('http') ? '': 'http://' + url);
+  });
+
+  ipcMain.on('onCloseAttempt', () => {
+    win.focus();
+    win.webContents.send('openCloseConfirmationWindow');
   });
 
   app.setAboutPanelOptions({

@@ -9,6 +9,8 @@ export class DroppableDirective {
     private el: HTMLElement;
 
     private dragEnterCallback: () => void = () => {
+        this.removeDraggedOverClassForAllDroppables();
+        this.el.classList.add('ui-treenode-dragover');
         if (!this.passwordStore.draggedEntry) {
             return;
         }
@@ -23,8 +25,12 @@ export class DroppableDirective {
     }
 
     public dropCallback: () => void = () => {
-        this.passwordStore.moveEntry((<HTMLInputElement>this.el.querySelector('.node-id')).value);
-        this.el.classList.remove('ui-treenode-dragover');
+        // this needs to be executed because dragend event is not called on drop
+        document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'auto');
+        this.removeDraggedOverClassForAllDroppables();
+        if (this.passwordStore.draggedEntry) {
+            this.passwordStore.moveEntry((<HTMLInputElement>this.el.querySelector('.node-id')).value);
+        }
     }
 
     constructor(
@@ -37,12 +43,22 @@ export class DroppableDirective {
         this.el.addEventListener('dragenter', this.dragEnterCallback);
         this.el.addEventListener('dragleave', this.dragLeaveCallback);
         this.el.addEventListener('drop', this.dropCallback);
+        this.el.addEventListener('dragend', () => {
+            this.removeDraggedOverClassForAllDroppables();
+        });
     }
 
     ngOnDestroy(): void {
         this.el.removeEventListener('dragenter', this.dragEnterCallback);
         this.el.removeEventListener('dragleave', this.dragLeaveCallback);
         this.el.removeEventListener('drop', this.dropCallback);
+        this.el.removeEventListener('dragend', () => {
+            this.removeDraggedOverClassForAllDroppables();
+        });
+    }
+
+    private removeDraggedOverClassForAllDroppables() {
+        Array.from(document.getElementsByClassName('ui-treenode-dragover')).forEach(el => el.classList.remove('ui-treenode-dragover'));
     }
 
 }

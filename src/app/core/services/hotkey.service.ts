@@ -6,26 +6,85 @@ import { PasswordStoreService } from './password-store.service';
 })
 export class HotkeyService {
 
-  public hotkeys: any[];
+  private hotkeyProvider: IHotkeyProvider;
 
-  constructor(private passwordService: PasswordStoreService) {}
-
-  saveDatabase = (event: KeyboardEvent) => {
-      if (event.key === 's' && this.isMetaKeyPressed(event)) {
-        // handle hotkey for password save action
-      }
-  }
-
-  intercept(event: KeyboardEvent) {
-    this.saveDatabase(event);
-  }
-
-  private isMetaKeyPressed(event: KeyboardEvent) {
+  constructor(private passwordStore: PasswordStoreService) {
     if (process.platform === 'darwin') {
-      return event.metaKey;
+      this.hotkeyProvider = new DarwinHotkeyProvider(this.passwordStore);
     } else {
-      return event.ctrlKey;
+      this.hotkeyProvider = new WindowsHotkeyProvider(this.passwordStore);
     }
   }
 
+  intercept(event: KeyboardEvent) {
+    this.hotkeyProvider.registerSaveDatabase(event);
+    this.hotkeyProvider.registerDeleteEntry(event);
+    this.hotkeyProvider.registerEditEntry(event);
+    this.hotkeyProvider.registerAddEntry(event);
+  }
+
+}
+
+interface IHotkeyProvider {
+  registerSaveDatabase: (event: any) => void;
+  registerDeleteEntry: (event: any) => void;
+  registerEditEntry: (event: any) => void;
+  registerAddEntry: (event: any) => void;
+  //select allentries - ctrl/meta + a
+}
+
+class DarwinHotkeyProvider implements IHotkeyProvider {
+  constructor(private passwordStore: PasswordStoreService) {}
+
+  public registerSaveDatabase(event: KeyboardEvent) {
+      if (event.key === 's' && event.metaKey) {
+        this.passwordStore.trySaveDatabase();
+      }
+  }
+
+  public registerDeleteEntry(event: KeyboardEvent) {
+    if (event.key === 'Backspace' && event.metaKey) {
+      this.passwordStore.openDeleteEntryWindow();
+    }
+  }
+
+  public registerEditEntry(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.passwordStore.openEditEntryWindow();
+    }
+  }
+
+  public registerAddEntry(event: KeyboardEvent) {
+    if (event.key === 'i' && event.metaKey) {
+      this.passwordStore.openAddEntryWindow();
+    }
+  }
+}
+
+class WindowsHotkeyProvider implements IHotkeyProvider {
+  constructor(private passwordStore: PasswordStoreService) {}
+
+  public registerSaveDatabase(event: KeyboardEvent) {
+      if (event.key === 's' && event.ctrlKey) {
+        this.passwordStore.trySaveDatabase();
+      }
+  }
+
+  public registerDeleteEntry(event: KeyboardEvent) {
+    if (event.key === 'Del') {
+      this.passwordStore.openDeleteEntryWindow();
+    }
+  }
+
+  public registerEditEntry(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.passwordStore.openEditEntryWindow();
+    }
+  }
+
+  public registerAddEntry(event: KeyboardEvent) {
+    if (event.key === 'i' && event.ctrlKey) {
+      this.passwordStore.openAddEntryWindow();
+    }
+  }
 }
