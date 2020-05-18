@@ -1,10 +1,11 @@
-import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { ElectronService } from '../../core/services';
 import { PasswordStoreService } from '../../core/services/password-store.service';
 import { MessageService, TreeNode } from 'primeng/api';
 import { Observable } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
+import { ContextMenu } from 'primeng/contextmenu';
 
 @Component({
   selector: 'app-password-list',
@@ -17,8 +18,10 @@ export class PasswordListComponent implements OnInit, OnDestroy {
   public contextMenuItems: MenuItem[];
   public databaseItems: MenuItem[];
 
-  get selectedRow(): PasswordEntry {
-    return this.passwordStore.selectedPassword;
+  @ViewChild('cm') groupContextMenu: ContextMenu;
+
+  get selectedRow(): any[] {
+    return this.passwordStore.selectedPasswords;
   }
 
   get selectedCategory(): TreeNode {
@@ -39,10 +42,6 @@ export class PasswordListComponent implements OnInit, OnDestroy {
 
   get isRenameModeOn(): boolean {
     return this.passwordStore.isRenameModeOn;
-  }
-
-  get draggedEntry(): PasswordEntry {
-    return this.passwordStore.draggedEntry;
   }
 
   private newEntryAddedListener: (event: Electron.IpcRendererEvent, ...args: PasswordEntry[]) => void = (_, newEntryModel) => {
@@ -69,7 +68,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
       {
         label: 'Delete',
         icon: 'pi pi-fw pi-times',
-        command: () => this.passwordStore.removeGroup(),
+        command: () => this.passwordStore.openDeleteGroupWindow(),
       } as MenuItem,
       {
         label: 'Rename',
@@ -84,7 +83,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     ];
   }
 
-  trackByFn(index: number, entry: PasswordEntry): string {
+  trackByFn(_: number, entry: PasswordEntry): string {
     return entry.id;
   }
 
@@ -99,7 +98,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
 
   filterCategory(event: {node: TreeNode}) {
     this.passwordStore.selectedCategory.data = event.node.data || [];
-    this.passwordStore.selectedPassword = undefined;
+    this.passwordStore.selectedPasswords = [];
     this.passwordStore.resetSearch();
     this.passwordStore.notifyStream();
   }
@@ -110,12 +109,32 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectRow(password: PasswordEntry, rowIndex: number) {
-    this.passwordStore.selectedPassword = password;
-    this.passwordStore.rowIndex = rowIndex;
+  selectRow(event: MouseEvent, password: PasswordEntry) {
+    if (event.metaKey && event.type === 'click') {
+      const foundIndex = this.passwordStore.selectedPasswords.findIndex(p => p.id === password.id);
+      if (foundIndex > -1) {
+        this.passwordStore.selectedPasswords.splice(foundIndex, 1);
+        return;
+      }
+      this.passwordStore.selectedPasswords.push(password);
+    } else {
+      this.passwordStore.selectedPasswords = [password];
+    }
+  }
+
+  isRowSelected(rowData: PasswordEntry): boolean {
+    return this.passwordStore.selectedPasswords.filter(e => e.id === rowData.id).length > 0;
+  }
+
+  isRowDragged(rowData: PasswordEntry): boolean {
+    return this.passwordStore.draggedEntry.filter(e => e.id === rowData.id).length > 0;
   }
 
   setContextMenuCategory(event: any) {
+    if (event.node.label === 'Database') {
+      this.groupContextMenu.hide();
+      return;
+    }
     this.passwordStore.contextSelectedCategory = event.node;
   }
 
@@ -124,11 +143,18 @@ export class PasswordListComponent implements OnInit, OnDestroy {
   }
 
   setRenameModeOff() {
-    this.passwordStore.isRenameModeOn = false;
+    requestAnimationFrame(() => {
+      this.passwordStore.isRenameModeOn = false;
+    });
   }
 
   handleDragStart(event: DragEvent, rowData: PasswordEntry) {
-    this.passwordStore.draggedEntry = rowData;
+    if (this.selectedRow.length > 0) {
+      this.passwordStore.draggedEntry = this.selectedRow;
+    } else {
+      this.passwordStore.draggedEntry = [rowData];
+    }
+
     var elem = document.createElement("div");
     elem.id = "drag-ghost";
     elem.style.position = "absolute";
@@ -144,7 +170,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
       ghost.parentNode.removeChild(ghost);
     }
     document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'auto');
-    this.passwordStore.draggedEntry = undefined;
+    this.passwordStore.draggedEntry = [];
   }
 
   ngOnDestroy(): void {

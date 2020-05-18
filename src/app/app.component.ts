@@ -21,7 +21,7 @@ export class AppComponent implements AfterViewInit {
     private zone: NgZone,
     private passwordService: PasswordStoreService,
     private hotkeyService: HotkeyService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
   ) {
     translate.setDefaultLang('en');
     console.log('AppConfig', AppConfig);
@@ -59,17 +59,30 @@ export class AppComponent implements AfterViewInit {
       ev.preventDefault();
     }
 
+    // test for elements that should not trigger entries deselection
+    // entry row itself, menu buttons and dialog body
+    document.addEventListener("click", (event: MouseEvent) => {
+      if (
+        !(<Element>event.srcElement).closest('.row-entry')
+        && !(<Element>event.srcElement).closest('.menu-panel *')
+        && !(<Element>event.srcElement).closest('.ui-dialog')
+      ) {
+        this.passwordService.selectedPasswords = [];
+      }
+    });
+
     this.electronService.ipcRenderer.on('openCloseConfirmationWindow', () => {
       this.zone.run(() => {
-        this.confirmationService.confirm({message: 'Save database changes before exiting Haslock?'});
+        this.confirmationService.confirm({ message: 'Save database changes before exiting Haslock?' });
       });
     })
 
-    window.onbeforeunload = (e) => {
-      this.electronService.ipcRenderer.send('onCloseAttempt');
-      e.returnValue = false; // equivalent to `return false` but not recommended
+    if (AppConfig.environment !== 'LOCAL') {
+      window.onbeforeunload = (e) => {
+        this.electronService.ipcRenderer.send('onCloseAttempt');
+        e.returnValue = false;
+      }
     }
-
   }
 
 }

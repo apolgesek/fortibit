@@ -5,10 +5,12 @@ import { Directive, ElementRef, HostListener } from '@angular/core';
 })
 export class BlurEnterDirective {
 
-    @HostListener('document:keydown.enter', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+    @HostListener('document:keydown.enter', ['$event']) onKeydownHandler() {
         this.element.nativeElement.blur();
     }
     
-    constructor(private element: ElementRef) { }
+    constructor(
+      private element: ElementRef,
+    ) { }
 
 }

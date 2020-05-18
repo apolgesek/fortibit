@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PasswordStoreService } from '../../core/services/password-store.service';
 import { DialogService } from 'primeng/api';
-import { NewEntryComponent } from '../new-entry/new-entry.component';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
 const logoURL = require('../../../assets/images/lock.svg');
 
@@ -24,8 +23,12 @@ export class DashboardComponent implements OnInit {
     return this.selectedCategoryData?.length > 0;
   }
 
-  get isRowSelected(): boolean {
-    return !!this.passwordStore.selectedPassword;
+  get isOneRowSelected(): boolean {
+    return this.passwordStore.selectedPasswords.length === 1;
+  }
+
+  get isAnyRowSelected(): boolean {
+    return this.passwordStore.selectedPasswords.length > 0;
   }
 
   get logoURL(): string {

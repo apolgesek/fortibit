@@ -10,8 +10,10 @@ import { ElectronService } from '@app/core/services';
 })
 export class EntryDetailsComponent {
 
-  get entry(): PasswordEntry {
-    return this.passwordStore.selectedPassword;
+  get entry(): PasswordEntry | undefined {
+    if (this.passwordStore.selectedPasswords.length === 1) {
+      return this.passwordStore.selectedPasswords[0];
+    }
   }
 
   constructor(

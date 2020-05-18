@@ -28,8 +28,9 @@ export class DroppableDirective {
         // this needs to be executed because dragend event is not called on drop
         document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'auto');
         this.removeDraggedOverClassForAllDroppables();
-        if (this.passwordStore.draggedEntry) {
+        if (this.passwordStore.draggedEntry.length) {
             this.passwordStore.moveEntry((<HTMLInputElement>this.el.querySelector('.node-id')).value);
+            this.passwordStore.draggedEntry = [];
         }
     }
 
