@@ -11,14 +11,10 @@ export class DroppableDirective {
     private dragEnterCallback: () => void = () => {
         this.removeDraggedOverClassForAllDroppables();
         this.el.classList.add('ui-treenode-dragover');
-        if (!this.passwordStore.draggedEntry) {
-            return;
-        }
-        this.el.classList.add('ui-treenode-dragover');
     };
     
     public dragLeaveCallback: () => void = () => {
-        if (!this.passwordStore.draggedEntry) {
+        if (!this.passwordStore.draggedEntry.length) {
             return;
         }
         this.el.classList.remove('ui-treenode-dragover');

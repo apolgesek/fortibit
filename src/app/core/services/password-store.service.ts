@@ -4,7 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { ElectronService } from './electron/electron.service';
 import { map, shareReplay } from 'rxjs/operators';
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
-import { TreeNode, ConfirmationService, DialogService, DynamicDialogRef } from 'primeng/api';
+import { TreeNode, ConfirmationService } from 'primeng/api';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AppConfig } from 'environments/environment';
 import { PasswordEntry } from '../models/password-entry.model';
 import { NewEntryComponent } from '@app/home/new-entry/new-entry.component';
@@ -240,7 +241,6 @@ export class PasswordStoreService {
   }
 
   openDeleteEntryWindow() {
-    this.isDialogOpened = true;
     this.confirmDialogService.confirm({
       message: this.confirmEntriesDeleteMessage,
       accept: () => {
@@ -250,7 +250,6 @@ export class PasswordStoreService {
   }
 
   openDeleteGroupWindow() {
-    this.isDialogOpened = true;
     this.confirmDialogService.confirm({
       message: 'Are you sure you want to delete this group?'
       + `<p><strong>${this.selectedCategory.data.length}</strong> entries will be removed</p>`,
@@ -278,8 +277,7 @@ export class PasswordStoreService {
 
   private initDialogOpen() {
     this.isDialogOpened = true;
-    this.dialogRef.onClose.subscribe(() => {
-      console.log(1);
+    this.dialogRef.onDestroy.subscribe(() => {
       this.isDialogOpened = false;
     });
   }

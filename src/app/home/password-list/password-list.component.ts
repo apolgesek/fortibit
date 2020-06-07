@@ -44,6 +44,10 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     return this.passwordStore.isRenameModeOn;
   }
 
+  get selectedGroupLabel(): string {
+    return this.contextSelectedCategory?.label;
+  }
+
   private newEntryAddedListener: (event: Electron.IpcRendererEvent, ...args: PasswordEntry[]) => void = (_, newEntryModel) => {
     this.zone.run(() => {
       this.passwordStore.addEntry(newEntryModel);
@@ -87,11 +91,12 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     return entry.id;
   }
 
-  copyToClipboard(data: string) {
-    if (!data) {
+  copyToClipboard(row: PasswordEntry, prop: string) {
+    if (!prop) {
       return;
     }
-    this.electronService.ipcRenderer.send('copyToClipboard', data);
+    this.electronService.ipcRenderer.send('copyToClipboard', prop);
+    row.lastAccessDate = new Date();
     this.toastService.clear();
     this.toastService.add({ severity: 'success', summary: 'Copied to clipboard!', life: 15000, detail: 'clipboard' });
   }

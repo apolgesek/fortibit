@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/api';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { PasswordStoreService } from '@app/core/services/password-store.service';
 
 @Component({
@@ -16,7 +16,7 @@ export class NewEntryComponent implements OnInit {
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
     private fb: FormBuilder,
-    private passwordService: PasswordStoreService,
+    private passwordService: PasswordStoreService
   ) { }
 
   ngOnInit(): void {
@@ -40,7 +40,11 @@ export class NewEntryComponent implements OnInit {
     });
 
     if (this.newEntryForm.valid) {
-      this.passwordService.addEntry(this.newEntryForm.value);
+      if (this.config.data.creationDate) {
+        this.passwordService.addEntry(this.newEntryForm.value);
+      } else {
+        this.passwordService.addEntry({...this.newEntryForm.value, creationDate: new Date()});
+      }
       this.ref.close();
     }
   }

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PasswordStoreService } from './password-store.service';
-import { DialogService, ConfirmationService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
+import { DialogService } from 'primeng/dynamicdialog';
 
 @Injectable({
   providedIn: 'root'

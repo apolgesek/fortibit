@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PasswordStoreService } from '../../core/services/password-store.service';
-import { DialogService } from 'primeng/api';
+import { DialogService } from 'primeng/dynamicdialog';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
 const logoURL = require('../../../assets/images/lock.svg');
 
@@ -32,7 +32,7 @@ export class DashboardComponent implements OnInit {
   }
 
   get logoURL(): string {
-    return logoURL;
+    return logoURL.default;
   }
 
   get filePath(): string {

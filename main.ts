@@ -146,6 +146,10 @@ try {
     win.webContents.send('openCloseConfirmationWindow');
   });
 
+  ipcMain.on('exit', () => {
+    app.quit();
+  });
+
   app.setAboutPanelOptions({
     applicationName: "Haslock", 
     applicationVersion: "0.0.1",

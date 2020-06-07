@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { PasswordStoreService } from './core/services/password-store.service';
 import { HotkeyService } from './core/services/hotkey.service';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, Confirmation } from 'primeng/api';
 
 @Component({
   selector: 'app-root',
@@ -73,12 +73,21 @@ export class AppComponent implements AfterViewInit {
 
     this.electronService.ipcRenderer.on('openCloseConfirmationWindow', () => {
       this.zone.run(() => {
-        this.confirmationService.confirm({ message: 'Save database changes before exiting Haslock?' });
+        this.confirmationService.confirm({
+          message: 'You have unsaved changes. <p>Are you sure you want to quit?</p>',
+          accept: () => {
+            window.onbeforeunload = undefined;
+            this.electronService.ipcRenderer.send('exit');
+          },
+        } as Confirmation);
       });
     })
 
     if (AppConfig.environment !== 'LOCAL') {
       window.onbeforeunload = (e) => {
+        if (this.passwordService.dateSaved) {
+          return;
+        }
         this.electronService.ipcRenderer.send('onCloseAttempt');
         e.returnValue = false;
       }
