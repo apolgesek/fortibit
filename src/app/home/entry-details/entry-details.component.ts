@@ -6,14 +6,12 @@ import { ElectronService } from '@app/core/services';
 @Component({
   selector: 'app-entry-details',
   templateUrl: './entry-details.component.html',
-  styleUrls: ['./entry-details.component.scss']
+  styleUrls: ['./entry-details.component.scss'],
 })
 export class EntryDetailsComponent {
 
   get entry(): PasswordEntry | undefined {
-    if (this.passwordStore.selectedPasswords.length === 1) {
-      return this.passwordStore.selectedPasswords[0];
-    }
+    return this.passwordStore.selectedPasswords[0];
   }
 
   constructor(

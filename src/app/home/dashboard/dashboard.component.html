@@ -5,8 +5,7 @@
         <button
             pButton
             type="button"
-            label="Add entry"
-            class="ui-button-success"
+            class="add-entry"
             icon="pi pi-plus"
             iconPos="left"
             (click)="openAddEntryWindow()">
@@ -14,8 +13,9 @@
         <button
             pButton
             type="button"
-            class="ui-button-info"
+            label="Save"
             icon="pi pi-save"
+            class="ui-button-secondary save-db"
             iconPos="left"
             [disabled]="isDateSaved"
             (click)="trySaveDatabase()">
@@ -23,8 +23,9 @@
         <button
             pButton
             type="button"
-            class="ui-button-warning"
+            label="Edit"
             icon="pi pi-pencil"
+            class="ui-button-secondary edit-entry"
             iconPos="left"
             [disabled]="!isAnyPassword || !isOneRowSelected"
             (click)="openEditEntryWindow()">
@@ -32,21 +33,25 @@
         <button
             pButton
             type="button"
-            class="ui-button-danger"
+            label="Remove"
             icon="pi pi-trash"
+            class="ui-button-secondary remove-entry"
             iconPos="left"
             [disabled]="!isAnyPassword || !isAnyRowSelected"
             (click)="openDeleteEntryWindow()">
         </button>
-        <input type="text" (input)="searchEntries($event)" pInputText placeholder="Search" />
+        <input type="text" class="search" (input)="searchEntries($event)" pInputText placeholder="Search" />
     </div>
 </nav>
 
 <router-outlet></router-outlet>
 
-<p-toast position="bottom-right" [hideTransitionOptions]="'0ms'">
+<p-toast position="bottom-right"
+    [showTransitionOptions]="'150ms'"
+    [showTransformOptions]="'translateX(100%)'"
+    [hideTransitionOptions]="'250ms'">
     <ng-template let-message pTemplate="message">
-        <div style="text-align: center; display: flex; align-items: center;">
+        <div class="toast-outer">
             <div class="toast-inner">
                 <div class="toast-text">{{message.summary}}</div>
                 <div *ngIf="message.detail === 'clipboard'" class="seconds-left" [appStopwatch]="message.life"></div>

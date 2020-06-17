@@ -1,12 +1,13 @@
-<div *ngIf="entry" class="details-container">
+<div class="details-container">
     <div>
+        <div class="header">Entry details</div>
         <p><span class="label">Title</span>: {{ entry.title }}</p>
         <p><span class="label">User</span>: {{ entry.username }}</p>
         <p *ngIf="entry.url" class="truncate">
             <span class="label">URL</span>: <a (click)="openUrl(entry.url)" href="#">{{ entry.url }}</a>
         </p>
-        <p><span class="label">Creation date</span>: {{ entry.creationDate | date:'d/MM/yy hh:mm' }}</p>
-        <p><span class="label">Last access date</span>: {{ entry.lastAccessDate | date:'d/MM/yy hh:mm' }}</p>
+        <p><span class="label">Creation date</span>: {{ entry.creationDate | date:'dd/MM/yy HH:mm' }}</p>
+        <p><span class="label">Last access date</span>: {{ entry.lastAccessDate | date:'dd/MM/yy HH:mm' }}</p>
     </div>
     <div *ngIf="entry.notes">
         <p><span class="label">Notes</span>: {{ entry.notes }}</p>

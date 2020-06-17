@@ -6,21 +6,39 @@ html, body {
   font-family: 'Open Sans', sans-serif;
 }
 
-.toast-inner {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 0;
+body .ui-toast .ui-toast-message.ui-toast-message-success {
+  color: #fff;
+  background-color: #47A69F;
+  width: 15rem;
 
-  .toast-text {
-    font-weight: bold;
-    margin-right: 1rem;
+  .ui-toast-close-icon {
+    color: #fff;
   }
 
-  .seconds-left {
-    color: #3e8b3e;
-    font-size: 2rem;
-    font-weight: bold;
-  }  
+  .toast-outer {
+    text-align: center;
+    display: flex;
+    align-items: center;
+
+    .toast-inner {
+      display: flex;
+      align-items: center;
+      padding: 0rem 0;
+    
+      .toast-text {
+        margin-right: 1rem;
+      }
+    
+      .seconds-left {
+        color: #fff;
+        font-size: 2rem;
+      } 
+    }
+  }
+}
+
+.ui-toast-bottom-right {
+  right: -0.5rem;
 }
 
 .loader {
@@ -31,6 +49,13 @@ html, body {
   top: 0;
   left: 0;
   z-index: 999;
+
+  svg {
+    display: block;
+    position: relative;
+    top: 30%;
+    left: calc(50% - 3em);
+  }
 
   .lds-ring {
     display: block;
@@ -82,4 +107,11 @@ html, body {
 input, button, a {
   outline: none !important;
   box-shadow: none !important;
+}
+
+.ui-contextmenu {
+  width: auto;
+  .ui-submenu-list {
+    width: 16em;
+  }
 }

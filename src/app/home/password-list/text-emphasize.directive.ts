@@ -18,15 +18,15 @@ export class TextEmphasizeDirective {
     requestAnimationFrame(() => {
       const elementTextContent = this.element.nativeElement as HTMLElement;
       let newContent: string = elementTextContent.innerHTML
-        .replace(new RegExp('<strong>', 'gi'), '')
-        .replace(new RegExp('</strong>', 'gi'), '');
+        .replace(new RegExp('<strong>', 'g'), '')
+        .replace(new RegExp('</strong>', 'g'), '');
 
       if (this._searchPhrase.length === 0 || !elementTextContent.textContent.includes(this._searchPhrase)) {
         elementTextContent.innerHTML = newContent;
         return;
       }
 
-      newContent = newContent.replace(new RegExp(this._searchPhrase, 'gi'), `<strong>${this._searchPhrase}</strong>`);
+      newContent = newContent.replace(new RegExp(this._searchPhrase, 'g'), `<strong>${this._searchPhrase}</strong>`);
       elementTextContent.innerHTML = newContent;
 
     });

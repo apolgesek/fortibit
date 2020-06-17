@@ -6,19 +6,34 @@ import { Observable } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
 import { ContextMenu } from 'primeng/contextmenu';
+import { HotkeyService } from '@app/core/services/hotkey.service';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-password-list',
   templateUrl: './password-list.component.html',
   styleUrls: ['./password-list.component.scss'],
+  animations: [
+    trigger('myInsertRemoveTrigger', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)' }),
+        animate('150ms', style({ transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('150ms', style({ transform: 'translateX(100%)' }))
+      ])
+    ]),
+  ]
 })
 export class PasswordListComponent implements OnInit, OnDestroy {
   public passwordList$: Observable<PasswordEntry[]>;
   public searchPhrase$: Observable<string>;
-  public contextMenuItems: MenuItem[];
+  public groupContextMenuItems: MenuItem[];
   public databaseItems: MenuItem[];
+  public entryMenuItems: MenuItem[];
+  public multiEntryMenuItems: MenuItem[];
 
-  @ViewChild('cm') groupContextMenu: ContextMenu;
+  @ViewChild('groupCm') groupContextMenu: ContextMenu;
 
   get selectedRow(): any[] {
     return this.passwordStore.selectedPasswords;
@@ -58,6 +73,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     private electronService: ElectronService,
     private passwordStore: PasswordStoreService,
     private toastService: MessageService,
+    private hotkeyService: HotkeyService,
     private zone: NgZone,
   ) { 
     this.passwordList$ = this.passwordStore.filteredList$;
@@ -68,7 +84,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     this.electronService.ipcRenderer.on('onNewEntryAdded', this.newEntryAddedListener);
     this.passwordStore.notifyStream();
 
-    this.contextMenuItems = [
+    this.groupContextMenuItems = [
       {
         label: 'Delete',
         icon: 'pi pi-fw pi-times',
@@ -85,6 +101,72 @@ export class PasswordListComponent implements OnInit, OnDestroy {
         }
       } as MenuItem
     ];
+
+    const rearrangeItems = {
+      label: 'Rearrange',
+      items: [
+        {
+          label: 'Move top (Ctrl + ↑)',
+          icon: 'pi pi-fw pi-angle-double-up',
+          command: () => this.passwordStore.moveTop()
+        },
+        {
+          label: 'Move up (Alt + ↑)',
+          icon: 'pi pi-fw pi-angle-up',
+          command: () => this.passwordStore.moveUp()
+        },
+        {
+          label: 'Move down (Alt + ↓)',
+          icon: 'pi pi-fw pi-angle-down',
+          command: () => this.passwordStore.moveDown()
+        },
+        {
+          label: 'Move bottom (Ctrl + ↓)',
+          icon: 'pi pi-fw pi-angle-double-down',
+          command: () => this.passwordStore.moveBottom()
+        }
+      ] as MenuItem[]
+    } as MenuItem;
+
+    const deleteItem = {
+      label: this.hotkeyService.deleteShortcutLabel,
+      icon: 'pi pi-fw pi-trash',
+      command: () => {
+        this.passwordStore.openDeleteEntryWindow();
+      }
+    } as MenuItem;
+
+    this.multiEntryMenuItems = [rearrangeItems, deleteItem];
+    this.entryMenuItems = [
+      rearrangeItems,
+      {
+        label: 'Copy username',
+        command: () => {
+          this.copyToClipboard(
+            this.passwordStore.selectedPasswords[0],
+            this.passwordStore.selectedPasswords[0].username
+          );
+        }
+      },
+      {
+        label: 'Copy password',
+        command: () => {
+          this.copyToClipboard(
+            this.passwordStore.selectedPasswords[0],
+            this.passwordStore.selectedPasswords[0].username
+          );
+        }
+      },
+      {
+        label: 'Edit (Enter)',
+        visible: this.passwordStore.selectedPasswords.length === 0,
+        icon: 'pi pi-fw pi-pencil',
+        command: () => {
+          this.passwordStore.openEditEntryWindow();
+        }
+      },
+      deleteItem
+    ] as MenuItem[];
   }
 
   trackByFn(_: number, entry: PasswordEntry): string {
@@ -127,6 +209,12 @@ export class PasswordListComponent implements OnInit, OnDestroy {
     }
   }
 
+  selectRowContext(password: PasswordEntry) {
+    if (this.passwordStore.selectedPasswords.length === 0) {
+      this.passwordStore.selectedPasswords = [password];
+    }
+  }
+
   isRowSelected(rowData: PasswordEntry): boolean {
     return this.passwordStore.selectedPasswords.filter(e => e.id === rowData.id).length > 0;
   }
@@ -141,6 +229,8 @@ export class PasswordListComponent implements OnInit, OnDestroy {
       return;
     }
     this.passwordStore.contextSelectedCategory = event.node;
+    this.passwordStore.selectedCategory = event.node;
+    this.passwordStore.notifyStream();
   }
 
   addGroup() {

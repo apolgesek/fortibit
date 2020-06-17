@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { PasswordStoreService } from './password-store.service';
-import { ConfirmationService } from 'primeng/api';
-import { DialogService } from 'primeng/dynamicdialog';
 
 @Injectable({
   providedIn: 'root'
@@ -9,20 +7,21 @@ import { DialogService } from 'primeng/dynamicdialog';
 export class HotkeyService {
 
   private hotkeyProvider: IHotkeyProvider;
+  public deleteShortcutLabel: string;
 
   constructor(
     private passwordStore: PasswordStoreService,
-    private dialogService: DialogService,
-    private confirmationService: ConfirmationService
   ) {
     if (process.platform === 'darwin') {
       this.hotkeyProvider = new DarwinHotkeyProvider(
-        this.passwordStore,
-        this.dialogService,
-        this.confirmationService
+        this.passwordStore
       );
+      this.deleteShortcutLabel = '(Cmd + ⌫)';
     } else {
-      this.hotkeyProvider = new WindowsHotkeyProvider(this.passwordStore, this.dialogService);
+      this.hotkeyProvider = new WindowsHotkeyProvider(
+        this.passwordStore
+      );
+      this.deleteShortcutLabel = '(Del)';
     }
   }
 
@@ -32,22 +31,28 @@ export class HotkeyService {
     this.hotkeyProvider.registerEditEntry(event);
     this.hotkeyProvider.registerAddEntry(event);
     this.hotkeyProvider.registerSelectAllEntries(event);
+    this.hotkeyProvider.registerMoveUpEntry(event);
+    this.hotkeyProvider.registerMoveTopEntry(event);
+    this.hotkeyProvider.registerMoveDownEntry(event);
+    this.hotkeyProvider.registerMoveBottomEntry(event);
   }
 }
 
 interface IHotkeyProvider {
-  registerSaveDatabase: (event: any) => void;
-  registerDeleteEntry: (event: any) => void;
-  registerEditEntry: (event: any) => void;
-  registerAddEntry: (event: any) => void;
-  registerSelectAllEntries: (event: any) => void;
+  registerSaveDatabase: (event: KeyboardEvent) => void;
+  registerDeleteEntry: (event: KeyboardEvent) => void;
+  registerEditEntry: (event: KeyboardEvent) => void;
+  registerAddEntry: (event: KeyboardEvent) => void;
+  registerMoveUpEntry: (event: KeyboardEvent) =>  void;
+  registerMoveTopEntry: (event: KeyboardEvent) =>  void;
+  registerMoveDownEntry: (event: KeyboardEvent) =>  void;
+  registerMoveBottomEntry: (event: KeyboardEvent) =>  void;
+  registerSelectAllEntries: (event: KeyboardEvent) => void;
 }
 
 class DarwinHotkeyProvider implements IHotkeyProvider {
   constructor(
     private passwordStore: PasswordStoreService,
-    private dialogService: DialogService,
-    private confirmationService: ConfirmationService
   ) {}
 
   public registerSaveDatabase(event: KeyboardEvent) {
@@ -79,8 +84,37 @@ class DarwinHotkeyProvider implements IHotkeyProvider {
     }
   }
 
+  public registerMoveUpEntry(event: KeyboardEvent) {
+    if (event.key === 'ArrowUp' && event.altKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.moveUp();
+      event.preventDefault();
+    }
+  }
+
+  public registerMoveTopEntry(event: KeyboardEvent) {
+    if (event.key === 'ArrowUp' && event.metaKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.moveTop();
+      event.preventDefault();
+    }
+  }
+
+  public registerMoveDownEntry(event: KeyboardEvent) {
+    if (event.key === 'ArrowDown' && event.altKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.moveDown();
+      event.preventDefault();
+    }
+  }
+
+  public registerMoveBottomEntry(event: KeyboardEvent) {
+    if (event.key === 'ArrowDown' && event.metaKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.moveBottom();
+      event.preventDefault();
+    }
+  }
+
   public registerSelectAllEntries(event: KeyboardEvent) {
     if (event.key === 'a' && event.metaKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.selectedPasswords = [];
       this.passwordStore.selectedPasswords.push(...this.passwordStore.selectedCategory.data);
       event.preventDefault();
     }
@@ -90,7 +124,6 @@ class DarwinHotkeyProvider implements IHotkeyProvider {
 class WindowsHotkeyProvider implements IHotkeyProvider {
   constructor(
     private passwordStore: PasswordStoreService,
-    private dialogService: DialogService,
   ) {}
 
   public registerSaveDatabase(event: KeyboardEvent) {
@@ -117,9 +150,39 @@ class WindowsHotkeyProvider implements IHotkeyProvider {
     }
   }
 
+  public registerMoveUpEntry(event: KeyboardEvent) {
+    if (event.key === 'ArrowUp' && event.altKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.moveUp();
+      event.preventDefault();
+    }
+  }
+
+  public registerMoveTopEntry(event: KeyboardEvent) {
+    if (event.key === 'ArrowUp' && event.ctrlKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.moveTop();
+      event.preventDefault();
+    }
+  }
+
+  public registerMoveDownEntry(event: KeyboardEvent) {
+    if (event.key === 'ArrowDown' && event.altKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.moveDown();
+      event.preventDefault();
+    }
+  }
+
+  public registerMoveBottomEntry(event: KeyboardEvent) {
+    if (event.key === 'ArrowDown' && event.ctrlKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.moveBottom();
+      event.preventDefault();
+    }
+  }
+
   public registerSelectAllEntries(event: KeyboardEvent) {
-    if (event.key === 'a' && event.ctrlKey) {
-      this.passwordStore.selectedPasswords = this.passwordStore.selectedCategory.data;
+    if (event.key === 'a' && event.ctrlKey && this.passwordStore.selectedPasswords.length) {
+      this.passwordStore.selectedPasswords = [];
+      this.passwordStore.selectedPasswords.push(...this.passwordStore.selectedCategory.data);
+      event.preventDefault();
     }
   }
 }

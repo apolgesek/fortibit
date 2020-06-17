@@ -143,38 +143,6 @@ export class PasswordStoreService {
     this.clearDateSaved();
   }
 
-  // create tree handler static class
-  private findRow(node: TreeNode, id?: string): PasswordEntry[] {
-    if (!id) {
-      return node.data;
-    }
-    if (node.data.find(e => e.id === id)) {
-      return node.data;
-    } else if (node.children != null) {
-      var i;
-      var result = null;
-      for (i=0; result == null && i < node.children.length; i++) {
-        result = this.findRow(node.children[i], id);
-      }
-      return result;
-    }
-    return null;
-  }
-
-  private findRowGroup(node: TreeNode, targetGroup: string): PasswordEntry[] {
-    if (node.key === targetGroup) {
-      return node.data;
-    } else if (node.children != null) {
-      var i;
-      var result = null;
-      for (i=0; result == null && i < node.children.length; i++) {
-        result = this.findRowGroup(node.children[i], targetGroup);
-      }
-      return result;
-    }
-    return null;
-  }
-
   filterEntries(value: string) {
     this._searchPhraseSource.next(value);
   }
@@ -275,6 +243,59 @@ export class PasswordStoreService {
     this.initDialogOpen();
   }
 
+  moveUp() {
+    const groupData = (this.selectedCategory.data as PasswordEntry[]);
+    this.selectedPasswords.sort((a, b) => groupData.findIndex(e => e.id === a.id) <= groupData.findIndex(e => e.id === b.id) ? -1 : 1)
+
+    const isEdge = this.selectedPasswords.find(p => p.id === groupData[0].id);
+    if (isEdge) {
+      return;
+    }
+    this.selectedPasswords.forEach(element => {
+      const elIdx = groupData.findIndex(e => e.id === element.id);
+      this.swapElements<PasswordEntry>(groupData, elIdx, elIdx - 1);
+    });
+  }
+
+  moveDown() {
+    const groupData = (this.selectedCategory.data as PasswordEntry[]);
+    this.selectedPasswords.sort((a, b) => groupData.findIndex(e => e.id === a.id) >= groupData.findIndex(e => e.id === b.id) ? -1 : 1)
+
+    const isEdge = this.selectedPasswords.find(p => p.id === groupData[groupData.length - 1].id);
+    if (isEdge) {
+      return;
+    }
+    this.selectedPasswords.forEach(element => {
+      const elIdx = groupData.findIndex(e => e.id === element.id);
+      this.swapElements<PasswordEntry>(groupData, elIdx, elIdx + 1);
+    });
+  }
+
+  moveTop() {
+    const groupData = (this.selectedCategory.data as PasswordEntry[]);    
+    this.selectedPasswords.forEach(element => {
+      const elIdx = groupData.findIndex(e => e.id === element.id);
+      groupData.splice(elIdx, 1);
+      groupData.unshift(element);
+    });
+  }
+
+  moveBottom() {
+    const groupData = (this.selectedCategory.data as PasswordEntry[]);    
+    this.selectedPasswords.forEach(element => {
+      const elIdx = groupData.findIndex(e => e.id === element.id);
+      groupData.splice(elIdx, 1);
+      groupData.push(element);
+    });
+  }
+
+  private swapElements<T>(array: T[], i1: number, i2: number) {
+    let savedElement: T;
+    savedElement = {...array[i1]};
+    array[i1] = array[i2];
+    array[i2] = savedElement;
+  }
+
   private initDialogOpen() {
     this.isDialogOpened = true;
     this.dialogRef.onDestroy.subscribe(() => {
@@ -330,5 +351,37 @@ export class PasswordStoreService {
     this.selectedCategory = this.files[0];
     this.setDateSaved();
   }
+
+    // create tree handler static class
+    private findRow(node: TreeNode, id?: string): PasswordEntry[] {
+      if (!id) {
+        return node.data;
+      }
+      if (node.data.find(e => e.id === id)) {
+        return node.data;
+      } else if (node.children != null) {
+        var i;
+        var result = null;
+        for (i=0; result == null && i < node.children.length; i++) {
+          result = this.findRow(node.children[i], id);
+        }
+        return result;
+      }
+      return null;
+    }
+  
+    private findRowGroup(node: TreeNode, targetGroup: string): PasswordEntry[] {
+      if (node.key === targetGroup) {
+        return node.data;
+      } else if (node.children != null) {
+        var i;
+        var result = null;
+        for (i=0; result == null && i < node.children.length; i++) {
+          result = this.findRowGroup(node.children[i], targetGroup);
+        }
+        return result;
+      }
+      return null;
+    }
 
 }

@@ -66,6 +66,10 @@ export class AppComponent implements AfterViewInit {
         !(<Element>event.srcElement).closest('.row-entry')
         && !(<Element>event.srcElement).closest('.menu-panel *')
         && !(<Element>event.srcElement).closest('.ui-dialog')
+        && !(<Element>event.srcElement).closest('.entry-contextmenu')
+        && !(<Element>event.srcElement).classList.contains('ui-clickable')
+        && !(<Element>event.srcElement).closest('.ui-toast')
+        && !(<Element>event.srcElement).closest('.details-container')
       ) {
         this.passwordService.selectedPasswords = [];
       }

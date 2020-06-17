@@ -1,18 +1,65 @@
 :host ::ng-deep{
-    .ui-button-text-icon-left .ui-button-icon-left {
+    .main-nav .ui-button-text-icon-left .ui-button-icon-left {
         margin-top: -.5rem;
+        color: #444;
+        top: 0.65em;
     }
 
-    .ui-button-success {
+    .ui-button-secondary {
+        display: flex;
+        height: 2.5em;
+
+        .ui-button-text {
+            padding-left: 2.5em !important;
+        }
+    
+        .ui-button-icon-left {
+            left: .3em;
+            font-size: 1.6em;
+        }
+
+        &:enabled:hover {
+            background-color: #fff !important;
+            border-color: #fff !important;
+            box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+            0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+            0px 1px 10px 0px rgba(0,0,0,.12) !important;
+        }
+    }
+
+    .add-entry {
+        margin-right: 1.5rem;
+        transition: 150ms box-shadow;
+        background-color: #fff !important;
+        color: #1b81d7;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        border: 0;
+        &:hover {
+            color: #1b81d7 !important;
+            background-color: #fff !important;
+            box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+                0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+                0px 1px 10px 0px rgba(0,0,0,.12) !important;
+        }
+
+        &.ui-button-icon-only {
+            width: 2.5rem;
+        }
+
+        .ui-button-icon-left {
+            font-size: 1.8em;
+            margin-top: -0.45em;
+        }
+    }
+
+    .edit-entry {
+        margin-left: 0.5rem;
         margin-right: 0.5rem;
     }
 
-    .ui-button-warning {
-        margin-left: 2rem;
-        margin-right: 0.5rem;
-    }
-
-    .ui-button-danger {
+    .remove-entry {
         margin-right: 2rem;
     }
 }
@@ -20,9 +67,8 @@
 .main-nav {
     width: 100%;
     height: 5rem;
-    background-image: linear-gradient(270deg,#2bc0ec,#1b81d7);
+    background:#1b81d7;
     display: flex;
-    align-items: center;
 
     .brand {
         margin: 0;
@@ -42,6 +88,9 @@
         flex: 1;
         text-align: right;
         margin-right: 1rem;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
     }
 
     .file-location {
@@ -51,6 +100,12 @@
         margin-top: 0.5rem;
         max-width: 200px;
         word-break: break-all;
+    }
+
+    .search {
+        border: none;
+        height: 2.5em;
+        padding: 0.7em;
     }
 
 }
