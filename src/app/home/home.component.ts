@@ -18,7 +18,7 @@ export class HomeComponent implements OnInit {
   }
 
   get logoURL() {
-    return logoURL;
+    return logoURL.default;
   }
 
   get filePath() {

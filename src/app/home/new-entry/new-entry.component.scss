@@ -1,18 +1,46 @@
 :host ::ng-deep {
-    padding: 0 2rem 1rem;
+    padding: 0 0 1rem;
     display: block;
-
-    .ui-message-error {
-        margin: 1rem 0 0;
-    }
 
     .ui-fluid {
         display: flex;
         justify-content: flex-end;
-    
-        .confirm-btn {
-            width: auto;
-            margin-right: 0.5rem;
+    }
+
+    .ui-inputgroup {
+        border: 1px solid #a6a6a6;
+        border-radius: 4px;
+
+        input, textarea {
+            width: 100%;
+            font-size: 0.9rem;
+            color: #444;
+            border: 0;
+            border-radius: 4px;
+        }
+
+        input {
+            padding: 0 0.5rem;
+        }
+
+        textarea {
+            padding: 0.5rem 0.5rem 0;
+            resize: none;
+            outline: none;
+        }
+
+        .ui-inputgroup-addon {
+            border: 0 !important;
+            background-color: unset !important;
+        }
+
+        &.ng-invalid {
+            border: 1px solid #a80000;
         }
     }
+}
+
+.validation-error {
+    color: #a80000;
+    margin: 0.5rem 0 0;
 }

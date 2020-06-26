@@ -7,23 +7,11 @@ import { MenuItem } from 'primeng/api';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
 import { ContextMenu } from 'primeng/contextmenu';
 import { HotkeyService } from '@app/core/services/hotkey.service';
-import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-password-list',
   templateUrl: './password-list.component.html',
-  styleUrls: ['./password-list.component.scss'],
-  animations: [
-    trigger('myInsertRemoveTrigger', [
-      transition(':enter', [
-        style({ transform: 'translateX(100%)' }),
-        animate('150ms', style({ transform: 'translateX(0)' })),
-      ]),
-      transition(':leave', [
-        animate('150ms', style({ transform: 'translateX(100%)' }))
-      ])
-    ]),
-  ]
+  styleUrls: ['./password-list.component.scss']
 })
 export class PasswordListComponent implements OnInit, OnDestroy {
   public passwordList$: Observable<PasswordEntry[]>;
@@ -41,6 +29,10 @@ export class PasswordListComponent implements OnInit, OnDestroy {
 
   get selectedCategory(): TreeNode {
     return this.passwordStore.selectedCategory;
+  }
+
+  get filePath(): string {
+    return this.passwordStore.filePath ? this.passwordStore.filePath.split("/").slice(-1)[0] : '*New db';
   }
 
   set selectedCategory(value: TreeNode) {
@@ -86,10 +78,13 @@ export class PasswordListComponent implements OnInit, OnDestroy {
 
     this.groupContextMenuItems = [
       {
-        label: 'Delete',
-        icon: 'pi pi-fw pi-times',
-        command: () => this.passwordStore.openDeleteGroupWindow(),
-      } as MenuItem,
+        label: 'Add subgroup',
+        icon: 'pi pi-fw pi-plus',
+        command: () => this.passwordStore.addSubgroup(),
+      },
+      {
+        separator: true,
+      },
       {
         label: 'Rename',
         icon: 'pi pi-fw pi-pencil',
@@ -99,8 +94,13 @@ export class PasswordListComponent implements OnInit, OnDestroy {
             (<HTMLInputElement>document.querySelector('.group-name-input')).focus();
           });
         }
-      } as MenuItem
-    ];
+      },
+      {
+        label: 'Delete',
+        icon: 'pi pi-fw pi-trash',
+        command: () => this.passwordStore.openDeleteGroupWindow(),
+      },
+    ] as MenuItem[];
 
     const rearrangeItems = {
       label: 'Rearrange',
@@ -157,6 +157,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
           );
         }
       },
+      { separator: true },
       {
         label: 'Edit (Enter)',
         visible: this.passwordStore.selectedPasswords.length === 0,

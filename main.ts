@@ -28,7 +28,7 @@ function createWindow(): BrowserWindow {
       nodeIntegration: true,
       allowRunningInsecureContent: (serve) ? true : false,
     },
-    resizable: false
+    resizable: true
   });
 
   if (serve) {

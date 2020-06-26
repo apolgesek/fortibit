@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { PasswordStoreService } from '../../core/services/password-store.service';
-import { DialogService } from 'primeng/dynamicdialog';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
+import { fromEvent, Subject } from 'rxjs';
+import { distinctUntilChanged, debounceTime, takeUntil } from 'rxjs/operators';
 const logoURL = require('../../../assets/images/lock.svg');
 
 @Component({
@@ -9,11 +10,15 @@ const logoURL = require('../../../assets/images/lock.svg');
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public newPassword: string = '';
   public newPasswordRepeat: string = '';
   public selectedCategoryData: PasswordEntry[];
+
+  @ViewChild('search') search: ElementRef;
+
+  private destroyed$ = new Subject<void>();
 
   get isDateSaved(): boolean {
     return !!this.passwordStore.dateSaved;
@@ -35,10 +40,6 @@ export class DashboardComponent implements OnInit {
     return logoURL.default;
   }
 
-  get filePath(): string {
-    return this.passwordStore.filePath ? ".../" + this.passwordStore.filePath.split("/").slice(-2).join("/") : '';
-  }
-
   get isNewPasswordDialogShown(): boolean {
     return this.passwordStore.isNewPasswordDialogShown;
   }
@@ -47,21 +48,29 @@ export class DashboardComponent implements OnInit {
     this.passwordStore.isNewPasswordDialogShown = value;
   }
 
-  constructor(
-    private passwordStore: PasswordStoreService,
-    private dialogService: DialogService,
-  ) { }
+  constructor(private passwordStore: PasswordStoreService) { }
 
   ngOnInit(): void {
     this.selectedCategoryData = this.passwordStore.selectedCategory?.data;
   }
 
-  openAddEntryWindow() {
-    this.passwordStore.openAddEntryWindow();
+  ngAfterViewInit(): void {
+    fromEvent(this.search.nativeElement, 'keyup').pipe(
+      distinctUntilChanged(),
+      debounceTime(500),
+      takeUntil(this.destroyed$)
+    ).subscribe(() => {
+      this.passwordStore.filterEntries(this.search.nativeElement.value);
+    });
   }
 
-  searchEntries(event: any) {
-    this.passwordStore.filterEntries(event.target.value);
+  ngOnDestroy() {
+    this.destroyed$.next();
+    this.destroyed$.complete();
+  }
+
+  openAddEntryWindow() {
+    this.passwordStore.openAddEntryWindow();
   }
 
   saveNewDatabase() {

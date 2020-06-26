@@ -14,6 +14,16 @@ export class EntryDetailsComponent {
     return this.passwordStore.selectedPasswords[0];
   }
 
+  get isEntrySelected(): boolean {
+    return this.passwordStore.selectedPasswords.length === 1;
+  }
+
+  get database(): any {
+    return {
+      name: this.passwordStore.filePath ? this.passwordStore.filePath.split("/").slice(-1)[0] : '*New db'
+    };
+  }
+
   constructor(
     private passwordStore: PasswordStoreService,
     private electronService: ElectronService

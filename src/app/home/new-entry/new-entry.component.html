@@ -3,47 +3,51 @@
         <div class="ui-g-12">
             <div class="ui-inputgroup">
                 <span class="ui-inputgroup-addon"><i class="pi pi-bookmark" style="line-height: 1.25;"></i></span>
-                <input type="text" formControlName="title" pInputText placeholder="Title">         
+                <input type="text" formControlName="title" placeholder="Title">         
             </div>
         </div>
 
         <div class="ui-g-12">
-            <div class="ui-inputgroup">
+            <div class="ui-inputgroup" [ngClass]="{'ng-invalid': newEntryForm.get('username').invalid && newEntryForm.get('username').dirty}">
                 <span class="ui-inputgroup-addon"><i class="pi pi-user" style="line-height: 1.25;"></i></span>
-                <input type="text" formControlName="username" pInputText placeholder="Username">         
+                <input type="text" formControlName="username" placeholder="Username">         
             </div>
-            <p-message
+            <div
                 *ngIf="newEntryForm.get('username').invalid && newEntryForm.get('username').dirty"
-                severity="error"
-                text="Username is required">
-            </p-message>
+                @fade
+                class="validation-error">
+                Username is required
+            </div>
         </div>
         
         <div class="ui-g-12">
-            <div class="ui-inputgroup">
+            <div class="ui-inputgroup" [ngClass]="{'ng-invalid': newEntryForm.get('value').invalid && newEntryForm.get('value').dirty}">
                 <span class="ui-inputgroup-addon"><i class="pi pi-key" style="line-height: 1.25;"></i></span>
-                <input type="password" formControlName="value" pInputText placeholder="Password">   
+                <input type="password" formControlName="value" placeholder="Password">   
             </div>
-            <p-message
+            <div
                 *ngIf="newEntryForm.get('value').invalid && newEntryForm.get('value').dirty"
-                severity="error"
-                text="Password is required">
-            </p-message>
+                @fade
+                class="validation-error">
+                Password is required
+            </div>
         </div>
                 
         <div class="ui-g-12">
             <div class="ui-inputgroup">
                 <span class="ui-inputgroup-addon"><i class="pi pi-globe" style="line-height: 1.25;"></i></span>
-                <input type="text" formControlName="url" pInputText placeholder="Website">      
+                <input type="text" formControlName="url" placeholder="Website">      
             </div>
         </div>
 
         <div class="ui-g-12">
             <div class="ui-inputgroup">
                 <span class="ui-inputgroup-addon"><i class="pi pi-info" style="line-height: 1.25;"></i></span>
-                <textarea formControlName="notes" pInputTextarea placeholder="Optional note"></textarea>     
+                <textarea formControlName="notes" placeholder="Optional note" rows="5"></textarea>     
             </div>
         </div>
-        <button pButton type="submit" label="Confirm" class="confirm-btn ui-button-success"></button>
+        <button type="submit" class="primary-btn">
+            Confirm
+        </button>
     </div>
 </form>

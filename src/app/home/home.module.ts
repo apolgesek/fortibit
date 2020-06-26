@@ -32,6 +32,7 @@ import { TextEmphasizeDirective } from './password-list/text-emphasize.directive
 import { BlurEnterDirective } from './password-list/blur-enter.directive';
 import { DroppableDirective } from './password-list/droppable.directive';
 import { EntryDetailsComponent } from './entry-details/entry-details.component';
+import { StickyHeaderDirective } from './password-list/sticky-header.directive';
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import { EntryDetailsComponent } from './entry-details/entry-details.component';
     TextEmphasizeDirective,
     BlurEnterDirective,
     DroppableDirective,
-    EntryDetailsComponent
+    EntryDetailsComponent,
+    StickyHeaderDirective
   ],
   imports: [
     CommonModule,

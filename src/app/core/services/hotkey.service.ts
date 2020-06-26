@@ -16,12 +16,12 @@ export class HotkeyService {
       this.hotkeyProvider = new DarwinHotkeyProvider(
         this.passwordStore
       );
-      this.deleteShortcutLabel = '(Cmd + ⌫)';
+      this.deleteShortcutLabel = 'Delete (Cmd + ⌫)';
     } else {
       this.hotkeyProvider = new WindowsHotkeyProvider(
         this.passwordStore
       );
-      this.deleteShortcutLabel = '(Del)';
+      this.deleteShortcutLabel = 'Delete (Del)';
     }
   }
 

@@ -1,15 +1,66 @@
-<div class="details-container">
-    <div>
+<div class="details-container" [ngClass]="{'db': !isEntrySelected}">
+    <ng-container *ngIf="isEntrySelected; else databaseDetails">
         <div class="header">Entry details</div>
-        <p><span class="label">Title</span>: {{ entry.title }}</p>
-        <p><span class="label">User</span>: {{ entry.username }}</p>
-        <p *ngIf="entry.url" class="truncate">
-            <span class="label">URL</span>: <a (click)="openUrl(entry.url)" href="#">{{ entry.url }}</a>
-        </p>
-        <p><span class="label">Creation date</span>: {{ entry.creationDate | date:'dd/MM/yy HH:mm' }}</p>
-        <p><span class="label">Last access date</span>: {{ entry.lastAccessDate | date:'dd/MM/yy HH:mm' }}</p>
-    </div>
-    <div *ngIf="entry.notes">
-        <p><span class="label">Notes</span>: {{ entry.notes }}</p>
-    </div>
+        <div class="content">
+            <div class="section">
+                <p><span class="label">Title</span></p>
+                {{ entry.title }}
+            </div>
+
+            <div class="section">
+                <p><span class="label">User</span></p>
+                {{ entry.username }}
+            </div>
+
+            <div *ngIf="entry.url" class="section word-wrap">
+                <p><span class="label">URL</span></p>
+                <a (click)="openUrl(entry.url)" href="#">{{ entry.url }}</a>
+            </div>
+
+            <div *ngIf="entry.creationDate" class="section">
+                <p><span class="label">Creation date</span></p>
+                {{ entry.creationDate | date:'dd/MM/yy HH:mm' }}
+            </div>
+
+            <div *ngIf="entry.lastAccessDate" class="section">
+                <p><span class="label">Last access date</span></p>
+                {{ entry.lastAccessDate | date:'dd/MM/yy HH:mm' }}
+            </div>
+
+            <div *ngIf="entry.notes" class="section">
+                <p><span class="label">Notes</span></p>
+                {{ entry.notes }}
+            </div>
+        </div>
+    </ng-container>
 </div>
+
+<ng-template #databaseDetails>
+    <div class="header">Database details</div>
+    <div class="content">
+        <div class="section">
+            <p><span class="label">File name</span></p>
+            {{ database.name }}
+        </div>
+        <div class="section">
+            <p><span class="label">Description</span></p>
+            Lorem ipsum
+        </div>
+        <div class="section">
+            <p><span class="label">Encryption algorithm</span></p>
+            AES-256 (Rijndael)  
+        </div>
+        <div class="section">
+            <p><span class="label">Key derivation function</span></p>
+            PBKDF2 - 100 000 rounds 
+        </div>
+        <div class="section">
+            <p><span class="label">Compression</span></p>
+            Not available
+        </div>
+        <div class="section">
+            <p><span class="label">Password strength</span></p>
+            Not available
+        </div>
+    </div>
+</ng-template>

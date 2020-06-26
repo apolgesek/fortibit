@@ -1,11 +1,11 @@
 :host {
     display: block;
     height: calc(100% - 5rem);
-    width: 19rem;
+    width: 16rem;
     background-color: #fff;
-    position: absolute;
+    position: fixed;
+    z-index: 2;
     right: 0;
-    border-left: 1px solid #ccc;
     font-size: 0.8rem;
 }
 
@@ -14,26 +14,26 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    .header {
-        padding: 0.5rem;
-        background-color: #47A69F;
-        font-weight: 700;
-        color: #fff;
-        font-size: 0.9rem;
+    transition: background-color 150ms ease-in-out;
+
+    &.db {
+        background-color: #F1F3F4;
     }
-    > div {
+
+    > div:not(.header) {
+        padding: 0 1rem;
+
+        .section {
+            margin: 1rem 0;
+            word-break: break-all;
+        }
+
         p {
             margin: 0.25rem 0;
-            padding: 0 0.5rem;
-            &.truncate {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
         }
 
         .label {
-            font-weight: bold;
+            color: rgb(107, 107, 107);
         }
     }
 }

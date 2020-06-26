@@ -9,6 +9,7 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AppConfig } from 'environments/environment';
 import { PasswordEntry } from '../models/password-entry.model';
 import { NewEntryComponent } from '@app/home/new-entry/new-entry.component';
+import { markDirty } from './mark-dirty.decorator';
 
 @Injectable({
   providedIn: 'root'
@@ -33,32 +34,13 @@ export class PasswordStoreService {
     label: "Database",
     data: [],
     expanded: true,
+    expandedIcon: "pi pi-folder-open",
     draggable: false,
     children: [
-      {
-        key: uuidv4(),
-        label: "General",
-        icon: "pi pi-folder",
-        data: [],
-      },
-      {
-        key: uuidv4(),
-        label: "Email",
-        data: [],
-        icon: "pi pi-folder",
-      },
-      {
-        key: uuidv4(),
-        label: "Work",
-        data: [],
-        icon: "pi pi-folder",
-      },
-      {
-        key: uuidv4(),
-        label: "Banking",
-        data: [],
-        icon: "pi pi-folder",
-      },
+      this.buildGroup("General"),
+      this.buildGroup("Email"),
+      this.buildGroup("Work"),
+      this.buildGroup("Banking"),
     ]
   }];
 
@@ -111,6 +93,7 @@ export class PasswordStoreService {
     }
   }
 
+  @markDirty()
   addEntry(entryModel: PasswordEntry) {
     if (entryModel.id) {
       const catalogData = this.findRow(this.files[0], entryModel.id);
@@ -123,9 +106,9 @@ export class PasswordStoreService {
     }
 
     this.notifyStream();
-    this.clearDateSaved();
   }
 
+  @markDirty()
   deleteEntry() {
     if (this.selectedPasswords.length === 0) {
       const catalogData = this.findRow(this.files[0], this.draggedEntry[0].id);
@@ -140,24 +123,15 @@ export class PasswordStoreService {
     }
     this.selectedPasswords = [];
     this.notifyStream();
-    this.clearDateSaved();
   }
 
   filterEntries(value: string) {
     this._searchPhraseSource.next(value);
   }
 
+  @markDirty()
   clearAll() {
     this.files = [];
-    this.clearDateSaved();
-  }
-
-  clearDateSaved() {
-    this.dateSaved = undefined;
-  }
-
-  setDateSaved() {
-    this.dateSaved = new Date();
   }
 
   saveDatabase(newPassword: string) {
@@ -173,18 +147,30 @@ export class PasswordStoreService {
     this._searchPhraseSource.next('');
   }
 
+  @markDirty()
   removeGroup() {
     let idx = this.selectedCategory.parent.children.findIndex(g => g.key === this.contextSelectedCategory.key);
     this.selectedCategory.parent.children.splice(idx, 1);
     this.selectedCategory = this.files[0];
   }
 
+  @markDirty()
   renameGroup() {
     this.isRenameModeOn = true;
   }
 
+  @markDirty()
   addGroup() {
-    this.files[0].children.push({key: uuidv4(), label: 'New Group', data: [], icon: "pi pi-folder"});
+    this.files[0].children.push(this.buildGroup("New group"));
+  }
+
+  @markDirty()
+  addSubgroup() {
+    if (!this.selectedCategory.children) {
+      this.selectedCategory.children = [];
+    }
+    this.selectedCategory.children.push(this.buildGroup("New subgroup"));
+    this.selectedCategory.expanded = true;
   }
 
   moveEntry(targetGroup: string) {
@@ -243,6 +229,7 @@ export class PasswordStoreService {
     this.initDialogOpen();
   }
 
+  @markDirty()
   moveUp() {
     const groupData = (this.selectedCategory.data as PasswordEntry[]);
     this.selectedPasswords.sort((a, b) => groupData.findIndex(e => e.id === a.id) <= groupData.findIndex(e => e.id === b.id) ? -1 : 1)
@@ -257,6 +244,7 @@ export class PasswordStoreService {
     });
   }
 
+  @markDirty()
   moveDown() {
     const groupData = (this.selectedCategory.data as PasswordEntry[]);
     this.selectedPasswords.sort((a, b) => groupData.findIndex(e => e.id === a.id) >= groupData.findIndex(e => e.id === b.id) ? -1 : 1)
@@ -271,6 +259,7 @@ export class PasswordStoreService {
     });
   }
 
+  @markDirty()
   moveTop() {
     const groupData = (this.selectedCategory.data as PasswordEntry[]);    
     this.selectedPasswords.forEach(element => {
@@ -280,6 +269,7 @@ export class PasswordStoreService {
     });
   }
 
+  @markDirty()
   moveBottom() {
     const groupData = (this.selectedCategory.data as PasswordEntry[]);    
     this.selectedPasswords.forEach(element => {
@@ -384,4 +374,17 @@ export class PasswordStoreService {
       return null;
     }
 
+    private buildGroup(title: string): TreeNode {
+      return {
+        key: uuidv4(),
+        label: title,
+        data: [],
+        collapsedIcon: "pi pi-folder",
+        expandedIcon: "pi pi-folder-open"
+      };
+    }
+  
+    private setDateSaved() {
+      this.dateSaved = new Date();
+    }
 }

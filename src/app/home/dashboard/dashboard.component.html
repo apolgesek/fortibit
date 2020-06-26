@@ -1,6 +1,5 @@
 <nav class="main-nav">
     <h2 class="brand"><img [src]="logoURL" class="brand-logo"> haslock</h2>
-    <div class="file-location">{{ filePath }}</div>
     <div class="menu-panel">
         <button
             pButton
@@ -13,7 +12,7 @@
         <button
             pButton
             type="button"
-            label="Save"
+            label="Save DB"
             icon="pi pi-save"
             class="ui-button-secondary save-db"
             iconPos="left"
@@ -40,7 +39,7 @@
             [disabled]="!isAnyPassword || !isAnyRowSelected"
             (click)="openDeleteEntryWindow()">
         </button>
-        <input type="text" class="search" (input)="searchEntries($event)" pInputText placeholder="Search" />
+        <input type="text" class="search" #search pInputText placeholder="Search database" />
     </div>
 </nav>
 
