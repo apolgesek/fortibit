@@ -14,7 +14,7 @@
             </div>
             <div
                 *ngIf="newEntryForm.get('username').invalid && newEntryForm.get('username').dirty"
-                @fade
+                @fadeSlide
                 class="validation-error">
                 Username is required
             </div>
@@ -27,7 +27,7 @@
             </div>
             <div
                 *ngIf="newEntryForm.get('value').invalid && newEntryForm.get('value').dirty"
-                @fade
+                @fadeSlide
                 class="validation-error">
                 Password is required
             </div>

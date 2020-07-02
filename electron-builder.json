@@ -25,7 +25,6 @@
     "role": "Editor"
   }],
   "win": {
-    "icon": "dist",
     "target": [
       "portable"
     ]

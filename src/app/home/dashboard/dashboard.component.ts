@@ -36,8 +36,20 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.passwordStore.selectedPasswords.length > 0;
   }
 
+  get selectedRowsCount(): number {
+    return this.passwordStore.selectedPasswords.length;
+  }
+
   get logoURL(): string {
     return logoURL.default;
+  }
+
+  get isRemoveEntryDialogShown(): boolean {
+    return this.passwordStore.isRemoveEntryDialogShown;
+  }
+
+  set isRemoveEntryDialogShown(value: boolean) {
+    this.passwordStore.isRemoveEntryDialogShown = value;
   }
 
   get isNewPasswordDialogShown(): boolean {
@@ -46,6 +58,22 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   set isNewPasswordDialogShown(value: boolean) {
     this.passwordStore.isNewPasswordDialogShown = value;
+  }
+
+  get isConfirmExitDialogShown(): boolean {
+    return this.passwordStore.isConfirmExitDialogShown;
+  }
+
+  set isConfirmExitDialogShown(value: boolean) {
+    this.passwordStore.isConfirmExitDialogShown = value;
+  }
+
+  get isConfirmGroupRemoveDialogShown(): boolean {
+    return this.passwordStore.isConfirmGroupRemoveDialogShown;
+  }
+
+  set isConfirmGroupRemoveDialogShown(value: boolean) {
+    this.passwordStore.isConfirmGroupRemoveDialogShown = value;
   }
 
   constructor(private passwordStore: PasswordStoreService) { }
@@ -87,6 +115,32 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   openDeleteEntryWindow() {
     this.passwordStore.openDeleteEntryWindow();
+  }
+
+  deleteEntry() {
+    this.passwordStore.deleteEntry();
+    this.closeRemoveEntryDialog();
+  }
+
+  closeRemoveEntryDialog() {
+    this.isRemoveEntryDialogShown = false;
+  }
+
+  closeConfirmExitDialog() {
+    this.isConfirmExitDialogShown = false;
+  }
+
+  closeConfirmGroupRemoveDialog() {
+    this.isConfirmGroupRemoveDialogShown = false;
+  }
+
+  exitApp() {
+    this.passwordStore.exitApp();
+  }
+
+  removeGroup() {
+    this.passwordStore.removeGroup();
+    this.closeConfirmGroupRemoveDialog();
   }
 
 }

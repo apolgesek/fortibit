@@ -19,6 +19,9 @@
 
   .ui-card {
     position: relative;
+    .ui-card-body {
+      padding: 1.8rem;
+    }
   }
 }
 

@@ -25,6 +25,10 @@ export class HotkeyService {
     }
   }
 
+  getMultiselectionKey(event: MouseEvent): boolean {
+    return process.platform === 'darwin' ? event.metaKey : event.ctrlKey;
+  }
+
   intercept(event: KeyboardEvent) {
     this.hotkeyProvider.registerSaveDatabase(event);
     this.hotkeyProvider.registerDeleteEntry(event);
@@ -133,13 +137,17 @@ class WindowsHotkeyProvider implements IHotkeyProvider {
   }
 
   public registerDeleteEntry(event: KeyboardEvent) {
-    if (event.key === 'Del') {
+    if (event.key === 'Delete') {
       this.passwordStore.openDeleteEntryWindow();
     }
   }
 
   public registerEditEntry(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter'
+        && !this.passwordStore.isDialogOpened
+        && this.passwordStore.selectedPasswords.length === 1
+        && !this.passwordStore.isRenameModeOn
+      ) {
       this.passwordStore.openEditEntryWindow();
     }
   }

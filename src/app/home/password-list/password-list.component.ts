@@ -32,7 +32,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
   }
 
   get filePath(): string {
-    return this.passwordStore.filePath ? this.passwordStore.filePath.split("/").slice(-1)[0] : '*New db';
+    return this.passwordStore.file?.filename ?? '*New db';
   }
 
   set selectedCategory(value: TreeNode) {
@@ -198,7 +198,7 @@ export class PasswordListComponent implements OnInit, OnDestroy {
   }
 
   selectRow(event: MouseEvent, password: PasswordEntry) {
-    if (event.metaKey && event.type === 'click') {
+    if (this.hotkeyService.getMultiselectionKey(event) && event.type === 'click') {
       const foundIndex = this.passwordStore.selectedPasswords.findIndex(p => p.id === password.id);
       if (foundIndex > -1) {
         this.passwordStore.selectedPasswords.splice(foundIndex, 1);
@@ -251,20 +251,30 @@ export class PasswordListComponent implements OnInit, OnDestroy {
       this.passwordStore.draggedEntry = [rowData];
     }
 
-    var elem = document.createElement("div");
-    elem.id = "drag-ghost";
-    elem.style.position = "absolute";
-    elem.style.top = "-1000px";
-    document.body.appendChild(elem);
+    let elem = null;
+    if (process.platform === 'darwin') {
+      elem = document.createElement("div");
+      elem.id = "drag-ghost";
+      elem.style.position = "absolute";
+      elem.style.top = "-1000px";
+      document.body.appendChild(elem);
+    } else {
+      elem = new Image();
+      elem.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+    }
     event.dataTransfer.setDragImage(elem, 0, 0);
+
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.dropEffect = 'move';
     document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'none');
   }
 
   handleDragEnd(event: DragEvent) {
-    var ghost = document.getElementById("drag-ghost");
-    if (ghost.parentNode) {
+    if (process.platform === 'darwin') {
+      let ghost = document.getElementById("drag-ghost");
       ghost.parentNode.removeChild(ghost);
     }
+
     document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'auto');
     this.passwordStore.draggedEntry = [];
   }

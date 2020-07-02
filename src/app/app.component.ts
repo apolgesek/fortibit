@@ -35,9 +35,9 @@ export class AppComponent implements AfterViewInit {
       console.log('Mode web');
     }
 
-    this.electronService.ipcRenderer.on('providePassword', (_, filePath) => {
+    this.electronService.ipcRenderer.on('providePassword', (_, file) => {
       this.zone.run(() => {
-        this.passwordService.filePath = filePath;
+        this.passwordService.file = file;
         this.router.navigateByUrl('/home');
       });
     });
@@ -77,13 +77,7 @@ export class AppComponent implements AfterViewInit {
 
     this.electronService.ipcRenderer.on('openCloseConfirmationWindow', () => {
       this.zone.run(() => {
-        this.confirmationService.confirm({
-          message: 'You have unsaved changes. <p>Are you sure you want to quit?</p>',
-          accept: () => {
-            window.onbeforeunload = undefined;
-            this.electronService.ipcRenderer.send('exit');
-          },
-        } as Confirmation);
+        this.passwordService.isConfirmExitDialogShown = true;
       });
     })
 

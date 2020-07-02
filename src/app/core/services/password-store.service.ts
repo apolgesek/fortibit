@@ -24,11 +24,14 @@ export class PasswordStoreService {
   public contextSelectedCategory: TreeNode;
   public rowIndex: number;
   public isInvalidPassword = false;
-  public filePath: string;
+  public file: { filePath: string, filename: string };
   public isRenameModeOn: boolean;
   public isDialogOpened: boolean;
   public dialogRef: DynamicDialogRef;
   public isNewPasswordDialogShown = false;
+  public isRemoveEntryDialogShown = false;
+  public isConfirmExitDialogShown = false;
+  public isConfirmGroupRemoveDialogShown = false;
   public files: TreeNode[] = [{
     key: uuidv4(),
     label: "Database",
@@ -75,7 +78,7 @@ export class PasswordStoreService {
         try {
           const deserializedPasswords = JSON.parse(decrypted);
           this.isInvalidPassword = false;
-          this.filePath = file;
+          this.file = file;
           this.clearAll();
           this.files = deserializedPasswords;
           this.selectedCategory = this.files[0];
@@ -91,6 +94,8 @@ export class PasswordStoreService {
     if (AppConfig.mocks) {
       this.loadTestData();
     }
+
+    this.selectedCategory = this.files[0];
   }
 
   @markDirty()
@@ -182,7 +187,7 @@ export class PasswordStoreService {
   }
 
   trySaveDatabase() {
-    if (!this.filePath) {
+    if (!this.file) {
       this.isNewPasswordDialogShown = true;
     } else {
       this.saveDatabase(null);
@@ -195,22 +200,11 @@ export class PasswordStoreService {
   }
 
   openDeleteEntryWindow() {
-    this.confirmDialogService.confirm({
-      message: this.confirmEntriesDeleteMessage,
-      accept: () => {
-        this.deleteEntry();
-      }
-    });
+    this.isRemoveEntryDialogShown = true;
   }
 
   openDeleteGroupWindow() {
-    this.confirmDialogService.confirm({
-      message: 'Are you sure you want to delete this group?'
-      + `<p><strong>${this.selectedCategory.data.length}</strong> entries will be removed</p>`,
-      accept: () => {
-        this.removeGroup();
-      }
-    });
+    this.isConfirmGroupRemoveDialogShown = true;
   }
 
   openEditEntryWindow() {
@@ -271,12 +265,17 @@ export class PasswordStoreService {
 
   @markDirty()
   moveBottom() {
-    const groupData = (this.selectedCategory.data as PasswordEntry[]);    
+    const groupData = (this.selectedCategory.data as PasswordEntry[]);
     this.selectedPasswords.forEach(element => {
       const elIdx = groupData.findIndex(e => e.id === element.id);
       groupData.splice(elIdx, 1);
       groupData.push(element);
     });
+  }
+
+  exitApp() {
+    window.onbeforeunload = undefined;
+    this.electronService.ipcRenderer.send('exit');
   }
 
   private swapElements<T>(array: T[], i1: number, i2: number) {
@@ -338,7 +337,6 @@ export class PasswordStoreService {
     this.files[0].children.forEach((el, index) => {
       el.data = (shuffledMocks as any[]).splice(index * 20, 20);
     });
-    this.selectedCategory = this.files[0];
     this.setDateSaved();
   }
 

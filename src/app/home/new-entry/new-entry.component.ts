@@ -2,28 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { PasswordStoreService } from '@app/core/services/password-store.service';
-import { trigger, style, transition, animate } from '@angular/animations';
+import { fade } from '@app/shared/animations/fade-slide.animation';
 
 @Component({
   selector: 'app-new-entry',
   templateUrl: './new-entry.component.html',
   styleUrls: ['./new-entry.component.scss'],
-  animations: [
-    // the fade-in/fade-out animation.
-    trigger('fade', [
-      // fade in when created. this could also be written as transition('void => *')
-      transition(':enter', [
-        style({opacity: 0, transform: 'translateY(-1rem)'}),
-        animate('150ms', style({opacity: 1, transform: 'translateY(0)'})),
-      ]),
-
-      // fade out when destroyed. this could also be written as transition('void => *')
-      transition(':leave', [
-        style({opacity: 1, transform: 'translateY(0)'}),
-        animate('150ms', style({opacity: 0, transform: 'translateY(-1rem)'}))
-      ])
-    ])
-  ]
+  animations: [ fade() ]
 })
 export class NewEntryComponent implements OnInit {
 

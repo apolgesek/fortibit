@@ -8,26 +8,31 @@
     <p-card class="sign-in">
       <div class="ui-g ui-fluid">
         <div class="ui-g-12">
-          <p class="file-path">File path: {{ filePath }}</p>
-          <div class="ui-inputgroup">
+          <p class="file-path" *ngIf="filePath">File path: {{ filePath }}</p>
+          <div class="ui-inputgroup" [ngClass]="{'ng-invalid': loginForm.get('password').invalid && loginForm.get('password').dirty}">
               <span class="ui-inputgroup-addon"><i class="pi pi-key" style="line-height: 1.25;"></i></span>
-              <input type="password" formControlName="password" pInputText placeholder="Password">   
+              <input type="password" formControlName="password" placeholder="Password">   
           </div>
-          <p-message
+          <div
             *ngIf="loginForm.get('password').invalid && loginForm.get('password').dirty"
-            severity="error"
-            text="Password is required">
-          </p-message>
-          <p-message
+            @fadeSlide
+            class="validation-error">
+            Password is required
+          </div>
+          <div
             *ngIf="isInvalid"
-            severity="error"
-            text="Password is invalid">
-          </p-message>
+            @fadeSlide
+            class="validation-error">
+            Password is invalid
+          </div>
         </div>
       </div>
       <p-footer>
-        <button pButton type="submit" label="OK" class="ui-button-success"></button>
+        <button type="submit" label="OK" class="primary-btn">
+          Enter
+        </button>
       </p-footer>
     </p-card>
   </form>
+  <div style="display: flex; justify-content: center; color: #ccc; margin-top: 1rem">v{{ version }}</div>
 </div>

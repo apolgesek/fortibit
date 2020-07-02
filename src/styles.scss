@@ -8,6 +8,10 @@ html, body {
   background-color: #fff;
 }
 
+input, textarea {
+  font-family: "Open Sans", Verdana, Geneva, Tahoma, sans-serif;
+}
+
 body .ui-toast .ui-toast-message.ui-toast-message-success {
   color: #fff;
   background-color: #47A69F;
@@ -146,6 +150,29 @@ body .ui-dialog .ui-dialog-titlebar {
       0px 4px 5px 0px rgba(0, 0, 0, 0.14),
       0px 1px 10px 0px rgba(0,0,0,.12) !important;
   }
+  &:disabled {
+    background-color: #ccc;
+    &:hover {
+      box-shadow: none !important;
+    }
+  }
+}
+
+.text-btn {
+  font-weight: bold;
+  color: #47A69F;
+  margin: 0 0.5rem;
+  padding: 0.5rem;
+  border: 0;
+  font-size: .9rem;
+  border-radius: 4px;
+  transition: background-color 150ms;
+  letter-spacing: 1px;
+  background-color: #fff;
+  cursor: pointer;
+  &:hover {
+      background-color: rgb(245, 245, 245);
+  }
 }
 
 .header {
@@ -155,4 +182,41 @@ body .ui-dialog .ui-dialog-titlebar {
   font-weight: 700;
   color: #444;
   font-size: 0.9rem;
+}
+
+.ui-inputgroup {
+  border: 1px solid #a6a6a6;
+  border-radius: 4px;
+
+  input, textarea {
+      width: 100%;
+      font-size: 0.9rem;
+      color: #444;
+      border: 0;
+      border-radius: 4px;
+  }
+
+  input {
+      padding: 0 0.5rem;
+  }
+
+  textarea {
+      padding: 0.5rem 0.5rem 0;
+      resize: none;
+      outline: none;
+  }
+
+  .ui-inputgroup-addon {
+      border: 0 !important;
+      background-color: unset !important;
+  }
+
+  &.ng-invalid {
+      border: 1px solid #a80000;
+  }
+}
+
+.validation-error {
+  color: #a80000;
+  margin: 0.5rem 0 0;
 }

@@ -20,11 +20,11 @@ export class OpenTypeGuard implements CanActivate {
   ): Promise<boolean> {
     return this.electronService.ipcRenderer.invoke('appOpenType').then((result) => {
         if (result) {
-            this.passwordService.filePath = result;
-            this.router.navigateByUrl('/home');
-            return Promise.resolve(false);
+          this.passwordService.file = result;
+          this.router.navigateByUrl('/home');
+          return Promise.resolve(false);
         } else {
-            return Promise.resolve(true);
+          return Promise.resolve(true);
         }
     });
   }

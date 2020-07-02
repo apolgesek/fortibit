@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain, dialog, clipboard, SaveDialogReturnValue, shell } from 'electron';
+const version = require('./package.json').version as string;
 
 import * as path from 'path';
 import * as url from 'url';
@@ -10,7 +11,7 @@ const args = process.argv.slice(1),
     serve = args.some(val => val === '--serve');
 
 let clearClipboardTimeout: NodeJS.Timeout;
-let file: string;
+let file: { filePath: string, filename: string};
 let currentPassword: string;
 let wasAppLoaded: boolean;
 
@@ -42,6 +43,11 @@ function createWindow(): BrowserWindow {
       protocol: 'file:',
       slashes: true
     }));
+  }
+
+  //windows open by file
+  if (process.platform === 'win32' && process.argv.length >= 2) {
+    file = { filePath: process.argv[1], filename: path.basename(process.argv[1]) };
   }
 
   if (serve) {
@@ -79,14 +85,13 @@ try {
     }
   });
 
-  // mac os open by file
-  // TODO: support windows - process.argv
+  // macOS open by file
   app.on('open-file', (_, filePath) => {
-    file = filePath;
+    file = { filePath, filename: path.basename(filePath) };
   });
 
   ipcMain.on('saveFile', async (_, { passwordList, newPassword }) => {
-    let savePath: SaveDialogReturnValue = { filePath: file, canceled: false };
+    let savePath: SaveDialogReturnValue = { filePath: file.filePath, canceled: false };
     let output;
     const stringData = JSON.stringify(passwordList, (k ,v) => (k === 'parent' ? undefined : v));
     if (!file) {
@@ -98,7 +103,7 @@ try {
     const finalFilePath = savePath.filePath.endsWith(ext) ? savePath.filePath : savePath.filePath + ext;
 
     fs.writeFile(finalFilePath, output, () => {});
-    file = finalFilePath;
+    file = { filePath: finalFilePath, filename: path.basename(finalFilePath) };
   });
 
   ipcMain.on('copyToClipboard', (_, value: string) => {
@@ -113,12 +118,12 @@ try {
     if (!filePath.endsWith(ext)) {
       return;
     }
-    file = filePath;
+    file = { filePath: filePath, filename: path.basename(filePath) };
     win.webContents.send('providePassword', file);
   });
 
   ipcMain.on('authAttempt', (_, password) => {
-    fs.readFile(file, (_, data) => {
+    fs.readFile(file.filePath, (_, data) => {
       try {
         const decrypted = EncryptionProvider.decryptString(data.toString(), password);
         currentPassword = password;
@@ -137,6 +142,10 @@ try {
     return file;
   });
 
+  ipcMain.on('appVersion', () => {
+    win.webContents.send('appVersion', version);
+  });
+
   ipcMain.on('openUrl', (_, url: string) => {
     shell.openExternal(url.includes('http') ? '': 'http://' + url);
   });
@@ -152,8 +161,8 @@ try {
 
   app.setAboutPanelOptions({
     applicationName: "Haslock", 
-    applicationVersion: "0.0.1",
-    version: "0.0.1",
+    applicationVersion: version,
+    version: version,
     copyright: "Copyright © 2020 by Arkadiusz Półgęsek",
     authors: ["Arkadiusz Półgęsek"],
   });

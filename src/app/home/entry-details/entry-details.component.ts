@@ -20,7 +20,7 @@ export class EntryDetailsComponent {
 
   get database(): any {
     return {
-      name: this.passwordStore.filePath ? this.passwordStore.filePath.split("/").slice(-1)[0] : '*New db'
+      name: this.passwordStore.file?.filename ?? '*New db'
     };
   }
 
