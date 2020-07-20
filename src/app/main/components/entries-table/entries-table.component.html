@@ -1,0 +1,113 @@
+<div class="sidebar">
+    <div class="header">{{ filePath }}</div>
+    <p-tree
+        [value]="files"
+        selectionMode="single"
+        [(selection)]="selectedCategory"
+        (onNodeSelect)="filterCategory($event)"
+        (onNodeCollapse)="collapseCategory($event)"
+        (onNodeContextMenuSelect)="setContextMenuCategory($event)"
+        [draggableNodes]="true"
+        [droppableNodes]="true"
+        [contextMenu]="groupCm">
+        <ng-template let-node pTemplate="default">
+            <input
+                *ngIf="isRenameModeOn && node === contextSelectedCategory; else readOnly"
+                [(ngModel)]="node.label"
+                (blur)="setRenameModeOff()"
+                type="text"
+                appBlurEnter
+                class="group-name-input"
+                maxlength="20">
+            <ng-template #readOnly>
+                <div appDroppable>
+                    {{ node.label }}
+                    <input type="hidden" class="node-id" [value]="node.key">
+                </div>
+            </ng-template>
+        </ng-template>
+    </p-tree>
+    <div style="display: flex; margin: auto; margin-bottom: 1rem; justify-content: center; align-items: center; font-size: 0.9rem;">
+        <a
+            href="#"
+            class="outline-btn"
+            (click)="addGroup(); false">
+            Add group
+        </a>
+    </div>
+    <div class="selected-entries">Selected {{ selectedRow.length }} of {{ selectedCategory.data.length }}</div>
+</div>
+<div class="password-table" appStickyHeader>
+    <div class="table-body">
+        <p-table
+            [value]="passwordList$ | async"
+            [rowTrackBy]="trackByFn"
+            [contextMenu]="entryCm"
+            (onContextMenuSelect)="selectRowContext($event.data)">
+            <ng-template pTemplate="header">
+                <div id="sticky-header">
+                    <div style="font-weight: bold; color: #444">Title</div>
+                    <div style="font-weight: bold; color: #444">Username</div>
+                    <div style="font-weight: bold; color: #444">Password</div>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="body"
+                let-rowData
+                let-rowIndex="rowIndex">
+                <tr *ngIf="rowData.isCatalog; else regularTemplate">
+                    <td colspan="3">
+                        <div style="display: flex; align-items: center;">
+                            <span class="pi pi-folder" style="margin-right: 0.5rem; color: #777"></span> {{ rowData.name }}
+                        </div>
+                    </td>
+                </tr>
+                <ng-template #regularTemplate>
+                    <tr
+                        pDraggable
+                        [pContextMenuRow]="rowData"
+                        [pContextMenuRowIndex]="rowIndex"
+                        (onDragStart)="handleDragStart($event, rowData)"
+                        (onDragEnd)="handleDragEnd($event)"
+                        (click)="selectRow($event, rowData)"
+                        class="row-entry"
+                        [ngClass]="{'ui-state-highlight': isRowSelected(rowData), 'is-dragging': isRowDragged(rowData)}">
+                        <td
+                            [appTextEmphasize]="searchPhrase$ | async"
+                            (dblclick)="copyToClipboard(rowData, rowData.title)"
+                            class="long-text">
+                            {{rowData.title}}
+                        </td>
+                        <td
+                            [appTextEmphasize]="searchPhrase$ | async"
+                            (dblclick)="copyToClipboard(rowData, rowData.username)"
+                            class="long-text">
+                            {{rowData.username}}
+                        </td>
+                        <td (dblclick)="copyToClipboard(rowData, rowData.value)">******</td>
+                    </tr>
+                </ng-template>
+            </ng-template>
+        </p-table>
+        <div *ngIf="!(passwordList$ | async)?.length" class="list-cta">
+            Nothing in here,<br /> try to <strong>add</strong> a new entry
+        </div>
+    </div>
+</div>
+
+<app-entry-details></app-entry-details>
+
+<app-pop-ups></app-pop-ups>
+
+<p-contextMenu
+    #groupCm
+    [model]="selectedGroupLabel === 'Database' ? undefined : groupContextMenuItems"
+    appendTo="body"
+    styleClass="groupContextmenu">
+</p-contextMenu>
+
+<p-contextMenu
+    #entryCm
+    [model]="selectedRow.length === 1 ? entryMenuItems : multiEntryMenuItems"
+    appendTo="body"
+    styleClass="entry-contextmenu">
+</p-contextMenu>

@@ -134,10 +134,11 @@ body .ui-dialog .ui-dialog-titlebar {
 }
 
 .primary-btn {
+  font-family: "Open Sans";
   border: 0;
   padding: 0.5rem 1rem;
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #fff;
   background: #47A69F;
   width: auto;
@@ -146,9 +147,7 @@ body .ui-dialog .ui-dialog-titlebar {
   cursor: pointer;
   &:hover {
       background-color: #409b95;
-      box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
-      0px 4px 5px 0px rgba(0, 0, 0, 0.14),
-      0px 1px 10px 0px rgba(0,0,0,.12) !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
   }
   &:disabled {
     background-color: #ccc;
@@ -159,7 +158,7 @@ body .ui-dialog .ui-dialog-titlebar {
 }
 
 .text-btn {
-  font-weight: bold;
+  font-family: "Open Sans";
   color: #47A69F;
   margin: 0 0.5rem;
   padding: 0.5rem;

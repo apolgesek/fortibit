@@ -4,7 +4,7 @@ const version = require('./package.json').version as string;
 import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
-import { EncryptionProvider } from './encryption/encryption-provider';
+import { Encryptor } from './encryption/encryptor';
 
 let win: BrowserWindow = null;
 const args = process.argv.slice(1),
@@ -96,9 +96,9 @@ try {
     const stringData = JSON.stringify(passwordList, (k ,v) => (k === 'parent' ? undefined : v));
     if (!file) {
       savePath = await dialog.showSaveDialog(win, {});
-      output = EncryptionProvider.encryptString(stringData, newPassword);
+      output = Encryptor.encryptString(stringData, newPassword);
     } else {
-      output = EncryptionProvider.encryptString(stringData, currentPassword);
+      output = Encryptor.encryptString(stringData, currentPassword);
     }
     const finalFilePath = savePath.filePath.endsWith(ext) ? savePath.filePath : savePath.filePath + ext;
 
@@ -125,7 +125,7 @@ try {
   ipcMain.on('authAttempt', (_, password) => {
     fs.readFile(file.filePath, (_, data) => {
       try {
-        const decrypted = EncryptionProvider.decryptString(data.toString(), password);
+        const decrypted = Encryptor.decryptString(data.toString(), password);
         currentPassword = password;
         win.webContents.send('onContentDecrypt', {decrypted, file});
       } catch (e) {

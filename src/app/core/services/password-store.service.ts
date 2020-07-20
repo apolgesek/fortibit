@@ -8,8 +8,8 @@ import { TreeNode, ConfirmationService } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AppConfig } from 'environments/environment';
 import { PasswordEntry } from '../models/password-entry.model';
-import { NewEntryComponent } from '@app/home/new-entry/new-entry.component';
-import { markDirty } from './mark-dirty.decorator';
+import { EntryFormComponent } from '@app/main/components/entry-form/entry-form.component';
+import { markDirty } from '../decorators/mark-dirty.decorator';
 
 @Injectable({
   providedIn: 'root'
@@ -211,7 +211,7 @@ export class PasswordStoreService {
     if (this.isDialogOpened) {
       return;
     }
-    this.dialogRef = this.dialogService.open(NewEntryComponent, {width: '70%', header: 'Edit entry', data: this.selectedPasswords[0]});
+    this.dialogRef = this.dialogService.open(EntryFormComponent, {width: '70%', header: 'Edit entry', data: this.selectedPasswords[0]});
     this.initDialogOpen();
   }
 
@@ -219,7 +219,7 @@ export class PasswordStoreService {
     if (this.isDialogOpened) {
       return;
     }
-    this.dialogRef = this.dialogService.open(NewEntryComponent, {width: '70%', header: 'Add new entry'});
+    this.dialogRef = this.dialogService.open(EntryFormComponent, {width: '70%', header: 'Add new entry'});
     this.initDialogOpen();
   }
 

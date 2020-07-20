@@ -1,0 +1,114 @@
+:host ::ng-deep{
+    .main-nav .ui-button-text-icon-left .ui-button-icon-left {
+        margin-top: -.5rem;
+        color: #444;
+        top: 0.65em;
+    }
+
+    .ui-button-secondary {
+        font-family: "Open Sans";
+        font-size: 0.9rem;
+        display: flex;
+        height: 2.5em;
+        transition: all 150ms ease-in-out;
+
+        .ui-button-text {
+            padding-left: 2.5em !important;
+        }
+    
+        .ui-button-icon-left {
+            left: .3em;
+            font-size: 1.6em;
+        }
+
+        &:enabled:hover {
+            background-color: #fff !important;
+            border-color: #fff !important;
+            box-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.2),
+            0px 2px 3px 0px rgba(0, 0, 0, 0.14),
+            0px 1px 5px 0px rgba(0,0,0,.12) !important;
+        }
+    }
+
+    .add-entry {
+        margin-right: 1.5rem;
+        transition: 150ms box-shadow;
+        background-color: #fff !important;
+        color: #1b81d7;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        border: 0;
+        &:hover {
+            color: #1b81d7 !important;
+            background-color: #fff !important;
+            box-shadow: 0px 1px 4px -1px rgba(0, 0, 0, 0.2),
+                0px 2px 5px 0px rgba(0, 0, 0, 0.14),
+                0px 1px 8px 0px rgba(0,0,0,.12) !important;
+        }
+
+        &.ui-button-icon-only {
+            width: 2.5rem;
+        }
+
+        .ui-button-icon-left {
+            font-size: 1.8em;
+            margin-top: -0.45em;
+        }
+    }
+
+    .edit-entry {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+    }
+
+    .remove-entry {
+        margin-right: 2rem;
+    }
+}
+
+.main-nav {
+    width: 100%;
+    height: 5rem;
+    background:#1b81d7;
+    display: flex;
+    position: relative;
+    z-index: 3;
+    -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+    -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+
+    .brand {
+        margin: 0;
+        color: #fff;
+        margin-left: 1rem;
+        display: flex;
+        align-items: center;
+        font-size: 1.8rem;
+        font-weight: 400;
+        .brand-logo {
+            height: 1.8rem;
+            margin-right: 0.4rem;
+        }
+    }
+
+    .menu-panel {
+        flex: 1;
+        text-align: left;
+        margin-left: 5.25rem;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    .search {   
+        border: none;
+        height: 2.5em;
+        padding: 0.7em;
+        &:focus {
+            box-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.2),
+            0px 2px 3px 0px rgba(0, 0, 0, 0.14),
+            0px 1px 5px 0px rgba(0,0,0,.12) !important;
+        }
+    }
+}

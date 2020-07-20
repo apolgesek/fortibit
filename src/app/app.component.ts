@@ -5,15 +5,23 @@ import { AppConfig } from '../environments/environment';
 import { Router } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { PasswordStoreService } from './core/services/password-store.service';
-import { HotkeyService } from './core/services/hotkey.service';
-import { ConfirmationService, Confirmation } from 'primeng/api';
+import { HotkeyService } from './core/services/hotkey/hotkey.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements AfterViewInit {
+
+  private cssSelectors = [
+    '.row-entry',
+    '.menu-panel *',
+    '.ui-dialog',
+    '.entry-contextmenu',
+    '.ui-toast',
+    '.details-container'
+  ];
+
   constructor(
     public electronService: ElectronService,
     private translate: TranslateService,
@@ -21,7 +29,6 @@ export class AppComponent implements AfterViewInit {
     private zone: NgZone,
     private passwordService: PasswordStoreService,
     private hotkeyService: HotkeyService,
-    private confirmationService: ConfirmationService,
   ) {
     translate.setDefaultLang('en');
     console.log('AppConfig', AppConfig);
@@ -52,6 +59,7 @@ export class AppComponent implements AfterViewInit {
       ev.preventDefault();
     }
 
+    // handle file drop on app window
     document.body.ondrop = (ev) => {
       if (ev.dataTransfer.files.length) {
         this.electronService.ipcRenderer.send('onFileDrop', ev.dataTransfer.files[0].path);
@@ -60,17 +68,8 @@ export class AppComponent implements AfterViewInit {
     }
 
     // test for elements that should not trigger entries deselection
-    // entry row itself, menu buttons and dialog body
     document.addEventListener("click", (event: MouseEvent) => {
-      if (
-        !(<Element>event.srcElement).closest('.row-entry')
-        && !(<Element>event.srcElement).closest('.menu-panel *')
-        && !(<Element>event.srcElement).closest('.ui-dialog')
-        && !(<Element>event.srcElement).closest('.entry-contextmenu')
-        && !(<Element>event.srcElement).classList.contains('ui-clickable')
-        && !(<Element>event.srcElement).closest('.ui-toast')
-        && !(<Element>event.srcElement).closest('.details-container')
-      ) {
+      if (this.isOutsideClick(event)) {
         this.passwordService.selectedPasswords = [];
       }
     });
@@ -81,15 +80,24 @@ export class AppComponent implements AfterViewInit {
       });
     })
 
+    // confirm unsaved database
     if (AppConfig.environment !== 'LOCAL') {
-      window.onbeforeunload = (e) => {
+      window.onbeforeunload = (event) => {
         if (this.passwordService.dateSaved) {
           return;
         }
         this.electronService.ipcRenderer.send('onCloseAttempt');
-        e.returnValue = false;
+        event.returnValue = false;
       }
     }
   }
 
+  private isOutsideClick(event: MouseEvent) {
+    return this.cssSelectors.every(s => !this.isElementOutside(s))
+    && !(<Element>event.srcElement).classList.contains('ui-clickable')
+  }
+
+  private isElementOutside(selector: string) {
+    return !(<Element>event.srcElement).closest(selector);
+  }
 }
