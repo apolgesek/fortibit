@@ -1,9 +1,9 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
-import { PasswordStoreService } from '../../../core/services/password-store.service';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
+import { PasswordStoreService } from '@app/core/services/password-store.service';
 import { fromEvent, Subject } from 'rxjs';
-import { distinctUntilChanged, debounceTime, takeUntil } from 'rxjs/operators';
-const logoURL = require('../../../../assets/images/lock.svg');
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+const logoURL = require('assets/images/lock.svg');
 
 @Component({
   selector: 'app-dashboard',
@@ -17,23 +17,23 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private destroyed$ = new Subject<void>();
 
-  get isDateSaved(): boolean {
+  get isDatabaseDirty(): boolean {
     return !!this.passwordStore.dateSaved;
   }
 
-  get isAnyPassword(): boolean {
+  get isAnyEntry(): boolean {
     return this.selectedCategoryData?.length > 0;
   }
 
-  get isOneRowSelected(): boolean {
+  get isOneEntrySelected(): boolean {
     return this.passwordStore.selectedPasswords.length === 1;
   }
 
-  get isAnyRowSelected(): boolean {
+  get isAnyEntrySelected(): boolean {
     return this.passwordStore.selectedPasswords.length > 0;
   }
 
-  get selectedRowsCount(): number {
+  get selectedPasswordsCount(): number {
     return this.passwordStore.selectedPasswords.length;
   }
 
@@ -52,8 +52,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       distinctUntilChanged(),
       debounceTime(500),
       takeUntil(this.destroyed$)
-    ).subscribe(() => {
-      this.passwordStore.filterEntries(this.search.nativeElement.value);
+    ).subscribe((event: KeyboardEvent) => {
+      this.passwordStore.filterEntries((event.target as HTMLInputElement).value);
     });
   }
 

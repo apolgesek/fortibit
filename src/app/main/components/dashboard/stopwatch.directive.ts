@@ -7,7 +7,7 @@ import { MessageService } from 'primeng/api';
 export class StopwatchDirective implements OnInit, AfterViewInit {
 
   @Input('appStopwatch') seconds: number; 
-  public remainingTime: number;
+  public secondsLeft: number;
   
   private interval: NodeJS.Timeout;
 
@@ -17,7 +17,7 @@ export class StopwatchDirective implements OnInit, AfterViewInit {
     ) { }
 
   ngOnInit(): void {
-    this.remainingTime = this.seconds;
+    this.secondsLeft = this.seconds;
   }
 
   ngAfterViewInit() {
@@ -32,12 +32,12 @@ export class StopwatchDirective implements OnInit, AfterViewInit {
   }
 
   private updateCountdown() {
-    if (this.remainingTime <= 0) {
+    if (this.secondsLeft <= 0) {
       clearInterval(this.interval);
       this.toastService.clear();
     }
-    this.element.nativeElement.innerHTML = `${this.remainingTime / 1000}`;
-    this.remainingTime += -1000;
+    this.element.nativeElement.innerHTML = `${this.secondsLeft / 1000}`;
+    this.secondsLeft += -1000;
   }
 
 }

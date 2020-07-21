@@ -1,12 +1,11 @@
-import { Component, OnInit, NgZone, OnDestroy, ViewChild } from '@angular/core';
-import { ElectronService } from '../../../core/services';
-import { PasswordStoreService } from '../../../core/services/password-store.service';
-import { MessageService, TreeNode } from 'primeng/api';
-import { Observable } from 'rxjs';
-import { MenuItem } from 'primeng/api';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
-import { ContextMenu } from 'primeng/contextmenu';
+import { ElectronService } from '@app/core/services';
 import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
+import { PasswordStoreService } from '@app/core/services/password-store.service';
+import { MenuItem, MessageService, TreeNode } from 'primeng/api';
+import { ContextMenu } from 'primeng/contextmenu';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-entries-table',
@@ -16,14 +15,15 @@ import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
 export class EntriesTableComponent implements OnInit, OnDestroy {
   public passwordList$: Observable<PasswordEntry[]>;
   public searchPhrase$: Observable<string>;
+
   public groupContextMenuItems: MenuItem[];
   public databaseItems: MenuItem[];
   public entryMenuItems: MenuItem[];
   public multiEntryMenuItems: MenuItem[];
 
-  @ViewChild('groupCm') groupContextMenu: ContextMenu;
+  @ViewChild('groupContextMenu') groupContextMenu: ContextMenu;
 
-  get selectedRow(): any[] {
+  get selectedEntries(): any[] {
     return this.passwordStore.selectedPasswords;
   }
 
@@ -62,11 +62,11 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   };
 
   constructor(
+    private zone: NgZone,
     private electronService: ElectronService,
     private passwordStore: PasswordStoreService,
     private toastService: MessageService,
-    private hotkeyService: HotkeyService,
-    private zone: NgZone,
+    private hotkeyService: HotkeyService
   ) { 
     this.passwordList$ = this.passwordStore.filteredList$;
     this.searchPhrase$ = this.passwordStore.searchPhrase$;
@@ -245,8 +245,8 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   }
 
   handleDragStart(event: DragEvent, rowData: PasswordEntry) {
-    if (this.selectedRow.length > 0) {
-      this.passwordStore.draggedEntry = this.selectedRow;
+    if (this.selectedEntries.length > 0) {
+      this.passwordStore.draggedEntry = this.selectedEntries;
     } else {
       this.passwordStore.draggedEntry = [rowData];
     }
@@ -269,7 +269,7 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'none');
   }
 
-  handleDragEnd(event: DragEvent) {
+  handleDragEnd() {
     if (process.platform === 'darwin') {
       let ghost = document.getElementById("drag-ghost");
       ghost.parentNode.removeChild(ghost);

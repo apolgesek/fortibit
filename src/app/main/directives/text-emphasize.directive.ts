@@ -17,17 +17,17 @@ export class TextEmphasizeDirective {
   private checkChanges() {
     requestAnimationFrame(() => {
       const elementTextContent = this.element.nativeElement as HTMLElement;
-      let newContent: string = elementTextContent.innerHTML
+      let htmlContent = elementTextContent.innerHTML
         .replace(new RegExp('<strong>', 'g'), '')
         .replace(new RegExp('</strong>', 'g'), '');
 
       if (this._searchPhrase.length === 0 || !elementTextContent.textContent.includes(this._searchPhrase)) {
-        elementTextContent.innerHTML = newContent;
+        elementTextContent.innerHTML = htmlContent;
         return;
       }
 
-      newContent = newContent.replace(new RegExp(this._searchPhrase, 'g'), `<strong>${this._searchPhrase}</strong>`);
-      elementTextContent.innerHTML = newContent;
+      htmlContent = htmlContent.replace(new RegExp(this._searchPhrase, 'g'), `<strong>${this._searchPhrase}</strong>`);
+      elementTextContent.innerHTML = htmlContent;
     });
   }
 

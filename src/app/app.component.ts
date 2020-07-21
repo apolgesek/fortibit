@@ -1,11 +1,11 @@
-import { Component, AfterViewInit, NgZone } from '@angular/core';
-import { ElectronService } from './core/services';
-import { TranslateService } from '@ngx-translate/core';
-import { AppConfig } from '../environments/environment';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { fromEvent } from 'rxjs';
-import { PasswordStoreService } from './core/services/password-store.service';
+import { AppConfig } from '../environments/environment';
+import { ElectronService } from './core/services';
 import { HotkeyService } from './core/services/hotkey/hotkey.service';
+import { PasswordStoreService } from './core/services/password-store.service';
 
 @Component({
   selector: 'app-root',
@@ -93,7 +93,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   private isOutsideClick(event: MouseEvent) {
-    return this.cssSelectors.every(s => !this.isElementOutside(s))
+    return this.cssSelectors.every(s => this.isElementOutside(s))
     && !(<Element>event.srcElement).classList.contains('ui-clickable')
   }
 

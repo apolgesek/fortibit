@@ -4,6 +4,7 @@ import { PasswordStoreService } from '@app/core/services/password-store.service'
 @Directive({
   selector: '[appDroppable]'
 })
+// detect entry/ies drag and drop on groups
 export class DroppableDirective {
 
 	private el: HTMLElement;

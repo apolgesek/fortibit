@@ -10,7 +10,6 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
 
   private readonly className = 'scrolled';
   private readonly destroyed$ = new Subject<void>();
-
   private observer: IntersectionObserver;
   private observedElement: HTMLElement;
 
@@ -20,7 +19,7 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
   ) { }
 
   ngAfterViewInit() {
-    let options: IntersectionObserverInit = {
+    const options: IntersectionObserverInit = {
       root: this.elementRef.nativeElement,
       threshold: 1
     };
@@ -46,7 +45,6 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
     if (this.observer) {
       this.observer.unobserve(this.observedElement);
     }
-
     this.destroyed$.next();
     this.destroyed$.complete();
   }
@@ -65,10 +63,10 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
     ).subscribe(() => {
       requestAnimationFrame(() => {
         this.getTableHeaderClasses().remove(this.className);
+
         if (this.observedElement) {
           this.observer.unobserve(this.observedElement);
         }
-
         this.observedElement = this.getFirstRow();
 
         if (this.observedElement) {

@@ -30,7 +30,9 @@ $sidePanelOutDuration: 250ms;
                         }
                         
                         div {
-                            width: 33.333333%;
+                            font-weight: bold;
+                            color: #444;
+                            width: calc(100% / 3);
                             text-align: center;
                             &:first-child {
                                 border-left: 0;
@@ -120,6 +122,11 @@ $sidePanelOutDuration: 250ms;
             height: calc(100% - 8rem);
             border: none;
             padding: 0 0 0.571em 1em;
+
+            .ui-tree-wrapper {
+                height: 100%;
+            }
+
             .ui-tree-container {
                 padding-top: 0.4rem;
                 position: relative;
@@ -208,4 +215,13 @@ text-align: center;
 .header {
     margin-left: 0.25rem;
     padding: 0.45 0rem;
+}
+
+.add-group {
+    display: flex;
+    margin: auto;
+    margin-bottom: 1rem;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
 }

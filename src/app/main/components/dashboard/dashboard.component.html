@@ -1,46 +1,53 @@
 <nav class="main-nav">
-    <h2 class="brand"><img [src]="logoURL" class="brand-logo"> haslock</h2>
-    <div class="menu-panel">
-        <button
-            pButton
-            type="button"
-            class="add-entry"
-            icon="pi pi-plus"
-            iconPos="left"
-            (click)="openAddEntryWindow()">
-        </button>
-        <button
-            pButton
-            type="button"
-            label="Save DB"
-            icon="pi pi-save"
-            class="ui-button-secondary save-db"
-            iconPos="left"
-            [disabled]="isDateSaved"
-            (click)="trySaveDatabase()">
-        </button>
-        <button
-            pButton
-            type="button"
-            label="Edit"
-            icon="pi pi-pencil"
-            class="ui-button-secondary edit-entry"
-            iconPos="left"
-            [disabled]="!isAnyPassword || !isOneRowSelected"
-            (click)="openEditEntryWindow()">
-        </button>
-        <button
-            pButton
-            type="button"
-            label="Remove"
-            icon="pi pi-trash"
-            class="ui-button-secondary remove-entry"
-            iconPos="left"
-            [disabled]="!isAnyPassword || !isAnyRowSelected"
-            (click)="openDeleteEntryWindow()">
-        </button>
-        <input type="text" class="search" #search pInputText placeholder="Search database" />
-    </div>
+	<h2 class="brand">
+		<img [src]="logoURL" class="brand-logo"> haslock
+	</h2>
+	<div class="menu-panel">
+		<button
+			pButton
+			type="button"
+			icon="pi pi-plus"
+			iconPos="left"
+			class="add-entry"
+			(click)="openAddEntryWindow()">
+		</button>
+		<button
+			pButton
+			type="button"
+			label="Save DB"
+			icon="pi pi-save"
+			iconPos="left"
+			[disabled]="isDatabaseDirty"
+			class="ui-button-secondary save-db"
+			(click)="trySaveDatabase()">
+		</button>
+		<button
+			pButton
+			type="button"
+			label="Edit"
+			icon="pi pi-pencil"
+			iconPos="left"
+			[disabled]="!(isAnyEntry && isOneEntrySelected)"
+			class="ui-button-secondary edit-entry"
+			(click)="openEditEntryWindow()">
+		</button>
+		<button
+			pButton
+			type="button"
+			label="Remove"
+			icon="pi pi-trash"
+			iconPos="left"
+			[disabled]="!(isAnyEntry && isAnyEntrySelected)"
+			class="ui-button-secondary remove-entry"
+			(click)="openDeleteEntryWindow()">
+		</button>
+		<input
+			#search
+			type="text"
+			class="search"
+			pInputText
+			placeholder="Search database" />
+	</div>
 </nav>
 
 <router-outlet></router-outlet>
