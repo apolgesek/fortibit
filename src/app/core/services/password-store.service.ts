@@ -1,22 +1,22 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
-import { v4 as uuidv4 } from 'uuid';
-import { ElectronService } from './electron/electron.service';
-import { map, shareReplay } from 'rxjs/operators';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
-import { TreeNode, ConfirmationService } from 'primeng/api';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { AppConfig } from 'environments/environment';
-import { PasswordEntry } from '../models/password-entry.model';
 import { EntryFormComponent } from '@app/main/components/entry-form/entry-form.component';
+import { AppConfig } from 'environments/environment';
+import { MessageService, TreeNode } from 'primeng/api';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 import { markDirty } from '../decorators/mark-dirty.decorator';
+import { PasswordEntry } from '../models/password-entry.model';
+import { ElectronService } from './electron/electron.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PasswordStoreService {
 
-  public filteredList$: Observable<PasswordEntry[]>;
+  public entries$: Observable<PasswordEntry[]>;
   public dateSaved: Date;
   public selectedPasswords: PasswordEntry[] = [];
   public draggedEntry: PasswordEntry[] = [];
@@ -32,7 +32,8 @@ export class PasswordStoreService {
   public isRemoveEntryDialogShown = false;
   public isConfirmExitDialogShown = false;
   public isConfirmGroupRemoveDialogShown = false;
-  public files: TreeNode[] = [{
+
+  public groups: TreeNode[] = [{
     key: uuidv4(),
     label: "Database",
     data: [],
@@ -54,20 +55,27 @@ export class PasswordStoreService {
       return `Are you sure you want delete this entry?`;
     }
   }
+
+  get databaseFileName(): string {
+    return this.file?.filename ?? '*New db';
+  }
   
   public searchPhrase$: Observable<string>;
   private _searchPhraseSource: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  private _outputPasswordListSource: BehaviorSubject<PasswordEntry[]> = new BehaviorSubject<PasswordEntry[]>([]);
+  private _passwordListSource: BehaviorSubject<PasswordEntry[]> = new BehaviorSubject<PasswordEntry[]>([]);
 
   constructor(
     private electronService: ElectronService,
     private router: Router,
     private zone: NgZone,
-    private confirmDialogService: ConfirmationService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private messageService: MessageService
   ) {
-    this.filteredList$ = combineLatest(this._outputPasswordListSource, this._searchPhraseSource).pipe(
-      map(([passwords, searchPhrase]) => this.matchEntries(passwords, searchPhrase)),
+    this.entries$ = combineLatest(
+      this._passwordListSource,
+      this._searchPhraseSource
+    ).pipe(
+      map(([ passwords, searchPhrase ]) => this.filterEntries(passwords, searchPhrase)),
       shareReplay()
     );
 
@@ -80,8 +88,8 @@ export class PasswordStoreService {
           this.isInvalidPassword = false;
           this.file = file;
           this.clearAll();
-          this.files = deserializedPasswords;
-          this.selectedCategory = this.files[0];
+          this.groups = deserializedPasswords;
+          this.selectedCategory = this.groups[0];
           this.setDateSaved();
           this.router.navigate(['/dashboard']);
         } catch (err) {
@@ -95,13 +103,13 @@ export class PasswordStoreService {
       this.loadTestData();
     }
 
-    this.selectedCategory = this.files[0];
+    this.selectedCategory = this.groups[0];
   }
 
   @markDirty()
   addEntry(entryModel: PasswordEntry) {
     if (entryModel.id) {
-      const catalogData = this.findRow(this.files[0], entryModel.id);
+      const catalogData = this.findRow(this.groups[0], entryModel.id);
       let entryIdx = catalogData.findIndex(p => p.id === entryModel.id);
       catalogData[entryIdx] = {...entryModel, id: uuidv4()};
       this.selectedPasswords = [catalogData[entryIdx]];
@@ -110,42 +118,42 @@ export class PasswordStoreService {
       this.resetSearch();
     }
 
-    this.notifyStream();
+    this.updateEntries();
   }
 
   @markDirty()
   deleteEntry() {
     if (this.selectedPasswords.length === 0) {
-      const catalogData = this.findRow(this.files[0], this.draggedEntry[0].id);
+      const catalogData = this.findRow(this.groups[0], this.draggedEntry[0].id);
       const idx = catalogData.findIndex(e => e.id === this.draggedEntry[0].id);
       catalogData.splice(idx, 1);
     } else {
       this.selectedPasswords.forEach(el => {
-        const catalogData = this.findRow(this.files[0], el.id);
+        const catalogData = this.findRow(this.groups[0], el.id);
         const idx = catalogData.findIndex(e => e.id === el.id);
         catalogData.splice(idx, 1);
       });
     }
     this.selectedPasswords = [];
-    this.notifyStream();
+    this.updateEntries();
   }
 
-  filterEntries(value: string) {
+  searchEntries(value: string) {
     this._searchPhraseSource.next(value);
   }
 
   @markDirty()
   clearAll() {
-    this.files = [];
+    this.groups = [];
   }
 
   saveDatabase(newPassword: string) {
-    this.electronService.ipcRenderer.send('saveFile', {passwordList: this.files, newPassword});
+    this.electronService.ipcRenderer.send('saveFile', {passwordList: this.groups, newPassword});
     this.setDateSaved();
   }
 
-  notifyStream() {
-    this._outputPasswordListSource.next(this.selectedCategory.data);
+  updateEntries() {
+    this._passwordListSource.next(this.selectedCategory.data);
   }
 
   resetSearch() {
@@ -156,7 +164,7 @@ export class PasswordStoreService {
   removeGroup() {
     let idx = this.selectedCategory.parent.children.findIndex(g => g.key === this.contextSelectedCategory.key);
     this.selectedCategory.parent.children.splice(idx, 1);
-    this.selectedCategory = this.files[0];
+    this.selectedCategory = this.groups[0];
   }
 
   @markDirty()
@@ -166,7 +174,7 @@ export class PasswordStoreService {
 
   @markDirty()
   addGroup() {
-    this.files[0].children.push(this.buildGroup("New group"));
+    this.groups[0].children.push(this.buildGroup("New group"));
   }
 
   @markDirty()
@@ -181,9 +189,9 @@ export class PasswordStoreService {
   moveEntry(targetGroup: string) {
     const copy = [...this.draggedEntry];
     this.deleteEntry();
-    const groupData = this.findRowGroup(this.files[0], targetGroup);
+    const groupData = this.findRowGroup(this.groups[0], targetGroup);
     groupData.push(...copy);
-    this.notifyStream();
+    this.updateEntries();
   }
 
   trySaveDatabase() {
@@ -228,8 +236,8 @@ export class PasswordStoreService {
     const groupData = (this.selectedCategory.data as PasswordEntry[]);
     this.selectedPasswords.sort((a, b) => groupData.findIndex(e => e.id === a.id) <= groupData.findIndex(e => e.id === b.id) ? -1 : 1)
 
-    const isEdge = this.selectedPasswords.find(p => p.id === groupData[0].id);
-    if (isEdge) {
+    const isFirst = this.selectedPasswords.find(p => p.id === groupData[0].id);
+    if (isFirst) {
       return;
     }
     this.selectedPasswords.forEach(element => {
@@ -243,8 +251,8 @@ export class PasswordStoreService {
     const groupData = (this.selectedCategory.data as PasswordEntry[]);
     this.selectedPasswords.sort((a, b) => groupData.findIndex(e => e.id === a.id) >= groupData.findIndex(e => e.id === b.id) ? -1 : 1)
 
-    const isEdge = this.selectedPasswords.find(p => p.id === groupData[groupData.length - 1].id);
-    if (isEdge) {
+    const isLast = this.selectedPasswords.find(p => p.id === groupData[groupData.length - 1].id);
+    if (isLast) {
       return;
     }
     this.selectedPasswords.forEach(element => {
@@ -278,6 +286,21 @@ export class PasswordStoreService {
     this.electronService.ipcRenderer.send('exit');
   }
 
+  copyToClipboard(entry: PasswordEntry, property: string) {
+    if (!property) {
+      return;
+    }
+    this.electronService.ipcRenderer.send('copyToClipboard', property);
+    entry.lastAccessDate = new Date();
+    this.messageService.clear();
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Copied to clipboard!',
+      life: 15000,
+      detail: 'clipboard'
+    });
+  }
+
   private swapElements<T>(array: T[], i1: number, i2: number) {
     let savedElement: T;
     savedElement = {...array[i1]};
@@ -292,12 +315,12 @@ export class PasswordStoreService {
     });
   }
 
-  private matchEntries(passwords: PasswordEntry[], phrase: string): PasswordEntry[] {
+  private filterEntries(passwords: PasswordEntry[], phrase: string): PasswordEntry[] {
     if (!phrase) {
       return passwords;
     }
     const tempData: PasswordEntry[] = [];
-    this.buildAllEntriesList(this.files[0], tempData, phrase);
+    this.buildAllEntriesList(this.groups[0], tempData, phrase);
     return tempData;
   }
 
@@ -308,7 +331,7 @@ export class PasswordStoreService {
       if (filteredNodes.length) {
         const path: string[] = [];
         this.buildPath(node, path);
-        output.push({ name: path.reverse().join('/'), isCatalog: true });
+        output.push({ name: path.reverse().join('/'), isGroup: true });
         output.push(...filteredNodes);
       }
     }
@@ -333,9 +356,9 @@ export class PasswordStoreService {
   private loadTestData() {
     const mocks = require('../mocks/MOCK_DATA.json');
     const shuffledMocks = mocks.sort(() => 0.5 - Math.random());
-    this.files[0].data = (shuffledMocks as any[]).splice(500, 20);
-    this.files[0].children.forEach((el, index) => {
-      el.data = (shuffledMocks as any[]).splice(index * 20, 20);
+    this.groups[0].data = (shuffledMocks as PasswordEntry[]).splice(500, 20);
+    this.groups[0].children.forEach((_, index) => {
+      this.groups[0].children[index].data = (shuffledMocks as PasswordEntry[]).splice(index * 20, 20);
     });
     this.setDateSaved();
   }

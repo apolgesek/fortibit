@@ -91,7 +91,7 @@ try {
   });
 
   ipcMain.on('saveFile', async (_, { passwordList, newPassword }) => {
-    let savePath: SaveDialogReturnValue = { filePath: file.filePath, canceled: false };
+    let savePath: SaveDialogReturnValue = { filePath: file?.filePath, canceled: false };
     let output;
     const stringData = JSON.stringify(passwordList, (k ,v) => (k === 'parent' ? undefined : v));
     if (!file) {

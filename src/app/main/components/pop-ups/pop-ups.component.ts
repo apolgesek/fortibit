@@ -1,15 +1,20 @@
 import { Component } from '@angular/core';
 import { PasswordStoreService } from '@app/core/services';
+import { fade } from '@app/shared/animations/fade-slide.animation';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-pop-ups',
   templateUrl: './pop-ups.component.html',
-  styleUrls: ['./pop-ups.component.scss']
+  styleUrls: ['./pop-ups.component.scss'],
+  animations: [
+    fade()
+  ]
 })
 export class PopUpsComponent {
-
-  public newPassword: string = '';
-  public newPasswordRepeat: string = '';
+  public masterPasswordForm: FormGroup;
+  public submitted: boolean;
+  public readonly minPasswordLength = 6;
 
   get isRemoveEntryDialogShown(): boolean {
     return this.passwordStore.isRemoveEntryDialogShown;
@@ -43,9 +48,20 @@ export class PopUpsComponent {
     this.passwordStore.isConfirmGroupRemoveDialogShown = value;
   }
 
+  get passwordsNotMatch(): boolean {
+    return this.masterPasswordForm.get('newPassword').value !== this.masterPasswordForm.get('newPasswordDuplicate').value
+      && this.submitted;
+  }
+
   constructor(
-    private passwordStore: PasswordStoreService
-  ) { }
+    private passwordStore: PasswordStoreService,
+    private fb: FormBuilder
+  ) { 
+    this.masterPasswordForm = this.fb.group({
+      newPassword: ['', Validators.required],
+      newPasswordDuplicate: ['', Validators.required]
+    });
+  }
 
   closeRemoveEntryDialog() {
     this.isRemoveEntryDialogShown = false;
@@ -74,11 +90,20 @@ export class PopUpsComponent {
   }
 
   saveNewDatabase() {
-    this.passwordStore.saveNewDatabase(this.newPassword);
+    this.submitted = true;
+    Object.values(this.masterPasswordForm.controls).forEach(control => {
+      control.markAsDirty();
+    });
+
+    if (this.passwordsNotMatch || this.masterPasswordForm.invalid) {
+      return;
+    }
+    this.passwordStore.saveNewDatabase(this.masterPasswordForm.get('newPassword').value);
   }
 
-  trySaveDatabase() {
-    this.passwordStore.trySaveDatabase();
+  resetNewPasswordForm() {
+    this.masterPasswordForm.reset();
+    this.submitted = undefined;
   }
 
 }

@@ -1,16 +1,27 @@
-<form #ngForm (ngSubmit)="addNewEntry()" [formGroup]="newEntryForm">
+<form
+    #ngForm
+    [formGroup]="newEntryForm"
+    (ngSubmit)="addNewEntry()">
     <div class="ui-g ui-fluid">
         <div class="ui-g-12">
             <div class="ui-inputgroup">
-                <span class="ui-inputgroup-addon"><i class="pi pi-bookmark" style="line-height: 1.25;"></i></span>
-                <input type="text" formControlName="title" placeholder="Title">         
+                <span class="ui-inputgroup-addon"><i class="pi pi-bookmark"></i></span>
+                <input
+                    type="text"
+                    formControlName="title"
+                    placeholder="Title">         
             </div>
         </div>
 
         <div class="ui-g-12">
-            <div class="ui-inputgroup" [ngClass]="{'ng-invalid': newEntryForm.get('username').invalid && newEntryForm.get('username').dirty}">
-                <span class="ui-inputgroup-addon"><i class="pi pi-user" style="line-height: 1.25;"></i></span>
-                <input type="text" formControlName="username" placeholder="Username">         
+            <div
+                class="ui-inputgroup"
+                [ngClass]="{'ng-invalid': newEntryForm.get('username').invalid && newEntryForm.get('username').dirty}">
+                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                <input
+                    type="text"
+                    formControlName="username"
+                    placeholder="Username">         
             </div>
             <div
                 *ngIf="newEntryForm.get('username').invalid && newEntryForm.get('username').dirty"
@@ -21,9 +32,14 @@
         </div>
         
         <div class="ui-g-12">
-            <div class="ui-inputgroup" [ngClass]="{'ng-invalid': newEntryForm.get('value').invalid && newEntryForm.get('value').dirty}">
-                <span class="ui-inputgroup-addon"><i class="pi pi-key" style="line-height: 1.25;"></i></span>
-                <input type="password" formControlName="value" placeholder="Password">   
+            <div
+                class="ui-inputgroup"
+                [ngClass]="{'ng-invalid': newEntryForm.get('value').invalid && newEntryForm.get('value').dirty}">
+                <span class="ui-inputgroup-addon"><i class="pi pi-key"></i></span>
+                <input
+                    type="password"
+                    formControlName="value"
+                    placeholder="Password">   
             </div>
             <div
                 *ngIf="newEntryForm.get('value').invalid && newEntryForm.get('value').dirty"
@@ -35,18 +51,27 @@
                 
         <div class="ui-g-12">
             <div class="ui-inputgroup">
-                <span class="ui-inputgroup-addon"><i class="pi pi-globe" style="line-height: 1.25;"></i></span>
-                <input type="text" formControlName="url" placeholder="Website">      
+                <span class="ui-inputgroup-addon"><i class="pi pi-globe"></i></span>
+                <input
+                    type="text"
+                    formControlName="url"
+                    placeholder="Website">      
             </div>
         </div>
 
         <div class="ui-g-12">
             <div class="ui-inputgroup">
-                <span class="ui-inputgroup-addon"><i class="pi pi-info" style="line-height: 1.25;"></i></span>
-                <textarea formControlName="notes" placeholder="Optional note" rows="5"></textarea>     
+                <span class="ui-inputgroup-addon"><i class="pi pi-info"></i></span>
+                <textarea
+                    formControlName="notes"
+                    placeholder="Optional note"
+                    rows="5">
+                </textarea>     
             </div>
         </div>
-        <button type="submit" class="primary-btn">
+        <button
+            type="submit"
+            class="primary-btn">
             Confirm
         </button>
     </div>

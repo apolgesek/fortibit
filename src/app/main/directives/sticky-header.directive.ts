@@ -58,7 +58,7 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
   }
 
   private reassignObservedOnPasswordListChange() {
-    this.passwordStoreService.filteredList$.pipe(
+    this.passwordStoreService.entries$.pipe(
       takeUntil(this.destroyed$)
     ).subscribe(() => {
       requestAnimationFrame(() => {

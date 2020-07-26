@@ -1,17 +1,31 @@
 <div class="brand">
   <h1 class="title">
-    <img [src]="logoURL" class="brand-logo"> Haslock
+    <img
+      [src]="logoURL"
+      class="brand-logo"> Haslock
   </h1>
 </div>
 <div class="container">
-  <form #ngForm [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()">
+  <form
+    #ngForm
+    [formGroup]="loginForm"
+    (ngSubmit)="onLoginSubmit()">
     <p-card class="sign-in">
       <div class="ui-g ui-fluid">
         <div class="ui-g-12">
-          <p *ngIf="filePath" class="file-path">File path: {{ filePath }}</p>
-          <div class="ui-inputgroup" [ngClass]="{'ng-invalid': passwordControl.invalid && passwordControl.dirty}">
+          <p
+            *ngIf="filePath"
+            class="file-path">
+            File path: {{ filePath }}
+          </p>
+          <div
+            class="ui-inputgroup"
+            [ngClass]="{'ng-invalid': passwordControl.invalid && passwordControl.dirty}">
               <span class="ui-inputgroup-addon"><i class="pi pi-key" style="line-height: 1.25;"></i></span>
-              <input type="password" formControlName="password" placeholder="Password">   
+              <input
+                type="password"
+                formControlName="password"
+                placeholder="Password">   
           </div>
           <div
             *ngIf="passwordControl.invalid && passwordControl.get('password').dirty"
@@ -28,7 +42,10 @@
         </div>
       </div>
       <p-footer>
-        <button type="submit" label="OK" class="primary-btn">
+        <button
+          type="submit"
+          label="OK"
+          class="primary-btn">
           Enter
         </button>
       </p-footer>

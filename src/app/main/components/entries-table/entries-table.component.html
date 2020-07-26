@@ -1,14 +1,14 @@
 <div class="sidebar">
 	<div class="header">
-		{{ filePath }}
+		{{ fileName }}
 	</div>
 	<p-tree
-		[value]="files"
+		[value]="groups"
 		selectionMode="single"
-		[(selection)]="selectedCategory"
-		(onNodeSelect)="filterCategory($event)"
-		(onNodeCollapse)="collapseCategory($event)"
-		(onNodeContextMenuSelect)="setContextMenuCategory($event)"
+		[(selection)]="selectedGroup"
+		(onNodeSelect)="selectGroup($event)"
+		(onNodeCollapse)="collapseGroup($event)"
+		(onNodeContextMenuSelect)="setContextMenuGroup($event)"
 		[draggableNodes]="true"
 		[droppableNodes]="true"
 		[contextMenu]="groupContextMenu">
@@ -16,9 +16,9 @@
 			let-node
 			pTemplate="default">
 			<input
-				*ngIf="isRenameModeOn && node === contextSelectedCategory; else readOnly"
+				*ngIf="isGroupRenameModeOn && node === contextSelectedCategory; else readOnly"
 				[(ngModel)]="node.label"
-				(blur)="setRenameModeOff()"
+				(blur)="setGroupRenameModeOff()"
 				type="text"
 				appBlurEnter
 				class="group-name-input"
@@ -43,7 +43,7 @@
 			</a>
     </div>
     <div class="selected-entries">
-			Selected {{ selectedEntries.length }} of {{ selectedCategory.data.length }}
+			Selected {{ selectedEntries.length }} of {{ selectedGroup.data.length }}
 		</div>
 </div>
 <div
@@ -52,9 +52,9 @@
 	<div class="table-body">
 		<p-table
 			[value]="passwordList$ | async"
-			[rowTrackBy]="trackByFn"
+			[rowTrackBy]="trackEntryById"
 			[contextMenu]="entryContextMenu"
-			(onContextMenuSelect)="selectRowContext($event.data)">
+			(onContextMenuSelect)="selectEntryContext($event)">
 			<ng-template pTemplate="header">
 				<div id="sticky-header">
 					<div>Title</div>
@@ -66,26 +66,24 @@
 				pTemplate="body"
 				let-rowData
 				let-rowIndex="rowIndex">
-				<tr *ngIf="rowData.isCatalog; else regularTemplate">
+				<tr *ngIf="rowData.isGroup; else entryTemplate">
 					<td colspan="3">
-						<div style="display: flex; align-items: center;">
-							<span
-								class="pi pi-folder"
-								style="margin-right: 0.5rem; color: #777">
+						<div class="group-separator">
+							<span class="pi pi-folder">
 							</span> {{ rowData.name }}
 						</div>
 					</td>
 				</tr>
-				<ng-template #regularTemplate>
+				<ng-template #entryTemplate>
 					<tr
 						pDraggable
 						[pContextMenuRow]="rowData"
 						[pContextMenuRowIndex]="rowIndex"
-						(onDragStart)="handleDragStart($event, rowData)"
-						(onDragEnd)="handleDragEnd($event)"
-						(click)="selectRow($event, rowData)"
+						(onDragStart)="onDragStart($event, rowData)"
+						(onDragEnd)="onDragEnd($event)"
+						(click)="selectEntry($event, rowData)"
 						class="row-entry"
-						[ngClass]="{'ui-state-highlight': isRowSelected(rowData), 'is-dragging': isRowDragged(rowData)}">
+						[ngClass]="{'ui-state-highlight': isEntrySelected(rowData), 'is-dragging': isEntryDragged(rowData)}">
 						<td
 							[appTextEmphasize]="searchPhrase$ | async"
 							(dblclick)="copyToClipboard(rowData, rowData.title)"
@@ -98,7 +96,9 @@
 							class="long-text">
 							{{ rowData.username }}
 						</td>
-						<td (dblclick)="copyToClipboard(rowData, rowData.value)">******</td>
+						<td (dblclick)="copyToClipboard(rowData, rowData.value)">
+							******
+						</td>
 					</tr>
 				</ng-template>
 			</ng-template>

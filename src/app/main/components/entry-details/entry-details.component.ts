@@ -10,7 +10,7 @@ import { ElectronService } from '@app/core/services';
 })
 export class EntryDetailsComponent {
 
-  get entry(): PasswordEntry | undefined {
+  get entry(): PasswordEntry {
     return this.passwordStore.selectedPasswords[0];
   }
 
@@ -18,9 +18,9 @@ export class EntryDetailsComponent {
     return this.passwordStore.selectedPasswords.length === 1;
   }
 
-  get database(): any {
+  get databaseInformation(): { name: string } {
     return {
-      name: this.passwordStore.file?.filename ?? '*New db'
+      name: this.passwordStore.databaseFileName
     };
   }
 

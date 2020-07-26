@@ -1,0 +1,31 @@
+.dialog-message {
+  padding: 1rem;
+}
+
+.footer-container {
+  padding: 0.5rem 0;
+}
+
+.ui-inputgroup {
+  margin: 0.5rem 0;
+  input {
+    width: 100%;
+    padding: 0.5rem;
+  }
+}
+
+.password-hint {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+
+  i {
+    color: #1b81d7;
+    font-size: 1.8rem;
+    margin-right: 0.4rem;
+  }
+}
+
+.validation-error {
+  margin: 1rem 0;
+}

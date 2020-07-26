@@ -1,6 +1,8 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { ContextMenuSub, ContextMenu } from 'primeng/contextmenu';
+import { DomHandler } from 'primeng/dom';
 import { fromEvent } from 'rxjs';
 import { AppConfig } from '../environments/environment';
 import { ElectronService } from './core/services';
@@ -32,6 +34,45 @@ export class AppComponent implements AfterViewInit {
   ) {
     translate.setDefaultLang('en');
     console.log('AppConfig', AppConfig);
+
+    // primeng sub context menu fix / waiting for official one
+    // issue: https://github.com/primefaces/primeng/issues/8077
+    ContextMenuSub.prototype.position = function (sublist, item) {
+      this.containerOffset = DomHandler.getOffset(item.parentElement);
+      var viewport = DomHandler.getViewport();
+      var sublistWidth = sublist.offsetParent ? sublist.offsetWidth : DomHandler.getHiddenElementOuterWidth(sublist);
+      var itemOuterWidth = DomHandler.getOuterWidth(item.children[0]);
+      var itemOuterHeight = DomHandler.getOuterHeight(item.children[0]);
+      var sublistHeight = sublist.offsetHeight ? sublist.offsetHeight : DomHandler.getHiddenElementOuterHeight(sublist);
+      if ((parseInt(this.containerOffset.top) + itemOuterHeight + sublistHeight) > (viewport.height - DomHandler.calculateScrollbarHeight())) {
+        sublist.style.bottom = '0px';
+        // below line added
+        sublist.style.top = '';
+      }
+      else {
+        sublist.style.top = '0px';
+        // below line added
+        sublist.style.bottom = '';
+      }
+      if ((parseInt(this.containerOffset.left) + itemOuterWidth + sublistWidth) > (viewport.width - DomHandler.calculateScrollbarWidth())) {
+        sublist.style.left = -sublistWidth + 'px';
+      }
+      else {
+        sublist.style.left = itemOuterWidth + 'px';
+      }
+    };
+
+    // context menu should calculate it's position based on dynamic model
+    ContextMenu.prototype.position = (function() {
+      var cached_function = ContextMenu.prototype.position;
+  
+      return function() {  
+        var args = arguments;
+        requestAnimationFrame(() => {
+          cached_function.apply(this, args);
+        });
+      };
+    })();
 
     if (electronService.isElectron) {
       console.log(process.env);

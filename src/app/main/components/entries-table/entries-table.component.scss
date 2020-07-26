@@ -225,3 +225,13 @@ text-align: center;
     align-items: center;
     font-size: 0.9rem;
 }
+
+.group-separator {
+    display: flex;
+    align-items: center;
+
+    span {
+        margin-right: 0.5rem;
+        color: #777;
+    }
+}

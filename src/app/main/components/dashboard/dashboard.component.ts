@@ -53,7 +53,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(500),
       takeUntil(this.destroyed$)
     ).subscribe((event: KeyboardEvent) => {
-      this.passwordStore.filterEntries((event.target as HTMLInputElement).value);
+      this.passwordStore.searchEntries((event.target as HTMLInputElement).value);
     });
   }
 
@@ -74,4 +74,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.passwordStore.openDeleteEntryWindow();
   }
 
+  trySaveDatabase() {
+    this.passwordStore.trySaveDatabase();
+  }
 }

@@ -1,107 +1,153 @@
-<p-toast position="bottom-right"
-    [showTransitionOptions]="'150ms'"
-    [showTransformOptions]="'translateX(100%)'"
-    [hideTransitionOptions]="'250ms'">
-    <ng-template let-message pTemplate="message">
-        <div class="toast-outer">
-            <div class="toast-inner">
-                <div class="toast-text">{{message.summary}}</div>
-                <div *ngIf="message.detail === 'clipboard'" class="seconds-left" [appStopwatch]="message.life"></div>
-            </div>
-        </div>
-    </ng-template>
+<p-toast
+	position="bottom-right"
+	[showTransitionOptions]="'150ms'"
+	[hideTransitionOptions]="'250ms'"
+	[showTransformOptions]="'translateX(100%)'">
+	<ng-template
+		let-message
+		pTemplate="message">
+		<div class="toast-outer">
+			<div class="toast-inner">
+				<div class="toast-text">{{ message.summary }}</div>
+				<div
+					*ngIf="message.detail === 'clipboard'"
+					[appStopwatch]="message.life"
+					class="seconds-left">
+				</div>
+			</div>
+		</div>
+	</ng-template>
 </p-toast>
 
-<p-dialog [(visible)]="isConfirmExitDialogShown" [modal]="true" [draggable]="false">
-    <p-header>
-        Quit haslock
-    </p-header>
-    <div style="padding: 1rem">
-        Are you sure you want to quit? There are unsaved changes
-    </div>
-    <p-footer>
-        <div style="padding: 0.5rem 0">
-            <button type="button" class="text-btn" (click)="closeConfirmExitDialog()">
-                Cancel
-            </button>
-            <button type="button" class="text-btn" (click)="exitApp()">
-                Quit
-            </button>
-        </div>
-    </p-footer>
+<p-dialog
+	[(visible)]="isConfirmExitDialogShown"
+	[modal]="true"
+	[draggable]="false">
+	<p-header>
+		Quit haslock
+	</p-header>
+	<div class="dialog-message">
+		Are you sure you want to quit? There are unsaved changes
+	</div>
+	<p-footer>
+		<div class="footer-container">
+			<button
+				type="button"
+				class="text-btn"
+				(click)="closeConfirmExitDialog()">
+				Cancel
+			</button>
+			<button
+				type="button"
+				class="text-btn"
+				(click)="exitApp()">
+				Quit
+			</button>
+		</div>
+	</p-footer>
 </p-dialog>
 
-<p-dialog [(visible)]="isConfirmGroupRemoveDialogShown" [modal]="true">
-    <p-header>
-        Remove group
-    </p-header>
-    <div style="padding: 1rem">
-        Are you sure you want to remove this group?
-    </div>
-    <p-footer>
-        <div style="padding: 0.5rem 0">
-            <button type="button" class="text-btn" (click)="closeConfirmGroupRemoveDialog()">
-                Cancel
-            </button>
-            <button type="button" class="primary-btn" (click)="removeGroup()">
-                Remove
-            </button>
-        </div>
-    </p-footer>
+<p-dialog
+	[(visible)]="isConfirmGroupRemoveDialogShown"
+	[modal]="true">
+	<p-header>
+		Remove group
+	</p-header>
+	<div class="dialog-message">
+		Are you sure you want to remove this group?
+	</div>
+	<p-footer>
+		<div class="footer-container">
+			<button
+				type="button"
+				class="text-btn"
+				(click)="closeConfirmGroupRemoveDialog()">
+				Cancel
+			</button>
+			<button
+				type="button"
+				class="primary-btn"
+				(click)="removeGroup()">
+				Remove
+			</button>
+		</div>
+	</p-footer>
 </p-dialog>
 
-<p-dialog [(visible)]="isRemoveEntryDialogShown" [modal]="true">
-    <p-header>
-        Remove entry
-    </p-header>
-    <div style="padding: 1rem">
-        <ng-container *ngIf="isOneRowSelected; else multiRemove">
-            Are you sure you want to remove this entry?
-        </ng-container>
-        <ng-template #multiRemove>
-            Are you sure you want to remove <strong>{{ selectedRowsCount }}</strong> entries?
-        </ng-template>
-    </div>
-    <p-footer>
-        <div style="padding: 0.5rem 0">
-            <button type="button" class="text-btn" (click)="closeRemoveEntryDialog()">
-                Cancel
-            </button>
-            <button type="button" class="primary-btn" (click)="deleteEntry()">
-                Remove
-            </button>
-        </div>
-    </p-footer>
+<p-dialog
+	[(visible)]="isRemoveEntryDialogShown"
+	[modal]="true">
+	<p-header>
+		Remove entry
+	</p-header>
+	<div class="dialog-message">
+		<ng-container *ngIf="isOneRowSelected; else multiRemove">
+			Are you sure you want to remove this entry?
+		</ng-container>
+		<ng-template #multiRemove>
+			Are you sure you want to remove <strong>{{ selectedRowsCount }}</strong> entries?
+		</ng-template>
+	</div>
+	<p-footer>
+		<div class="footer-container">
+			<button
+				type="button"
+				class="text-btn"
+				(click)="closeRemoveEntryDialog()">
+				Cancel
+			</button>
+			<button
+				type="button"
+				class="primary-btn"
+				(click)="deleteEntry()">
+				Remove
+			</button>
+		</div>
+	</p-footer>
 </p-dialog>
 
-<p-dialog [(visible)]="isNewPasswordDialogShown" [modal]="true" [draggable]="false">
-    <p-header>
-        Master password setup
-    </p-header>
-    <div style="display: flex; align-items: center; margin: 1rem 0">
-        <i class="pi pi-info-circle" style="color: #1b81d7; font-size: 1.8rem; margin-right: 0.4rem;"></i>
-        Password must be at least&nbsp;<strong>6</strong>&nbsp;characters long
-    </div>
-    <div class="ui-g-12">
-        <div class="ui-inputgroup">
-            <input type="password" [(ngModel)]="newPassword" placeholder="New password" style="width: 100%; padding: 0.5rem">         
-        </div>
-    </div>
-    
-    <div class="ui-g-12">
-        <div class="ui-inputgroup">
-            <input type="password" [(ngModel)]="newPasswordRepeat" placeholder="Repeat password" style="width: 100%; padding: 0.5rem">   
-        </div>
-    </div>
-    <p-footer>
-        <div style="padding: 0.5rem 0">
-            <button
-                type="button"
-                [disabled]="newPassword.length < 6 || newPassword !== newPasswordRepeat"
-                class="primary-btn"
-                (click)="saveNewDatabase()">
-                Save
-            </button>
-        </div>
-    </p-footer>
+<p-dialog
+	[(visible)]="isNewPasswordDialogShown"
+	[modal]="true"
+	[draggable]="false"
+	(onHide)="resetNewPasswordForm()">
+	<p-header>
+		Master password setup
+	</p-header>
+	<div class="password-hint">
+		<i class="pi pi-info-circle"></i>
+		Password must be at least&nbsp;<strong>{{ minPasswordLength }}</strong>&nbsp;characters long
+	</div>
+	<ng-container [formGroup]="masterPasswordForm">
+		<div class="ui-inputgroup">
+			<input
+				type="password"
+				formControlName="newPassword"
+				placeholder="New password">         
+		</div>
+
+		<div class="ui-inputgroup">
+			<input
+				type="password"
+				formControlName="newPasswordDuplicate"
+				placeholder="Repeat password">   
+		</div>
+	
+		<div
+			*ngIf="(passwordsNotMatch || masterPasswordForm.invalid) && submitted"
+			@fadeSlide
+			class="validation-error">
+			Passwords do not match
+		</div>
+	</ng-container>
+	<p-footer>
+		<div class="footer-container">
+			<button
+				type="button"
+				class="primary-btn"
+				(click)="saveNewDatabase()">
+				Save
+			</button>
+		</div>
+	</p-footer>
 </p-dialog>
