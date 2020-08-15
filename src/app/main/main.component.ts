@@ -56,6 +56,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.loginForm.reset();
+    this.databaseService.isInvalidPassword = false;
   }
 
   onLoginSubmit() {
