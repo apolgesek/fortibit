@@ -1,3 +1,5 @@
+@import 'variables';
+
 .dialog-message {
   padding: 1rem;
 }
@@ -20,7 +22,7 @@
   margin: 1rem 0;
 
   i {
-    color: #1b81d7;
+    color: $curious-blue;
     font-size: 1.8rem;
     margin-right: 0.4rem;
   }

@@ -1,25 +1,27 @@
 /* You can add global styles to this file, and also import other style files */
+@import 'variables';
+
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Open Sans', sans-serif;
+  font-family: $font;
   overflow-x: hidden;
-  background-color: #fff;
+  background-color: $white;
 }
 
 input, textarea {
-  font-family: "Open Sans", Verdana, Geneva, Tahoma, sans-serif;
+  font-family: $font;
 }
 
 body .ui-toast .ui-toast-message.ui-toast-message-success {
-  color: #fff;
-  background-color: #47A69F;
+  color: $white;
+  background-color: $keppel-light;
   width: 13rem;
   border-radius: 4px;
 
   .ui-toast-close-icon {
-    color: #fff;
+    color: $white;
   }
 
   .toast-outer {
@@ -37,7 +39,7 @@ body .ui-toast .ui-toast-message.ui-toast-message-success {
       }
     
       .seconds-left {
-        color: #fff;
+        color: $white;
         font-size: 1rem;
       } 
     }
@@ -80,11 +82,10 @@ body .ui-toast .ui-toast-message.ui-toast-message-success {
     position: absolute;
     width: 64px;
     height: 64px;
-    border: 8px solid #1b81d7;
+    border: 8px solid $curious-blue;
     border-radius: 50%;
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    border-color: #1b81d7 transparent transparent transparent;
-
+    border-color: $curious-blue transparent transparent transparent;
   }
 
   .lds-ring div:nth-child(1) {
@@ -130,27 +131,27 @@ input, button, a {
 }
 
 body .ui-dialog .ui-dialog-titlebar {
-  background-color: #fff;
+  background-color: $white;
 }
 
 .primary-btn {
-  font-family: "Open Sans";
+  font-family: $font;
   border: 0;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-size: 0.9rem;
-  color: #fff;
-  background: #47A69F;
+  color: $white;
+  background: $keppel-light;
   width: auto;
   margin-right: 0.5rem;
   transition: all 150ms;
   cursor: pointer;
   &:hover {
-      background-color: #409b95;
+      background-color: $keppel;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
   }
   &:disabled {
-    background-color: #ccc;
+    background-color: $silver;
     &:hover {
       box-shadow: none !important;
     }
@@ -158,8 +159,8 @@ body .ui-dialog .ui-dialog-titlebar {
 }
 
 .text-btn {
-  font-family: "Open Sans";
-  color: #47A69F;
+  font-family: $font;
+  color: $keppel-light;
   margin: 0 0.5rem;
   padding: 0.5rem;
   border: 0;
@@ -167,7 +168,7 @@ body .ui-dialog .ui-dialog-titlebar {
   border-radius: 4px;
   transition: background-color 150ms;
   letter-spacing: 1px;
-  background-color: #fff;
+  background-color: $white;
   cursor: pointer;
   &:hover {
       background-color: rgb(245, 245, 245);
@@ -215,11 +216,11 @@ body .ui-dialog .ui-dialog-titlebar {
   }
 
   &.ng-invalid {
-      border: 1px solid #a80000;
+      border: 1px solid $bright-red;
   }
 }
 
 .validation-error {
-  color: #a80000;
+  color: $bright-red;
   margin: 0.5rem 0 0;
 }

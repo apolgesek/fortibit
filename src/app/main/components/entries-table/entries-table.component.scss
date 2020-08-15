@@ -1,3 +1,5 @@
+@import 'variables';
+
 $sidePanelInDuration: 300ms;
 $sidePanelOutDuration: 250ms;
 
@@ -17,11 +19,11 @@ $sidePanelOutDuration: 250ms;
                         display: flex;
                         position: sticky;
                         top: 0;
-                        background-color: #fff;
+                        background-color: $white;
                         transition: all 150ms;
-                        box-shadow: 0px 0px 0px 1px #ccc,
-                        0px 0px 0px 1px #ccc,
-                        0px 0px 0px 1px #ccc;
+                        box-shadow: 0px 0px 0px 1px $silver,
+                        0px 0px 0px 1px $silver,
+                        0px 0px 0px 1px $silver;
 
                         &.scrolled {
                             -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
@@ -89,14 +91,15 @@ $sidePanelOutDuration: 250ms;
 
         .sidebar {
             width: 16rem;
-            border-right: 1px solid #ccc;
+            border-right: 1px solid $silver;
             overflow-y: auto;
             overflow-x: hidden;
+            
             .selected-entries {
                 text-align: center;
                 font-size: 0.9rem;
                 padding: 0.4rem 0;
-                border-top: 1px solid #ccc;
+                border-top: 1px solid $silver;
                 height: 2rem;
                 width: inherit;
                 position: sticky;
@@ -201,14 +204,14 @@ text-align: center;
 }
 
 .outline-btn {
-    color: #409b95;
+    color: $keppel;
     display: block;
     padding: 0.5rem;
     transition: all 150ms;
     border-radius: 4px;
-    border: 1px solid #409b95;
+    border: 1px solid $keppel;
     &:hover {
-        background-color: #7fd4ce4f;
+        background-color: $bermuda-light;
     }
 }
 

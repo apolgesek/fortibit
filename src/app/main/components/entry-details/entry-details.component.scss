@@ -1,8 +1,10 @@
+@import 'variables';
+
 :host {
     display: block;
     height: calc(100% - 5rem);
     width: 16rem;
-    background-color: #fff;
+    background-color: $white;
     position: fixed;
     z-index: 2;
     right: 0;
