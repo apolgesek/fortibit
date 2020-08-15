@@ -1,8 +1,10 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
-import { PasswordStoreService } from '@app/core/services/password-store.service';
+import { DatabaseService } from '@app/core/services/database.service';
+import { DialogsService } from '@app/core/services/dialogs.service';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+
 const logoURL = require('assets/images/lock.svg');
 
 @Component({
@@ -18,7 +20,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private destroyed$ = new Subject<void>();
 
   get isDatabaseDirty(): boolean {
-    return !!this.passwordStore.dateSaved;
+    return !!this.databaseService.dateSaved;
   }
 
   get isAnyEntry(): boolean {
@@ -26,25 +28,28 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get isOneEntrySelected(): boolean {
-    return this.passwordStore.selectedPasswords.length === 1;
+    return this.databaseService.selectedPasswords.length === 1;
   }
 
   get isAnyEntrySelected(): boolean {
-    return this.passwordStore.selectedPasswords.length > 0;
+    return this.databaseService.selectedPasswords.length > 0;
   }
 
   get selectedPasswordsCount(): number {
-    return this.passwordStore.selectedPasswords.length;
+    return this.databaseService.selectedPasswords.length;
   }
 
   get logoURL(): string {
     return logoURL.default;
   }
 
-  constructor(private passwordStore: PasswordStoreService) { }
+  constructor(
+    private databaseService: DatabaseService,
+    private dialogsService: DialogsService
+  ) { }
 
   ngOnInit(): void {
-    this.selectedCategoryData = this.passwordStore.selectedCategory?.data;
+    this.selectedCategoryData = this.databaseService.selectedCategory?.data;
   }
 
   ngAfterViewInit(): void {
@@ -53,7 +58,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(500),
       takeUntil(this.destroyed$)
     ).subscribe((event: KeyboardEvent) => {
-      this.passwordStore.searchEntries((event.target as HTMLInputElement).value);
+      this.databaseService.searchEntries((event.target as HTMLInputElement).value);
     });
   }
 
@@ -63,18 +68,20 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openAddEntryWindow() {
-    this.passwordStore.openAddEntryWindow();
+    this.databaseService.editedEntry = undefined;
+    this.dialogsService.openEntryWindow();
   }
 
   openEditEntryWindow() {
-    this.passwordStore.openEditEntryWindow();
+    this.databaseService.editedEntry = this.databaseService.selectedPasswords[0];
+    this.dialogsService.openEntryWindow();
   }
 
   openDeleteEntryWindow() {
-    this.passwordStore.openDeleteEntryWindow();
+    this.dialogsService.openDeleteEntryWindow();
   }
 
   trySaveDatabase() {
-    this.passwordStore.trySaveDatabase();
+    this.databaseService.trySaveDatabase();
   }
 }

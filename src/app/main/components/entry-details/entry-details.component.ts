@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { PasswordStoreService } from '@app/core/services/password-store.service';
+import { DatabaseService } from '@app/core/services/database.service';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
 import { ElectronService } from '@app/core/services';
 
@@ -11,21 +11,21 @@ import { ElectronService } from '@app/core/services';
 export class EntryDetailsComponent {
 
   get entry(): PasswordEntry {
-    return this.passwordStore.selectedPasswords[0];
+    return this.databaseService.selectedPasswords[0];
   }
 
   get isEntrySelected(): boolean {
-    return this.passwordStore.selectedPasswords.length === 1;
+    return this.databaseService.selectedPasswords.length === 1;
   }
 
   get databaseInformation(): { name: string } {
     return {
-      name: this.passwordStore.databaseFileName
+      name: this.databaseService.databaseFileName
     };
   }
 
   constructor(
-    private passwordStore: PasswordStoreService,
+    private databaseService: DatabaseService,
     private electronService: ElectronService
   ) { }
 

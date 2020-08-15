@@ -30,8 +30,7 @@
     "src/polyfills.ts",
   ],
   "include": [
-    "src/**/*",
-    "encryption",
+    "encryption/encryptor.ts"
   ],
   "exclude": [
     "node_modules"

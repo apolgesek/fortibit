@@ -177,10 +177,14 @@ body .ui-dialog .ui-dialog-titlebar {
 .header {
   position: relative;
   z-index: 2;
-  padding: 0.45rem 0 0 1rem;
+  padding: 0.45rem 0 0.5rem 1rem;
   font-weight: 700;
   color: #444;
   font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 15rem;
 }
 
 .ui-inputgroup {

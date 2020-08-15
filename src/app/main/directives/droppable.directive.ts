@@ -1,5 +1,5 @@
 import { Directive, ElementRef } from '@angular/core';
-import { PasswordStoreService } from '@app/core/services/password-store.service';
+import { DatabaseService } from '@app/core/services/database.service';
 
 @Directive({
   selector: '[appDroppable]'
@@ -11,11 +11,11 @@ export class DroppableDirective {
 
 	constructor(
 		private element: ElementRef,
-		private passwordStore: PasswordStoreService
+		private databaseService: DatabaseService
 	) { }
 	
 	dragLeaveCallback: () => void = () => {
-		if (!this.passwordStore.draggedEntry.length) {
+		if (!this.databaseService.draggedEntry.length) {
 			return;
 		}
 		this.el.classList.remove('ui-treenode-dragover');
@@ -25,9 +25,9 @@ export class DroppableDirective {
 		// this needs to be executed because dragend event is not called on drop
 		document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'auto');
 		this.removeDraggedOverClassForAllDroppables();
-		if (this.passwordStore.draggedEntry.length) {
-			this.passwordStore.moveEntry((<HTMLInputElement>this.el.querySelector('.node-id')).value);
-			this.passwordStore.draggedEntry = [];
+		if (this.databaseService.draggedEntry.length) {
+			this.databaseService.moveEntry((<HTMLInputElement>this.el.querySelector('.node-id')).value);
+			this.databaseService.draggedEntry = [];
 		}
 	}
 

@@ -1,1 +1,1 @@
-export * from './open-type.guard';
+export * from './file-open-mode.guard';

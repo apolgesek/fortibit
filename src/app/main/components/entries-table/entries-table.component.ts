@@ -2,7 +2,7 @@ import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
 import { ElectronService } from '@app/core/services';
 import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
-import { PasswordStoreService } from '@app/core/services/password-store.service';
+import { DatabaseService } from '@app/core/services/database.service';
 import { ContextMenuItemsService } from '@app/main/services/context-menu-items.service';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { ContextMenu } from 'primeng/contextmenu';
@@ -28,31 +28,31 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   @ViewChild('entryContextMenu') entryContextMenu: ContextMenu;
 
   get selectedEntries(): PasswordEntry[] {
-    return this.passwordStore.selectedPasswords;
+    return this.databaseService.selectedPasswords;
   }
 
   get selectedGroup(): TreeNode {
-    return this.passwordStore.selectedCategory;
+    return this.databaseService.selectedCategory;
   }
 
   set selectedGroup(treeNode: TreeNode) {
-    this.passwordStore.selectedCategory = treeNode;
+    this.databaseService.selectedCategory = treeNode;
   }
 
   get fileName(): string {
-    return this.passwordStore.databaseFileName;
+    return this.databaseService.databaseFileName;
   }
 
   get groups(): TreeNode[] {
-    return this.passwordStore.groups;
+    return this.databaseService.groups;
   }
 
   get contextSelectedCategory(): TreeNode {
-    return this.passwordStore.contextSelectedCategory;
+    return this.databaseService.contextSelectedCategory;
   }
 
   get isGroupRenameModeOn(): boolean {
-    return this.passwordStore.isRenameModeOn;
+    return this.databaseService.isRenameModeOn;
   }
 
   get selectedGroupLabel(): string {
@@ -62,17 +62,16 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   constructor(
     private zone: NgZone,
     private electronService: ElectronService,
-    private passwordStore: PasswordStoreService,
+    private databaseService: DatabaseService,
     private hotkeyService: HotkeyService,
     private contextMenuItemsService: ContextMenuItemsService
   ) { 
-    this.passwordList$ = this.passwordStore.entries$;
-    this.searchPhrase$ = this.passwordStore.searchPhrase$;
+    this.passwordList$ = this.databaseService.entries$;
+    this.searchPhrase$ = this.databaseService.searchPhrase$;
   }
 
   ngOnInit() {
-    this.electronService.ipcRenderer.on('onNewEntryAdded', this.newEntryAddedListener);
-    this.passwordStore.updateEntries();
+    this.databaseService.updateEntries();
 
     this.groupContextMenuItems = this.contextMenuItemsService.buildGroupContextMenuItems();
     this.multiEntryMenuItems = this.contextMenuItemsService.buildMultiEntryContextMenuItems();
@@ -80,7 +79,6 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.electronService.ipcRenderer.off('onNewEntryAdded', this.newEntryAddedListener);
   }
 
   trackEntryById(_: number, entry: PasswordEntry): string {
@@ -88,15 +86,15 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   }
 
   copyToClipboard(entry: PasswordEntry, property: string) {
-    this.passwordStore.copyToClipboard(entry, property);
+    this.databaseService.copyToClipboard(entry, property);
   }
 
   selectGroup(event: treeNodeEventObject) {
-    this.passwordStore.selectedCategory = event.node;
-    this.passwordStore.selectedCategory.data = event.node.data || [];
-    this.passwordStore.selectedPasswords = [];
-    this.passwordStore.resetSearch();
-    this.passwordStore.updateEntries();
+    this.databaseService.selectedCategory = event.node;
+    this.databaseService.selectedCategory.data = event.node.data || [];
+    this.databaseService.selectedPasswords = [];
+    this.databaseService.resetSearch();
+    this.databaseService.updateEntries();
   }
 
   // prevent "Database" group collapse
@@ -108,29 +106,29 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
 
   selectEntry(event: MouseEvent, password: PasswordEntry) {
     if (this.hotkeyService.getMultiselectionKey(event) && event.type === 'click') {
-      const foundIndex = this.passwordStore.selectedPasswords.findIndex(p => p.id === password.id);
+      const foundIndex = this.databaseService.selectedPasswords.findIndex(p => p.id === password.id);
       if (foundIndex > -1) {
-        this.passwordStore.selectedPasswords.splice(foundIndex, 1);
+        this.databaseService.selectedPasswords.splice(foundIndex, 1);
         return;
       }
-      this.passwordStore.selectedPasswords.push(password);
+      this.databaseService.selectedPasswords.push(password);
     } else {
-      this.passwordStore.selectedPasswords = [password];
+      this.databaseService.selectedPasswords = [password];
     }
   }
 
   selectEntryContext(event: any) {
-    if (this.passwordStore.selectedPasswords.length === 0) {
-      this.passwordStore.selectedPasswords = [ event.data ];
+    if (this.databaseService.selectedPasswords.length === 0) {
+      this.databaseService.selectedPasswords = [ event.data ];
     }
   }
 
   isEntrySelected(entryData: PasswordEntry): boolean {
-    return this.passwordStore.selectedPasswords.filter(e => e.id === entryData.id).length > 0;
+    return this.databaseService.selectedPasswords.filter(e => e.id === entryData.id).length > 0;
   }
 
   isEntryDragged(entryData: PasswordEntry): boolean {
-    return this.passwordStore.draggedEntry.filter(e => e.id === entryData.id).length > 0;
+    return this.databaseService.draggedEntry.filter(e => e.id === entryData.id).length > 0;
   }
 
   setContextMenuGroup(event: treeNodeEventObject) {
@@ -138,25 +136,25 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
       this.groupContextMenu.hide();
       return;
     }
-    this.passwordStore.contextSelectedCategory = event.node;
-    this.passwordStore.selectedCategory = event.node;
-    this.passwordStore.updateEntries();
+    this.databaseService.contextSelectedCategory = event.node;
+    this.databaseService.selectedCategory = event.node;
+    this.databaseService.updateEntries();
   }
 
   addGroup() {
-    this.passwordStore.addGroup();
+    this.databaseService.addGroup();
   }
 
   setGroupRenameModeOff() {
     requestAnimationFrame(() => {
-      this.passwordStore.isRenameModeOn = false;
+      this.databaseService.isRenameModeOn = false;
     });
   }
 
   onDragStart(event: DragEvent, entryData: PasswordEntry) {
     this.selectedEntries.length > 0
-      ? this.passwordStore.draggedEntry = this.selectedEntries
-      : this.passwordStore.draggedEntry = [ entryData ];
+      ? this.databaseService.draggedEntry = this.selectedEntries
+      : this.databaseService.draggedEntry = [ entryData ];
 
     let element = null;
     if (process.platform === 'darwin') {
@@ -184,12 +182,6 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     }
 
     document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'auto');
-    this.passwordStore.draggedEntry = [];
+    this.databaseService.draggedEntry = [];
   }
-
-  private newEntryAddedListener: entryAddedElectronEventArgs = (_, newEntryModel: PasswordEntry) => {
-    this.zone.run(() => {
-      this.passwordStore.addEntry(newEntryModel);
-   });
-  };
 }

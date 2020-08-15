@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
-import { PasswordStoreService } from '@app/core/services/password-store.service';
+import { DatabaseService } from '@app/core/services/database.service';
 import { fade } from '@app/shared/animations/fade-slide.animation';
 
 @Component({
@@ -18,7 +18,7 @@ export class EntryFormComponent implements OnInit {
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
     private fb: FormBuilder,
-    private passwordService: PasswordStoreService
+    private passwordService: DatabaseService
   ) { }
 
   ngOnInit(): void {

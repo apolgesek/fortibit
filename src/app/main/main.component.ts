@@ -1,7 +1,7 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ElectronService } from '../core/services';
-import { PasswordStoreService } from '../core/services/password-store.service';
+import { DatabaseService } from '../core/services/database.service';
 import { fade } from '@app/shared/animations/fade-slide.animation';
 
 const logoURL = require('../../assets/images/lock.svg');
@@ -19,7 +19,7 @@ export class MainComponent implements OnInit {
   public version: string;
 
   get isInvalidPassword(): boolean {
-    return this.passwordStore.isInvalidPassword;
+    return this.databaseService.isInvalidPassword;
   }
 
   get logoURL(): string {
@@ -27,7 +27,7 @@ export class MainComponent implements OnInit {
   }
 
   get filePath(): string {
-    return this.passwordStore.file.filePath;
+    return this.databaseService.file.filePath;
   }
 
   get passwordControl(): FormControl {
@@ -37,7 +37,7 @@ export class MainComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private zone: NgZone,
-    private passwordStore: PasswordStoreService,
+    private databaseService: DatabaseService,
     private electronService: ElectronService
   ) { }
 

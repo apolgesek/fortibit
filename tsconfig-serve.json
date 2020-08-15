@@ -17,7 +17,8 @@
     ]
   },
   "include": [
-    "main.ts"
+    "main.ts",
+    "encryption/encryptor.ts"
   ],
   "exclude": [
     "node_modules",

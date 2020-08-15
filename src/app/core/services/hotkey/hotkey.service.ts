@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { PasswordStoreService } from '../password-store.service';
+import { DatabaseService } from '../database.service';
 import { DarwinHotkeyProvider } from './darwin-hotkey-provider';
 import { IHotkeyProvider } from './hotkey-provider.model';
 import { WindowsHotkeyProvider } from './windows-hotkey-provider';
+import { DialogsService } from '../dialogs.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,16 +14,19 @@ export class HotkeyService {
   public deleteShortcutLabel: string;
 
   constructor(
-    private passwordStore: PasswordStoreService,
+    private databaseService: DatabaseService,
+    private dialogsService: DialogsService
   ) {
     if (process.platform === 'darwin') {
       this.hotkeyProvider = new DarwinHotkeyProvider(
-        this.passwordStore
+        this.databaseService,
+        this.dialogsService
       );
       this.deleteShortcutLabel = 'Delete (Cmd + ⌫)';
     } else {
       this.hotkeyProvider = new WindowsHotkeyProvider(
-        this.passwordStore
+        this.databaseService,
+        this.dialogsService
       );
       this.deleteShortcutLabel = 'Delete (Del)';
     }

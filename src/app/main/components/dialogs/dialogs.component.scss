@@ -29,3 +29,7 @@
 .validation-error {
   margin: 1rem 0;
 }
+
+::ng-deep .entry-dialog {
+  width: 70%;
+}

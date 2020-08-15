@@ -1,45 +1,40 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
-import { EntryFormComponent } from '@app/main/components/entry-form/entry-form.component';
 import { AppConfig } from 'environments/environment';
 import { MessageService, TreeNode } from 'primeng/api';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { markDirty } from '../decorators/mark-dirty.decorator';
 import { PasswordEntry } from '../models/password-entry.model';
+import { DialogsService } from './dialogs.service';
 import { ElectronService } from './electron/electron.service';
+import { MockDataManager } from './mock-data-manager';
 
 @Injectable({
   providedIn: 'root'
 })
-export class PasswordStoreService {
+export class DatabaseService {
+  public readonly entries$: Observable<PasswordEntry[]>;
+  public readonly rowIndex: number;
 
-  public entries$: Observable<PasswordEntry[]>;
   public dateSaved: Date;
   public selectedPasswords: PasswordEntry[] = [];
   public draggedEntry: PasswordEntry[] = [];
   public selectedCategory: TreeNode;
+  public editedEntry: PasswordEntry;
   public contextSelectedCategory: TreeNode;
-  public rowIndex: number;
   public isInvalidPassword = false;
+  public isRenameModeOn = false;
   public file: { filePath: string, filename: string };
-  public isRenameModeOn: boolean;
-  public isDialogOpened: boolean;
-  public dialogRef: DynamicDialogRef;
-  public isNewPasswordDialogShown = false;
-  public isRemoveEntryDialogShown = false;
-  public isConfirmExitDialogShown = false;
-  public isConfirmGroupRemoveDialogShown = false;
 
   public groups: TreeNode[] = [{
     key: uuidv4(),
     label: "Database",
-    data: [],
     expanded: true,
     expandedIcon: "pi pi-folder-open",
     draggable: false,
+    data: [],
     children: [
       this.buildGroup("General"),
       this.buildGroup("Email"),
@@ -50,7 +45,7 @@ export class PasswordStoreService {
 
   get confirmEntriesDeleteMessage(): string {
     if (this.selectedPasswords.length > 1) {
-      return `Are you sure you want to delete <strong>${this.selectedPasswords.length}</strong> entries?`;
+      return `Are you sure you want to delete <strong>${ this.selectedPasswords.length }</strong> entries?`;
     } else {
       return `Are you sure you want delete this entry?`;
     }
@@ -61,51 +56,51 @@ export class PasswordStoreService {
   }
   
   public searchPhrase$: Observable<string>;
-  private _searchPhraseSource: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  private _passwordListSource: BehaviorSubject<PasswordEntry[]> = new BehaviorSubject<PasswordEntry[]>([]);
+  private searchPhraseSource: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  private passwordListSource: BehaviorSubject<PasswordEntry[]> = new BehaviorSubject<PasswordEntry[]>([]);
 
   constructor(
     private electronService: ElectronService,
     private router: Router,
     private zone: NgZone,
-    private dialogService: DialogService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private dialogsService: DialogsService
   ) {
     this.entries$ = combineLatest(
-      this._passwordListSource,
-      this._searchPhraseSource
+      this.passwordListSource,
+      this.searchPhraseSource
     ).pipe(
       map(([ passwords, searchPhrase ]) => this.filterEntries(passwords, searchPhrase)),
       shareReplay()
     );
 
-    this.searchPhrase$ = this._searchPhraseSource.asObservable().pipe();
+    this.searchPhrase$ = this.searchPhraseSource.asObservable().pipe();
 
+    // introduce invalid password response
     this.electronService.ipcRenderer.on('onContentDecrypt', (_, { decrypted, file }) => {
       this.zone.run(() => {
         try {
           const deserializedPasswords = JSON.parse(decrypted);
-          this.isInvalidPassword = false;
+          this.setGroups(deserializedPasswords);
           this.file = file;
-          this.clearAll();
-          this.groups = deserializedPasswords;
           this.selectedCategory = this.groups[0];
           this.setDateSaved();
           this.router.navigate(['/dashboard']);
         } catch (err) {
           this.isInvalidPassword = true;
-          return;
         }
       });
     });
 
     if (AppConfig.mocks) {
-      this.loadTestData();
+      const mockDataManager = new MockDataManager(this);
+      mockDataManager.loadMockEntries();
     }
 
     this.selectedCategory = this.groups[0];
   }
 
+  //#region mark dirty methods
   @markDirty()
   addEntry(entryModel: PasswordEntry) {
     if (entryModel.id) {
@@ -117,7 +112,6 @@ export class PasswordStoreService {
       this.selectedCategory.data.push({...entryModel, id: uuidv4()});
       this.resetSearch();
     }
-
     this.updateEntries();
   }
 
@@ -138,32 +132,15 @@ export class PasswordStoreService {
     this.updateEntries();
   }
 
-  searchEntries(value: string) {
-    this._searchPhraseSource.next(value);
-  }
-
   @markDirty()
-  clearAll() {
-    this.groups = [];
-  }
-
-  saveDatabase(newPassword: string) {
-    this.electronService.ipcRenderer.send('saveFile', {passwordList: this.groups, newPassword});
-    this.setDateSaved();
-  }
-
-  updateEntries() {
-    this._passwordListSource.next(this.selectedCategory.data);
-  }
-
-  resetSearch() {
-    this._searchPhraseSource.next('');
+  setGroups(groups: TreeNode[]) {
+    this.groups = groups;
   }
 
   @markDirty()
   removeGroup() {
-    let idx = this.selectedCategory.parent.children.findIndex(g => g.key === this.contextSelectedCategory.key);
-    this.selectedCategory.parent.children.splice(idx, 1);
+    let index = this.selectedCategory.parent.children.findIndex(g => g.key === this.contextSelectedCategory.key);
+    this.selectedCategory.parent.children.splice(index, 1);
     this.selectedCategory = this.groups[0];
   }
 
@@ -186,51 +163,6 @@ export class PasswordStoreService {
     this.selectedCategory.expanded = true;
   }
 
-  moveEntry(targetGroup: string) {
-    const copy = [...this.draggedEntry];
-    this.deleteEntry();
-    const groupData = this.findRowGroup(this.groups[0], targetGroup);
-    groupData.push(...copy);
-    this.updateEntries();
-  }
-
-  trySaveDatabase() {
-    if (!this.file) {
-      this.isNewPasswordDialogShown = true;
-    } else {
-      this.saveDatabase(null);
-    }
-  }
-
-  saveNewDatabase(newPassword: string) {
-    this.saveDatabase(newPassword);
-    this.isNewPasswordDialogShown = false;
-  }
-
-  openDeleteEntryWindow() {
-    this.isRemoveEntryDialogShown = true;
-  }
-
-  openDeleteGroupWindow() {
-    this.isConfirmGroupRemoveDialogShown = true;
-  }
-
-  openEditEntryWindow() {
-    if (this.isDialogOpened) {
-      return;
-    }
-    this.dialogRef = this.dialogService.open(EntryFormComponent, {width: '70%', header: 'Edit entry', data: this.selectedPasswords[0]});
-    this.initDialogOpen();
-  }
-
-  openAddEntryWindow() {
-    if (this.isDialogOpened) {
-      return;
-    }
-    this.dialogRef = this.dialogService.open(EntryFormComponent, {width: '70%', header: 'Add new entry'});
-    this.initDialogOpen();
-  }
-
   @markDirty()
   moveUp() {
     const groupData = (this.selectedCategory.data as PasswordEntry[]);
@@ -242,7 +174,7 @@ export class PasswordStoreService {
     }
     this.selectedPasswords.forEach(element => {
       const elIdx = groupData.findIndex(e => e.id === element.id);
-      this.swapElements<PasswordEntry>(groupData, elIdx, elIdx - 1);
+      [ groupData[elIdx - 1], groupData[elIdx] ] = [ groupData[elIdx], groupData[elIdx - 1] ];
     });
   }
 
@@ -257,7 +189,7 @@ export class PasswordStoreService {
     }
     this.selectedPasswords.forEach(element => {
       const elIdx = groupData.findIndex(e => e.id === element.id);
-      this.swapElements<PasswordEntry>(groupData, elIdx, elIdx + 1);
+      [ groupData[elIdx], groupData[elIdx + 1] ] = [ groupData[elIdx + 1], groupData[elIdx] ];
     });
   }
 
@@ -280,18 +212,23 @@ export class PasswordStoreService {
       groupData.push(element);
     });
   }
+  //#endregion
 
   exitApp() {
     window.onbeforeunload = undefined;
     this.electronService.ipcRenderer.send('exit');
   }
 
+  searchEntries(value: string) {
+    this.searchPhraseSource.next(value);
+  }
+
   copyToClipboard(entry: PasswordEntry, property: string) {
     if (!property) {
       return;
     }
-    this.electronService.ipcRenderer.send('copyToClipboard', property);
     entry.lastAccessDate = new Date();
+    this.electronService.ipcRenderer.send('copyToClipboard', property);
     this.messageService.clear();
     this.messageService.add({
       severity: 'success',
@@ -301,18 +238,38 @@ export class PasswordStoreService {
     });
   }
 
-  private swapElements<T>(array: T[], i1: number, i2: number) {
-    let savedElement: T;
-    savedElement = {...array[i1]};
-    array[i1] = array[i2];
-    array[i2] = savedElement;
+  saveDatabase(newPassword: string) {
+    this.electronService.ipcRenderer.send('saveFile', { passwordList: this.groups, newPassword });
+    this.setDateSaved();
   }
 
-  private initDialogOpen() {
-    this.isDialogOpened = true;
-    this.dialogRef.onDestroy.subscribe(() => {
-      this.isDialogOpened = false;
-    });
+  updateEntries() {
+    this.passwordListSource.next(this.selectedCategory.data);
+  }
+
+  resetSearch() {
+    this.searchPhraseSource.next('');
+  }
+
+  moveEntry(targetGroup: string) {
+    const copy = [...this.draggedEntry];
+    this.deleteEntry();
+    const groupData = this.findRowGroup(this.groups[0], targetGroup);
+    groupData.push(...copy);
+    this.updateEntries();
+  }
+
+  trySaveDatabase() {
+    !this.file ? this.dialogsService.openMasterPasswordWindow() : this.saveDatabase(null);
+  }
+
+  saveNewDatabase(newPassword: string) {
+    this.saveDatabase(newPassword);
+    this.dialogsService.closeMasterPasswordWindow();
+  }
+
+  setDateSaved() {
+    this.dateSaved = new Date();
   }
 
   private filterEntries(passwords: PasswordEntry[], phrase: string): PasswordEntry[] {
@@ -320,11 +277,11 @@ export class PasswordStoreService {
       return passwords;
     }
     const tempData: PasswordEntry[] = [];
-    this.buildAllEntriesList(this.groups[0], tempData, phrase);
+    this.buildSearchResultList(this.groups[0], tempData, phrase);
     return tempData;
   }
 
-  private buildAllEntriesList(node: TreeNode, output: PasswordEntry[] & any, phrase: string) {
+  private buildSearchResultList(node: TreeNode, output: PasswordEntry[] & any, phrase: string) {
     if (node.data.length) {
       const filteredNodes: PasswordEntry[] = node.data
         .filter(p => (p.title.includes(phrase) || p.username.includes(phrase) || p.url?.includes(phrase)));
@@ -337,7 +294,7 @@ export class PasswordStoreService {
     }
     if (node.children?.length) {
       node.children.forEach((element: TreeNode) => {
-        this.buildAllEntriesList(element, output, phrase);
+        this.buildSearchResultList(element, output, phrase);
       });
     } else {
       return output;
@@ -348,64 +305,43 @@ export class PasswordStoreService {
     path.push(node.label);
     if (node.parent) {
       this.buildPath(node.parent, path);
-    } else {
-      return;
     }
   }
 
-  private loadTestData() {
-    const mocks = require('../mocks/MOCK_DATA.json');
-    const shuffledMocks = mocks.sort(() => 0.5 - Math.random());
-    this.groups[0].data = (shuffledMocks as PasswordEntry[]).splice(500, 20);
-    this.groups[0].children.forEach((_, index) => {
-      this.groups[0].children[index].data = (shuffledMocks as PasswordEntry[]).splice(index * 20, 20);
-    });
-    this.setDateSaved();
+  private findRow(node: TreeNode, id?: string): PasswordEntry[] {
+    if (!id) {
+      return node.data;
+    }
+    if (node.data.find(e => e.id === id)) {
+      return node.data;
+    } else if (node.children != null) {
+      let result;
+      for (let i = 0; result == null && i < node.children.length; i++) {
+        result = this.findRow(node.children[i], id);
+      }
+      return result;
+    }
+  }
+  
+  private findRowGroup(node: TreeNode, targetGroupKey: string): PasswordEntry[] {
+    if (node.key === targetGroupKey) {
+      return node.data;
+    } else if (node.children != null) {
+      let result;
+      for (let i = 0; result == null && i < node.children.length; i++) {
+        result = this.findRowGroup(node.children[i], targetGroupKey);
+      }
+      return result;
+    }
   }
 
-    // create tree handler static class
-    private findRow(node: TreeNode, id?: string): PasswordEntry[] {
-      if (!id) {
-        return node.data;
-      }
-      if (node.data.find(e => e.id === id)) {
-        return node.data;
-      } else if (node.children != null) {
-        var i;
-        var result = null;
-        for (i=0; result == null && i < node.children.length; i++) {
-          result = this.findRow(node.children[i], id);
-        }
-        return result;
-      }
-      return null;
-    }
-  
-    private findRowGroup(node: TreeNode, targetGroup: string): PasswordEntry[] {
-      if (node.key === targetGroup) {
-        return node.data;
-      } else if (node.children != null) {
-        var i;
-        var result = null;
-        for (i=0; result == null && i < node.children.length; i++) {
-          result = this.findRowGroup(node.children[i], targetGroup);
-        }
-        return result;
-      }
-      return null;
-    }
-
-    private buildGroup(title: string): TreeNode {
-      return {
-        key: uuidv4(),
-        label: title,
-        data: [],
-        collapsedIcon: "pi pi-folder",
-        expandedIcon: "pi pi-folder-open"
-      };
-    }
-  
-    private setDateSaved() {
-      this.dateSaved = new Date();
-    }
+  private buildGroup(title: string): TreeNode {
+    return {
+      key: uuidv4(),
+      label: title,
+      data: [],
+      collapsedIcon: "pi pi-folder",
+      expandedIcon: "pi pi-folder-open"
+    };
+  }
 }

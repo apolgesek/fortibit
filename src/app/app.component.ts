@@ -1,13 +1,14 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ContextMenuSub, ContextMenu } from 'primeng/contextmenu';
+import { ContextMenu, ContextMenuSub } from 'primeng/contextmenu';
 import { DomHandler } from 'primeng/dom';
 import { fromEvent } from 'rxjs';
 import { AppConfig } from '../environments/environment';
 import { ElectronService } from './core/services';
+import { DatabaseService } from './core/services/database.service';
+import { DialogsService } from './core/services/dialogs.service';
 import { HotkeyService } from './core/services/hotkey/hotkey.service';
-import { PasswordStoreService } from './core/services/password-store.service';
 
 @Component({
   selector: 'app-root',
@@ -29,7 +30,8 @@ export class AppComponent implements AfterViewInit {
     private translate: TranslateService,
     private router: Router,
     private zone: NgZone,
-    private passwordService: PasswordStoreService,
+    private passwordService: DatabaseService,
+    private dialogsService: DialogsService,
     private hotkeyService: HotkeyService,
   ) {
     translate.setDefaultLang('en');
@@ -117,7 +119,7 @@ export class AppComponent implements AfterViewInit {
 
     this.electronService.ipcRenderer.on('openCloseConfirmationWindow', () => {
       this.zone.run(() => {
-        this.passwordService.isConfirmExitDialogShown = true;
+        this.dialogsService.openConfirmExitWindow();
       });
     })
 

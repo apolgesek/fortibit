@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HotkeyService, PasswordStoreService } from '@app/core/services';
+import { HotkeyService, DatabaseService } from '@app/core/services';
 import { MenuItem } from 'primeng/api';
+import { DialogsService } from '@app/core/services/dialogs.service';
 
 @Injectable({
   providedIn: 'root'
@@ -8,8 +9,9 @@ import { MenuItem } from 'primeng/api';
 export class ContextMenuItemsService {
 
   constructor(
-    private passwordStore: PasswordStoreService,
+    private databaseService: DatabaseService,
     private hotkeyService: HotkeyService,
+    private dialogsService: DialogsService
   ) { }
 
   buildGroupContextMenuItems(): MenuItem[] {
@@ -17,7 +19,7 @@ export class ContextMenuItemsService {
       {
         label: 'Add subgroup',
         icon: 'pi pi-fw pi-plus',
-        command: () => this.passwordStore.addSubgroup(),
+        command: () => this.databaseService.addSubgroup(),
       },
       {
         separator: true,
@@ -26,7 +28,7 @@ export class ContextMenuItemsService {
         label: 'Rename',
         icon: 'pi pi-fw pi-pencil',
         command: () => {
-          this.passwordStore.renameGroup();
+          this.databaseService.renameGroup();
           requestAnimationFrame(() => {
             (<HTMLInputElement>document.querySelector('.group-name-input')).focus();
           });
@@ -35,7 +37,7 @@ export class ContextMenuItemsService {
       {
         label: 'Delete',
         icon: 'pi pi-fw pi-trash',
-        command: () => this.passwordStore.openDeleteGroupWindow(),
+        command: () => this.dialogsService.openDeleteGroupWindow(),
       },
     ]
   };
@@ -53,28 +55,29 @@ export class ContextMenuItemsService {
       {
         label: 'Copy username',
         command: () => {
-          this.passwordStore.copyToClipboard(
-            this.passwordStore.selectedPasswords[0],
-            this.passwordStore.selectedPasswords[0].username
+          this.databaseService.copyToClipboard(
+            this.databaseService.selectedPasswords[0],
+            this.databaseService.selectedPasswords[0].username
           );
         }
       },
       {
         label: 'Copy password',
         command: () => {
-          this.passwordStore.copyToClipboard(
-            this.passwordStore.selectedPasswords[0],
-            this.passwordStore.selectedPasswords[0].username
+          this.databaseService.copyToClipboard(
+            this.databaseService.selectedPasswords[0],
+            this.databaseService.selectedPasswords[0].username
           );
         }
       },
       { separator: true },
       {
         label: 'Edit (Enter)',
-        visible: this.passwordStore.selectedPasswords.length === 0,
+        visible: this.databaseService.selectedPasswords.length === 0,
         icon: 'pi pi-fw pi-pencil',
         command: () => {
-          this.passwordStore.openEditEntryWindow();
+          this.databaseService.editedEntry = this.databaseService.selectedPasswords[0];
+          this.dialogsService.openEntryWindow();
         }
       },
       this.buildRemoveEntryContextMenuItem()
@@ -88,22 +91,22 @@ export class ContextMenuItemsService {
         {
           label: 'Move top (Ctrl + ↑)',
           icon: 'pi pi-fw pi-angle-double-up',
-          command: () => this.passwordStore.moveTop()
+          command: () => this.databaseService.moveTop()
         },
         {
           label: 'Move up (Alt + ↑)',
           icon: 'pi pi-fw pi-angle-up',
-          command: () => this.passwordStore.moveUp()
+          command: () => this.databaseService.moveUp()
         },
         {
           label: 'Move down (Alt + ↓)',
           icon: 'pi pi-fw pi-angle-down',
-          command: () => this.passwordStore.moveDown()
+          command: () => this.databaseService.moveDown()
         },
         {
           label: 'Move bottom (Ctrl + ↓)',
           icon: 'pi pi-fw pi-angle-double-down',
-          command: () => this.passwordStore.moveBottom()
+          command: () => this.databaseService.moveBottom()
         }
       ]
     }
@@ -114,7 +117,7 @@ export class ContextMenuItemsService {
       label: this.hotkeyService.deleteShortcutLabel,
       icon: 'pi pi-fw pi-trash',
       command: () => {
-        this.passwordStore.openDeleteEntryWindow();
+        this.dialogsService.openDeleteEntryWindow();
       }
     }
   };

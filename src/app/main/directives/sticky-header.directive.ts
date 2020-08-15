@@ -1,5 +1,5 @@
 import { Directive, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
-import { PasswordStoreService } from '@app/core/services/password-store.service';
+import { DatabaseService } from '@app/core/services/database.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -15,7 +15,7 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
 
   constructor(
     private elementRef: ElementRef,
-    private passwordStoreService: PasswordStoreService
+    private databaseService: DatabaseService
   ) { }
 
   ngAfterViewInit() {
@@ -58,7 +58,7 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
   }
 
   private reassignObservedOnPasswordListChange() {
-    this.passwordStoreService.entries$.pipe(
+    this.databaseService.entries$.pipe(
       takeUntil(this.destroyed$)
     ).subscribe(() => {
       requestAnimationFrame(() => {

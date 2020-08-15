@@ -18,10 +18,10 @@ import { TreeModule } from 'primeng/tree';
 import { SharedModule } from '../shared/shared.module';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { StopwatchDirective } from './components/dashboard/stopwatch.directive';
+import { DialogsComponent } from './components/dialogs/dialogs.component';
 import { EntriesTableComponent } from './components/entries-table/entries-table.component';
 import { EntryDetailsComponent } from './components/entry-details/entry-details.component';
 import { EntryFormComponent } from './components/entry-form/entry-form.component';
-import { PopUpsComponent } from './components/pop-ups/pop-ups.component';
 import { BlurEnterDirective } from './directives/blur-enter.directive';
 import { DroppableDirective } from './directives/droppable.directive';
 import { StickyHeaderDirective } from './directives/sticky-header.directive';
@@ -41,7 +41,7 @@ import { MainComponent } from './main.component';
     DroppableDirective,
     EntryDetailsComponent,
     StickyHeaderDirective,
-    PopUpsComponent
+    DialogsComponent
   ],
   imports: [
     CommonModule,

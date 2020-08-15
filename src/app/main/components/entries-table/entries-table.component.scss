@@ -212,11 +212,6 @@ text-align: center;
     }
 }
 
-.header {
-    margin-left: 0.25rem;
-    padding: 0.45 0rem;
-}
-
 .add-group {
     display: flex;
     margin: auto;
@@ -224,6 +219,7 @@ text-align: center;
     justify-content: center;
     align-items: center;
     font-size: 0.9rem;
+    padding-top: 0.5rem;
 }
 
 .group-separator {
