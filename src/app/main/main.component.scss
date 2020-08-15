@@ -1,3 +1,5 @@
+@import 'variables';
+
 :host ::ng-deep{
   .ui-inputgroup {
     input {
@@ -27,14 +29,14 @@
 
 .brand {
   height: 10rem;
-  background-image: linear-gradient(270deg,#2bc0ec,#1b81d7);
+  background-image: linear-gradient(270deg, $picton-blue, $curious-blue);
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 
   h1.title {
-    color: #fff;
+    color: $white;
     font-size: 3rem;
     margin: 0;
     font-weight: 400;
@@ -43,7 +45,7 @@
 
     .brand-logo {
       height: 3rem;
-      fill: #fff;
+      fill: $white;
       margin-right: 0.6rem;
     }
   }
@@ -67,6 +69,6 @@
 .version {
   display: flex;
   justify-content: center;
-  color: #ccc;
+  color: $silver;
   margin-top: 1rem;
 }

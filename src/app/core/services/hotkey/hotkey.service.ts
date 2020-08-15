@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { DatabaseService } from '../database.service';
 import { DarwinHotkeyProvider } from './darwin-hotkey-provider';
 import { IHotkeyProvider } from './hotkey-provider.model';
 import { WindowsHotkeyProvider } from './windows-hotkey-provider';
 import { DialogsService } from '../dialogs.service';
+import { DOCUMENT } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class HotkeyService {
 
   constructor(
     private databaseService: DatabaseService,
-    private dialogsService: DialogsService
+    private dialogsService: DialogsService,
+    @Inject(DOCUMENT) private document: Document
   ) {
     if (process.platform === 'darwin') {
       this.hotkeyProvider = new DarwinHotkeyProvider(
@@ -37,6 +39,10 @@ export class HotkeyService {
   }
 
   intercept(event: KeyboardEvent) {
+    // disable hotkey if dialog opened
+    if (this.document.body.classList.contains('ui-overflow-hidden')) {
+      return;
+    }
     this.hotkeyProvider.registerSaveDatabase(event);
     this.hotkeyProvider.registerDeleteEntry(event);
     this.hotkeyProvider.registerEditEntry(event);

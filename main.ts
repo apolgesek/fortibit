@@ -1,10 +1,19 @@
-import { app, BrowserWindow, ipcMain, dialog, clipboard, SaveDialogReturnValue, shell } from 'electron';
-const version = require('./package.json').version as string;
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  clipboard,
+  SaveDialogReturnValue,
+  shell
+} from 'electron';
 
 import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
+
 import { Encryptor } from './encryption/encryptor';
+const version = require('./package.json').version as string;
 
 let win: BrowserWindow = null;
 const args = process.argv.slice(1),
@@ -19,7 +28,6 @@ const ext = '.hslc';
 
 function createWindow(): BrowserWindow {
 
-  // Create the browser window.
   win = new BrowserWindow({
     x: 0,
     y: 0,
@@ -66,7 +74,6 @@ function createWindow(): BrowserWindow {
 }
 
 try {
-
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
@@ -94,16 +101,22 @@ try {
     let savePath: SaveDialogReturnValue = { filePath: file?.filePath, canceled: false };
     let output;
     const stringData = JSON.stringify(passwordList, (k ,v) => (k === 'parent' ? undefined : v));
-    if (!file) {
+    if (!currentPassword) {
       savePath = await dialog.showSaveDialog(win, {});
       output = Encryptor.encryptString(stringData, newPassword);
+      currentPassword = newPassword;
     } else {
       output = Encryptor.encryptString(stringData, currentPassword);
     }
     const finalFilePath = savePath.filePath.endsWith(ext) ? savePath.filePath : savePath.filePath + ext;
 
-    fs.writeFile(finalFilePath, output, () => {});
-    file = { filePath: finalFilePath, filename: path.basename(finalFilePath) };
+    try {
+      fs.writeFile(finalFilePath, output, () => null);
+      file = { filePath: finalFilePath, filename: path.basename(finalFilePath) };
+      win.webContents.send('saveStatus', { status: true,  message: undefined, file });
+    } catch (err) {
+      win.webContents.send('saveStatus', { status: false,  message: err });
+    }
   });
 
   ipcMain.on('copyToClipboard', (_, value: string) => {
@@ -157,14 +170,6 @@ try {
 
   ipcMain.on('exit', () => {
     app.quit();
-  });
-
-  app.setAboutPanelOptions({
-    applicationName: "Haslock", 
-    applicationVersion: version,
-    version: version,
-    copyright: "Copyright © 2020 by Arkadiusz Półgęsek",
-    authors: ["Arkadiusz Półgęsek"],
   });
 
 } catch (e) {

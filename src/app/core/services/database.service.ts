@@ -92,9 +92,38 @@ export class DatabaseService {
       });
     });
 
+    this.electronService.ipcRenderer.on('saveStatus', (_, { status, message, file }) => {
+      this.zone.run(() => {
+        if (status) {
+          this.file = file;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Database saved',
+            life: 5000,
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error: ' + message,
+            life: 5000,
+          });
+        }
+      });
+    });
+
     if (AppConfig.mocks) {
       const mockDataManager = new MockDataManager(this);
       mockDataManager.loadMockEntries();
+    } else {
+      this.groups[0].data = [
+        {"id":"687cc183-f40d-4512-8cad-955717f4f22c","title":"Social network","username":"John Doe","value":"kFwOIvnxU","url":"http://johnssocialnetwork.domain","notes":"I love this website", "creationDate": new Date()},
+        {"id":"ee4ea1d0-7e66-4740-8ab7-0cc43d0bc474","title":"Work","username":"john.doe","value":"vVk6CDOqFSDx","url":"johnswork.com/login", "creationDate": new Date()},
+        {"id":"564e90fa-55e3-49e0-a0c3-ff2b2c65d239","title":"Email","username":"john.doe@xyz.com","value":"z0lGjwa","notes":"Email for important stuff", "creationDate": new Date()},
+      ];
+      this.groups[0].children.forEach((_, index) => {
+        this.groups[0].children[index].data = [];
+      });
+      this.setDateSaved();
     }
 
     this.selectedCategory = this.groups[0];

@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ElectronService } from '../core/services';
 import { DatabaseService } from '../core/services/database.service';
@@ -14,7 +14,7 @@ const logoURL = require('../../assets/images/lock.svg');
     fade()
   ]
 })
-export class MainComponent implements OnInit {
+export class MainComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;
   public version: string;
 
@@ -54,6 +54,10 @@ export class MainComponent implements OnInit {
     })
   }
 
+  ngOnDestroy() {
+    this.loginForm.reset();
+  }
+
   onLoginSubmit() {
     Object.values(this.loginForm.controls).forEach(control => {
       control.markAsDirty();
@@ -65,5 +69,4 @@ export class MainComponent implements OnInit {
 
     this.electronService.ipcRenderer.send('authAttempt', this.loginForm.value.password);
   }
-
 }
