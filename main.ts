@@ -36,9 +36,12 @@ function createWindow(): BrowserWindow {
     webPreferences: {
       nodeIntegration: true,
       allowRunningInsecureContent: (serve) ? true : false,
+      devTools: (serve) ? true : false,
     },
-    resizable: true
+    resizable: true,
   });
+
+  win.removeMenu();
 
   if (serve) {
     require('electron-reload')(__dirname, {
