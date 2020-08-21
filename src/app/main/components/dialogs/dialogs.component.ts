@@ -131,18 +131,13 @@ export class DialogsComponent {
     });
 
     if (this.newEntryForm.valid) {
-      if (this.databaseService.editedEntry?.creationDate) {
+      if (this.databaseService.editedEntry?.id) {
         this.databaseService.addEntry(this.newEntryForm.value);
       } else {
         this.databaseService.addEntry({...this.newEntryForm.value, creationDate: new Date()});
       }
       this.dialogsService.isEntryDialogShown = false;
     }
-  }
-
-  clearEntryForm() {
-    this.databaseService.editedEntry = undefined;
-    this.newEntryForm.reset();
   }
 
   initEntryForm() {
@@ -152,7 +147,9 @@ export class DialogsComponent {
       username: ['', Validators.required],
       value: ['', Validators.required],
       url: [''],
-      notes: ['']
+      notes: [''],
+      creationDate: [null],
+      lastAccessDate: [null]
     }, { updateOn: 'blur' });
 
     if (this.databaseService.editedEntry) {

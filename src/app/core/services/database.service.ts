@@ -135,7 +135,7 @@ export class DatabaseService {
     if (entryModel.id) {
       const catalogData = this.findRow(this.groups[0], entryModel.id);
       let entryIdx = catalogData.findIndex(p => p.id === entryModel.id);
-      catalogData[entryIdx] = {...entryModel, id: uuidv4()};
+      catalogData[entryIdx] = {...entryModel, id: uuidv4()}; // update id for entries table change detection
       this.selectedPasswords = [catalogData[entryIdx]];
     } else {
       this.selectedCategory.data.push({...entryModel, id: uuidv4()});

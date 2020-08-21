@@ -21,7 +21,6 @@ import { StopwatchDirective } from './components/dashboard/stopwatch.directive';
 import { DialogsComponent } from './components/dialogs/dialogs.component';
 import { EntriesTableComponent } from './components/entries-table/entries-table.component';
 import { EntryDetailsComponent } from './components/entry-details/entry-details.component';
-import { EntryFormComponent } from './components/entry-form/entry-form.component';
 import { BlurEnterDirective } from './directives/blur-enter.directive';
 import { DroppableDirective } from './directives/droppable.directive';
 import { StickyHeaderDirective } from './directives/sticky-header.directive';
@@ -34,7 +33,6 @@ import { MainComponent } from './main.component';
     MainComponent,
     DashboardComponent,
     EntriesTableComponent,
-    EntryFormComponent,
     StopwatchDirective,
     TextEmphasizeDirective,
     BlurEnterDirective,
@@ -62,6 +60,5 @@ import { MainComponent } from './main.component';
     DragDropModule
   ],
   providers: [ DialogService, TreeDragDropService ],
-  entryComponents: [ EntryFormComponent ]
 })
 export class HomeModule {}
