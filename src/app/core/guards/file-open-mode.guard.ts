@@ -18,9 +18,10 @@ export class FileOpenModeGuard implements CanActivate {
     if (result) {
       this.passwordService.file = result;
       this.router.navigateByUrl('/home');
+
       return Promise.resolve(false);
-    } else {
-      return Promise.resolve(true);
-    }
+    } 
+
+    return Promise.resolve(true);
   }
 }

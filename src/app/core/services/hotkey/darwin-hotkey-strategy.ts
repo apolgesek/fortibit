@@ -1,17 +1,17 @@
 import { DatabaseService } from "../database.service";
 import { DialogsService } from "../dialogs.service";
-import { IHotkeyProvider } from "./hotkey-provider.model";
+import { IHotkeyStrategy } from "./hotkey-strategy.model";
 
-export class DarwinHotkeyProvider implements IHotkeyProvider {
+export class DarwinHotkeyStrategy implements IHotkeyStrategy {
     constructor(
       private databaseService: DatabaseService,
       private dialogsService: DialogsService
     ) {}
   
     public registerSaveDatabase(event: KeyboardEvent) {
-        if (event.key === 's' && event.metaKey) {
-          this.databaseService.trySaveDatabase();
-        }
+      if (event.key === 's' && event.metaKey) {
+        !this.databaseService.file ? this.dialogsService.openMasterPasswordWindow() : this.databaseService.saveDatabase(null);
+      }
     }
   
     public registerDeleteEntry(event: KeyboardEvent) {
@@ -23,7 +23,7 @@ export class DarwinHotkeyProvider implements IHotkeyProvider {
     public registerEditEntry(event: KeyboardEvent) {
       if (
         event.key === 'Enter'
-        && !this.dialogsService.isEntryDialogShown
+        && !document.querySelector('.ui-dialog')
         && this.databaseService.selectedPasswords.length === 1
         && !this.databaseService.isRenameModeOn
       ) {
@@ -33,7 +33,7 @@ export class DarwinHotkeyProvider implements IHotkeyProvider {
     }
   
     public registerAddEntry(event: KeyboardEvent) {
-      if (event.key === 'i' && event.metaKey && !this.dialogsService.isEntryDialogShown) {
+      if (event.key === 'i' && event.metaKey && !document.querySelector('.ui-dialog')) {
         this.dialogsService.openEntryWindow();
       }
     }

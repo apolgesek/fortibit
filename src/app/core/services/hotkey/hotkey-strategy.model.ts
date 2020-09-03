@@ -1,4 +1,4 @@
-export interface IHotkeyProvider {
+export interface IHotkeyStrategy {
     registerSaveDatabase: (event: KeyboardEvent) => void;
     registerDeleteEntry: (event: KeyboardEvent) => void;
     registerEditEntry: (event: KeyboardEvent) => void;

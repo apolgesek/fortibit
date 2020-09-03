@@ -1,17 +1,17 @@
-import { Injectable, Inject } from '@angular/core';
-import { DatabaseService } from '../database.service';
-import { DarwinHotkeyProvider } from './darwin-hotkey-provider';
-import { IHotkeyProvider } from './hotkey-provider.model';
-import { WindowsHotkeyProvider } from './windows-hotkey-provider';
-import { DialogsService } from '../dialogs.service';
 import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
+import { DatabaseService } from '../database.service';
+import { DialogsService } from '../dialogs.service';
+import { DarwinHotkeyStrategy } from './darwin-hotkey-strategy';
+import { IHotkeyStrategy } from './hotkey-strategy.model';
+import { WindowsHotkeyStrategy } from './windows-hotkey-provider';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HotkeyService {
 
-  private hotkeyProvider: IHotkeyProvider;
+  private hotkeyStrategy: IHotkeyStrategy;
   public deleteShortcutLabel: string;
 
   constructor(
@@ -20,13 +20,13 @@ export class HotkeyService {
     @Inject(DOCUMENT) private document: Document
   ) {
     if (process.platform === 'darwin') {
-      this.hotkeyProvider = new DarwinHotkeyProvider(
+      this.hotkeyStrategy = new DarwinHotkeyStrategy(
         this.databaseService,
         this.dialogsService
       );
       this.deleteShortcutLabel = 'Delete (Cmd + ⌫)';
     } else {
-      this.hotkeyProvider = new WindowsHotkeyProvider(
+      this.hotkeyStrategy = new WindowsHotkeyStrategy(
         this.databaseService,
         this.dialogsService
       );
@@ -43,14 +43,14 @@ export class HotkeyService {
     if (this.document.body.classList.contains('ui-overflow-hidden')) {
       return;
     }
-    this.hotkeyProvider.registerSaveDatabase(event);
-    this.hotkeyProvider.registerDeleteEntry(event);
-    this.hotkeyProvider.registerEditEntry(event);
-    this.hotkeyProvider.registerAddEntry(event);
-    this.hotkeyProvider.registerSelectAllEntries(event);
-    this.hotkeyProvider.registerMoveUpEntry(event);
-    this.hotkeyProvider.registerMoveTopEntry(event);
-    this.hotkeyProvider.registerMoveDownEntry(event);
-    this.hotkeyProvider.registerMoveBottomEntry(event);
+    this.hotkeyStrategy.registerSaveDatabase(event);
+    this.hotkeyStrategy.registerDeleteEntry(event);
+    this.hotkeyStrategy.registerEditEntry(event);
+    this.hotkeyStrategy.registerAddEntry(event);
+    this.hotkeyStrategy.registerSelectAllEntries(event);
+    this.hotkeyStrategy.registerMoveUpEntry(event);
+    this.hotkeyStrategy.registerMoveTopEntry(event);
+    this.hotkeyStrategy.registerMoveDownEntry(event);
+    this.hotkeyStrategy.registerMoveBottomEntry(event);
   }
 }

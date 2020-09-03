@@ -82,6 +82,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   trySaveDatabase() {
-    this.databaseService.trySaveDatabase();
+    !this.databaseService.file ? this.dialogsService.openMasterPasswordWindow() : this.databaseService.saveDatabase(null);
   }
 }

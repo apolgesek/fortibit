@@ -224,3 +224,13 @@ body .ui-dialog .ui-dialog-titlebar {
   color: $bright-red;
   margin: 0.5rem 0 0;
 }
+
+.footer-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.dialog-message {
+  padding: 1rem;
+}

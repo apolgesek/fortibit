@@ -1,0 +1,22 @@
+<div class="dialog-message">
+  <ng-container *ngIf="selectedRowsCount === 1; else multiRemove">
+    Are you sure you want to remove this entry?
+  </ng-container>
+  <ng-template #multiRemove>
+    Are you sure you want to remove <strong>{{ selectedRowsCount }}</strong> entries?
+  </ng-template>
+</div>
+<div class="footer-container">
+  <button
+    type="button"
+    class="text-btn"
+    (click)="closeRemoveEntryDialog()">
+    Cancel
+  </button>
+  <button
+    type="button"
+    class="primary-btn"
+    (click)="deleteEntry()">
+    Remove
+  </button>
+</div>

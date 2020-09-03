@@ -16,7 +16,7 @@ import { HotkeyService } from './core/services/hotkey/hotkey.service';
 })
 export class AppComponent implements AfterViewInit {
 
-  private cssSelectors = [
+  private preventEntryUnselectSelectors = [
     '.row-entry',
     '.menu-panel *',
     '.ui-dialog',
@@ -136,7 +136,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   private isOutsideClick(event: MouseEvent) {
-    return this.cssSelectors.every(s => this.isElementOutside(s))
+    return this.preventEntryUnselectSelectors.every(s => this.isElementOutside(s))
     && !(<Element>event.srcElement).classList.contains('ui-clickable')
   }
 

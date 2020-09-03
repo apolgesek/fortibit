@@ -1,0 +1,22 @@
+<p-toast
+	position="bottom-right"
+	[showTransitionOptions]="'150ms'"
+	[hideTransitionOptions]="'250ms'"
+	[showTransformOptions]="'translateX(100%)'">
+	<ng-template
+		let-message
+		pTemplate="message">
+		<div class="toast-outer">
+			<div class="toast-inner">
+				<div class="toast-text">{{ message.summary }}</div>
+				<div
+					*ngIf="message.detail === 'clipboard'"
+					[appStopwatch]="message.life"
+					class="seconds-left">
+				</div>
+			</div>
+		</div>
+	</ng-template>
+</p-toast>
+
+

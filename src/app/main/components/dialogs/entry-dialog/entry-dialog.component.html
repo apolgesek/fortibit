@@ -1,0 +1,66 @@
+<ng-container
+  *ngIf="newEntryForm"
+  [formGroup]="newEntryForm">
+  <div>
+    <div class="ui-inputgroup">
+      <span class="ui-inputgroup-addon"><i class="pi pi-bookmark"></i></span>
+      <input
+        type="text"
+        formControlName="title"
+        placeholder="Title">         
+    </div>
+    <div
+      class="ui-inputgroup"
+      [ngClass]="{'ng-invalid': newEntryForm.get('username').invalid && newEntryForm.get('username').dirty}">
+      <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+      <input
+        type="text"
+        formControlName="username"
+        placeholder="Username">         
+    </div>
+    <div
+      *ngIf="newEntryForm.get('username').invalid && newEntryForm.get('username').dirty"
+      @fadeSlide
+      class="validation-error">
+      Username is required
+    </div>
+    <div
+      class="ui-inputgroup"
+      [ngClass]="{'ng-invalid': newEntryForm.get('value').invalid && newEntryForm.get('value').dirty}">
+      <span class="ui-inputgroup-addon"><i class="pi pi-key"></i></span>
+      <input
+        type="password"
+        formControlName="value"
+        placeholder="Password">   
+    </div>
+    <div
+      *ngIf="newEntryForm.get('value').invalid && newEntryForm.get('value').dirty"
+      @fadeSlide
+      class="validation-error">
+      Password is required
+    </div>		
+    <div class="ui-inputgroup">
+      <span class="ui-inputgroup-addon"><i class="pi pi-globe"></i></span>
+      <input
+        type="text"
+        formControlName="url"
+        placeholder="Website">      
+    </div>
+    <div class="ui-inputgroup">
+      <span class="ui-inputgroup-addon"><i class="pi pi-info"></i></span>
+      <textarea
+        formControlName="notes"
+        placeholder="Optional note"
+        rows="5">
+      </textarea>     
+    </div>
+  </div>
+</ng-container>
+<div class="footer-container">
+  <button
+    type="button"
+    (click)="addNewEntry()"
+    class="primary-btn">
+    Confirm
+  </button>
+</div>

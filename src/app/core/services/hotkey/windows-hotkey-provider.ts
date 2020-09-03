@@ -1,17 +1,17 @@
 import { DatabaseService } from "../database.service";
-import { IHotkeyProvider } from "./hotkey-provider.model";
 import { DialogsService } from "../dialogs.service";
+import { IHotkeyStrategy } from "./hotkey-strategy.model";
 
-export class WindowsHotkeyProvider implements IHotkeyProvider {
+export class WindowsHotkeyStrategy implements IHotkeyStrategy {
     constructor(
       private databaseService: DatabaseService,
       private dialogsService: DialogsService
     ) {}
   
     public registerSaveDatabase(event: KeyboardEvent) {
-        if (event.key === 's' && event.ctrlKey) {
-          this.databaseService.trySaveDatabase();
-        }
+      if (event.key === 's' && event.ctrlKey) {
+        !this.databaseService.file ? this.dialogsService.openMasterPasswordWindow() : this.databaseService.saveDatabase(null);
+      }
     }
   
     public registerDeleteEntry(event: KeyboardEvent) {
@@ -21,18 +21,19 @@ export class WindowsHotkeyProvider implements IHotkeyProvider {
     }
   
     public registerEditEntry(event: KeyboardEvent) {
-      if (event.key === 'Enter'
-          && !this.dialogsService.isEntryDialogShown
+      if (
+          event.key === 'Enter'
+          && !document.querySelector('.ui-dialog')
           && this.databaseService.selectedPasswords.length === 1
           && !this.databaseService.isRenameModeOn
-        ) {
+      ) {
         this.databaseService.editedEntry = this.databaseService.selectedPasswords[0];
         this.dialogsService.openEntryWindow();
       }
     }
   
     public registerAddEntry(event: KeyboardEvent) {
-      if (event.key === 'i' && event.ctrlKey) {
+      if (event.key === 'i' && event.ctrlKey && !document.querySelector('.ui-dialog')) {
         this.dialogsService.openEntryWindow();
       }
     }

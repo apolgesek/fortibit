@@ -7,7 +7,6 @@ import { map, shareReplay } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { markDirty } from '../decorators/mark-dirty.decorator';
 import { PasswordEntry } from '../models/password-entry.model';
-import { DialogsService } from './dialogs.service';
 import { ElectronService } from './electron/electron.service';
 import { MockDataManager } from './mock-data-manager';
 
@@ -64,7 +63,6 @@ export class DatabaseService {
     private router: Router,
     private zone: NgZone,
     private messageService: MessageService,
-    private dialogsService: DialogsService
   ) {
     this.entries$ = combineLatest(
       this.passwordListSource,
@@ -146,7 +144,7 @@ export class DatabaseService {
 
   @markDirty()
   deleteEntry() {
-    if (this.selectedPasswords.length === 0) {
+    if (this.selectedPasswords.length === 0) { // drag entry when it's not selected first
       const catalogData = this.findRow(this.groups[0], this.draggedEntry[0].id);
       const idx = catalogData.findIndex(e => e.id === this.draggedEntry[0].id);
       catalogData.splice(idx, 1);
@@ -288,13 +286,8 @@ export class DatabaseService {
     this.updateEntries();
   }
 
-  trySaveDatabase() {
-    !this.file ? this.dialogsService.openMasterPasswordWindow() : this.saveDatabase(null);
-  }
-
   saveNewDatabase(newPassword: string) {
     this.saveDatabase(newPassword);
-    this.dialogsService.closeMasterPasswordWindow();
   }
 
   setDateSaved() {

@@ -1,0 +1,24 @@
+@mixin form-dialog {
+  .ui-inputgroup {
+    margin: 0.5rem 0;
+    input {
+      width: 100%;
+      padding: 0.5rem;
+    }
+  }
+  
+  .validation-error {
+    margin: 0.5rem 0;
+  }
+  
+  ::ng-deep {
+    .ui-fluid {
+      display: flex;
+      justify-content: flex-end;
+    }
+  
+    .ui-inputgroup-addon i {
+      line-height: 1.25rem;
+    }
+  }
+}
