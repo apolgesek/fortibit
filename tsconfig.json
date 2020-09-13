@@ -23,14 +23,14 @@
       "@app/*": [
         "app/*"
       ],
+      "@assets/*": [
+        "assets/*"
+      ]
     }
   },
   "files": [
-    "src/main.ts",
     "src/polyfills.ts",
-  ],
-  "include": [
-    "encryption/encryptor.ts"
+    "src/main.ts",
   ],
   "exclude": [
     "node_modules"

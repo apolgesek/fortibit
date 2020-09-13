@@ -5,7 +5,7 @@ import { DeleteGroupDialogComponent } from '@app/main/components/dialogs/delete-
 import { EntryDialogComponent } from '@app/main/components/dialogs/entry-dialog/entry-dialog.component';
 import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/master-password-dialog/master-password-dialog.component';
 import { DialogService } from 'primeng/dynamicdialog';
-import { DatabaseService } from './database.service';
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ import { DatabaseService } from './database.service';
 export class DialogsService {
   constructor(
     public dialogService: DialogService,
-    private databaseService: DatabaseService
+    private storageService: StorageService
   ) { }
 
   openDeleteEntryWindow() {
@@ -47,7 +47,7 @@ export class DialogsService {
     this.dialogService.open(
       EntryDialogComponent,
       {
-        header: this.databaseService.editedEntry ? 'Edit entry' : 'New entry',
+        header: this.storageService.editedEntry ? 'Edit entry' : 'New entry',
         width: '70%'
       }
     );

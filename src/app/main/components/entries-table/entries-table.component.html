@@ -65,7 +65,7 @@
 			<ng-template
 				pTemplate="body"
 				let-rowData
-				let-rowIndex="rowIndex">
+				let-rowIndex="entryIndex">
 				<tr *ngIf="rowData.isGroup; else entryTemplate">
 					<td colspan="3">
 						<div class="group-separator">
@@ -78,7 +78,7 @@
 					<tr
 						pDraggable
 						[pContextMenuRow]="rowData"
-						[pContextMenuRowIndex]="rowIndex"
+						[pContextMenuRowIndex]="entryIndex"
 						(onDragStart)="onDragStart($event, rowData)"
 						(onDragEnd)="onDragEnd($event)"
 						(click)="selectEntry($event, rowData)"

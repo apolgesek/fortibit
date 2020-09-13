@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HotkeyService, DatabaseService } from '@app/core/services';
+import { HotkeyService, StorageService } from '@app/core/services';
 import { MenuItem } from 'primeng/api';
 import { DialogsService } from '@app/core/services/dialogs.service';
 
@@ -9,7 +9,7 @@ import { DialogsService } from '@app/core/services/dialogs.service';
 export class ContextMenuItemsService {
 
   constructor(
-    private databaseService: DatabaseService,
+    private storageService: StorageService,
     private hotkeyService: HotkeyService,
     private dialogsService: DialogsService
   ) { }
@@ -19,7 +19,7 @@ export class ContextMenuItemsService {
       {
         label: 'Add subgroup',
         icon: 'pi pi-fw pi-plus',
-        command: () => this.databaseService.addSubgroup(),
+        command: () => this.storageService.addSubgroup(),
       },
       {
         separator: true,
@@ -28,7 +28,7 @@ export class ContextMenuItemsService {
         label: 'Rename',
         icon: 'pi pi-fw pi-pencil',
         command: () => {
-          this.databaseService.renameGroup();
+          this.storageService.renameGroup();
           requestAnimationFrame(() => {
             (<HTMLInputElement>document.querySelector('.group-name-input')).focus();
           });
@@ -55,28 +55,28 @@ export class ContextMenuItemsService {
       {
         label: 'Copy username',
         command: () => {
-          this.databaseService.copyToClipboard(
-            this.databaseService.selectedPasswords[0],
-            this.databaseService.selectedPasswords[0].username
+          this.storageService.copyToClipboard(
+            this.storageService.selectedPasswords[0],
+            this.storageService.selectedPasswords[0].username
           );
         }
       },
       {
         label: 'Copy password',
         command: () => {
-          this.databaseService.copyToClipboard(
-            this.databaseService.selectedPasswords[0],
-            this.databaseService.selectedPasswords[0].username
+          this.storageService.copyToClipboard(
+            this.storageService.selectedPasswords[0],
+            this.storageService.selectedPasswords[0].username
           );
         }
       },
       { separator: true },
       {
         label: 'Edit (Enter)',
-        visible: this.databaseService.selectedPasswords.length === 0,
+        visible: this.storageService.selectedPasswords.length === 0,
         icon: 'pi pi-fw pi-pencil',
         command: () => {
-          this.databaseService.editedEntry = this.databaseService.selectedPasswords[0];
+          this.storageService.editedEntry = this.storageService.selectedPasswords[0];
           this.dialogsService.openEntryWindow();
         }
       },
@@ -89,24 +89,24 @@ export class ContextMenuItemsService {
       label: 'Rearrange',
       items: [
         {
-          label: 'Move top (Ctrl + ↑)',
+          label: this.hotkeyService.configuration.moveTopLabel,
           icon: 'pi pi-fw pi-angle-double-up',
-          command: () => this.databaseService.moveTop()
+          command: () => this.storageService.moveTop()
         },
         {
           label: 'Move up (Alt + ↑)',
           icon: 'pi pi-fw pi-angle-up',
-          command: () => this.databaseService.moveUp()
+          command: () => this.storageService.moveUp()
         },
         {
           label: 'Move down (Alt + ↓)',
           icon: 'pi pi-fw pi-angle-down',
-          command: () => this.databaseService.moveDown()
+          command: () => this.storageService.moveDown()
         },
         {
-          label: 'Move bottom (Ctrl + ↓)',
+          label: this.hotkeyService.configuration.moveBottomLabel,
           icon: 'pi pi-fw pi-angle-double-down',
-          command: () => this.databaseService.moveBottom()
+          command: () => this.storageService.moveBottom()
         }
       ]
     }
@@ -114,7 +114,7 @@ export class ContextMenuItemsService {
   
   private buildRemoveEntryContextMenuItem(): MenuItem {
     return {
-      label: this.hotkeyService.deleteShortcutLabel,
+      label: this.hotkeyService.configuration.deleteLabel,
       icon: 'pi pi-fw pi-trash',
       command: () => {
         this.dialogsService.openDeleteEntryWindow();

@@ -7,15 +7,18 @@ import { map, shareReplay } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { markDirty } from '../decorators/mark-dirty.decorator';
 import { PasswordEntry } from '../models/password-entry.model';
+import { ArrayUtils } from '../utils';
 import { ElectronService } from './electron/electron.service';
-import { MockDataManager } from './mock-data-manager';
+import { MockDataService } from './mock-data.service';
+
+const nameof = <T>(name: keyof T) => name;
 
 @Injectable({
   providedIn: 'root'
 })
-export class DatabaseService {
+export class StorageService {
   public readonly entries$: Observable<PasswordEntry[]>;
-  public readonly rowIndex: number;
+  public readonly entryIndex: number;
 
   public dateSaved: Date;
   public selectedPasswords: PasswordEntry[] = [];
@@ -64,17 +67,16 @@ export class DatabaseService {
     private zone: NgZone,
     private messageService: MessageService,
   ) {
-    this.entries$ = combineLatest(
+    this.entries$ = combineLatest([
       this.passwordListSource,
       this.searchPhraseSource
-    ).pipe(
+    ]).pipe(
       map(([ passwords, searchPhrase ]) => this.filterEntries(passwords, searchPhrase)),
       shareReplay()
     );
 
     this.searchPhrase$ = this.searchPhraseSource.asObservable().pipe();
 
-    // introduce invalid password response
     this.electronService.ipcRenderer.on('onContentDecrypt', (_, { decrypted, file }) => {
       this.zone.run(() => {
         try {
@@ -110,14 +112,10 @@ export class DatabaseService {
     });
 
     if (AppConfig.mocks) {
-      const mockDataManager = new MockDataManager(this);
-      mockDataManager.loadMockEntries();
+      MockDataService.loadMockedEntries(this.groups[0]);
+      this.setDateSaved();
     } else {
-      this.groups[0].data = [
-        {"id":"687cc183-f40d-4512-8cad-955717f4f22c","title":"Social network","username":"John Doe","value":"kFwOIvnxU","url":"http://johnssocialnetwork.domain","notes":"I love this website", "creationDate": new Date()},
-        {"id":"ee4ea1d0-7e66-4740-8ab7-0cc43d0bc474","title":"Work","username":"john.doe","value":"vVk6CDOqFSDx","url":"johnswork.com/login", "creationDate": new Date()},
-        {"id":"564e90fa-55e3-49e0-a0c3-ff2b2c65d239","title":"Email","username":"john.doe@xyz.com","value":"z0lGjwa","notes":"Email for important stuff", "creationDate": new Date()},
-      ];
+      this.groups[0].data = require('@assets/json/new_db_data.json');
       this.groups[0].children.forEach((_, index) => {
         this.groups[0].children[index].data = [];
       });
@@ -192,32 +190,20 @@ export class DatabaseService {
 
   @markDirty()
   moveUp() {
-    const groupData = (this.selectedCategory.data as PasswordEntry[]);
-    this.selectedPasswords.sort((a, b) => groupData.findIndex(e => e.id === a.id) <= groupData.findIndex(e => e.id === b.id) ? -1 : 1)
-
-    const isFirst = this.selectedPasswords.find(p => p.id === groupData[0].id);
-    if (isFirst) {
-      return;
-    }
-    this.selectedPasswords.forEach(element => {
-      const elIdx = groupData.findIndex(e => e.id === element.id);
-      [ groupData[elIdx - 1], groupData[elIdx] ] = [ groupData[elIdx], groupData[elIdx - 1] ];
-    });
+    ArrayUtils.moveElementsLeft<PasswordEntry>(
+      this.selectedCategory.data,
+      this.selectedPasswords,
+      nameof<PasswordEntry>('id')
+    );
   }
 
   @markDirty()
   moveDown() {
-    const groupData = (this.selectedCategory.data as PasswordEntry[]);
-    this.selectedPasswords.sort((a, b) => groupData.findIndex(e => e.id === a.id) >= groupData.findIndex(e => e.id === b.id) ? -1 : 1)
-
-    const isLast = this.selectedPasswords.find(p => p.id === groupData[groupData.length - 1].id);
-    if (isLast) {
-      return;
-    }
-    this.selectedPasswords.forEach(element => {
-      const elIdx = groupData.findIndex(e => e.id === element.id);
-      [ groupData[elIdx], groupData[elIdx + 1] ] = [ groupData[elIdx + 1], groupData[elIdx] ];
-    });
+    ArrayUtils.moveElementsRight<PasswordEntry>(
+      this.selectedCategory.data,
+      this.selectedPasswords,
+      nameof<PasswordEntry>('id')
+    );
   }
 
   @markDirty()

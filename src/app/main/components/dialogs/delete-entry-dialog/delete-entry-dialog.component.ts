@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DatabaseService } from '@app/core/services/database.service';
+import { StorageService } from '@app/core/services/storage.service';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
@@ -10,11 +10,11 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
 export class DeleteEntryDialogComponent implements OnInit {
 
   get selectedRowsCount(): number {
-    return this.databaseService.selectedPasswords.length;
+    return this.storageService.selectedPasswords.length;
   }
 
   constructor(
-    private databaseService: DatabaseService,
+    private storageService: StorageService,
     public ref: DynamicDialogRef
   ) { }
 
@@ -22,7 +22,7 @@ export class DeleteEntryDialogComponent implements OnInit {
   }
 
   deleteEntry() {
-    this.databaseService.deleteEntry();
+    this.storageService.deleteEntry();
     this.closeRemoveEntryDialog();
   }
 

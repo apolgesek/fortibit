@@ -1,7 +1,7 @@
 import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ElectronService } from '../core/services';
-import { DatabaseService } from '../core/services/database.service';
+import { StorageService } from '../core/services/storage.service';
 import { fade } from '@app/shared/animations/fade-slide.animation';
 
 const logoURL = require('../../assets/images/lock.svg');
@@ -19,7 +19,7 @@ export class MainComponent implements OnInit, OnDestroy {
   public version: string;
 
   get isInvalidPassword(): boolean {
-    return this.databaseService.isInvalidPassword;
+    return this.storageService.isInvalidPassword;
   }
 
   get logoURL(): string {
@@ -27,7 +27,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   get filePath(): string {
-    return this.databaseService.file.filePath;
+    return this.storageService.file.filePath;
   }
 
   get passwordControl(): FormControl {
@@ -37,7 +37,7 @@ export class MainComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private zone: NgZone,
-    private databaseService: DatabaseService,
+    private storageService: StorageService,
     private electronService: ElectronService
   ) { }
 
@@ -56,7 +56,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.loginForm.reset();
-    this.databaseService.isInvalidPassword = false;
+    this.storageService.isInvalidPassword = false;
   }
 
   onLoginSubmit() {

@@ -45,7 +45,7 @@ var Encryptor = /** @class */ (function () {
         cipher.setAuthTag(tag);
         return Buffer.concat([cipher.update(ciphertext), cipher.final()]);
     };
-    // AES-256 Counter encryption mode
+    // AES-256 Galois/Counter encryption mode
     Encryptor.ALGORITHM_NAME = 'aes-256-gcm';
     Encryptor.ALGORITHM_NONCE_SIZE = 12;
     Encryptor.ALGORITHM_TAG_SIZE = 16;

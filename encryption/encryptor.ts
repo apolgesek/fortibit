@@ -2,7 +2,7 @@ const crypto = require('crypto');
 
 export class Encryptor {
 
-    // AES-256 Counter encryption mode
+    // AES-256 Galois/Counter encryption mode
     private static readonly ALGORITHM_NAME = 'aes-256-gcm';
     private static readonly ALGORITHM_NONCE_SIZE = 12;
     private static readonly ALGORITHM_TAG_SIZE = 16;

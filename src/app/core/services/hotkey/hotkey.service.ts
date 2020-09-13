@@ -1,36 +1,57 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
-import { DatabaseService } from '../database.service';
+import { IHotkeyConfiguration, IHotkeyStrategy } from '@app/core/models';
 import { DialogsService } from '../dialogs.service';
+import { StorageService } from '../storage.service';
 import { DarwinHotkeyStrategy } from './darwin-hotkey-strategy';
-import { IHotkeyStrategy } from './hotkey-strategy.model';
-import { WindowsHotkeyStrategy } from './windows-hotkey-provider';
+import { WindowsHotkeyStrategy } from './windows-hotkey-strategy';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HotkeyService {
-
   private hotkeyStrategy: IHotkeyStrategy;
+
+  public configuration: IHotkeyConfiguration;
   public deleteShortcutLabel: string;
 
   constructor(
-    private databaseService: DatabaseService,
+    private storageService: StorageService,
     private dialogsService: DialogsService,
     @Inject(DOCUMENT) private document: Document
   ) {
-    if (process.platform === 'darwin') {
-      this.hotkeyStrategy = new DarwinHotkeyStrategy(
-        this.databaseService,
-        this.dialogsService
-      );
-      this.deleteShortcutLabel = 'Delete (Cmd + ⌫)';
-    } else {
-      this.hotkeyStrategy = new WindowsHotkeyStrategy(
-        this.databaseService,
-        this.dialogsService
-      );
-      this.deleteShortcutLabel = 'Delete (Del)';
+    this.create();
+  }
+
+  private create() {
+    switch (process.platform) {
+      case 'darwin':
+        this.hotkeyStrategy = new DarwinHotkeyStrategy(
+          this.storageService,
+          this.dialogsService
+        );
+
+        this.configuration = {
+          deleteLabel: 'Delete (Cmd + ⌫)',
+          moveTopLabel: 'Move top (Cmd + ↑)',
+          moveBottomLabel: 'Move bottom (Cmd + ↓)',
+        };
+
+        break;
+      case 'win32':
+        this.hotkeyStrategy = new WindowsHotkeyStrategy(
+          this.storageService,
+          this.dialogsService
+        );
+
+        this.configuration = {
+          deleteLabel: 'Delete (Del)',
+          moveTopLabel: 'Move top (Ctrl + ↑)',
+          moveBottomLabel: 'Move bottom (Ctrl + ↓)',
+        };
+
+      default:
+        break;
     }
   }
 

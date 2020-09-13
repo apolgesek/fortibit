@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { Resolve, Router } from '@angular/router';
 import { ElectronService } from '@app/core/services';
-import { DatabaseService } from '@app/core/services/database.service';
+import { StorageService } from '@app/core/services/storage.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class FileOpenModeGuard implements CanActivate {
+export class AuthRequiredResolver implements Resolve<boolean> {
   constructor(
     private router: Router,
     private electronService: ElectronService,
-    private passwordService: DatabaseService
+    private passwordService: StorageService
   ) {}
 
-  async canActivate(): Promise<boolean> {
+  async resolve(): Promise<boolean> {
     const result = await this.electronService.ipcRenderer.invoke('appOpenType');
     if (result) {
       this.passwordService.file = result;

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DatabaseService } from '@app/core/services/database.service';
+import { StorageService } from '@app/core/services/storage.service';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { fade } from '@app/shared/animations/fade-slide.animation';
 
@@ -23,7 +23,7 @@ export class MasterPasswordDialogComponent implements OnInit {
   }
 
   constructor(
-    private databaseService: DatabaseService,
+    private storageService: StorageService,
     private fb: FormBuilder
   ) { }
 
@@ -43,7 +43,7 @@ export class MasterPasswordDialogComponent implements OnInit {
     if (this.passwordsNotMatch || this.masterPasswordForm.invalid) {
       return;
     }
-    this.databaseService.saveNewDatabase(this.masterPasswordForm.get('newPassword').value);
+    this.storageService.saveNewDatabase(this.masterPasswordForm.get('newPassword').value);
   }
 
   resetNewPasswordForm() {

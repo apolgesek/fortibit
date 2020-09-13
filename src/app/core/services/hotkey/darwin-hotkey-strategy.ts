@@ -1,16 +1,16 @@
-import { DatabaseService } from "../database.service";
+import { StorageService } from "../storage.service";
 import { DialogsService } from "../dialogs.service";
-import { IHotkeyStrategy } from "./hotkey-strategy.model";
+import { IHotkeyStrategy } from "../../models/hotkey-strategy.model";
 
 export class DarwinHotkeyStrategy implements IHotkeyStrategy {
     constructor(
-      private databaseService: DatabaseService,
+      private storageService: StorageService,
       private dialogsService: DialogsService
     ) {}
   
     public registerSaveDatabase(event: KeyboardEvent) {
       if (event.key === 's' && event.metaKey) {
-        !this.databaseService.file ? this.dialogsService.openMasterPasswordWindow() : this.databaseService.saveDatabase(null);
+        !this.storageService.file ? this.dialogsService.openMasterPasswordWindow() : this.storageService.saveDatabase(null);
       }
     }
   
@@ -24,10 +24,10 @@ export class DarwinHotkeyStrategy implements IHotkeyStrategy {
       if (
         event.key === 'Enter'
         && !document.querySelector('.ui-dialog')
-        && this.databaseService.selectedPasswords.length === 1
-        && !this.databaseService.isRenameModeOn
+        && this.storageService.selectedPasswords.length === 1
+        && !this.storageService.isRenameModeOn
       ) {
-        this.databaseService.editedEntry = this.databaseService.selectedPasswords[0];
+        this.storageService.editedEntry = this.storageService.selectedPasswords[0];
         this.dialogsService.openEntryWindow();
       }
     }
@@ -39,37 +39,37 @@ export class DarwinHotkeyStrategy implements IHotkeyStrategy {
     }
   
     public registerMoveUpEntry(event: KeyboardEvent) {
-      if (event.key === 'ArrowUp' && event.altKey && this.databaseService.selectedPasswords.length) {
-        this.databaseService.moveUp();
+      if (event.key === 'ArrowUp' && event.altKey && this.storageService.selectedPasswords.length) {
+        this.storageService.moveUp();
         event.preventDefault();
       }
     }
   
     public registerMoveTopEntry(event: KeyboardEvent) {
-      if (event.key === 'ArrowUp' && event.metaKey && this.databaseService.selectedPasswords.length) {
-        this.databaseService.moveTop();
+      if (event.key === 'ArrowUp' && event.metaKey && this.storageService.selectedPasswords.length) {
+        this.storageService.moveTop();
         event.preventDefault();
       }
     }
   
     public registerMoveDownEntry(event: KeyboardEvent) {
-      if (event.key === 'ArrowDown' && event.altKey && this.databaseService.selectedPasswords.length) {
-        this.databaseService.moveDown();
+      if (event.key === 'ArrowDown' && event.altKey && this.storageService.selectedPasswords.length) {
+        this.storageService.moveDown();
         event.preventDefault();
       }
     }
   
     public registerMoveBottomEntry(event: KeyboardEvent) {
-      if (event.key === 'ArrowDown' && event.metaKey && this.databaseService.selectedPasswords.length) {
-        this.databaseService.moveBottom();
+      if (event.key === 'ArrowDown' && event.metaKey && this.storageService.selectedPasswords.length) {
+        this.storageService.moveBottom();
         event.preventDefault();
       }
     }
   
     public registerSelectAllEntries(event: KeyboardEvent) {
-      if (event.key === 'a' && event.metaKey && this.databaseService.selectedPasswords.length) {
-        this.databaseService.selectedPasswords = [];
-        this.databaseService.selectedPasswords.push(...this.databaseService.selectedCategory.data);
+      if (event.key === 'a' && event.metaKey && this.storageService.selectedPasswords.length) {
+        this.storageService.selectedPasswords = [];
+        this.storageService.selectedPasswords.push(...this.storageService.selectedCategory.data);
         event.preventDefault();
       }
     }

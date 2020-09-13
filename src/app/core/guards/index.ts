@@ -1,1 +1,1 @@
-export * from './file-open-mode.guard';
+export * from './auth-required.resolver';

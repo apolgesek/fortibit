@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DatabaseService } from '@app/core/services/database.service';
+import { StorageService } from '@app/core/services/storage.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { fade } from '@app/shared/animations/fade-slide.animation';
@@ -14,7 +14,7 @@ export class EntryDialogComponent implements OnInit {
   public newEntryForm: FormGroup;
 
   constructor(
-    private databaseService: DatabaseService,
+    private storageService: StorageService,
     private fb: FormBuilder,
     public ref: DynamicDialogRef
   ) { }
@@ -35,8 +35,8 @@ export class EntryDialogComponent implements OnInit {
       lastAccessDate: [null]
     }, { updateOn: 'blur' });
 
-    if (this.databaseService.editedEntry) {
-      this.newEntryForm.patchValue(this.databaseService.editedEntry);
+    if (this.storageService.editedEntry) {
+      this.newEntryForm.patchValue(this.storageService.editedEntry);
     }
   }
 
@@ -46,10 +46,10 @@ export class EntryDialogComponent implements OnInit {
     });
 
     if (this.newEntryForm.valid) {
-      if (this.databaseService.editedEntry?.id) {
-        this.databaseService.addEntry(this.newEntryForm.value);
+      if (this.storageService.editedEntry?.id) {
+        this.storageService.addEntry(this.newEntryForm.value);
       } else {
-        this.databaseService.addEntry({...this.newEntryForm.value, creationDate: new Date()});
+        this.storageService.addEntry({...this.newEntryForm.value, creationDate: new Date()});
       }
       this.ref.close();
     }

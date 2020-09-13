@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
-import { DatabaseService } from '@app/core/services/database.service';
+import { StorageService } from '@app/core/services/storage.service';
 import { DialogsService } from '@app/core/services/dialogs.service';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -20,7 +20,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private destroyed$ = new Subject<void>();
 
   get isDatabaseDirty(): boolean {
-    return !!this.databaseService.dateSaved;
+    return !!this.storageService.dateSaved;
   }
 
   get isAnyEntry(): boolean {
@@ -28,15 +28,15 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get isOneEntrySelected(): boolean {
-    return this.databaseService.selectedPasswords.length === 1;
+    return this.storageService.selectedPasswords.length === 1;
   }
 
   get isAnyEntrySelected(): boolean {
-    return this.databaseService.selectedPasswords.length > 0;
+    return this.storageService.selectedPasswords.length > 0;
   }
 
   get selectedPasswordsCount(): number {
-    return this.databaseService.selectedPasswords.length;
+    return this.storageService.selectedPasswords.length;
   }
 
   get logoURL(): string {
@@ -44,12 +44,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   constructor(
-    private databaseService: DatabaseService,
+    private storageService: StorageService,
     private dialogsService: DialogsService
   ) { }
 
   ngOnInit(): void {
-    this.selectedCategoryData = this.databaseService.selectedCategory?.data;
+    this.selectedCategoryData = this.storageService.selectedCategory?.data;
   }
 
   ngAfterViewInit(): void {
@@ -58,7 +58,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(500),
       takeUntil(this.destroyed$)
     ).subscribe((event: KeyboardEvent) => {
-      this.databaseService.searchEntries((event.target as HTMLInputElement).value);
+      this.storageService.searchEntries((event.target as HTMLInputElement).value);
     });
   }
 
@@ -68,12 +68,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openAddEntryWindow() {
-    this.databaseService.editedEntry = undefined;
+    this.storageService.editedEntry = undefined;
     this.dialogsService.openEntryWindow();
   }
 
   openEditEntryWindow() {
-    this.databaseService.editedEntry = this.databaseService.selectedPasswords[0];
+    this.storageService.editedEntry = this.storageService.selectedPasswords[0];
     this.dialogsService.openEntryWindow();
   }
 
@@ -82,6 +82,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   trySaveDatabase() {
-    !this.databaseService.file ? this.dialogsService.openMasterPasswordWindow() : this.databaseService.saveDatabase(null);
+    !this.storageService.file ? this.dialogsService.openMasterPasswordWindow() : this.storageService.saveDatabase(null);
   }
 }

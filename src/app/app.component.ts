@@ -6,7 +6,7 @@ import { DomHandler } from 'primeng/dom';
 import { fromEvent } from 'rxjs';
 import { AppConfig } from '../environments/environment';
 import { ElectronService } from './core/services';
-import { DatabaseService } from './core/services/database.service';
+import { StorageService } from './core/services/storage.service';
 import { DialogsService } from './core/services/dialogs.service';
 import { HotkeyService } from './core/services/hotkey/hotkey.service';
 
@@ -30,7 +30,7 @@ export class AppComponent implements AfterViewInit {
     private translate: TranslateService,
     private router: Router,
     private zone: NgZone,
-    private passwordService: DatabaseService,
+    private passwordService: StorageService,
     private dialogsService: DialogsService,
     private hotkeyService: HotkeyService,
   ) {
