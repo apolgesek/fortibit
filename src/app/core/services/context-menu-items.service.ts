@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HotkeyService, StorageService } from '@app/core/services';
-import { MenuItem } from 'primeng/api';
+import { CoreService } from '@app/core/services/core.service';
 import { DialogsService } from '@app/core/services/dialogs.service';
+import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
+import { StorageService } from '@app/core/services/storage.service';
+import { MenuItem } from 'primeng/api';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +13,8 @@ export class ContextMenuItemsService {
   constructor(
     private storageService: StorageService,
     private hotkeyService: HotkeyService,
-    private dialogsService: DialogsService
+    private dialogsService: DialogsService,
+    private coreService: CoreService
   ) { }
 
   buildGroupContextMenuItems(): MenuItem[] {
@@ -55,7 +58,7 @@ export class ContextMenuItemsService {
       {
         label: 'Copy username',
         command: () => {
-          this.storageService.copyToClipboard(
+          this.coreService.copyToClipboard(
             this.storageService.selectedPasswords[0],
             this.storageService.selectedPasswords[0].username
           );
@@ -64,7 +67,7 @@ export class ContextMenuItemsService {
       {
         label: 'Copy password',
         command: () => {
-          this.storageService.copyToClipboard(
+          this.coreService.copyToClipboard(
             this.storageService.selectedPasswords[0],
             this.storageService.selectedPasswords[0].username
           );

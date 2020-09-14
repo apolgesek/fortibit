@@ -1,15 +1,15 @@
-import { Injectable, NgZone } from '@angular/core';
-import { Router } from '@angular/router';
+import { Injectable } from '@angular/core';
 import { AppConfig } from 'environments/environment';
-import { MessageService, TreeNode } from 'primeng/api';
+import { TreeNode } from 'primeng/api';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import { v4 as uuidv4 } from 'uuid';
 import { markDirty } from '../decorators/mark-dirty.decorator';
 import { PasswordEntry } from '../models/password-entry.model';
 import { ArrayUtils } from '../utils';
 import { ElectronService } from './electron/electron.service';
 import { MockDataService } from './mock-data.service';
+import { SearchService } from './search.service';
+import { v4 as uuidv4 } from 'uuid';
 
 const nameof = <T>(name: keyof T) => name;
 
@@ -26,90 +26,42 @@ export class StorageService {
   public selectedCategory: TreeNode;
   public editedEntry: PasswordEntry;
   public contextSelectedCategory: TreeNode;
-  public isInvalidPassword = false;
   public isRenameModeOn = false;
   public file: { filePath: string, filename: string };
-
-  public groups: TreeNode[] = [{
-    key: uuidv4(),
-    label: "Database",
-    expanded: true,
-    expandedIcon: "pi pi-folder-open",
-    draggable: false,
-    data: [],
-    children: [
-      this.buildGroup("General"),
-      this.buildGroup("Email"),
-      this.buildGroup("Work"),
-      this.buildGroup("Banking"),
-    ]
-  }];
-
-  get confirmEntriesDeleteMessage(): string {
-    if (this.selectedPasswords.length > 1) {
-      return `Are you sure you want to delete <strong>${ this.selectedPasswords.length }</strong> entries?`;
-    } else {
-      return `Are you sure you want delete this entry?`;
-    }
-  }
+  public groups: TreeNode[];
 
   get databaseFileName(): string {
     return this.file?.filename ?? '*New db';
   }
   
-  public searchPhrase$: Observable<string>;
-  private searchPhraseSource: BehaviorSubject<string> = new BehaviorSubject<string>('');
   private passwordListSource: BehaviorSubject<PasswordEntry[]> = new BehaviorSubject<PasswordEntry[]>([]);
 
   constructor(
     private electronService: ElectronService,
-    private router: Router,
-    private zone: NgZone,
-    private messageService: MessageService,
+    private searchService: SearchService
   ) {
     this.entries$ = combineLatest([
       this.passwordListSource,
-      this.searchPhraseSource
+      this.searchService.searchPhrase$
     ]).pipe(
-      map(([ passwords, searchPhrase ]) => this.filterEntries(passwords, searchPhrase)),
+      map(([ passwords, searchPhrase ]) => this.searchService.filterEntries(passwords, searchPhrase, this.groups[0])),
       shareReplay()
     );
 
-    this.searchPhrase$ = this.searchPhraseSource.asObservable().pipe();
-
-    this.electronService.ipcRenderer.on('onContentDecrypt', (_, { decrypted, file }) => {
-      this.zone.run(() => {
-        try {
-          const deserializedPasswords = JSON.parse(decrypted);
-          this.setGroups(deserializedPasswords);
-          this.file = file;
-          this.selectedCategory = this.groups[0];
-          this.setDateSaved();
-          this.router.navigate(['/dashboard']);
-        } catch (err) {
-          this.isInvalidPassword = true;
-        }
-      });
-    });
-
-    this.electronService.ipcRenderer.on('saveStatus', (_, { status, message, file }) => {
-      this.zone.run(() => {
-        if (status) {
-          this.file = file;
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Database saved',
-            life: 5000,
-          });
-        } else {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error: ' + message,
-            life: 5000,
-          });
-        }
-      });
-    });
+    this.groups = [{
+      key: uuidv4(),
+      label: "Database",
+      expanded: true,
+      expandedIcon: "pi pi-folder-open",
+      draggable: false,
+      data: [],
+      children: [
+        this.buildGroup("General"),
+        this.buildGroup("Email"),
+        this.buildGroup("Work"),
+        this.buildGroup("Banking"),
+      ]
+    }];
 
     if (AppConfig.mocks) {
       MockDataService.loadMockedEntries(this.groups[0]);
@@ -135,7 +87,7 @@ export class StorageService {
       this.selectedPasswords = [catalogData[entryIdx]];
     } else {
       this.selectedCategory.data.push({...entryModel, id: uuidv4()});
-      this.resetSearch();
+      this.searchService.reset();
     }
     this.updateEntries();
   }
@@ -227,30 +179,6 @@ export class StorageService {
   }
   //#endregion
 
-  exitApp() {
-    window.onbeforeunload = undefined;
-    this.electronService.ipcRenderer.send('exit');
-  }
-
-  searchEntries(value: string) {
-    this.searchPhraseSource.next(value);
-  }
-
-  copyToClipboard(entry: PasswordEntry, property: string) {
-    if (!property) {
-      return;
-    }
-    entry.lastAccessDate = new Date();
-    this.electronService.ipcRenderer.send('copyToClipboard', property);
-    this.messageService.clear();
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Copied to clipboard!',
-      life: 15000,
-      detail: 'clipboard'
-    });
-  }
-
   saveDatabase(newPassword: string) {
     this.electronService.ipcRenderer.send('saveFile', { passwordList: this.groups, newPassword });
     this.setDateSaved();
@@ -258,10 +186,6 @@ export class StorageService {
 
   updateEntries() {
     this.passwordListSource.next(this.selectedCategory.data);
-  }
-
-  resetSearch() {
-    this.searchPhraseSource.next('');
   }
 
   moveEntry(targetGroup: string) {
@@ -278,42 +202,6 @@ export class StorageService {
 
   setDateSaved() {
     this.dateSaved = new Date();
-  }
-
-  private filterEntries(passwords: PasswordEntry[], phrase: string): PasswordEntry[] {
-    if (!phrase) {
-      return passwords;
-    }
-    const tempData: PasswordEntry[] = [];
-    this.buildSearchResultList(this.groups[0], tempData, phrase);
-    return tempData;
-  }
-
-  private buildSearchResultList(node: TreeNode, output: PasswordEntry[] & any, phrase: string) {
-    if (node.data.length) {
-      const filteredNodes: PasswordEntry[] = node.data
-        .filter(p => (p.title.includes(phrase) || p.username.includes(phrase) || p.url?.includes(phrase)));
-      if (filteredNodes.length) {
-        const path: string[] = [];
-        this.buildPath(node, path);
-        output.push({ name: path.reverse().join('/'), isGroup: true });
-        output.push(...filteredNodes);
-      }
-    }
-    if (node.children?.length) {
-      node.children.forEach((element: TreeNode) => {
-        this.buildSearchResultList(element, output, phrase);
-      });
-    } else {
-      return output;
-    }
-  }
-
-  private buildPath(node: TreeNode, path: string[]) {
-    path.push(node.label);
-    if (node.parent) {
-      this.buildPath(node.parent, path);
-    }
   }
 
   private findRow(node: TreeNode, id?: string): PasswordEntry[] {
@@ -343,7 +231,7 @@ export class StorageService {
     }
   }
 
-  private buildGroup(title: string): TreeNode {
+  public buildGroup(title: string): TreeNode {
     return {
       key: uuidv4(),
       label: title,

@@ -158,8 +158,8 @@ try {
     return file;
   });
 
-  ipcMain.on('appVersion', () => {
-    win.webContents.send('appVersion', version);
+  ipcMain.handle('appVersion', () => {
+    return version;
   });
 
   ipcMain.on('openUrl', (_, url: string) => {

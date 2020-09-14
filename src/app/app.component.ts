@@ -85,13 +85,6 @@ export class AppComponent implements AfterViewInit {
       console.log('Mode web');
     }
 
-    this.electronService.ipcRenderer.on('providePassword', (_, file) => {
-      this.zone.run(() => {
-        this.passwordService.file = file;
-        this.router.navigateByUrl('/home');
-      });
-    });
-
     fromEvent(window, 'keydown').subscribe((event: KeyboardEvent) => {
       this.hotkeyService.intercept(event);
     });
@@ -116,12 +109,6 @@ export class AppComponent implements AfterViewInit {
         this.passwordService.selectedPasswords = [];
       }
     });
-
-    this.electronService.ipcRenderer.on('openCloseConfirmationWindow', () => {
-      this.zone.run(() => {
-        this.dialogsService.openConfirmExitWindow();
-      });
-    })
 
     // confirm unsaved database
     if (AppConfig.environment !== 'LOCAL') {

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { StorageService } from '@app/core/services/storage.service';
+import { CoreService } from '@app/core/services/core.service';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
@@ -10,7 +10,7 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
 export class ConfirmExitDialogComponent implements OnInit {
 
   constructor(
-    private storageService: StorageService,
+    private coreService: CoreService,
     public ref: DynamicDialogRef
   ) { }
 
@@ -18,7 +18,7 @@ export class ConfirmExitDialogComponent implements OnInit {
   }
 
   exitApp() {
-    this.storageService.exitApp();
+    this.coreService.exitApp();
   }
 
   closeConfirmExitDialog() {

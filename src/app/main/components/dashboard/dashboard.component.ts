@@ -4,6 +4,7 @@ import { StorageService } from '@app/core/services/storage.service';
 import { DialogsService } from '@app/core/services/dialogs.service';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { SearchService } from '@app/core/services';
 
 const logoURL = require('assets/images/lock.svg');
 
@@ -45,6 +46,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private storageService: StorageService,
+    private searchService: SearchService,
     private dialogsService: DialogsService
   ) { }
 
@@ -58,7 +60,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       debounceTime(500),
       takeUntil(this.destroyed$)
     ).subscribe((event: KeyboardEvent) => {
-      this.storageService.searchEntries((event.target as HTMLInputElement).value);
+      this.searchService.search((event.target as HTMLInputElement).value);
     });
   }
 

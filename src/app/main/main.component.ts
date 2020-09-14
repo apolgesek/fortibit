@@ -1,6 +1,6 @@
 import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { ElectronService } from '../core/services';
+import { CoreService, ElectronService } from '../core/services';
 import { StorageService } from '../core/services/storage.service';
 import { fade } from '@app/shared/animations/fade-slide.animation';
 
@@ -19,7 +19,7 @@ export class MainComponent implements OnInit, OnDestroy {
   public version: string;
 
   get isInvalidPassword(): boolean {
-    return this.storageService.isInvalidPassword;
+    return this.coreService.isInvalidPassword;
   }
 
   get logoURL(): string {
@@ -37,6 +37,7 @@ export class MainComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private zone: NgZone,
+    private coreService: CoreService,
     private storageService: StorageService,
     private electronService: ElectronService
   ) { }
@@ -46,17 +47,16 @@ export class MainComponent implements OnInit, OnDestroy {
       password: ['', Validators.required]
     });
 
-    this.electronService.ipcRenderer.send('appVersion');
-    this.electronService.ipcRenderer.on('appVersion', (_, data) => {
+    this.electronService.ipcRenderer.invoke('appVersion').then(result => {
       this.zone.run(() => {
-        this.version = data;
+        this.version = result;
       });
-    })
+    });
   }
 
   ngOnDestroy() {
     this.loginForm.reset();
-    this.storageService.isInvalidPassword = false;
+    this.coreService.isInvalidPassword = false;
   }
 
   onLoginSubmit() {

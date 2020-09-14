@@ -6,6 +6,7 @@ import { ContextMenuItemsService } from '@app/core/services/context-menu-items.s
 import { MenuItem, TreeNode } from 'primeng/api';
 import { ContextMenu } from 'primeng/contextmenu';
 import { Observable } from 'rxjs';
+import { CoreService, SearchService } from '@app/core/services';
 
 type treeNodeEventObject = { node: TreeNode };
 
@@ -59,11 +60,13 @@ export class EntriesTableComponent implements OnInit {
 
   constructor(
     private storageService: StorageService,
+    private searchService: SearchService,
     private hotkeyService: HotkeyService,
+    private coreService: CoreService,
     private contextMenuItemsService: ContextMenuItemsService
   ) { 
     this.passwordList$ = this.storageService.entries$;
-    this.searchPhrase$ = this.storageService.searchPhrase$;
+    this.searchPhrase$ = this.searchService.searchPhrase$;
   }
 
   ngOnInit() {
@@ -79,14 +82,14 @@ export class EntriesTableComponent implements OnInit {
   }
 
   copyToClipboard(entry: PasswordEntry, property: string) {
-    this.storageService.copyToClipboard(entry, property);
+    this.coreService.copyToClipboard(entry, property);
   }
 
   selectGroup(event: treeNodeEventObject) {
     this.storageService.selectedCategory = event.node;
     this.storageService.selectedCategory.data = event.node.data || [];
     this.storageService.selectedPasswords = [];
-    this.storageService.resetSearch();
+    this.searchService.reset();
     this.storageService.updateEntries();
   }
 
