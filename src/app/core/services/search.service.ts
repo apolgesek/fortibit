@@ -27,34 +27,34 @@ export class SearchService {
       return passwords;
     }
     const tempData: PasswordEntry[] = [];
-    this.buildSearchResultList(group, tempData, phrase);
+    this.createSearchResultList(group, tempData, phrase);
     return tempData;
   }
 
-  private buildSearchResultList(node: TreeNode, output: PasswordEntry[] & any, phrase: string) {
+  private createSearchResultList(node: TreeNode, output: PasswordEntry[] & any, phrase: string) {
     if (node.data.length) {
       const filteredNodes: PasswordEntry[] = node.data
         .filter(p => (p.title.includes(phrase) || p.username.includes(phrase) || p.url?.includes(phrase)));
       if (filteredNodes.length) {
         const path: string[] = [];
-        this.buildPath(node, path);
+        this.createPath(node, path);
         output.push({ name: path.reverse().join('/'), isGroup: true });
         output.push(...filteredNodes);
       }
     }
     if (node.children?.length) {
       node.children.forEach((element: TreeNode) => {
-        this.buildSearchResultList(element, output, phrase);
+        this.createSearchResultList(element, output, phrase);
       });
     } else {
       return output;
     }
   }
 
-  private buildPath(node: TreeNode, path: string[]) {
+  private createPath(node: TreeNode, path: string[]) {
     path.push(node.label);
     if (node.parent) {
-      this.buildPath(node.parent, path);
+      this.createPath(node.parent, path);
     }
   }
 

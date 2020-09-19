@@ -1,19 +1,22 @@
-import { Directive, ElementRef } from '@angular/core';
+import { Directive, ElementRef, Renderer2 } from '@angular/core';
+import { DomEventsService } from '@app/core/services';
 import { StorageService } from '@app/core/services/storage.service';
 
 @Directive({
   selector: '[appDroppable]'
 })
-// detect entry/ies drag and drop on groups
+// detect entries drag and drop on groups
 export class DroppableDirective {
 
 	private readonly uiTreenodeDragoverClassName = 'ui-treenode-dragover';
-
+	private unlisteners: (() => void)[] = [];
 	private el: HTMLElement;
 
 	constructor(
 		private element: ElementRef,
-		private storageService: StorageService
+		private storageService: StorageService,
+		private domEventsService: DomEventsService,
+		private renderer: Renderer2
 	) { }
 	
 	dragLeaveCallback: () => void = () => {
@@ -36,21 +39,22 @@ export class DroppableDirective {
 
 	ngOnInit() {
 		this.el = this.element.nativeElement.parentElement.parentElement.parentElement;
-		this.el.addEventListener('dragenter', this.dragEnterCallback);
-		this.el.addEventListener('dragleave', this.dragLeaveCallback);
-		this.el.addEventListener('drop', this.dropCallback);
-		this.el.addEventListener('dragend', () => {
-			this.removeDraggedOverClassForAllDroppables();
-		});
+		this.unlisteners = [
+			this.renderer.listen(this.el, 'dragenter', this.dragEnterCallback),
+			this.renderer.listen(this.el, 'dragleave', this.dragLeaveCallback),
+			this.renderer.listen(this.el, 'drop', this.dropCallback),
+			this.renderer.listen(this.el, 'dragstart', (event: DragEvent) => {
+				this.domEventsService.createDragGhost(event);
+			}),
+			this.renderer.listen(this.el, 'dragend', () => {
+				this.removeDraggedOverClassForAllDroppables();
+				this.domEventsService.removeDragGhost();
+			})
+		]
 	}
 
 	ngOnDestroy() {
-		this.el.removeEventListener('dragenter', this.dragEnterCallback);
-		this.el.removeEventListener('dragleave', this.dragLeaveCallback);
-		this.el.removeEventListener('drop', this.dropCallback);
-		this.el.removeEventListener('dragend', () => {
-			this.removeDraggedOverClassForAllDroppables();
-		});
+		this.unlisteners.forEach(u => u());
 	}
 
 	private removeDraggedOverClassForAllDroppables() {

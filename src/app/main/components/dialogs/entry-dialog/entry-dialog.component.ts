@@ -28,7 +28,7 @@ export class EntryDialogComponent implements OnInit {
       id: [''],
       title: [''],
       username: ['', Validators.required],
-      value: ['', Validators.required],
+      password: ['', Validators.required],
       url: [''],
       notes: [''],
       creationDate: [null],

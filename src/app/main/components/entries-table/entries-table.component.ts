@@ -1,12 +1,13 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
 import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
 import { StorageService } from '@app/core/services/storage.service';
-import { ContextMenuItemsService } from '@app/core/services/context-menu-items.service';
+import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
 import { MenuItem, TreeNode } from 'primeng/api';
 import { ContextMenu } from 'primeng/contextmenu';
 import { Observable } from 'rxjs';
-import { CoreService, SearchService } from '@app/core/services';
+import { CoreService, DomEventsService, SearchService } from '@app/core/services';
+import { DOCUMENT } from '@angular/common';
 
 type treeNodeEventObject = { node: TreeNode };
 
@@ -63,7 +64,10 @@ export class EntriesTableComponent implements OnInit {
     private searchService: SearchService,
     private hotkeyService: HotkeyService,
     private coreService: CoreService,
-    private contextMenuItemsService: ContextMenuItemsService
+    private contextMenuBuilderService: ContextMenuBuilderService,
+    private domEventsService: DomEventsService,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document
   ) { 
     this.passwordList$ = this.storageService.entries$;
     this.searchPhrase$ = this.searchService.searchPhrase$;
@@ -72,9 +76,22 @@ export class EntriesTableComponent implements OnInit {
   ngOnInit() {
     this.storageService.updateEntries();
 
-    this.groupContextMenuItems = this.contextMenuItemsService.buildGroupContextMenuItems();
-    this.multiEntryMenuItems = this.contextMenuItemsService.buildMultiEntryContextMenuItems();
-    this.entryMenuItems = this.contextMenuItemsService.buildEntryContextMenuItems();
+    this.groupContextMenuItems = this.contextMenuBuilderService
+      .buildGroupContextMenuItems()
+      .getResult();
+    this.multiEntryMenuItems = this.contextMenuBuilderService
+      .buildRearrangeEntriesContextMenuItem()
+      .buildRemoveEntryContextMenuItem()
+      .getResult();
+    
+    this.entryMenuItems = this.contextMenuBuilderService
+      .buildRearrangeEntriesContextMenuItem()
+      .buildCopyUsernameEntryContextMenuItem()
+      .buildCopyPasswordEntryContextMenuItem()
+      .buildSeparator()
+      .buildEditEntryContextMenuItem()
+      .buildRemoveEntryContextMenuItem()
+      .getResult();
   }
 
   trackEntryById(_: number, entry: PasswordEntry): string {
@@ -152,32 +169,19 @@ export class EntriesTableComponent implements OnInit {
       ? this.storageService.draggedEntry = this.selectedEntries
       : this.storageService.draggedEntry = [ entryData ];
 
-    let element = null;
-    if (process.platform === 'darwin') {
-      element = document.createElement("div");
-      element.id = "drag-ghost";
-      element.style.position = "absolute";
-      element.style.top = "-1000px";
-      document.body.appendChild(element);
-    } else {
-      element = new Image();
-      // transparent image
-      element.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-    }
-    event.dataTransfer.setDragImage(element, 0, 0);
+    this.domEventsService.createDragGhost(event);
 
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.dropEffect = 'move';
-    document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'none');
+
+    this.document.querySelectorAll('.ui-treenode-selectable *')
+      .forEach((el: HTMLElement) => this.renderer.setStyle(el, 'pointerEvents', 'none'));
   }
 
   onDragEnd() {
-    if (process.platform === 'darwin') {
-      const ghost = document.getElementById("drag-ghost");
-      ghost.parentNode.removeChild(ghost);
-    }
-
-    document.querySelectorAll('.ui-treenode-selectable *').forEach((el: HTMLElement) => el.style.pointerEvents = 'auto');
+    this.domEventsService.removeDragGhost();
+    this.document.querySelectorAll('.ui-treenode-selectable *')
+      .forEach((el: HTMLElement) => this.renderer.setStyle(el, 'pointerEvents', 'auto'));
     this.storageService.draggedEntry = [];
   }
 }

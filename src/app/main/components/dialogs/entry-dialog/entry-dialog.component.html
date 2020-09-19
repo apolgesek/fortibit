@@ -26,15 +26,15 @@
     </div>
     <div
       class="ui-inputgroup"
-      [ngClass]="{'ng-invalid': newEntryForm.get('value').invalid && newEntryForm.get('value').dirty}">
+      [ngClass]="{'ng-invalid': newEntryForm.get('password').invalid && newEntryForm.get('password').dirty}">
       <span class="ui-inputgroup-addon"><i class="pi pi-key"></i></span>
       <input
         type="password"
-        formControlName="value"
+        formControlName="password"
         placeholder="Password">   
     </div>
     <div
-      *ngIf="newEntryForm.get('value').invalid && newEntryForm.get('value').dirty"
+      *ngIf="newEntryForm.get('password').invalid && newEntryForm.get('password').dirty"
       @fadeSlide
       class="validation-error">
       Password is required

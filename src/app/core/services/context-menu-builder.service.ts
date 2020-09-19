@@ -8,17 +8,20 @@ import { MenuItem } from 'primeng/api';
 @Injectable({
   providedIn: 'root'
 })
-export class ContextMenuItemsService {
+export class ContextMenuBuilderService {
+
+  private contextMenuItems: MenuItem[] = [];
 
   constructor(
     private storageService: StorageService,
     private hotkeyService: HotkeyService,
     private dialogsService: DialogsService,
     private coreService: CoreService
-  ) { }
+  ) {
+  }
 
-  buildGroupContextMenuItems(): MenuItem[] {
-    return [
+  buildGroupContextMenuItems(): this {
+    this.contextMenuItems = [
       {
         label: 'Add subgroup',
         icon: 'pi pi-fw pi-plus',
@@ -42,53 +45,13 @@ export class ContextMenuItemsService {
         icon: 'pi pi-fw pi-trash',
         command: () => this.dialogsService.openDeleteGroupWindow(),
       },
-    ]
+    ];
+
+    return this;
   };
   
-  buildMultiEntryContextMenuItems(): MenuItem[] {
-    return [
-      this.buildRearrangeEntriesContextMenuItem(),
-      this.buildRemoveEntryContextMenuItem()
-    ]
-  };
-  
-  buildEntryContextMenuItems(): MenuItem[] {
-    return [
-      this.buildRearrangeEntriesContextMenuItem(),
-      {
-        label: 'Copy username',
-        command: () => {
-          this.coreService.copyToClipboard(
-            this.storageService.selectedPasswords[0],
-            this.storageService.selectedPasswords[0].username
-          );
-        }
-      },
-      {
-        label: 'Copy password',
-        command: () => {
-          this.coreService.copyToClipboard(
-            this.storageService.selectedPasswords[0],
-            this.storageService.selectedPasswords[0].username
-          );
-        }
-      },
-      { separator: true },
-      {
-        label: 'Edit (Enter)',
-        visible: this.storageService.selectedPasswords.length === 0,
-        icon: 'pi pi-fw pi-pencil',
-        command: () => {
-          this.storageService.editedEntry = this.storageService.selectedPasswords[0];
-          this.dialogsService.openEntryWindow();
-        }
-      },
-      this.buildRemoveEntryContextMenuItem()
-    ]
-  };
-  
-  private buildRearrangeEntriesContextMenuItem(): MenuItem {
-    return {
+  buildRearrangeEntriesContextMenuItem(): this {
+    this.contextMenuItems.push({
       label: 'Rearrange',
       items: [
         {
@@ -112,16 +75,75 @@ export class ContextMenuItemsService {
           command: () => this.storageService.moveBottom()
         }
       ]
-    }
+    });
+
+    return this;
   };
   
-  private buildRemoveEntryContextMenuItem(): MenuItem {
-    return {
+  buildRemoveEntryContextMenuItem(): this {
+    this.contextMenuItems.push({
       label: this.hotkeyService.configuration.deleteLabel,
       icon: 'pi pi-fw pi-trash',
       command: () => {
         this.dialogsService.openDeleteEntryWindow();
       }
-    }
+    });
+
+    return this;
   };
+
+  buildCopyUsernameEntryContextMenuItem(): this {
+    this.contextMenuItems.push({
+      label: 'Copy username',
+      command: () => {
+        this.coreService.copyToClipboard(
+          this.storageService.selectedPasswords[0],
+          this.storageService.selectedPasswords[0].username
+        );
+      }
+    });
+
+    return this;
+  }
+
+  buildCopyPasswordEntryContextMenuItem(): this {
+    this.contextMenuItems.push({
+      label: 'Copy password',
+      command: () => {
+        this.coreService.copyToClipboard(
+          this.storageService.selectedPasswords[0],
+          this.storageService.selectedPasswords[0].password
+        );
+      }
+    });
+
+    return this;
+  }
+
+  buildEditEntryContextMenuItem(): this {
+    this.contextMenuItems.push({
+      label: 'Edit (Enter)',
+      visible: this.storageService.selectedPasswords.length === 0,
+      icon: 'pi pi-fw pi-pencil',
+      command: () => {
+        this.storageService.editedEntry = this.storageService.selectedPasswords[0];
+        this.dialogsService.openEntryWindow();
+      }
+    });
+
+    return this;
+  }
+
+  buildSeparator(): this {
+    this.contextMenuItems.push({ separator: true });
+
+    return this;
+  }
+
+  getResult(): MenuItem[] {
+    const items = this.contextMenuItems;
+    this.contextMenuItems = [];
+
+    return items;
+  }
 }
