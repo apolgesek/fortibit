@@ -32,6 +32,7 @@ import { StickyHeaderDirective } from './directives/sticky-header.directive';
 import { TextEmphasizeDirective } from './directives/text-emphasize.directive';
 import { MainRoutingModule } from './main-routing.module';
 import { MainComponent } from './main.component';
+import { AutofocusDirective } from './directives/autofocus.directive';
 
 @NgModule({
   declarations: [
@@ -42,6 +43,7 @@ import { MainComponent } from './main.component';
     TextEmphasizeDirective,
     BlurEnterDirective,
     DroppableDirective,
+    AutofocusDirective,
     EntryDetailsComponent,
     StickyHeaderDirective,
     ClipboardToastComponent,

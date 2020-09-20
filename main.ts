@@ -35,10 +35,12 @@ function createWindow(): BrowserWindow {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      allowRunningInsecureContent: (serve) ? true : false,
-      devTools: (serve) ? true : false,
+      allowRunningInsecureContent: serve === true,
+      devTools: serve === true,
     },
     resizable: true,
+    minHeight: 520,
+    minWidth: 820
   });
 
   win.removeMenu();
@@ -106,6 +108,10 @@ try {
     const stringData = JSON.stringify(passwordList, (k ,v) => (k === 'parent' ? undefined : v));
     if (!currentPassword) {
       savePath = await dialog.showSaveDialog(win, {});
+      if (savePath.canceled) {
+        win.webContents.send('saveStatus', { status: false });
+        return;
+      }
       output = Encryptor.encryptString(stringData, newPassword);
       currentPassword = newPassword;
     } else {

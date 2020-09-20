@@ -1,3 +1,7 @@
+<div class="dialog-header">
+  <h2>Remove entry</h2>
+  <span class="close-dialog" (click)="ref.close()">&times;</span>
+</div>
 <div class="dialog-message">
   <ng-container *ngIf="selectedRowsCount === 1; else multiRemove">
     Are you sure you want to remove this entry?

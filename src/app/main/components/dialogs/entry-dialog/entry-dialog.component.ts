@@ -14,10 +14,14 @@ export class EntryDialogComponent implements OnInit {
   public newEntryForm: FormGroup;
 
   constructor(
+    public ref: DynamicDialogRef,
     private storageService: StorageService,
     private fb: FormBuilder,
-    public ref: DynamicDialogRef
   ) { }
+
+  get header(): string {
+    return this.storageService.editedEntry ? 'Edit entry' : 'Add entry';
+  }
 
   ngOnInit(): void {
     this.initEntryForm();
@@ -33,7 +37,7 @@ export class EntryDialogComponent implements OnInit {
       notes: [''],
       creationDate: [null],
       lastAccessDate: [null]
-    }, { updateOn: 'blur' });
+    });
 
     if (this.storageService.editedEntry) {
       this.newEntryForm.patchValue(this.storageService.editedEntry);
@@ -54,5 +58,4 @@ export class EntryDialogComponent implements OnInit {
       this.ref.close();
     }
   }
-
 }

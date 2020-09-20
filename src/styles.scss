@@ -234,3 +234,26 @@ body .ui-dialog .ui-dialog-titlebar {
 .dialog-message {
   padding: 1rem;
 }
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid $silver;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: normal;
+    flex: 1;
+  }
+
+  .close-dialog {
+    color: darken($silver, 30%);
+    font-size: 1.4rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+}

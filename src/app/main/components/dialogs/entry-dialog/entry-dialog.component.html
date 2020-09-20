@@ -1,13 +1,19 @@
-<ng-container
+<div class="dialog-header">
+  <h2>{{ header }}</h2>
+  <span class="close-dialog" (click)="ref.close()">&times;</span>
+</div>
+<form
   *ngIf="newEntryForm"
-  [formGroup]="newEntryForm">
+  [formGroup]="newEntryForm"
+  (ngSubmit)="addNewEntry()">
   <div>
     <div class="ui-inputgroup">
       <span class="ui-inputgroup-addon"><i class="pi pi-bookmark"></i></span>
       <input
         type="text"
+        appAutofocus
         formControlName="title"
-        placeholder="Title">         
+        placeholder="Title">   
     </div>
     <div
       class="ui-inputgroup"
@@ -55,12 +61,11 @@
       </textarea>     
     </div>
   </div>
-</ng-container>
-<div class="footer-container">
-  <button
-    type="button"
-    (click)="addNewEntry()"
-    class="primary-btn">
-    Confirm
-  </button>
-</div>
+  <div class="footer-container">
+    <button
+      type="submit"
+      class="primary-btn">
+      Confirm
+    </button>
+  </div>
+</form>

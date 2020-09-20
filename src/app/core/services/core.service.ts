@@ -10,6 +10,7 @@ import { StorageService } from "./storage.service";
 })
 export class CoreService {
   public isInvalidPassword = false;
+  public version: string;
 
   constructor(
     private zone: NgZone,
@@ -32,29 +33,18 @@ export class CoreService {
       });
     });
 
-    this.electronService.ipcRenderer.on('saveStatus', (_, { status, message, file }) => {
-      this.zone.run(() => {
-        if (status) {
-          this.storageService.file = file;
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Database saved',
-            life: 5000,
-          });
-        } else {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error: ' + message,
-            life: 5000,
-          });
-        }
-      });
-    });
-
     this.electronService.ipcRenderer.on('providePassword', (_, file) => {
       this.zone.run(() => {
         this.storageService.file = file;
         this.router.navigateByUrl('/home');
+      });
+    });
+
+    this.electronService.ipcRenderer
+    .invoke('appVersion')
+    .then(result => {
+      this.zone.run(() => {
+        this.version = result;
       });
     });
   }

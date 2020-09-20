@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { StorageService } from '@app/core/services/storage.service';
 import { PasswordEntry } from '@app/core/models/password-entry.model';
-import { ElectronService } from '@app/core/services';
+import { CoreService, ElectronService } from '@app/core/services';
 
 @Component({
   selector: 'app-entry-details',
@@ -9,6 +9,9 @@ import { ElectronService } from '@app/core/services';
   styleUrls: ['./entry-details.component.scss'],
 })
 export class EntryDetailsComponent {
+  get version(): string {
+    return this.coreService.version;
+  }
 
   get entry(): PasswordEntry {
     return this.storageService.selectedPasswords[0];
@@ -26,12 +29,12 @@ export class EntryDetailsComponent {
 
   constructor(
     private storageService: StorageService,
-    private electronService: ElectronService
+    private electronService: ElectronService,
+    private coreService: CoreService
   ) { }
 
   openUrl(url: string) {
     this.electronService.ipcRenderer.send('openUrl', url);
     return false;
   }
-
 }

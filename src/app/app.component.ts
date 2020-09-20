@@ -1,5 +1,4 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
-import { Router } from '@angular/router';
+import { AfterViewInit, Component } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ContextMenu, ContextMenuSub } from 'primeng/contextmenu';
 import { DomHandler } from 'primeng/dom';
@@ -7,7 +6,6 @@ import { fromEvent } from 'rxjs';
 import { AppConfig } from '../environments/environment';
 import { ElectronService } from './core/services';
 import { StorageService } from './core/services/storage.service';
-import { DialogsService } from './core/services/dialogs.service';
 import { HotkeyService } from './core/services/hotkey/hotkey.service';
 
 @Component({
@@ -28,10 +26,7 @@ export class AppComponent implements AfterViewInit {
   constructor(
     public electronService: ElectronService,
     private translate: TranslateService,
-    private router: Router,
-    private zone: NgZone,
     private passwordService: StorageService,
-    private dialogsService: DialogsService,
     private hotkeyService: HotkeyService,
   ) {
     translate.setDefaultLang('en');
@@ -91,12 +86,12 @@ export class AppComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    document.ondragover = document.ondrop = (ev) => {
+    document.ondragover = (ev) => {
       ev.preventDefault();
     }
 
     // handle file drop on app window
-    document.body.ondrop = (ev) => {
+    document.ondrop = (ev) => {
       if (ev.dataTransfer.files.length) {
         this.electronService.ipcRenderer.send('onFileDrop', ev.dataTransfer.files[0].path);
       }

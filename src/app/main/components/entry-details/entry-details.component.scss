@@ -39,3 +39,11 @@
         }
     }
 }
+
+.version {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 1rem;
+    color: darken($silver, 10%);
+    user-select: none;
+}

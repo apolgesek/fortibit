@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
-import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { fade } from '@app/shared/animations/fade-slide.animation';
+import { MessageService } from 'primeng/api';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-master-password-dialog',
@@ -11,20 +14,25 @@ import { fade } from '@app/shared/animations/fade-slide.animation';
     fade()
   ]
 })
-export class MasterPasswordDialogComponent implements OnInit {
+export class MasterPasswordDialogComponent implements OnInit, OnDestroy {
 
   public readonly minPasswordLength = 6;
   public masterPasswordForm: FormGroup;
   public submitted: boolean;
 
   get passwordsNotMatch(): boolean {
-    return this.masterPasswordForm.get('newPassword').value !== this.masterPasswordForm.get('newPasswordDuplicate').value
+    return this.masterPasswordForm.get('newPassword').value 
+      !== this.masterPasswordForm.get('newPasswordDuplicate').value
       && this.submitted;
   }
 
   constructor(
+    private zone: NgZone,
+    private fb: FormBuilder,
     private storageService: StorageService,
-    private fb: FormBuilder
+    private electronService: ElectronService,
+    private messageService: MessageService,
+    private ref: DynamicDialogRef
   ) { }
 
   ngOnInit(): void {
@@ -32,6 +40,30 @@ export class MasterPasswordDialogComponent implements OnInit {
       newPassword: ['', Validators.required],
       newPasswordDuplicate: ['', Validators.required]
     });
+
+    this.electronService.ipcRenderer.on('saveStatus', (_, { status, message, file }) => {
+      this.zone.run(() => {
+        if (status) {
+          this.storageService.file = file;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Database saved',
+            life: 5000,
+          });
+          this.ref.close();
+        } else if (message) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error: ' + message,
+            life: 5000,
+          });
+        }
+      });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.resetNewPasswordForm();
   }
 
   saveNewDatabase() {

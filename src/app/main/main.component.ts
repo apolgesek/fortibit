@@ -16,7 +16,10 @@ const logoURL = require('../../assets/images/lock.svg');
 })
 export class MainComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;
-  public version: string;
+
+  get version(): string {
+    return this.coreService.version;
+  }
 
   get isInvalidPassword(): boolean {
     return this.coreService.isInvalidPassword;
@@ -45,12 +48,6 @@ export class MainComponent implements OnInit, OnDestroy {
   ngOnInit() { 
     this.loginForm = this.fb.group({
       password: ['', Validators.required]
-    });
-
-    this.electronService.ipcRenderer.invoke('appVersion').then(result => {
-      this.zone.run(() => {
-        this.version = result;
-      });
     });
   }
 

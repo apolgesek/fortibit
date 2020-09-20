@@ -2,17 +2,17 @@
 
 :host ::ng-deep{
     .main-nav .ui-button-text-icon-left .ui-button-icon-left {
-        margin-top: -.5rem;
         color: #444;
-        top: 0.65em;
     }
 
     .ui-button-secondary {
         font-family: $font;
         font-size: 0.9rem;
         display: flex;
-        height: 2.5em;
+        height: 2.2rem;
         transition: all 150ms ease-in-out;
+        align-items: center;
+        border: 0 !important;
 
         &:enabled:hover {
             background-color: $white !important;
@@ -105,7 +105,7 @@
 
     .search {   
         border: none;
-        height: 2.5em;
+        height: 2.55em;
         padding: 0.7em;
         &:focus {
             box-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.2),
