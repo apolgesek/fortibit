@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { StorageService } from '@app/core/services/storage.service';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
@@ -7,23 +7,18 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
   templateUrl: './delete-group-dialog.component.html',
   styleUrls: ['./delete-group-dialog.component.scss']
 })
-export class DeleteGroupDialogComponent implements OnInit {
-
+export class DeleteGroupDialogComponent {
   constructor(
-    private storageService: StorageService,
-    public ref: DynamicDialogRef
+    public ref: DynamicDialogRef,
+    private storageService: StorageService
   ) { }
-
-  ngOnInit(): void {
-  }
 
   removeGroup() {
     this.storageService.removeGroup();
-    this.closeConfirmGroupRemoveDialog();
+    this.close();
   }
 
-  closeConfirmGroupRemoveDialog() {
+  close() {
     this.ref.close();
   }
-
 }

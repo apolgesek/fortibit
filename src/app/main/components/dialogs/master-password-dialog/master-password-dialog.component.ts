@@ -15,7 +15,6 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
   ]
 })
 export class MasterPasswordDialogComponent implements OnInit, OnDestroy {
-
   public readonly minPasswordLength = 6;
   public masterPasswordForm: FormGroup;
   public submitted: boolean;
@@ -81,5 +80,9 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy {
   resetNewPasswordForm() {
     this.masterPasswordForm.reset();
     this.submitted = undefined;
+  }
+
+  close() {
+    this.ref.close();
   }
 }

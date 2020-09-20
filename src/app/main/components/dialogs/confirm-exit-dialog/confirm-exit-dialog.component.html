@@ -1,6 +1,6 @@
 <div class="dialog-header">
   <h2>Quit haslock</h2>
-  <span class="close-dialog" (click)="ref.close()">&times;</span>
+  <span class="close-dialog" (click)="close()">&times;</span>
 </div>
 <div class="dialog-message">
   Are you sure you want to quit? There are unsaved changes
@@ -15,7 +15,7 @@
   <button
     type="button"
     class="primary-btn"
-    (click)="closeConfirmExitDialog()">
+    (click)="close()">
     Cancel
   </button>
 </div>

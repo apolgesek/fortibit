@@ -14,9 +14,9 @@ export class EntryDialogComponent implements OnInit {
   public newEntryForm: FormGroup;
 
   constructor(
-    public ref: DynamicDialogRef,
-    private storageService: StorageService,
     private fb: FormBuilder,
+    private ref: DynamicDialogRef,
+    private storageService: StorageService
   ) { }
 
   get header(): string {
@@ -57,5 +57,9 @@ export class EntryDialogComponent implements OnInit {
       }
       this.ref.close();
     }
+  }
+
+  close() {
+    this.ref.close();
   }
 }

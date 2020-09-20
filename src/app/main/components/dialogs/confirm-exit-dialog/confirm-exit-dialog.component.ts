@@ -7,22 +7,17 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
   templateUrl: './confirm-exit-dialog.component.html',
   styleUrls: ['./confirm-exit-dialog.component.scss']
 })
-export class ConfirmExitDialogComponent implements OnInit {
-
+export class ConfirmExitDialogComponent {
   constructor(
-    private coreService: CoreService,
-    public ref: DynamicDialogRef
+    private ref: DynamicDialogRef,
+    private coreService: CoreService
   ) { }
-
-  ngOnInit(): void {
-  }
 
   exitApp() {
     this.coreService.exitApp();
   }
 
-  closeConfirmExitDialog() {
+  close() {
     this.ref.close();
   }
-
 }

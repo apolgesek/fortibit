@@ -7,27 +7,22 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
   templateUrl: './delete-entry-dialog.component.html',
   styleUrls: ['./delete-entry-dialog.component.scss']
 })
-export class DeleteEntryDialogComponent implements OnInit {
-
+export class DeleteEntryDialogComponent {
   get selectedRowsCount(): number {
     return this.storageService.selectedPasswords.length;
   }
 
   constructor(
-    private storageService: StorageService,
-    public ref: DynamicDialogRef
+    private ref: DynamicDialogRef,
+    private storageService: StorageService
   ) { }
-
-  ngOnInit(): void {
-  }
 
   deleteEntry() {
     this.storageService.deleteEntry();
-    this.closeRemoveEntryDialog();
+    this.close();
   }
 
-  closeRemoveEntryDialog() {
+  close() {
     this.ref.close();
   }
-
 }
