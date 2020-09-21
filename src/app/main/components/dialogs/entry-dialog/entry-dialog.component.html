@@ -4,8 +4,7 @@
 </div>
 <form
   *ngIf="newEntryForm"
-  [formGroup]="newEntryForm"
-  (ngSubmit)="addNewEntry()">
+  [formGroup]="newEntryForm">
   <div>
     <div class="ui-inputgroup">
       <span class="ui-inputgroup-addon"><i class="pi pi-bookmark"></i></span>
@@ -63,7 +62,8 @@
   </div>
   <div class="footer-container">
     <button
-      type="submit"
+      type="button"
+      (click)="addNewEntry()"
       class="primary-btn">
       Confirm
     </button>

@@ -1,5 +1,5 @@
 {
-  "productName": "Haslock",
+  "productName": "haslock",
   "directories": {
     "output": "release/"
   },
@@ -21,12 +21,12 @@
   ],
   "fileAssociations": [{
     "ext": "hslc",
-    "name": "Haslock File",
+    "name": "haslock file",
     "role": "Editor"
   }],
   "win": {
     "target": [
-      "portable"
+      "nsis"
     ]
   },
   "mac": {

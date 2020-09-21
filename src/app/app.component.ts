@@ -80,7 +80,8 @@ export class AppComponent implements AfterViewInit {
       console.log('Mode web');
     }
 
-    fromEvent(window, 'keydown').subscribe((event: KeyboardEvent) => {
+    fromEvent(window, 'keydown')
+    .subscribe((event: KeyboardEvent) => {
       this.hotkeyService.intercept(event);
     });
   }

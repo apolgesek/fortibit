@@ -9,6 +9,8 @@ export class AutofocusDirective {
   ) { }
 
   ngAfterViewInit(): void {
-    this.element.nativeElement.focus();      
+    requestAnimationFrame(() => {
+      this.element.nativeElement.focus();
+    });
   }
 }
