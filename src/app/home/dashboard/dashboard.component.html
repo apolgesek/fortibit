@@ -1,0 +1,36 @@
+<nav class="main-nav">
+    <h2 class="brand"><img src="../../../assets/images/lock.svg" class="brand-logo"> hasloc</h2>
+    <div class="menu-panel">
+        <button
+            pButton
+            type="button"
+            label="Add entry"
+            class="ui-button-success"
+            (click)="openNewEntryWindow()">
+        </button>
+        <button
+            pButton
+            type="button"
+            label="Save"
+            class="ui-button-info"
+            icon="pi pi-save"
+            iconPos="left"
+            (click)="saveDatabase()">
+        </button>
+    </div>
+</nav>
+
+<router-outlet></router-outlet>
+
+<p-toast position="bottom-right" [hideTransitionOptions]="'0ms'">
+    <ng-template let-message pTemplate="message">
+        <div #countRef style="text-align: center; display: flex; align-items: center;">
+            <i class="pi pi-exclamation-triangle" style="font-size: 3em"></i>
+            <div>
+                <div style="font-weight: bold;">{{message.summary}}</div>
+                <span *ngIf="!initCounter && getLife(message.detail); else counter"></span>
+            </div>
+            <ng-template #counter>{{ passwordStore.lifeLeft | seconds }}s left</ng-template>
+        </div>
+    </ng-template>
+</p-toast>

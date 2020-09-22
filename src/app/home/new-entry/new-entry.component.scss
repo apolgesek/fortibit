@@ -1,0 +1,18 @@
+:host {
+    padding: 2rem;
+    display: block;
+
+    h3 {
+        margin: auto 0.5rem;
+    }
+
+    .ui-fluid {
+        display: flex;
+        justify-content: flex-end;
+    
+        .confirm-btn {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+    }
+}

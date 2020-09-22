@@ -1,0 +1,52 @@
+:host ::ng-deep{
+  .ui-inputgroup {
+    input {
+      width: 100%;
+    }
+  }
+  .ui-button-success {
+    margin-left: auto;
+  }
+
+  .ui-card-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .ui-message-error {
+    margin: 1rem 0;
+  }
+
+  .ui-card {
+    position: relative;
+  }
+}
+
+.brand {
+  height: 10rem;
+  background-image: linear-gradient(270deg,#2bc0ec,#1b81d7);
+  width: 100%;
+  text-align: center;
+
+  .title {
+    color: #fff;
+    font-size: 3rem;
+    margin: 0;
+    padding-top: 3rem;
+    font-weight: 400;
+  }
+}
+
+.brand-logo {
+  height: 2.5rem;
+}
+
+.sign-in {
+  display: block;
+  width: 50%;
+  margin: -2rem auto 0;
+}
+
+.navigate-dashboard {
+  margin-right: 1rem;
+}

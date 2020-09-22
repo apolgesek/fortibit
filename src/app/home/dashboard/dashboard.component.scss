@@ -1,0 +1,37 @@
+:host ::ng-deep{
+    .ui-button-text-icon-left .ui-button-icon-left {
+        margin-top: -.5rem;
+    }
+}
+
+
+.main-nav {
+    width: 100%;
+    height: 5rem;
+    background-image: linear-gradient(270deg,#2bc0ec,#1b81d7);
+    display: flex;
+    align-items: center;
+
+    .brand {
+        margin: 0;
+        color: #fff;
+        margin-left: 1rem;
+        display: flex;
+        align-items: center;
+        .brand-logo {
+            width: 2rem;
+            margin-right: 0.5rem;
+        }
+    }
+
+    .menu-panel {
+        flex: 1;
+        text-align: right;
+        margin-right: 1rem;
+
+        .ui-button-success {
+            margin-right: 1rem;
+        }
+    }
+
+}
