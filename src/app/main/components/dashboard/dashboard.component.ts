@@ -1,5 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { PasswordEntry } from '@app/core/models/password-entry.model';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { StorageService } from '@app/core/services/storage.service';
 import { DialogsService } from '@app/core/services/dialogs.service';
 import { fromEvent, Subject } from 'rxjs';
@@ -13,9 +12,7 @@ const logoURL = require('assets/images/lock.svg');
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
-
-  public selectedCategoryData: PasswordEntry[];
+export class DashboardComponent implements AfterViewInit, OnDestroy {
   @ViewChild('search') search: ElementRef;
 
   private destroyed$ = new Subject<void>();
@@ -25,7 +22,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get isAnyEntry(): boolean {
-    return this.selectedCategoryData?.length > 0;
+    return this.storageService.selectedCategory.data?.length > 0;
   }
 
   get isOneEntrySelected(): boolean {
@@ -49,10 +46,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private searchService: SearchService,
     private dialogsService: DialogsService
   ) { }
-
-  ngOnInit(): void {
-    this.selectedCategoryData = this.storageService.selectedCategory?.data;
-  }
 
   ngAfterViewInit(): void {
     fromEvent(this.search.nativeElement, 'keyup').pipe(
