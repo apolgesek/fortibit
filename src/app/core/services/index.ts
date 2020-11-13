@@ -1,4 +1,3 @@
-export * from './context-menu-builder.service';
 export * from './core.service';
 export * from './dom-events.service';
 export * from './electron/electron.service';

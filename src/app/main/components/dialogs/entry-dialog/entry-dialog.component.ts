@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { StorageService } from '@app/core/services/storage.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogRef } from 'primeng-lts/dynamicdialog';
 import { fade } from '@app/shared/animations/fade-slide.animation';
 import { fromEvent, Subject } from 'rxjs';
 import { skipWhile, takeUntil } from 'rxjs/operators';

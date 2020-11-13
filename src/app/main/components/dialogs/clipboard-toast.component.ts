@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { MessageService } from 'primeng-lts/api';
 
 @Component({
   selector: 'app-clipboard-toast',
@@ -6,5 +7,9 @@ import { Component } from '@angular/core';
   styleUrls: ['./clipboard-toast.component.scss'],
 })
 export class ClipboardToastComponent {
-  constructor() {}
+  constructor(private messageService: MessageService) {}
+
+  clearToast() {
+    this.messageService.clear();
+  }
 }

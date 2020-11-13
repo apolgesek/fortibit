@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { TreeNode } from "primeng/api";
+import { TreeNode } from "primeng-lts/api";
 import { BehaviorSubject, Observable } from "rxjs";
 import { PasswordEntry } from "../models";
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { TreeNode } from 'primeng/api';
+import { TreeNode } from 'primeng-lts/api';
 import { PasswordEntry } from '../models/password-entry.model';
 
 @Injectable({

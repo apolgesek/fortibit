@@ -42,9 +42,10 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
   }
 
   ngOnDestroy() {
-    if (this.observer) {
+    if (this.observedElement) {
       this.observer.unobserve(this.observedElement);
     }
+
     this.destroyed$.next();
     this.destroyed$.complete();
   }
@@ -67,6 +68,7 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
         if (this.observedElement) {
           this.observer.unobserve(this.observedElement);
         }
+
         this.observedElement = this.getFirstRow();
 
         if (this.observedElement) {

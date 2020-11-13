@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AppConfig } from 'environments/environment';
-import { TreeNode } from 'primeng/api';
+import { TreeNode } from 'primeng-lts/api';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { markDirty } from '../decorators/mark-dirty.decorator';
@@ -12,6 +12,7 @@ import { SearchService } from './search.service';
 import { v4 as uuidv4 } from 'uuid';
 
 const nameof = <T>(name: keyof T) => name;
+type treeNodeEventObject = { node: TreeNode };
 
 @Injectable({
   providedIn: 'root'
@@ -124,20 +125,24 @@ export class StorageService {
   @markDirty()
   renameGroup() {
     this.isRenameModeOn = true;
+    requestAnimationFrame(() => {
+      (<HTMLInputElement>document.querySelector('.group-name-input')).focus();
+    });
   }
 
   @markDirty()
   addGroup() {
-    this.groups[0].children.push(this.buildGroup("New group"));
-  }
-
-  @markDirty()
-  addSubgroup() {
     if (!this.selectedCategory.children) {
       this.selectedCategory.children = [];
     }
-    this.selectedCategory.children.push(this.buildGroup("New subgroup"));
+  
+    this.selectedCategory.children.push(this.buildGroup("New group"));
     this.selectedCategory.expanded = true;
+
+    const addedGroup = this.selectedCategory.children.slice(-1)[0];
+    this.contextSelectedCategory = addedGroup;
+    this.selectGroup({ node: addedGroup } as treeNodeEventObject);
+    this.renameGroup();
   }
 
   @markDirty()
@@ -178,6 +183,15 @@ export class StorageService {
     });
   }
   //#endregion
+
+  selectGroup(event: treeNodeEventObject) {
+    this.selectedCategory = event.node;
+    this.selectedCategory.data = event.node.data || [];
+    this.selectedPasswords = [];
+    this.searchService.reset();
+    this.updateEntries();
+    document.querySelector('.password-table')
+  }
 
   saveDatabase(newPassword: string) {
     this.electronService.ipcRenderer.send('saveFile', { passwordList: this.groups, newPassword });

@@ -5,7 +5,7 @@ $sidePanelOutDuration: 250ms;
 
 :host {
     width: 100%;
-    height: calc(100% - 5rem);
+    height: calc(100% - 7rem);
     display: flex;
     flex-wrap: row;
 
@@ -68,6 +68,7 @@ $sidePanelOutDuration: 250ms;
                     word-break: break-all;
                     user-select: none;
                     cursor: pointer;
+                    height: 35px;
                     &:first-child {
                         border-left: 0;
                     }
@@ -94,14 +95,43 @@ $sidePanelOutDuration: 250ms;
             border-right: 1px solid $silver;
             overflow-y: auto;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+
+            .header {   
+                .file {
+                    flex: 1;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    height: inherit;
+                }
+
+                .add-group {
+                    display: none;
+                    font-size: 1.2rem;
+                }
+            }
+
+            &:hover {
+                .add-group {
+                    display: block;
+                }
+            }
+
+            ::ng-deep {
+                p-tree {
+                    display: block;
+                    height: 100%;
+                }
+            }
             
             .selected-entries {
                 text-align: center;
                 font-size: 0.9rem;
                 padding: 0.4rem 0;
                 border-top: 1px solid $silver;
-                height: 2.1rem;
-                width: inherit;
+                min-height: 35px;
                 position: sticky;
                 bottom: 0;
             }
@@ -122,7 +152,8 @@ $sidePanelOutDuration: 250ms;
 
         .ui-tree {
             width: 100%;
-            height: calc(100% - 8.1rem);
+            height: 100%;
+            flex: 1;
             border: none;
             padding: 0 0 0.571em 1em;
 
@@ -187,11 +218,14 @@ $sidePanelOutDuration: 250ms;
 }
 
 .list-cta {
-text-align: center;
+    text-align: center;
     margin-top: 5rem;
-    color: rgba(0,0,0,0.2);
-    font-size: 1.5rem;
+    color: rgba(0,0,0,0.4);
+    font-size: 1.2rem;
     user-select: none;
+    a {
+        font-size: 0.9rem;
+    }
 }
 
 .table-body {
@@ -203,28 +237,6 @@ text-align: center;
     width: 6rem;
 }
 
-.outline-btn {
-    color: $keppel;
-    display: block;
-    padding: 0.5rem;
-    transition: all 150ms;
-    border-radius: 4px;
-    border: 1px solid $keppel;
-    &:hover {
-        background-color: $bermuda-light;
-    }
-}
-
-.add-group {
-    display: flex;
-    margin: auto;
-    margin-bottom: 1rem;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.9rem;
-    padding-top: 0.5rem;
-}
-
 .group-separator {
     display: flex;
     align-items: center;
@@ -232,5 +244,14 @@ text-align: center;
     span {
         margin-right: 0.5rem;
         color: #777;
+    }
+}
+
+.outline-btn {
+    transition: background-color 150ms;
+    border-radius: 4px;
+    padding: 0.5rem;
+    &:hover {
+        background-color: rgba($silver, 0.3);
     }
 }

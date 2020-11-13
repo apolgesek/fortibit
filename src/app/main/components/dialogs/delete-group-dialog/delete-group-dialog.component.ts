@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { StorageService } from '@app/core/services/storage.service';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogRef } from 'primeng-lts/dynamicdialog';
 
 @Component({
   selector: 'app-delete-group-dialog',

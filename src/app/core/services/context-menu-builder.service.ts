@@ -3,7 +3,7 @@ import { CoreService } from '@app/core/services/core.service';
 import { DialogsService } from '@app/core/services/dialogs.service';
 import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
 import { StorageService } from '@app/core/services/storage.service';
-import { MenuItem } from 'primeng/api';
+import { MenuItem } from 'primeng-lts/api';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +25,7 @@ export class ContextMenuBuilderService {
       {
         label: 'Add subgroup',
         icon: 'pi pi-fw pi-plus',
-        command: () => this.storageService.addSubgroup(),
+        command: () => this.storageService.addGroup(),
       },
       {
         separator: true,
@@ -35,9 +35,6 @@ export class ContextMenuBuilderService {
         icon: 'pi pi-fw pi-pencil',
         command: () => {
           this.storageService.renameGroup();
-          requestAnimationFrame(() => {
-            (<HTMLInputElement>document.querySelector('.group-name-input')).focus();
-          });
         }
       },
       {

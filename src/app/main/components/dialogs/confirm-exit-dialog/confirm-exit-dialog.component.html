@@ -8,12 +8,21 @@
 <div class="footer-container">
   <button
     type="button"
+    [disabled]="buttonsDisabled"
     class="text-btn"
-    (click)="exitApp()">
-    Quit
+    (click)="saveChanges()">
+    Save
   </button>
   <button
     type="button"
+    [disabled]="buttonsDisabled"
+    class="text-btn"
+    (click)="exitApp()">
+    Don't save
+  </button>
+  <button
+    type="button"
+    [disabled]="buttonsDisabled"
     class="primary-btn"
     (click)="close()">
     Cancel

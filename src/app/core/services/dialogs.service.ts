@@ -4,13 +4,19 @@ import { DeleteEntryDialogComponent } from '@app/main/components/dialogs/delete-
 import { DeleteGroupDialogComponent } from '@app/main/components/dialogs/delete-group-dialog/delete-group-dialog.component';
 import { EntryDialogComponent } from '@app/main/components/dialogs/entry-dialog/entry-dialog.component';
 import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/master-password-dialog/master-password-dialog.component';
-import { DialogService } from 'primeng/dynamicdialog';
+import { DialogService, DynamicDialogRef } from 'primeng-lts/dynamicdialog';
 import { ElectronService } from './electron/electron.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DialogsService {
+  openDeleteEntryWindowRef: DynamicDialogRef;
+  openDeleteGroupWindowRef: DynamicDialogRef;
+  openConfirmExitWindowRef: DynamicDialogRef;
+  openEntryWindowRef: DynamicDialogRef;
+  openMasterPasswordWindowRef: DynamicDialogRef;
+
   constructor(
     private zone: NgZone,
     private dialogService: DialogService,
@@ -24,7 +30,7 @@ export class DialogsService {
    }
 
   openDeleteEntryWindow() {
-    this.dialogService.open(
+    this.openDeleteEntryWindowRef = this.dialogService.open(
       DeleteEntryDialogComponent,
       {
         showHeader: false
@@ -33,7 +39,7 @@ export class DialogsService {
   }
 
   openDeleteGroupWindow() {
-    this.dialogService.open(
+    this.openDeleteGroupWindowRef = this.dialogService.open(
       DeleteGroupDialogComponent,
       {
         showHeader: false
@@ -42,7 +48,7 @@ export class DialogsService {
   }
 
   openConfirmExitWindow() {
-    this.dialogService.open(
+    this.openConfirmExitWindowRef = this.dialogService.open(
       ConfirmExitDialogComponent,
       {
         showHeader: false
@@ -51,7 +57,7 @@ export class DialogsService {
   }
 
   openEntryWindow() {
-    this.dialogService.open(
+    this.openEntryWindowRef = this.dialogService.open(
       EntryDialogComponent,
       {
         width: '70%',
@@ -61,10 +67,10 @@ export class DialogsService {
   }
 
   openMasterPasswordWindow() {
-    this.dialogService.open(
+    this.openMasterPasswordWindowRef = this.dialogService.open(
       MasterPasswordDialogComponent,
       {
-        showHeader: false
+        showHeader: false,
       }
     );
   }

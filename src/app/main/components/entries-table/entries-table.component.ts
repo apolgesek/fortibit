@@ -3,11 +3,12 @@ import { PasswordEntry } from '@app/core/models/password-entry.model';
 import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
-import { MenuItem, TreeNode } from 'primeng/api';
-import { ContextMenu } from 'primeng/contextmenu';
+import { MenuItem, TreeNode } from 'primeng-lts/api';
+import { ContextMenu } from 'primeng-lts/contextmenu';
 import { Observable } from 'rxjs';
 import { CoreService, DomEventsService, SearchService } from '@app/core/services';
 import { DOCUMENT } from '@angular/common';
+import { DialogsService } from '@app/core/services/dialogs.service';
 
 type treeNodeEventObject = { node: TreeNode };
 
@@ -67,6 +68,7 @@ export class EntriesTableComponent implements OnInit {
     private contextMenuBuilderService: ContextMenuBuilderService,
     private domEventsService: DomEventsService,
     private renderer: Renderer2,
+    private dialogsService: DialogsService,
     @Inject(DOCUMENT) private document: Document
   ) { 
     this.passwordList$ = this.storageService.entries$;
@@ -103,11 +105,8 @@ export class EntriesTableComponent implements OnInit {
   }
 
   selectGroup(event: treeNodeEventObject) {
-    this.storageService.selectedCategory = event.node;
-    this.storageService.selectedCategory.data = event.node.data || [];
-    this.storageService.selectedPasswords = [];
-    this.searchService.reset();
-    this.storageService.updateEntries();
+    this.storageService.selectGroup(event);
+    this.document.querySelector('.password-table').scrollTo(0,0);
   }
 
   // prevent "Database" group collapse
@@ -158,10 +157,17 @@ export class EntriesTableComponent implements OnInit {
     this.storageService.addGroup();
   }
 
+  collapseAll() {
+    this.groups[0].children.forEach(c => this.expandRecursive(c, false));
+    this.storageService.selectGroup({ node: this.groups[0] });
+  }
+
+  addNewEntry() {
+    this.dialogsService.openEntryWindow();
+  }
+
   setGroupRenameModeOff() {
-    requestAnimationFrame(() => {
-      this.storageService.isRenameModeOn = false;
-    });
+    this.storageService.isRenameModeOn = false;
   }
 
   onDragStart(event: DragEvent, entryData: PasswordEntry) {
@@ -183,5 +189,14 @@ export class EntriesTableComponent implements OnInit {
     this.document.querySelectorAll('.ui-treenode-selectable *')
       .forEach((el: HTMLElement) => this.renderer.setStyle(el, 'pointerEvents', 'auto'));
     this.storageService.draggedEntry = [];
+  }
+
+  private expandRecursive(node:TreeNode, isExpand:boolean) {
+    node.expanded = isExpand;
+    if (node.children){
+      node.children.forEach( childNode => {
+        this.expandRecursive(childNode, isExpand);
+      } );
+    }
   }
 }

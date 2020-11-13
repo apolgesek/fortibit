@@ -1,20 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { TreeDragDropService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ContextMenuModule } from 'primeng/contextmenu';
-import { DragDropModule } from 'primeng/dragdrop';
-import { DropdownModule } from 'primeng/dropdown';
-import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputTextareaModule } from 'primeng/inputtextarea';
-import { MessageModule } from 'primeng/message';
-import { MessagesModule } from 'primeng/messages';
-import { TableModule } from 'primeng/table';
-import { TreeModule } from 'primeng/tree';
+import { TreeDragDropService } from 'primeng-lts/api';
+import { ButtonModule } from 'primeng-lts/button';
+import { CardModule } from 'primeng-lts/card';
+import { ConfirmDialogModule } from 'primeng-lts/confirmdialog';
+import { ContextMenuModule } from 'primeng-lts/contextmenu';
+import { DragDropModule } from 'primeng-lts/dragdrop';
+import { DropdownModule } from 'primeng-lts/dropdown';
+import { DialogService, DynamicDialogModule } from 'primeng-lts/dynamicdialog';
+import { InputTextModule } from 'primeng-lts/inputtext';
+import { InputTextareaModule } from 'primeng-lts/inputtextarea';
+import { MessageModule } from 'primeng-lts/message';
+import { MessagesModule } from 'primeng-lts/messages';
+import { TableModule } from 'primeng-lts/table';
+import { TreeModule } from 'primeng-lts/tree';
 import { SharedModule } from '../shared/shared.module';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { StopwatchDirective } from './components/dashboard/stopwatch.directive';
@@ -26,13 +26,13 @@ import { EntryDialogComponent } from './components/dialogs/entry-dialog/entry-di
 import { MasterPasswordDialogComponent } from './components/dialogs/master-password-dialog/master-password-dialog.component';
 import { EntriesTableComponent } from './components/entries-table/entries-table.component';
 import { EntryDetailsComponent } from './components/entry-details/entry-details.component';
+import { AutofocusDirective } from './directives/autofocus.directive';
 import { BlurEnterDirective } from './directives/blur-enter.directive';
 import { DroppableDirective } from './directives/droppable.directive';
 import { StickyHeaderDirective } from './directives/sticky-header.directive';
 import { TextEmphasizeDirective } from './directives/text-emphasize.directive';
 import { MainRoutingModule } from './main-routing.module';
 import { MainComponent } from './main.component';
-import { AutofocusDirective } from './directives/autofocus.directive';
 
 @NgModule({
   declarations: [
@@ -51,7 +51,7 @@ import { AutofocusDirective } from './directives/autofocus.directive';
     DeleteGroupDialogComponent,
     EntryDialogComponent,
     ConfirmExitDialogComponent,
-    MasterPasswordDialogComponent
+    MasterPasswordDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -70,8 +70,8 @@ import { AutofocusDirective } from './directives/autofocus.directive';
     DropdownModule,
     TreeModule,
     ContextMenuModule,
-    DragDropModule
+    DragDropModule,
   ],
   providers: [ DialogService, TreeDragDropService ],
 })
-export class HomeModule {}
+export class MainModule {}

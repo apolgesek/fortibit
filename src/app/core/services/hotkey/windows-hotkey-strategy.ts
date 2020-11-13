@@ -15,7 +15,7 @@ export class WindowsHotkeyStrategy implements IHotkeyStrategy {
     }
   
     public registerDeleteEntry(event: KeyboardEvent) {
-      if (event.key === 'Delete') {
+      if (event.key === 'Delete' && this.storageService.selectedPasswords.length) {
         this.dialogsService.openDeleteEntryWindow();
       }
     }
