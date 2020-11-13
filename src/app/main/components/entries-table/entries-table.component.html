@@ -1,6 +1,10 @@
-<div class="sidebar">
+<div #sidebar class="sidebar">
 	<div class="header">
-		{{ fileName }}
+		<div class="file">{{ fileName }}</div>
+		<div class="add-group">
+			<a href="#" (click)="addGroup(); false"><span class="pi pi-plus"></span></a>
+			<a href="#" (click)="collapseAll(); false"><span class="pi pi-caret-up"></span></a>
+		</div>
 	</div>
 	<p-tree
 		[value]="groups"
@@ -34,19 +38,12 @@
 			</ng-template>
 		</ng-template>
 	</p-tree>
-    <div class="add-group">
-			<a
-				href="#"
-				(click)="addGroup(); false"
-				class="outline-btn">
-				Add group
-			</a>
-    </div>
     <div class="selected-entries">
 			Selected {{ selectedEntries.length }} of {{ selectedGroup.data.length }}
 		</div>
 </div>
 <div
+  #passwordTable
 	appStickyHeader
 	class="password-table">
 	<div class="table-body">
@@ -106,7 +103,8 @@
 		<div
 			*ngIf="!(passwordList$ | async)?.length"
 			class="list-cta">
-			Nothing in here,<br /> try to <strong>add</strong> a new entry
+			<p>No entries have been added yet</p>
+			<a href="#" class="outline-btn" (click)="addNewEntry(); false">Add entry</a>
 		</div>
 	</div>
 </div>
@@ -117,13 +115,13 @@
 <p-contextMenu
 	#groupContextMenu
 	[model]="selectedGroupLabel === 'Database' ? undefined : groupContextMenuItems"
-	appendTo="body"
+	[target]="sidebar"
 	styleClass="groupContextmenu">
 </p-contextMenu>
 
 <p-contextMenu
 	#entryContextMenu
 	[model]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
-	appendTo="body"
+	[target]="passwordTable"
 	styleClass="entry-contextmenu">
 </p-contextMenu>

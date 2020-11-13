@@ -14,7 +14,7 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
-    resolve: [AuthRequiredResolver],
+    canActivate: [AuthRequiredResolver],
     children: [
       {
         path: '',

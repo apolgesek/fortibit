@@ -1,5 +1,5 @@
 import { Directive, Input, AfterViewInit, ElementRef, OnInit } from '@angular/core';
-import { MessageService } from 'primeng/api';
+import { MessageService } from 'primeng-lts/api';
 
 @Directive({
   selector: '[appStopwatch]'
@@ -36,7 +36,7 @@ export class StopwatchDirective implements OnInit, AfterViewInit {
       clearInterval(this.interval);
       this.toastService.clear();
     }
-    this.element.nativeElement.innerHTML = `${this.secondsLeft / 1000}`;
+    this.element.nativeElement.innerHTML = `Time left: ${this.secondsLeft / 1000}`;
     this.secondsLeft += -1000;
   }
 

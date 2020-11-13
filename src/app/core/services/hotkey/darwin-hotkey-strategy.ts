@@ -15,7 +15,7 @@ export class DarwinHotkeyStrategy implements IHotkeyStrategy {
     }
   
     public registerDeleteEntry(event: KeyboardEvent) {
-      if (event.key === 'Backspace' && event.metaKey) {
+      if (event.key === 'Backspace' && event.metaKey && this.storageService.selectedPasswords.length) {
         this.dialogsService.openDeleteEntryWindow();
       }
     }

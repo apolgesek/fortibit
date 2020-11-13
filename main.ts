@@ -5,7 +5,7 @@ import {
   dialog,
   clipboard,
   SaveDialogReturnValue,
-  shell
+  shell,
 } from 'electron';
 
 import * as path from 'path';
@@ -22,12 +22,11 @@ const args = process.argv.slice(1),
 let clearClipboardTimeout: NodeJS.Timeout;
 let file: { filePath: string, filename: string};
 let currentPassword: string;
-let wasAppLoaded: boolean;
+let wasAppLoaded = false;
 
 const ext = '.hslc';
 
 function createWindow(): BrowserWindow {
-
   win = new BrowserWindow({
     x: 0,
     y: 0,
@@ -40,10 +39,9 @@ function createWindow(): BrowserWindow {
     },
     resizable: true,
     minHeight: 520,
-    minWidth: 820
+    minWidth: 820,
+    frame: false,
   });
-
-  win.removeMenu();
 
   if (serve) {
     require('electron-reload')(__dirname, {
@@ -56,11 +54,6 @@ function createWindow(): BrowserWindow {
       protocol: 'file:',
       slashes: true
     }));
-  }
-
-  //windows open by file
-  if (process.platform === 'win32' && process.argv.length >= 2) {
-    file = { filePath: process.argv[1], filename: path.basename(process.argv[1]) };
   }
 
   if (serve) {
@@ -84,9 +77,14 @@ try {
   // Some APIs can only be used after this event occurs.
   app.on('ready', createWindow);
 
+  const fileArg = process.argv.find(x => x.endsWith(ext));
+  if (fileArg) {
+    file = { filePath: fileArg, filename: path.basename(fileArg) };
+  }
+
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {
-      app.quit();
+    app.quit();
   });
 
   app.on('activate', () => {
@@ -144,6 +142,33 @@ try {
     win.webContents.send('providePassword', file);
   });
 
+  ipcMain.on('openFile', async () => {
+    const fileObj = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'Haslock database file', extensions: ['hslc'] }]
+    });
+
+    if (!fileObj.canceled) {
+      file = { filePath: fileObj.filePaths[0], filename: path.basename(fileObj.filePaths[0]) };
+      win.webContents.send('providePassword', file);
+    }
+  });
+
+  ipcMain.on('minimize', () => {
+    win.minimize();
+  })
+
+  ipcMain.on('maximize', () => {
+    win.setFullScreen(!win.isFullScreen());
+  })
+
+  ipcMain.on('close', () => {
+    if (win.webContents.isDevToolsOpened()) {
+      win.webContents.closeDevTools();
+    }
+    win.close();
+  })
+
   ipcMain.on('authAttempt', (_, password) => {
     fs.readFile(file.filePath, (_, data) => {
       try {
@@ -158,9 +183,11 @@ try {
 
   ipcMain.handle('appOpenType', () => {
     if (wasAppLoaded) {
-      return false;
+      return;
     }
+
     wasAppLoaded = true;
+
     return file;
   });
 
@@ -169,7 +196,7 @@ try {
   });
 
   ipcMain.on('openUrl', (_, url: string) => {
-    shell.openExternal(url.includes('http') ? '': 'http://' + url);
+    shell.openExternal(url.includes('http') ? url: 'http://' + url);
   });
 
   ipcMain.on('onCloseAttempt', () => {

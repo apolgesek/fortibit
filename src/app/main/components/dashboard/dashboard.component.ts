@@ -2,10 +2,8 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@ang
 import { StorageService } from '@app/core/services/storage.service';
 import { DialogsService } from '@app/core/services/dialogs.service';
 import { fromEvent, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { SearchService } from '@app/core/services';
-
-const logoURL = require('assets/images/lock.svg');
+import { debounceTime, distinctUntilChanged, takeUntil, tap } from 'rxjs/operators';
+import { HotkeyService, SearchService } from '@app/core/services';
 
 @Component({
   selector: 'app-dashboard',
@@ -37,24 +35,30 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     return this.storageService.selectedPasswords.length;
   }
 
-  get logoURL(): string {
-    return logoURL.default;
-  }
-
   constructor(
     private storageService: StorageService,
     private searchService: SearchService,
-    private dialogsService: DialogsService
+    private dialogsService: DialogsService,
+    private hotkeyService: HotkeyService
   ) { }
 
   ngAfterViewInit(): void {
     fromEvent(this.search.nativeElement, 'keyup').pipe(
       distinctUntilChanged(),
       debounceTime(500),
+      tap((event: KeyboardEvent) => {
+        this.searchService.search((event.target as HTMLInputElement).value);
+      }),
       takeUntil(this.destroyed$)
-    ).subscribe((event: KeyboardEvent) => {
-      this.searchService.search((event.target as HTMLInputElement).value);
-    });
+    ).subscribe();
+
+    fromEvent(window, 'keydown')
+      .pipe(
+        tap((event: KeyboardEvent) => {
+          this.hotkeyService.intercept(event);
+        }),
+        takeUntil(this.destroyed$)
+      ).subscribe();
   }
 
   ngOnDestroy() {

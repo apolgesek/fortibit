@@ -1,0 +1,6 @@
+<?xml version="1.0" ?><svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs><style>.cls{fill:none;stroke:#444;stroke-width:3px;shape-rendering: crispEdges;}</style></defs><title/><g id="max">
+<line class="cls" x1="7" y1="7" x2="7" y2="25"/>
+<line class="cls" x1="7" y1="25" x2="25" y2="25"/>
+<line class="cls" x1="25" y1="25" x2="25" y2="7"/>
+<line class="cls" x1="7" y1="7" x2="25" y2="7"/>
+</g></svg>

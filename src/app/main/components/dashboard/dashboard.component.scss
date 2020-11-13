@@ -76,28 +76,11 @@
     display: flex;
     position: relative;
     z-index: 3;
-    -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
-    -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
-
-    .brand {
-        margin: 0;
-        color: $white;
-        margin-left: 1rem;
-        display: flex;
-        align-items: center;
-        font-size: 1.8rem;
-        font-weight: 400;
-        .brand-logo {
-            height: 1.8rem;
-            margin-right: 0.4rem;
-        }
-    }
 
     .menu-panel {
         flex: 1;
         text-align: left;
-        margin-left: 5.25rem;
+        margin-left: 1rem;
         display: flex;
         justify-content: flex-start;
         align-items: center;

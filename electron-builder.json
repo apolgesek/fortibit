@@ -26,7 +26,7 @@
   }],
   "win": {
     "target": [
-      "msi"
+      "portable"
     ]
   },
   "mac": {
