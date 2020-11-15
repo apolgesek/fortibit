@@ -186,7 +186,7 @@ body .ui-dialog .ui-dialog-titlebar {
   width: 100%;
   position: relative;
   z-index: 2;
-  padding: 0.45rem 0 0.5rem 1rem;
+  padding: 0.45rem 0 0 1rem;
   font-weight: 700;
   color: #444;
   font-size: 0.9rem;
@@ -194,7 +194,7 @@ body .ui-dialog .ui-dialog-titlebar {
   white-space: nowrap;
   overflow: hidden;
   max-width: 15rem;
-  height: 2.5rem;
+  min-height: 2.1rem;
 }
 
 .ui-inputgroup {
