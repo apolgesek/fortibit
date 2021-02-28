@@ -4,12 +4,12 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthRequiredResolver } from '../core/guards/auth-required.resolver';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { EntriesTableComponent } from './components/entries-table/entries-table.component';
-import { MainComponent } from './main.component';
+import { MasterPasswordComponent } from './components/master-password/master-password.component';
 
 const routes: Routes = [
   {
     path: 'home',
-    component: MainComponent
+    component: MasterPasswordComponent
   },
   {
     path: 'dashboard',

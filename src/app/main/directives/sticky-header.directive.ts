@@ -7,9 +7,9 @@ import { takeUntil } from 'rxjs/operators';
   selector: '[appStickyHeader]'
 })
 export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
-
   private readonly className = 'scrolled';
   private readonly destroyed$ = new Subject<void>();
+
   private observer: IntersectionObserver;
   private observedElement: HTMLElement;
 
@@ -30,7 +30,7 @@ export class StickyHeaderDirective implements AfterViewInit, OnDestroy{
         change.isIntersecting
           ? tableHeaderClasses.remove(this.className)
           : tableHeaderClasses.add(this.className);
-      })
+      });
     }, options);
 
     this.observedElement = this.getFirstRow();

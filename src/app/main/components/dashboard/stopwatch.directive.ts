@@ -14,7 +14,7 @@ export class StopwatchDirective implements OnInit, AfterViewInit {
   constructor(
     private element: ElementRef,
     private toastService: MessageService,
-    ) { }
+  ) { }
 
   ngOnInit(): void {
     this.secondsLeft = this.seconds;

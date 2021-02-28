@@ -1,57 +1,40 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
-import { IHotkeyConfiguration, IHotkeyStrategy } from '@app/core/models';
+import { IHotkeyConfiguration, IHotkeyHandler } from '@app/core/models';
 import { DialogsService } from '../dialogs.service';
 import { StorageService } from '../storage.service';
-import { DarwinHotkeyStrategy } from './darwin-hotkey-strategy';
-import { WindowsHotkeyStrategy } from './windows-hotkey-strategy';
+import { WindowsHotkeyHandler } from './windows-hotkey-handler';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HotkeyService {
-  private hotkeyStrategy: IHotkeyStrategy;
-
   public configuration: IHotkeyConfiguration;
   public deleteShortcutLabel: string;
 
+  private hotkeyStrategy: IHotkeyHandler;
+
   constructor(
     private storageService: StorageService,
-    private dialogsService: DialogsService,
-    @Inject(DOCUMENT) private document: Document
-  ) {
-    this.create();
-  }
+    private dialogsService: DialogsService
+  ) { }
 
-  private create() {
+  public create() {
     switch (process.platform) {
-      case 'darwin':
-        this.hotkeyStrategy = new DarwinHotkeyStrategy(
-          this.storageService,
-          this.dialogsService
-        );
+    case 'win32':
+      this.hotkeyStrategy = new WindowsHotkeyHandler(
+        this.storageService,
+        this.dialogsService
+      );
 
-        this.configuration = {
-          deleteLabel: 'Delete (Cmd + ⌫)',
-          moveTopLabel: 'Move top (Cmd + ↑)',
-          moveBottomLabel: 'Move bottom (Cmd + ↓)',
-        };
-
-        break;
-      case 'win32':
-        this.hotkeyStrategy = new WindowsHotkeyStrategy(
-          this.storageService,
-          this.dialogsService
-        );
-
-        this.configuration = {
-          deleteLabel: 'Delete (Del)',
-          moveTopLabel: 'Move top (Ctrl + ↑)',
-          moveBottomLabel: 'Move bottom (Ctrl + ↓)',
-        };
-
-      default:
-        break;
+      this.configuration = {
+        deleteLabel: 'Delete (Del)',
+        moveTopLabel: 'Move top (Ctrl + ↑)',
+        moveBottomLabel: 'Move bottom (Ctrl + ↓)',
+      };
+      break;
+    default:
+      break;
     }
   }
 
@@ -60,10 +43,10 @@ export class HotkeyService {
   }
 
   intercept(event: KeyboardEvent) {
-    // disable hotkey if dialog opened
-    if (this.document.body.classList.contains('ui-overflow-hidden')) {
+    if (this.dialogsService.isAnyDialogOpened) {
       return;
     }
+
     this.hotkeyStrategy.registerSaveDatabase(event);
     this.hotkeyStrategy.registerDeleteEntry(event);
     this.hotkeyStrategy.registerEditEntry(event);

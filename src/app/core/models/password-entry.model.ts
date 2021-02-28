@@ -1,4 +1,4 @@
-export interface PasswordEntry {
+export interface IPasswordEntry {
 	id: string;
 	username: string;
 	password: string;

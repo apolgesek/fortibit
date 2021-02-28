@@ -4,31 +4,22 @@
     "output": "release/"
   },
   "files": [
-      "**/*",
-      "!**/*.ts",
-      "!*.code-workspace",
-      "!LICENSE.md",
-      "!package.json",
-      "!package-lock.json",
-      "!src/",
-      "!e2e/",
-      "!hooks/",
-      "!angular.json",
-      "!_config.yml",
-      "!karma.conf.js",
-      "!tsconfig.json",
-      "!tslint.json"
+    "**/*",
+    "!**/*.ts",
+    "!**/mock_data.json",
+    "!*.code-workspace",
+    "!LICENSE.md",
+    "!package.json",
+    "!package-lock.json",
+    "!src/",
+    "!e2e/",
+    "!hooks/",
+    "!angular.json",
+    "!_config.yml",
+    "!karma.conf.js",
+    "!tsconfig.json",
+    "!tslint.json"
   ],
-  "fileAssociations": [{
-    "ext": "hslc",
-    "name": "haslock file",
-    "role": "Editor"
-  }],
-  "win": {
-    "target": [
-      "portable"
-    ]
-  },
   "mac": {
     "target": [
       "dmg"

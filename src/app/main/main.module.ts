@@ -8,7 +8,7 @@ import { ConfirmDialogModule } from 'primeng-lts/confirmdialog';
 import { ContextMenuModule } from 'primeng-lts/contextmenu';
 import { DragDropModule } from 'primeng-lts/dragdrop';
 import { DropdownModule } from 'primeng-lts/dropdown';
-import { DialogService, DynamicDialogModule } from 'primeng-lts/dynamicdialog';
+import { DynamicDialogModule } from 'primeng-lts/dynamicdialog';
 import { InputTextModule } from 'primeng-lts/inputtext';
 import { InputTextareaModule } from 'primeng-lts/inputtextarea';
 import { MessageModule } from 'primeng-lts/message';
@@ -33,6 +33,7 @@ import { StickyHeaderDirective } from './directives/sticky-header.directive';
 import { TextEmphasizeDirective } from './directives/text-emphasize.directive';
 import { MainRoutingModule } from './main-routing.module';
 import { MainComponent } from './main.component';
+import { MasterPasswordComponent } from './components/master-password/master-password.component';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { MainComponent } from './main.component';
     EntryDialogComponent,
     ConfirmExitDialogComponent,
     MasterPasswordDialogComponent,
+    MasterPasswordComponent,
   ],
   imports: [
     CommonModule,
@@ -72,6 +74,13 @@ import { MainComponent } from './main.component';
     ContextMenuModule,
     DragDropModule,
   ],
-  providers: [ DialogService, TreeDragDropService ],
+  entryComponents: [
+    DeleteEntryDialogComponent,
+    DeleteGroupDialogComponent,
+    EntryDialogComponent,
+    ConfirmExitDialogComponent,
+    MasterPasswordDialogComponent,
+  ],
+  providers: [ TreeDragDropService ],
 })
 export class MainModule {}

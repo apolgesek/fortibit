@@ -1,4 +1,7 @@
-<div class="details-container" [ngClass]="{'db': !isEntrySelected}">
+<div
+    data-prevent-entry-deselect
+    class="details-container"
+    [ngClass]="{'db': !isEntrySelected}">
     <ng-container *ngIf="isEntrySelected; else databaseDetails">
         <div class="header">Entry details</div>
         <div class="content">
@@ -43,10 +46,6 @@
             {{ databaseInformation.name }}
         </div>
         <div class="section">
-            <p><span class="label">Description</span></p>
-            Lorem ipsum
-        </div>
-        <div class="section">
             <p><span class="label">Encryption algorithm</span></p>
             AES-256 (Rijndael)  
         </div>
@@ -55,12 +54,8 @@
             PBKDF2 - 100 000 rounds 
         </div>
         <div class="section">
-            <p><span class="label">Compression</span></p>
-            Not available
-        </div>
-        <div class="section">
-            <p><span class="label">Password strength</span></p>
-            Not available
+            <p><span class="label">Global autotype shortcut</span></p>
+            Ctrl + Alt + H <i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
         </div>
         <div class="version">haslock v{{ version }}</div>
     </div>
