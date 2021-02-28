@@ -1,58 +1,71 @@
-<div class="dialog-header">
+<div
+  data-prevent-entry-deselect
+  class="dialog-header">
   <h2>{{ header }}</h2>
-  <span class="close-dialog" (click)="close()">&times;</span>
+  <span
+    class="close-dialog"
+    (click)="close()">&times;
+  </span>
 </div>
 <form
-  *ngIf="newEntryForm"
+  data-prevent-entry-deselect
   [formGroup]="newEntryForm">
   <div>
-    <div class="ui-inputgroup">
-      <span class="ui-inputgroup-addon"><i class="pi pi-bookmark"></i></span>
+    <div class="p-inputgroup">
+      <span class="p-inputgroup-addon"><i class="pi pi-bookmark"></i></span>
       <input
         type="text"
+        spellcheck="false"
         appAutofocus
         formControlName="title"
         placeholder="Title">   
     </div>
     <div
-      class="ui-inputgroup"
-      [ngClass]="{'ng-invalid': newEntryForm.get('username').invalid && newEntryForm.get('username').dirty}">
-      <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+      class="p-inputgroup"
+      [ngClass]="{'ng-invalid': isControlInvalid('username')}">
+      <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
       <input
         type="text"
         formControlName="username"
         placeholder="Username">         
     </div>
     <div
-      *ngIf="newEntryForm.get('username').invalid && newEntryForm.get('username').dirty"
-      @fadeSlide
+      *ngIf="isControlInvalid('username')"
       class="validation-error">
       Username is required
     </div>
     <div
-      class="ui-inputgroup"
-      [ngClass]="{'ng-invalid': newEntryForm.get('password').invalid && newEntryForm.get('password').dirty}">
-      <span class="ui-inputgroup-addon"><i class="pi pi-key"></i></span>
+      class="p-inputgroup"
+      [ngClass]="{'ng-invalid': isControlInvalid('password')}">
+      <span class="p-inputgroup-addon"><i class="pi pi-key"></i></span>
       <input
         type="password"
         formControlName="password"
-        placeholder="Password">   
+        placeholder="Password"
+        (input)="onPasswordChange($event.target.value)">   
     </div>
     <div
-      *ngIf="newEntryForm.get('password').invalid && newEntryForm.get('password').dirty"
-      @fadeSlide
+      class="password-strength"
+      [class]="'s-' + passwordScore"
+      [ngClass]="{'active': passwordLength > 0}">
+      <div class="text">
+        {{ textDescription }}
+      </div>
+    </div>
+    <div
+      *ngIf="isControlInvalid('password')"
       class="validation-error">
       Password is required
     </div>		
-    <div class="ui-inputgroup">
-      <span class="ui-inputgroup-addon"><i class="pi pi-globe"></i></span>
+    <div class="p-inputgroup">
+      <span class="p-inputgroup-addon"><i class="pi pi-globe"></i></span>
       <input
         type="text"
         formControlName="url"
         placeholder="Website">      
     </div>
-    <div class="ui-inputgroup">
-      <span class="ui-inputgroup-addon"><i class="pi pi-info"></i></span>
+    <div class="p-inputgroup">
+      <span class="p-inputgroup-addon"><i class="pi pi-info"></i></span>
       <textarea
         formControlName="notes"
         placeholder="Optional note"

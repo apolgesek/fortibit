@@ -1,27 +1,25 @@
-import { DOCUMENT } from "@angular/common";
-import { Inject, Injectable, Renderer2, RendererFactory2 } from "@angular/core";
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DomEventsService {
-
   private renderer: Renderer2;
 
   constructor(
     private rendererFactory: RendererFactory2,
-    @Inject(DOCUMENT) private document: Document
-  ) {    
+    @Inject(DOCUMENT) private document: Document) {    
     this.renderer = this.rendererFactory.createRenderer(null,null);
   }
 
   createDragGhost(event: DragEvent) {
     let element = null;
     if (process.platform === 'darwin') {
-      element = document.createElement("div");
-      element.id = "drag-ghost";
-      element.style.position = "absolute";
-      element.style.top = "-1000px";
+      element = document.createElement('div');
+      element.id = 'drag-ghost';
+      element.style.position = 'absolute';
+      element.style.top = '-1000px';
       document.body.appendChild(element);
     } else {
       element = new Image();
@@ -36,7 +34,7 @@ export class DomEventsService {
 
   removeDragGhost() {
     if (process.platform === 'darwin') {
-      const ghost = this.document.getElementById("drag-ghost");
+      const ghost = this.document.getElementById('drag-ghost');
       this.renderer.removeChild(ghost.parentElement, ghost);
     }
   }

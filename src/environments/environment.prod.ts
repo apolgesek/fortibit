@@ -3,7 +3,10 @@ export const AppConfig = {
   environment: 'PROD',
   mocks: false,
   urls: {
-    releaseNotes: 'https://github.com/apolgesek/haslock/releases',
-    reportIssue: 'https://github.com/apolgesek/haslock/issues'
+    repositoryUrl: 'https://github.com/apolgesek/haslock/',
+    releaseNotes: 'releases',
+    reportIssue: 'issues',
+    keyboardReference: 'wiki/Keyboard-shortcuts',
+    autotypeShortcut: '#global-autotype'
   }
 };

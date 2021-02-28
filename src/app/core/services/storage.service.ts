@@ -4,11 +4,11 @@ import { TreeNode } from 'primeng-lts/api';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { markDirty } from '../decorators/mark-dirty.decorator';
-import { PasswordEntry } from '../models/password-entry.model';
+import { IPasswordEntry } from '../models/password-entry.model';
 import { ArrayUtils } from '../utils';
 import { ElectronService } from './electron/electron.service';
 import { MockDataService } from './mock-data.service';
-import { SearchService } from './search.service';
+import { ISearchResultGroup, SearchResult, SearchService } from './search.service';
 import { v4 as uuidv4 } from 'uuid';
 
 const nameof = <T>(name: keyof T) => name;
@@ -18,14 +18,15 @@ type treeNodeEventObject = { node: TreeNode };
   providedIn: 'root'
 })
 export class StorageService {
-  public readonly entries$: Observable<PasswordEntry[]>;
+  public readonly entries$: Observable<SearchResult[]>;
   public readonly entryIndex: number;
+  public entriesFound$: Observable<number>;
 
   public dateSaved: Date;
-  public selectedPasswords: PasswordEntry[] = [];
-  public draggedEntry: PasswordEntry[] = [];
+  public selectedPasswords: IPasswordEntry[] = [];
+  public draggedEntry: IPasswordEntry[] = [];
   public selectedCategory: TreeNode;
-  public editedEntry: PasswordEntry;
+  public editedEntry: IPasswordEntry;
   public contextSelectedCategory: TreeNode;
   public isRenameModeOn = false;
   public file: { filePath: string, filename: string };
@@ -35,7 +36,7 @@ export class StorageService {
     return this.file?.filename ?? '*New db';
   }
   
-  private passwordListSource: BehaviorSubject<PasswordEntry[]> = new BehaviorSubject<PasswordEntry[]>([]);
+  private passwordListSource: BehaviorSubject<IPasswordEntry[]> = new BehaviorSubject<IPasswordEntry[]>([]);
 
   constructor(
     private electronService: ElectronService,
@@ -49,41 +50,38 @@ export class StorageService {
       shareReplay()
     );
 
+    this.entriesFound$ = this.entries$
+      .pipe(map((entries) => entries.filter(e => !(e as ISearchResultGroup).groupPath).length));
+
     this.groups = [{
       key: uuidv4(),
-      label: "Database",
+      label: 'Database',
       expanded: true,
-      expandedIcon: "pi pi-folder-open",
+      expandedIcon: 'pi pi-folder-open',
       draggable: false,
       data: [],
       children: [
-        this.buildGroup("General"),
-        this.buildGroup("Email"),
-        this.buildGroup("Work"),
-        this.buildGroup("Banking"),
+        this.buildGroup('General'),
+        this.buildGroup('Email'),
+        this.buildGroup('Work'),
+        this.buildGroup('Banking'),
       ]
     }];
 
     if (AppConfig.mocks) {
       MockDataService.loadMockedEntries(this.groups[0]);
-      this.setDateSaved();
-    } else {
-      this.groups[0].data = require('@assets/json/new_db_data.json');
-      this.groups[0].children.forEach((_, index) => {
-        this.groups[0].children[index].data = [];
-      });
-      this.setDateSaved();
     }
 
+    this.setDateSaved();
     this.selectedCategory = this.groups[0];
   }
 
   //#region mark dirty methods
   @markDirty()
-  addEntry(entryModel: PasswordEntry) {
+  addEntry(entryModel: IPasswordEntry) {
     if (entryModel.id) {
       const catalogData = this.findRow(this.groups[0], entryModel.id);
-      let entryIdx = catalogData.findIndex(p => p.id === entryModel.id);
+      const entryIdx = catalogData.findIndex(p => p.id === entryModel.id);
       catalogData[entryIdx] = {...entryModel, id: uuidv4()}; // update id for entries table change detection
       this.selectedPasswords = [catalogData[entryIdx]];
     } else {
@@ -117,7 +115,7 @@ export class StorageService {
 
   @markDirty()
   removeGroup() {
-    let index = this.selectedCategory.parent.children.findIndex(g => g.key === this.contextSelectedCategory.key);
+    const index = this.selectedCategory.parent.children.findIndex(g => g.key === this.contextSelectedCategory.key);
     this.selectedCategory.parent.children.splice(index, 1);
     this.selectedCategory = this.groups[0];
   }
@@ -136,7 +134,7 @@ export class StorageService {
       this.selectedCategory.children = [];
     }
   
-    this.selectedCategory.children.push(this.buildGroup("New group"));
+    this.selectedCategory.children.push(this.buildGroup('New group'));
     this.selectedCategory.expanded = true;
 
     const addedGroup = this.selectedCategory.children.slice(-1)[0];
@@ -147,25 +145,25 @@ export class StorageService {
 
   @markDirty()
   moveUp() {
-    ArrayUtils.moveElementsLeft<PasswordEntry>(
+    ArrayUtils.moveElementsLeft<IPasswordEntry>(
       this.selectedCategory.data,
       this.selectedPasswords,
-      nameof<PasswordEntry>('id')
+      nameof<IPasswordEntry>('id')
     );
   }
 
   @markDirty()
   moveDown() {
-    ArrayUtils.moveElementsRight<PasswordEntry>(
+    ArrayUtils.moveElementsRight<IPasswordEntry>(
       this.selectedCategory.data,
       this.selectedPasswords,
-      nameof<PasswordEntry>('id')
+      nameof<IPasswordEntry>('id')
     );
   }
 
   @markDirty()
   moveTop() {
-    const groupData = (this.selectedCategory.data as PasswordEntry[]);    
+    const groupData = (this.selectedCategory.data as IPasswordEntry[]);    
     this.selectedPasswords.forEach(element => {
       const elIdx = groupData.findIndex(e => e.id === element.id);
       groupData.splice(elIdx, 1);
@@ -175,7 +173,7 @@ export class StorageService {
 
   @markDirty()
   moveBottom() {
-    const groupData = (this.selectedCategory.data as PasswordEntry[]);
+    const groupData = (this.selectedCategory.data as IPasswordEntry[]);
     this.selectedPasswords.forEach(element => {
       const elIdx = groupData.findIndex(e => e.id === element.id);
       groupData.splice(elIdx, 1);
@@ -190,7 +188,7 @@ export class StorageService {
     this.selectedPasswords = [];
     this.searchService.reset();
     this.updateEntries();
-    document.querySelector('.password-table')
+    document.querySelector('.password-table');
   }
 
   saveDatabase(newPassword: string) {
@@ -218,7 +216,7 @@ export class StorageService {
     this.dateSaved = new Date();
   }
 
-  private findRow(node: TreeNode, id?: string): PasswordEntry[] {
+  private findRow(node: TreeNode, id?: string): IPasswordEntry[] {
     if (!id) {
       return node.data;
     }
@@ -233,7 +231,7 @@ export class StorageService {
     }
   }
   
-  private findRowGroup(node: TreeNode, targetGroupKey: string): PasswordEntry[] {
+  private findRowGroup(node: TreeNode, targetGroupKey: string): IPasswordEntry[] {
     if (node.key === targetGroupKey) {
       return node.data;
     } else if (node.children != null) {
@@ -245,13 +243,13 @@ export class StorageService {
     }
   }
 
-  public buildGroup(title: string): TreeNode {
+  private buildGroup(title: string): TreeNode {
     return {
       key: uuidv4(),
       label: title,
       data: [],
-      collapsedIcon: "pi pi-folder",
-      expandedIcon: "pi pi-folder-open"
+      collapsedIcon: 'pi pi-folder',
+      expandedIcon: 'pi pi-folder-open'
     };
   }
 }

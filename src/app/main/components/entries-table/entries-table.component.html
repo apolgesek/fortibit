@@ -2,8 +2,8 @@
 	<div class="header">
 		<div class="file">{{ fileName }}</div>
 		<div class="add-group">
-			<a href="#" (click)="addGroup(); false"><span class="pi pi-plus"></span></a>
-			<a href="#" (click)="collapseAll(); false"><span class="pi pi-caret-up"></span></a>
+			<button (click)="addGroup(); false"><span class="pi pi-plus"></span></button>
+			<button (click)="collapseAll(); false"><span class="pi pi-caret-up"></span></button>
 		</div>
 	</div>
 	<p-tree
@@ -22,7 +22,7 @@
 			<input
 				*ngIf="isGroupRenameModeOn && node === contextSelectedCategory; else readOnly"
 				[(ngModel)]="node.label"
-				(blur)="setGroupRenameModeOff()"
+				(blur)="setGroupRenameModeOff(node)"
 				type="text"
 				appBlurEnter
 				class="group-name-input"
@@ -39,11 +39,12 @@
 		</ng-template>
 	</p-tree>
     <div class="selected-entries">
-			Selected {{ selectedEntries.length }} of {{ selectedGroup.data.length }}
+			Gr:&nbsp;<span class="group-name">{{ selectedGroup.label }}</span>
+			&nbsp;/ Sel: {{ selectedEntries.length }} / Tot: {{ selectedGroup.data.length }}
 		</div>
 </div>
 <div
-  #passwordTable
+	#passwordTable
 	appStickyHeader
 	class="password-table">
 	<div class="table-body">
@@ -63,11 +64,11 @@
 				pTemplate="body"
 				let-rowData
 				let-rowIndex="entryIndex">
-				<tr *ngIf="rowData.isGroup; else entryTemplate">
+				<tr *ngIf="rowData.groupPath; else entryTemplate" class="entry-group">
 					<td colspan="3">
 						<div class="group-separator">
 							<span class="pi pi-folder">
-							</span> {{ rowData.name }}
+							</span> {{ rowData.groupPath }}
 						</div>
 					</td>
 				</tr>
@@ -75,25 +76,26 @@
 					<tr
 						pDraggable
 						[pContextMenuRow]="rowData"
-						[pContextMenuRowIndex]="entryIndex"
+						[pContextMenuRowIndex]="rowIndex"
 						(onDragStart)="onDragStart($event, rowData)"
-						(onDragEnd)="onDragEnd($event)"
+						(onDragEnd)="onDragEnd()"
 						(click)="selectEntry($event, rowData)"
+						data-prevent-entry-deselect
 						class="row-entry"
-						[ngClass]="{'ui-state-highlight': isEntrySelected(rowData), 'is-dragging': isEntryDragged(rowData)}">
+						[ngClass]="{'selected': isEntrySelected(rowData), 'is-dragging': isEntryDragged(rowData)}">
 						<td
 							[appTextEmphasize]="searchPhrase$ | async"
-							(dblclick)="copyToClipboard(rowData, rowData.title)"
+							(dblclick)="copyToClipboard(rowData, 'title', rowData.title)"
 							class="long-text">
 							{{ rowData.title }}
 						</td>
 						<td
 							[appTextEmphasize]="searchPhrase$ | async"
-							(dblclick)="copyToClipboard(rowData, rowData.username)"
+							(dblclick)="copyToClipboard(rowData, 'username', rowData.username)"
 							class="long-text">
 							{{ rowData.username }}
 						</td>
-						<td (dblclick)="copyToClipboard(rowData, rowData.password)">
+						<td (dblclick)="copyToClipboard(rowData, 'password', rowData.password)">
 							******
 						</td>
 					</tr>
@@ -103,8 +105,13 @@
 		<div
 			*ngIf="!(passwordList$ | async)?.length"
 			class="list-cta">
-			<p>No entries have been added yet</p>
-			<a href="#" class="outline-btn" (click)="addNewEntry(); false">Add entry</a>
+			<ng-container *ngIf="(searchPhrase$ | async).length; else ctaContainer">
+				No results found
+			</ng-container>
+			<ng-template #ctaContainer>
+				<p>No entries have been added yet</p>
+				<a href="#" class="outline-btn" (click)="addNewEntry(); false">Add entry</a>
+			</ng-template>
 		</div>
 	</div>
 </div>
@@ -114,14 +121,16 @@
 
 <p-contextMenu
 	#groupContextMenu
-	[model]="selectedGroupLabel === 'Database' ? undefined : groupContextMenuItems"
+	[model]="groupContextMenuItems"
 	[target]="sidebar"
-	styleClass="groupContextmenu">
+	(onShow)="onGroupContextMenuShow()"
+	styleClass="group-contextmenu">
 </p-contextMenu>
 
 <p-contextMenu
 	#entryContextMenu
 	[model]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
 	[target]="passwordTable"
+	(onShow)="onEntryContextMenuShow()"
 	styleClass="entry-contextmenu">
 </p-contextMenu>
