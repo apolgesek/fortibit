@@ -110,7 +110,9 @@ export class CoreService {
 
   exitApp() {
     window.onbeforeunload = undefined;
-    this.electronService.ipcRenderer.send('exit');
+    setTimeout(() => {
+      this.electronService.ipcRenderer.send('exit');
+    });
   }
 
   async copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry, value: string) {
