@@ -1,34 +1,53 @@
 import { Directive, Input, ElementRef } from '@angular/core';
-
 @Directive({
   selector: '[appTextEmphasize]'
 })
 export class TextEmphasizeDirective {
+  private readonly openingTag = '<strong>';
+  private readonly closingTag = '</strong>';
 
-  private _searchPhrase: string = '';
+  private searchPhraseValue = '';
 
   @Input('appTextEmphasize') set searchPhrase(value: string) {
-    this._searchPhrase = value;
-    this.checkChanges();
+    this.searchPhraseValue = value.trim();
+    this.applyChanges();
   }
 
   constructor(private element: ElementRef) { }
 
-  private checkChanges() {
+  private applyChanges() {
     requestAnimationFrame(() => {
       const elementTextContent = this.element.nativeElement as HTMLElement;
-      let htmlContent = elementTextContent.innerHTML
-        .replace(new RegExp('<strong>', 'g'), '')
-        .replace(new RegExp('</strong>', 'g'), '');
 
-      if (this._searchPhrase.length === 0 || !elementTextContent.textContent.includes(this._searchPhrase)) {
-        elementTextContent.innerHTML = htmlContent;
+      elementTextContent.innerHTML = elementTextContent.innerHTML
+        .replaceAll(new RegExp(this.openingTag, 'g'), '')
+        .replaceAll(new RegExp(this.closingTag, 'g'), '');
+      
+      if (this.isSubstringNotFound(elementTextContent)) {
         return;
       }
 
-      htmlContent = htmlContent.replace(new RegExp(this._searchPhrase, 'g'), `<strong>${this._searchPhrase}</strong>`);
-      elementTextContent.innerHTML = htmlContent;
+      const matchedSubstrings = Array.from(elementTextContent.textContent
+        .matchAll(new RegExp(this.searchPhraseValue, 'gi'))
+      ).map(x => x[0]);
+
+      for (const match of matchedSubstrings) {
+        const lastFoundIndex = elementTextContent.innerHTML.lastIndexOf(this.closingTag);
+        let textToReplace = elementTextContent.innerHTML;
+
+        if (lastFoundIndex >= 0) {
+          textToReplace = elementTextContent.innerHTML.substring(lastFoundIndex + this.closingTag.length);
+        }
+
+        elementTextContent.innerHTML = elementTextContent.innerHTML
+          .substring(0, lastFoundIndex >=0 ? lastFoundIndex + this.closingTag.length : 0)
+          + textToReplace.replace(match, this.openingTag + match + this.closingTag);
+      }
     });
   }
 
+  private isSubstringNotFound(elementTextContent: HTMLElement) {
+    return this.searchPhraseValue.trim().length === 0
+      || !elementTextContent.textContent.toLowerCase().includes(this.searchPhraseValue.toLowerCase());
+  }
 }

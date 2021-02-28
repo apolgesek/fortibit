@@ -1,22 +1,20 @@
-import 'reflect-metadata';
-import '../polyfills';
-
-import { BrowserModule } from '@angular/platform-browser';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { CoreModule } from './core/core.module';
-import { SharedModule } from './shared/shared.module';
-import { AppRoutingModule } from './app-routing.module';
-import { MenuBarComponent } from './core/components/menu-bar/menu-bar.component';
-
+import { BrowserModule } from '@angular/platform-browser';
 // NG Translate
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-
-import { MainModule } from './main/main.module';
-import { AppComponent } from './app.component';
+import { DialogService } from 'primeng-lts/dynamicdialog';
 import { MenuModule } from 'primeng-lts/menu';
+import 'reflect-metadata';
+import '../polyfills';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { MenuBarComponent } from './core/components/menu-bar/menu-bar.component';
+import { CoreModule } from './core/core.module';
+import { MainModule } from './main/main.module';
+import { SharedModule } from './shared/shared.module';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
@@ -42,7 +40,9 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
       }
     })
   ],
-  providers: [],
+  providers: [
+    DialogService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

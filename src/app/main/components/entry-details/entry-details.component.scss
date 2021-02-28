@@ -22,6 +22,16 @@
     height: 100%;
     transition: background-color 150ms ease-in-out;
 
+    .header {
+        padding-top: 0.5rem;
+    }
+
+    i {
+        color: $curious-blue;
+        cursor: pointer;
+        margin-left: 0.3rem;
+    }
+
     &.db {
         background-color: #F1F3F4;
     }
@@ -45,9 +55,6 @@
 }
 
 .version {
-    position: absolute;
-    bottom: 0.6rem;
-    right: 1rem;
     color: darken($silver, 10%);
     user-select: none;
 }

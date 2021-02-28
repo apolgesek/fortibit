@@ -1,18 +1,36 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { StorageService } from '@app/core/services/storage.service';
 import { DialogsService } from '@app/core/services/dialogs.service';
-import { fromEvent, Subject } from 'rxjs';
+import { fromEvent, Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil, tap } from 'rxjs/operators';
-import { HotkeyService, SearchService } from '@app/core/services';
+import { CoreService, HotkeyService, SearchService } from '@app/core/services';
+import { EventType } from '@app/core/enums';
+import { AppConfig } from 'environments/environment';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
+  animations: [
+    trigger('fade', [
+      state('in', style({opacity: 1})),
+
+      transition(':enter', [
+        style({opacity: 0}),
+        animate(150)
+      ]),
+
+      transition(':leave',
+        animate(150, style({opacity: 0})))
+    ])
+  ]
 })
 export class DashboardComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('search') search: ElementRef;
+  public isSearching = false;
+  public wasSearched = false;
 
+  private searchStream$ = new Subject<string>();
   private destroyed$ = new Subject<void>();
 
   get isDatabaseDirty(): boolean {
@@ -35,23 +53,28 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     return this.storageService.selectedPasswords.length;
   }
 
+  get entriesFound(): Observable<number> {
+    return this.storageService.entriesFound$;
+  }
+
+  get searchPhrase(): string {
+    return this.searchService.searchPhraseValue;
+  }
+
+  set searchPhrase(value: string) {
+    this.searchService.searchPhraseValue = value;
+    this.searchStream$.next(value);
+  }
+
   constructor(
     private storageService: StorageService,
     private searchService: SearchService,
     private dialogsService: DialogsService,
-    private hotkeyService: HotkeyService
+    private hotkeyService: HotkeyService,
+    private coreService: CoreService,
   ) { }
 
   ngAfterViewInit(): void {
-    fromEvent(this.search.nativeElement, 'keyup').pipe(
-      distinctUntilChanged(),
-      debounceTime(500),
-      tap((event: KeyboardEvent) => {
-        this.searchService.search((event.target as HTMLInputElement).value);
-      }),
-      takeUntil(this.destroyed$)
-    ).subscribe();
-
     fromEvent(window, 'keydown')
       .pipe(
         tap((event: KeyboardEvent) => {
@@ -59,6 +82,32 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         }),
         takeUntil(this.destroyed$)
       ).subscribe();
+
+    // confirm unsaved database
+    const productionMode = AppConfig.environment !== 'LOCAL';
+    // const productionMode = true;
+    if (productionMode) {
+      window.onbeforeunload = (event) => {
+        this.coreService.checkFileSaved(EventType.Exit);
+        event.returnValue = false;
+      };
+    }
+
+    this.searchStream$.pipe(
+      tap(() => {
+        this.storageService.selectedPasswords = [];
+        this.isSearching = true;
+      }),
+      distinctUntilChanged(),
+      debounceTime(500),
+      tap(() => {
+        this.searchService.updateSearchResults();
+
+        this.wasSearched = this.searchPhrase.length > 0;
+        this.isSearching = false;
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
   }
 
   ngOnDestroy() {
@@ -67,7 +116,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   openAddEntryWindow() {
-    this.storageService.editedEntry = undefined;
     this.dialogsService.openEntryWindow();
   }
 

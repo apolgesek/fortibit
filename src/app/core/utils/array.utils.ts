@@ -5,10 +5,14 @@ export class ArrayUtils {
 
   public static moveElementsLeft<T>(array: T[], subarray: T[], uniqueProp: string) {
     subarray.sort((a, b) => {
-      return array.findIndex(e => e[uniqueProp] === a[uniqueProp]) <= array.findIndex(e => e[uniqueProp] === b[uniqueProp]) ? -1 : 1
+      return array.findIndex(e => e[uniqueProp] === a[uniqueProp])
+        <= array.findIndex(e => e[uniqueProp] === b[uniqueProp])
+        ? -1
+        : 1;
     });
 
     const isFirst = subarray.find(p => p[uniqueProp] === array[0][uniqueProp]);
+    
     if (isFirst) {
       return;
     }
@@ -21,10 +25,14 @@ export class ArrayUtils {
 
   public static moveElementsRight<T>(array: T[], subarray: T[], uniqueProp: string) {
     subarray.sort((a, b) => {
-      return array.findIndex(e => e[uniqueProp] === a[uniqueProp]) >= array.findIndex(e => e[uniqueProp] === b[uniqueProp]) ? -1 : 1
+      return array.findIndex(e => e[uniqueProp] === a[uniqueProp])
+        >= array.findIndex(e => e[uniqueProp] === b[uniqueProp])
+        ? -1
+        : 1;
     });
 
-    const isLast = subarray.find(p => p[uniqueProp] === array[subarray.length - 1][uniqueProp]);
+    const isLast = subarray.find(p => p[uniqueProp] === array[array.length - 1][uniqueProp]);
+    
     if (isLast) {
       return;
     }
