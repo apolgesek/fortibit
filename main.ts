@@ -21,7 +21,7 @@ enum Keys {
 
 class Main {
   private readonly version = require('./package.json').version as string;
-  private readonly memKey = Encryptor.getRandomBytes(8).toString('hex');
+  private readonly memoryKey = Encryptor.getRandomBytes(8).toString('hex');
   private readonly fileExtension = '.hslc';
   private readonly keypressDelayMs = 50;
   private readonly args = process.argv.slice(1);
@@ -66,11 +66,6 @@ class Main {
       }
     });
 
-    // macOS open by file
-    app.on('open-file', (_, filePath) => {
-      this.file = { filePath, filename: path.basename(filePath) };
-    });
-
     ipcMain.on('saveFile', async (_, { passwordList, newPassword }: { passwordList: unknown, newPassword: string }) => {
       let savePath: SaveDialogReturnValue = { filePath: this.file?.filePath, canceled: false };
       const databaseJSON = JSON.stringify(passwordList, (k ,v) => (k === 'parent' ? undefined : v));
@@ -99,7 +94,7 @@ class Main {
         }
       });
 
-      this.child.send({ database, newPassword, memKey: this.memKey, type: 'dbEncrypt' });
+      this.child.send({ database, newPassword, memoryKey: this.memoryKey, type: 'dbEncrypt' });
 
       this.currentPassword = Buffer.from(newPassword);
     });
@@ -152,7 +147,7 @@ class Main {
         return;
       }
 
-      const password = SimpleEncryptor.decryptString(entry.password, this.memKey);
+      const password = SimpleEncryptor.decryptString(entry.password, this.memoryKey);
 
       await sleep(200);
       await this.typeWord(entry.username);
@@ -162,11 +157,11 @@ class Main {
     });
 
     ipcMain.handle('encryptPassword', (_, password) => {
-      return SimpleEncryptor.encryptString(password, this.memKey);
+      return SimpleEncryptor.encryptString(password, this.memoryKey);
     });
 
     ipcMain.handle('decryptPassword', (_, password) => {
-      return SimpleEncryptor.decryptString(password, this.memKey);
+      return SimpleEncryptor.decryptString(password, this.memoryKey);
     });
 
     ipcMain.on('decryptDatabase', (_, password: string) => {
@@ -182,7 +177,7 @@ class Main {
         }
       });
 
-      this.child.send({ fileData, password, memKey: this.memKey, type: 'dbDecrypt' });
+      this.child.send({ fileData, password, memoryKey: this.memoryKey, type: 'dbDecrypt' });
     });
 
     ipcMain.handle('appOpenType', () => {
