@@ -121,6 +121,7 @@
 
 <p-contextMenu
 	#groupContextMenu
+	data-prevent-entry-deselect
 	[model]="groupContextMenuItems"
 	[target]="sidebar"
 	(onShow)="onGroupContextMenuShow()"
@@ -129,6 +130,7 @@
 
 <p-contextMenu
 	#entryContextMenu
+	data-prevent-entry-deselect
 	[model]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
 	[target]="passwordTable"
 	(onShow)="onEntryContextMenuShow()"
