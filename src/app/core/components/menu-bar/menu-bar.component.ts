@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { MenuItem } from 'primeng-lts/api';
-import { ElectronService } from '@app/core/services';
+import { CoreService, ElectronService } from '@app/core/services';
 import { AppConfig } from 'environments/environment';
+import { EventType } from '@app/core/enums';
 
 @Component({
   selector: 'app-menu-bar',
@@ -12,7 +13,7 @@ export class MenuBarComponent {
   public readonly fileItems = [{
     label: 'Open file...',
     command: () => {
-      this.electronService.ipcRenderer.send('openFile');
+      this.coreService.checkFileSaved(EventType.OpenFile);
     }
   },
   {
@@ -25,23 +26,37 @@ export class MenuBarComponent {
     }
   }] as MenuItem[];
 
-  public helpItems = [{
+public helpItems = [
+  {
+    label: 'Keyboard shortcuts',
+    command: () => {
+      this.coreService.openRepositoryLink(AppConfig.urls.keyboardReference);
+    }
+  },
+  {
+    separator: true
+  },
+  {
     label: 'Release notes',
     command: () => {
-      this.electronService.ipcRenderer.send('openUrl', AppConfig.urls.releaseNotes);
+      this.coreService.openRepositoryLink(AppConfig.urls.releaseNotes);
     }
   },
   {
     label: 'Report issue',
     command: () => {
-      this.electronService.ipcRenderer.send('openUrl', AppConfig.urls.reportIssue); 
+      this.coreService.openRepositoryLink(AppConfig.urls.reportIssue);
     }
-  }];
+  }
+] as MenuItem[];
 
   public readonly minimizeIconUrl = require('@assets/icons/min.svg').default;
   public readonly maximizeIconUrl = require('@assets/icons/max.svg').default;
 
-  constructor(private electronService: ElectronService) { }
+  constructor(
+    private electronService: ElectronService,
+    private coreService: CoreService
+  ) { }
 
   minimizeWindow() {
     this.electronService.ipcRenderer.send('minimize');

@@ -11,14 +11,14 @@ import { ToastModule } from 'primeng-lts/toast';
 
 @NgModule({
   imports: [
+    BrowserAnimationsModule,
     CommonModule,
     TranslateModule,
     FormsModule,
-    BrowserAnimationsModule,
     ToastModule,
     ConfirmDialogModule,
     DialogModule,
-    PasswordModule
+    PasswordModule,
   ],
   providers: [
     MessageService,
@@ -26,12 +26,12 @@ import { ToastModule } from 'primeng-lts/toast';
   ],
   exports: [
     TranslateModule,
-    FormsModule,
     BrowserAnimationsModule,
+    FormsModule,
     ToastModule,
     ConfirmDialogModule,
     DialogModule,
-    PasswordModule
+    PasswordModule,
   ]
 })
 export class SharedModule {}

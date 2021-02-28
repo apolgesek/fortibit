@@ -9,7 +9,6 @@ import { MenuItem } from 'primeng-lts/api';
   providedIn: 'root'
 })
 export class ContextMenuBuilderService {
-
   private contextMenuItems: MenuItem[] = [];
 
   constructor(
@@ -20,7 +19,7 @@ export class ContextMenuBuilderService {
   ) {
   }
 
-  buildGroupContextMenuItems(): this {
+  buildGroupContextMenuItems(configuration: { isRoot: boolean } = { isRoot: false }): this {
     this.contextMenuItems = [
       {
         label: 'Add subgroup',
@@ -32,6 +31,7 @@ export class ContextMenuBuilderService {
       },
       {
         label: 'Rename',
+        disabled: configuration.isRoot,
         icon: 'pi pi-fw pi-pencil',
         command: () => {
           this.storageService.renameGroup();
@@ -39,13 +39,14 @@ export class ContextMenuBuilderService {
       },
       {
         label: 'Delete',
+        disabled: configuration.isRoot,
         icon: 'pi pi-fw pi-trash',
         command: () => this.dialogsService.openDeleteGroupWindow(),
       },
     ];
 
     return this;
-  };
+  }
   
   buildRearrangeEntriesContextMenuItem(): this {
     this.contextMenuItems.push({
@@ -75,7 +76,7 @@ export class ContextMenuBuilderService {
     });
 
     return this;
-  };
+  }
   
   buildRemoveEntryContextMenuItem(): this {
     this.contextMenuItems.push({
@@ -87,7 +88,7 @@ export class ContextMenuBuilderService {
     });
 
     return this;
-  };
+  }
 
   buildCopyUsernameEntryContextMenuItem(): this {
     this.contextMenuItems.push({
@@ -95,6 +96,7 @@ export class ContextMenuBuilderService {
       command: () => {
         this.coreService.copyToClipboard(
           this.storageService.selectedPasswords[0],
+          'username',
           this.storageService.selectedPasswords[0].username
         );
       }
@@ -109,6 +111,7 @@ export class ContextMenuBuilderService {
       command: () => {
         this.coreService.copyToClipboard(
           this.storageService.selectedPasswords[0],
+          'password',
           this.storageService.selectedPasswords[0].password
         );
       }
@@ -120,7 +123,6 @@ export class ContextMenuBuilderService {
   buildEditEntryContextMenuItem(): this {
     this.contextMenuItems.push({
       label: 'Edit (Enter)',
-      visible: this.storageService.selectedPasswords.length === 0,
       icon: 'pi pi-fw pi-pencil',
       command: () => {
         this.storageService.editedEntry = this.storageService.selectedPasswords[0];

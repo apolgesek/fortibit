@@ -45,6 +45,11 @@ package-lock.json
 !/e2e/protractor.conf.js
 /e2e/*.map
 
+#encryption
+encryption/*.js
+encryption/*.map
+
 # System Files
 .DS_Store
 Thumbs.db
+post-release/*

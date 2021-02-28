@@ -1,23 +1,29 @@
+@import 'variables';
+
 @mixin form-dialog {
-  .ui-inputgroup {
+  .p-inputgroup {
     margin: 0.5rem 0;
     input {
       width: 100%;
       padding: 0.5rem;
+      border: 1px solid #ccc;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      outline: none;
     }
   }
   
-  .validation-error {
-    margin: 0.5rem 0;
-  }
-  
   ::ng-deep {
-    .ui-fluid {
+    .p-fluid {
       display: flex;
       justify-content: flex-end;
     }
   
-    .ui-inputgroup-addon i {
+    .p-inputgroup-addon i {
       line-height: 1.25rem;
     }
   }
@@ -40,4 +46,19 @@
   &::-webkit-scrollbar-track {
     background-color: #dedede;
   }
+}
+
+@mixin default-table-row {
+  box-shadow: none;
+  outline: none;
+  > td {
+      box-shadow: none !important;
+      outline: none !important;
+  }
+}
+
+@mixin primary-font {
+  font-family: $font;
+  src: url('/assets/fonts/open_sans-webfont.woff2') format('woff2'),
+  url('/assets/fonts/open_sans-webfont.woff') format('woff');
 }

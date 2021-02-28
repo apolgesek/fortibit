@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { StorageService } from '@app/core/services/storage.service';
 import { DynamicDialogRef } from 'primeng-lts/dynamicdialog';
-
 @Component({
   selector: 'app-delete-entry-dialog',
   templateUrl: './delete-entry-dialog.component.html',
-  styleUrls: ['./delete-entry-dialog.component.scss']
+  styleUrls: ['./delete-entry-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DeleteEntryDialogComponent {
   get selectedRowsCount(): number {

@@ -11,9 +11,9 @@ $sidePanelOutDuration: 250ms;
     flex-wrap: row;
 
     ::ng-deep {
-        .ui-table-wrapper {
+        .p-datatable-wrapper {
             table {
-                thead {
+                .p-datatable-thead {
                     #sticky-header {
                         width: calc(100vw - 32rem);
                         padding: 0.45rem 0;
@@ -21,6 +21,7 @@ $sidePanelOutDuration: 250ms;
                         position: sticky;
                         top: 0;
                         background-color: $white;
+                        user-select: none;
                         transition: all 150ms;
                         box-shadow: 0px 0px 0px 1px $silver,
                         0px 0px 0px 1px $silver,
@@ -35,33 +36,37 @@ $sidePanelOutDuration: 250ms;
                         div {
                             font-weight: bold;
                             color: #444;
-                            width: calc(100% / 3);
-                            text-align: center;
+                            width: calc((100% / 3) - 3px);
+                            text-align: left;
                             &:first-child {
                                 border-left: 0;
+                                padding-left: 1rem;
                             }
                         }   
                     }
                 }
 
-                tbody tr:first-child {
-                    td {
-                        border-top: 0;
-                    }
-                }
+                tbody > tr {
+                    @include default-table-row;
 
-                tbody tr:last-child {
-                    td {
-                        border-bottom: 0;
+                    &:focus, &:hover {
+                        @include default-table-row;
                     }
-                }
 
-                tbody tr, tbody tr:focus {
-                    box-shadow: none;
-                    outline: none;
-                    > td {
-                        box-shadow: none !important;
-                        outline: none !important;
+                    &.selected {
+                        background-color: #5d9ed3;
+                        color: $white;
+                        &:hover {
+                            background-color: #5d9ed3;
+                        }
+                    }
+
+                    &:hover {
+                        background-color: rgb(230, 230, 230);
+                    }
+
+                    &.entry-group:hover {
+                        background-color: $white;
                     }
                 }
 
@@ -69,9 +74,11 @@ $sidePanelOutDuration: 250ms;
                     word-break: break-all;
                     user-select: none;
                     cursor: pointer;
-                    height: 35px;
+                    padding: 0;
+                    height: 36px;
                     &:first-child {
                         border-left: 0;
+                        padding-left: 1rem;
                     }
 
                     &.long-text {
@@ -83,7 +90,7 @@ $sidePanelOutDuration: 250ms;
             }  
         }
 
-        .ui-selectable-row {
+        .p-selectable-row {
             outline: none;
         }
 
@@ -106,11 +113,27 @@ $sidePanelOutDuration: 250ms;
                     white-space: nowrap;
                     overflow: hidden;
                     height: inherit;
+                    padding-top: 0.5rem;
                 }
 
                 .add-group {
                     display: none;
                     font-size: 1.2rem;
+                    padding-top: 0.3rem;
+                    button {
+                        background-color: #fff;
+                        border: 0;
+                        width: 24px;
+                        color: $curious-blue;
+                        cursor: pointer;
+                        transition: 150ms color;
+                        &:hover {
+                            color: #444;
+                        }
+                        &:last-child {
+                            margin-right: 0;
+                        }
+                    }
                 }
             }
 
@@ -120,60 +143,69 @@ $sidePanelOutDuration: 250ms;
                 }
             }
 
-            ::ng-deep {
-                p-tree {
-                    display: block;
-                    height: 100%;
+            p-tree {
+                height: 100%;
+                display: flex;
+                overflow: auto;
+                @include scrollbar;               
+                .p-tree {
+                    width: 100%;
+                    padding: 0;
+                    border: 0;
+                
+                    .p-tree-wrapper {
+                        height: 100%;
+                        .p-tree-container > p-treenode > .p-treenode-droppoint {
+                            display: none;
+                        }
+                    }
+
+                    .p-tree-container {
+                        height: 100%;
+                        @include scrollbar;
+                        .p-treenode {
+                            padding: 0;
+                        }
+                    }
+
+                    .p-treenode-children {
+                        width: 100%;
+                        min-width: 12rem;
+                    }
+
+                    .p-treenode-content {
+                        padding: 0;
+                        border-radius: 0;
+                        height: 36px;
+                        &:focus {
+                            outline: 0;
+                            box-shadow: none;
+                        }
+                    }
                 }
             }
             
             .selected-entries {
                 text-align: center;
-                font-size: 0.9rem;
+                font-size: 0.8rem;
                 padding: 0.4rem 0;
-                border-top: 1px solid $silver;
-                min-height: 35px;
+                border-top: 1px solid #e9ecef;
+                min-height: 37px;
                 position: sticky;
                 bottom: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                user-select: none;
+
+                .group-name {
+                    display: inline-block;
+                    max-width: 5rem;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
             }   
-        }
-
-        .ui-tree {
-            width: 100%;
-            height: 100%;
-            flex: 1;
-            border: none;
-            padding: 0 0 0 1em;
-
-            .ui-tree-wrapper {
-                height: 100%;
-            }
-
-            .ui-tree-container {
-                padding-top: 0.4rem;
-                position: relative;
-
-                @include scrollbar;
-
-                .ui-treenode-content, .ui-treenode-content:focus {
-                    outline: none !important;
-                    box-shadow: none !important;
-
-                    .ui-treenode-label {
-                        transition: 150ms background-color;
-                    }
-                }
-
-                > p-treenode {
-                    display: block;
-                    position: absolute;
-                }
-
-                > p-treenode > li:first-child,
-                > p-treenode > li:last-child {
-                    display: none;
-                }
-            }
         }
     }
 }

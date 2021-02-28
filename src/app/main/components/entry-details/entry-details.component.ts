@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { StorageService } from '@app/core/services/storage.service';
-import { PasswordEntry } from '@app/core/models/password-entry.model';
+import { IPasswordEntry } from '@app/core/models/password-entry.model';
 import { CoreService, ElectronService } from '@app/core/services';
+import { AppConfig } from 'environments/environment';
 
 @Component({
   selector: 'app-entry-details',
@@ -13,7 +14,7 @@ export class EntryDetailsComponent {
     return this.coreService.version;
   }
 
-  get entry(): PasswordEntry {
+  get entry(): IPasswordEntry {
     return this.storageService.selectedPasswords[0];
   }
 
@@ -36,5 +37,9 @@ export class EntryDetailsComponent {
   openUrl(url: string) {
     this.electronService.ipcRenderer.send('openUrl', url);
     return false;
+  }
+
+  openAutotypeInformation() {
+    this.coreService.openRepositoryLink(AppConfig.urls.keyboardReference + AppConfig.urls.autotypeShortcut);
   }
 }

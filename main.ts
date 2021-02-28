@@ -1,214 +1,273 @@
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  dialog,
-  clipboard,
-  SaveDialogReturnValue,
-  shell,
-} from 'electron';
+import { ChildProcess, fork } from 'child_process';
+import { app, BrowserWindow, clipboard, dialog, globalShortcut, ipcMain, SaveDialogReturnValue, shell } from 'electron';
+import { Encryptor } from './encryption/encryptor';
+import { SimpleEncryptor } from './encryption/simple-encryptor';
+import { EventType } from './src/app/core/enums';
+import { WinApi } from './native-api/win-api';
 
+import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
-import * as fs from 'fs';
+import { INativeApi } from './native-api/native-api.model';
 
-import { Encryptor } from './encryption/encryptor';
-const version = require('./package.json').version as string;
-
-let win: BrowserWindow = null;
-const args = process.argv.slice(1),
-    serve = args.some(val => val === '--serve');
-
-let clearClipboardTimeout: NodeJS.Timeout;
-let file: { filePath: string, filename: string};
-let currentPassword: string;
-let wasAppLoaded = false;
-
-const ext = '.hslc';
-
-function createWindow(): BrowserWindow {
-  win = new BrowserWindow({
-    x: 0,
-    y: 0,
-    width: 960,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true,
-      allowRunningInsecureContent: serve === true,
-      devTools: serve === true,
-    },
-    resizable: true,
-    minHeight: 520,
-    minWidth: 820,
-    frame: false,
-  });
-
-  if (serve) {
-    require('electron-reload')(__dirname, {
-      electron: require(`${__dirname}/node_modules/electron`)
-    });
-    win.loadURL('http://localhost:4200');
-  } else {
-    win.loadURL(url.format({
-      pathname: path.join(__dirname, 'dist/index.html'),
-      protocol: 'file:',
-      slashes: true
-    }));
-  }
-
-  if (serve) {
-    win.webContents.openDevTools();
-  }
-
-  // Emitted when the window is closed.
-  win.on('closed', () => {
-    // Dereference the window object, usually you would store window
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    win = null;
-  });
-
-  return win;
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-try {
-  // This method will be called when Electron has finished
-  // initialization and is ready to create browser windows.
-  // Some APIs can only be used after this event occurs.
-  app.on('ready', createWindow);
+enum Keys {
+  Tab = 9,
+  Enter = 13
+}
 
-  const fileArg = process.argv.find(x => x.endsWith(ext));
-  if (fileArg) {
-    file = { filePath: fileArg, filename: path.basename(fileArg) };
-  }
+class Main {
+  private readonly version = require('./package.json').version as string;
+  private readonly memoryKey = Encryptor.getRandomBytes(8).toString('hex');
+  private readonly fileExtension = '.hslc';
+  private readonly keypressDelayMs = 50;
+  private readonly args = process.argv.slice(1);
+  private readonly serve = this.args.some(val => val === '--serve');
+  private readonly fileLocation = this.serve ? './encryption/main.js' : path.join(__dirname, 'encryption/main.js');
+  private readonly fileArg = process.argv.find(x => x.endsWith(this.fileExtension));
+  private readonly nativeApi: INativeApi;
 
-  // Quit when all windows are closed.
-  app.on('window-all-closed', () => {
-    app.quit();
-  });
+  private win: BrowserWindow;
+  private clearClipboardTimeout: NodeJS.Timeout;
+  private file: { filePath: string, filename: string};
+  private child: ChildProcess;
+  private currentPassword: Buffer;
+  private wasAppLoaded = false;
 
-  app.on('activate', () => {
-    // On OS X it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (win === null) {
-      createWindow();
+  constructor() {
+    if (this.fileArg) {
+      this.file = { filePath: this.fileArg, filename: path.basename(this.fileArg) };
     }
-  });
 
-  // macOS open by file
-  app.on('open-file', (_, filePath) => {
-    file = { filePath, filename: path.basename(filePath) };
-  });
+    if (process.platform === 'win32') {
+      this.nativeApi = new WinApi();
+    } else {
+      // TODO
+    }
 
-  ipcMain.on('saveFile', async (_, { passwordList, newPassword }) => {
-    let savePath: SaveDialogReturnValue = { filePath: file?.filePath, canceled: false };
-    let output;
-    const stringData = JSON.stringify(passwordList, (k ,v) => (k === 'parent' ? undefined : v));
-    if (!currentPassword) {
-      savePath = await dialog.showSaveDialog(win, {});
-      if (savePath.canceled) {
-        win.webContents.send('saveStatus', { status: false });
+    app.on('ready', () => this.createWindow());
+
+    app.on('window-all-closed', () => {
+      globalShortcut.unregisterAll();
+      
+      if (this.currentPassword) {
+        this.currentPassword.fill(0);
+      }
+
+      app.quit();
+    });
+
+    app.on('activate', () => {
+      if (this.win === null) {
+        this.createWindow();
+      }
+    });
+
+    ipcMain.on('saveFile', async (_, { passwordList, newPassword }: { passwordList: unknown, newPassword: string }) => {
+      let savePath: SaveDialogReturnValue = { filePath: this.file?.filePath, canceled: false };
+      const databaseJSON = JSON.stringify(passwordList, (k ,v) => (k === 'parent' ? undefined : v));
+      const database = JSON.parse(databaseJSON);
+
+      if (!this.currentPassword) {
+        savePath = await dialog.showSaveDialog(this.win, {});
+        if (savePath.canceled) {
+          this.win.webContents.send('saveStatus', { status: false });
+          return;
+        }
+      }
+
+      this.child = this.createChildProcess();
+      this.child.once('message', (encrypted) => {
+        const finalFilePath = savePath.filePath.endsWith(this.fileExtension)
+          ? savePath.filePath
+          : savePath.filePath + this.fileExtension;
+
+        try {
+          fs.writeFileSync(finalFilePath, encrypted, { encoding: 'base64' });
+          this.file = { filePath: finalFilePath, filename: path.basename(finalFilePath) };
+          this.win.webContents.send('saveStatus', { status: true,  message: undefined, file: this.file });
+        } catch (err) {
+          this.win.webContents.send('saveStatus', { status: false,  message: err });
+        }
+      });
+
+      this.child.send({ database, newPassword, memoryKey: this.memoryKey, type: 'dbEncrypt' });
+
+      this.currentPassword = Buffer.from(newPassword);
+    });
+
+    ipcMain.on('copyToClipboard', (_, value: string) => {
+      clearTimeout(this.clearClipboardTimeout);
+      clipboard.writeText(value);
+      this.clearClipboardTimeout = setTimeout(() => {
+        clipboard.clear();
+      }, 15000);
+    });
+
+    ipcMain.on('onFileDrop', (_, filePath: string) => {
+      if (!filePath.endsWith(this.fileExtension)) {
         return;
       }
-      output = Encryptor.encryptString(stringData, newPassword);
-      currentPassword = newPassword;
-    } else {
-      output = Encryptor.encryptString(stringData, currentPassword);
-    }
-    const finalFilePath = savePath.filePath.endsWith(ext) ? savePath.filePath : savePath.filePath + ext;
-
-    try {
-      fs.writeFile(finalFilePath, output, () => null);
-      file = { filePath: finalFilePath, filename: path.basename(finalFilePath) };
-      win.webContents.send('saveStatus', { status: true,  message: undefined, file });
-    } catch (err) {
-      win.webContents.send('saveStatus', { status: false,  message: err });
-    }
-  });
-
-  ipcMain.on('copyToClipboard', (_, value: string) => {
-    clearTimeout(clearClipboardTimeout);
-    clipboard.writeText(value);
-    clearClipboardTimeout = setTimeout(() => {
-      clipboard.clear();
-    }, 15000);
-  });
-
-  ipcMain.on('onFileDrop', (_, filePath: string) => {
-    if (!filePath.endsWith(ext)) {
-      return;
-    }
-    file = { filePath: filePath, filename: path.basename(filePath) };
-    win.webContents.send('providePassword', file);
-  });
-
-  ipcMain.on('openFile', async () => {
-    const fileObj = await dialog.showOpenDialog({
-      properties: ['openFile'],
-      filters: [{ name: 'Haslock database file', extensions: ['hslc'] }]
+      this.file = { filePath: filePath, filename: path.basename(filePath) };
+      this.win.webContents.send('providePassword', this.file);
     });
 
-    if (!fileObj.canceled) {
-      file = { filePath: fileObj.filePaths[0], filename: path.basename(fileObj.filePaths[0]) };
-      win.webContents.send('providePassword', file);
-    }
-  });
+    ipcMain.on('openFile', async () => {
+      const fileObj = await dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [{ name: 'Haslock database file', extensions: ['hslc'] }]
+      });
 
-  ipcMain.on('minimize', () => {
-    win.minimize();
-  })
-
-  ipcMain.on('maximize', () => {
-    win.setFullScreen(!win.isFullScreen());
-  })
-
-  ipcMain.on('close', () => {
-    if (win.webContents.isDevToolsOpened()) {
-      win.webContents.closeDevTools();
-    }
-    win.close();
-  })
-
-  ipcMain.on('authAttempt', (_, password) => {
-    fs.readFile(file.filePath, (_, data) => {
-      try {
-        const decrypted = Encryptor.decryptString(data.toString(), password);
-        currentPassword = password;
-        win.webContents.send('onContentDecrypt', {decrypted, file});
-      } catch (e) {
-        win.webContents.send('onContentDecrypt', {decrypted: '*', file});
+      if (!fileObj.canceled) {
+        this.file = { filePath: fileObj.filePaths[0], filename: path.basename(fileObj.filePaths[0]) };
+        this.win.webContents.send('providePassword', this.file);
       }
     });
-  });
 
-  ipcMain.handle('appOpenType', () => {
-    if (wasAppLoaded) {
-      return;
+    ipcMain.on('minimize', () => {
+      this.win.minimize();
+    });
+
+    ipcMain.on('maximize', () => {
+      this.win.setFullScreen(!this.win.isFullScreen());
+    });
+
+    ipcMain.on('close', () => {
+      if (this.win.webContents.isDevToolsOpened()) {
+        this.win.webContents.closeDevTools();
+      }
+      this.win.close();
+    });
+
+    ipcMain.on('receiveSelectedEntry', async (_, entry) => {
+      if (!entry) {
+        return;
+      }
+
+      const password = SimpleEncryptor.decryptString(entry.password, this.memoryKey);
+
+      await sleep(200);
+      await this.typeWord(entry.username);
+      await this.nativeApi.pressKey(Keys.Tab);
+      await this.typeWord(password);
+      await this.nativeApi.pressKey(Keys.Enter);
+    });
+
+    ipcMain.handle('encryptPassword', (_, password) => {
+      return SimpleEncryptor.encryptString(password, this.memoryKey);
+    });
+
+    ipcMain.handle('decryptPassword', (_, password) => {
+      return SimpleEncryptor.decryptString(password, this.memoryKey);
+    });
+
+    ipcMain.on('decryptDatabase', (_, password: string) => {
+      this.currentPassword = Buffer.from(password);
+      const fileData = fs.readFileSync(this.file.filePath, { encoding: 'base64' });
+      
+      this.child = this.createChildProcess();
+      this.child.once('message', (payload) => {
+        if (payload.error) {
+          this.win.webContents.send('onContentDecrypt', { decrypted: undefined, file: this.file });
+        } else {
+          this.win.webContents.send('onContentDecrypt', { decrypted: payload.decrypted, file: this.file });
+        }
+      });
+
+      this.child.send({ fileData, password, memoryKey: this.memoryKey, type: 'dbDecrypt' });
+    });
+
+    ipcMain.handle('appOpenType', () => {
+      if (this.wasAppLoaded) {
+        return;
+      }
+
+      this.wasAppLoaded = true;
+
+      return this.file;
+    });
+
+    ipcMain.handle('appVersion', () => {
+      return this.version;
+    });
+
+    ipcMain.on('openUrl', (_, url: string) => {
+      shell.openExternal(url.includes('http') ? url: 'http://' + url);
+    });
+
+    ipcMain.on('onCloseAttempt', (_, event?: EventType, payload?: unknown) => {
+      this.win.focus();
+      this.win.webContents.send('openCloseConfirmationWindow', event, payload);
+    });
+
+    ipcMain.on('exit', () => {
+      app.quit();
+    });
+  }
+  
+  private createChildProcess() {
+    return fork(this.fileLocation, [], {
+      env: {
+        'ELECTRON_RUN_AS_NODE': '1'
+      }
+    });
+  }
+
+  private async typeWord(word: string) {
+    for (const char of word.split('')) {
+      this.nativeApi.pressPhraseKey(char);
+      await sleep(this.keypressDelayMs);
     }
+  }
 
-    wasAppLoaded = true;
-
-    return file;
-  });
-
-  ipcMain.handle('appVersion', () => {
-    return version;
-  });
-
-  ipcMain.on('openUrl', (_, url: string) => {
-    shell.openExternal(url.includes('http') ? url: 'http://' + url);
-  });
-
-  ipcMain.on('onCloseAttempt', () => {
-    win.focus();
-    win.webContents.send('openCloseConfirmationWindow');
-  });
-
-  ipcMain.on('exit', () => {
-    app.quit();
-  });
-
-} catch (e) {
-  // Catch Error
-  // throw e;
+  private createWindow(): BrowserWindow {
+    this.win = new BrowserWindow({
+      x: 0,
+      y: 0,
+      width: 960,
+      height: 600,
+      webPreferences: {
+        nodeIntegration: true,
+        allowRunningInsecureContent: this.serve === true,
+        devTools: this.serve === true,
+        backgroundThrottling: false
+      },
+      resizable: true,
+      minHeight: 520,
+      minWidth: 820,
+      frame: false,
+    });
+  
+    if (this.serve) {
+      require('electron-reload')(__dirname, {
+        electron: require(`${__dirname}/node_modules/electron`)
+      });
+      this.win.loadURL('http://localhost:4200');
+    } else {
+      this.win.loadURL(url.format({
+        pathname: path.join(__dirname, 'dist/index.html'),
+        protocol: 'file:',
+        slashes: true
+      }));
+    }
+  
+    if (this.serve) {
+      this.win.webContents.openDevTools();
+    }
+  
+    globalShortcut.register('Alt+H', async () => {
+      this.win.webContents.send('getSelectedEntry', this.nativeApi.getActiveWindowTitle());
+    });
+  
+    this.win.on('closed', () => {
+      this.win = null;
+    });
+  
+    return this.win;
+  }
 }
+
+new Main();

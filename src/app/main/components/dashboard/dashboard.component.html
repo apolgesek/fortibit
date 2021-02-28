@@ -2,6 +2,7 @@
 	<div class="menu-panel">
 		<button
 			pButton
+			data-prevent-entry-deselect
 			type="button"
 			icon="pi pi-plus"
 			iconPos="left"
@@ -10,40 +11,48 @@
 		</button>
 		<button
 			pButton
+			data-prevent-entry-deselect
 			type="button"
 			label="Save"
 			icon="pi pi-save"
 			iconPos="left"
 			[disabled]="isDatabaseDirty"
-			class="ui-button-secondary save-db"
+			class="p-button-secondary save-db"
 			(click)="trySaveDatabase()">
 		</button>
 		<button
 			pButton
+			data-prevent-entry-deselect
 			type="button"
 			label="Edit"
 			icon="pi pi-pencil"
 			iconPos="left"
 			[disabled]="!(isAnyEntry && isOneEntrySelected)"
-			class="ui-button-secondary edit-entry"
+			class="p-button-secondary edit-entry"
 			(click)="openEditEntryWindow()">
 		</button>
 		<button
 			pButton
+			data-prevent-entry-deselect
 			type="button"
 			label="Remove"
 			icon="pi pi-trash"
 			iconPos="left"
 			[disabled]="!(isAnyEntry && isAnyEntrySelected)"
-			class="ui-button-secondary remove-entry"
+			class="p-button-secondary remove-entry"
 			(click)="openDeleteEntryWindow()">
 		</button>
 		<input
-			#search
 			type="text"
+			[(ngModel)]="searchPhrase"
 			class="search"
-			pInputText
-			placeholder="Search database" />
+			placeholder="Search entries" />
+			<div style="display: flex; align-items: center" @fade *ngIf="searchPhrase?.length && (!isSearching || wasSearched )">
+				<div class="arrow-left"></div>
+				<div class="count">
+					{{ entriesFound | async }} found
+				</div>
+			</div>
 	</div>
 </nav>
 

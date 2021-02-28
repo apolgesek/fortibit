@@ -10,18 +10,18 @@
       "node"
     ],
     "lib": [
-      "es2017",
-      "es2016",
-      "es2015",
+      "es2020",
+      "esnext",
       "dom"
     ]
   },
   "include": [
     "main.ts",
-    "encryption/encryptor.ts"
+    "encryption/main.ts",
+    "native-api/win-api.ts"
   ],
   "exclude": [
     "node_modules",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
   ]
 }

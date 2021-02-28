@@ -1,34 +1,41 @@
-@import 'variables';
+@import 'mixins';
 
 :host ::ng-deep{
-    .main-nav .ui-button-text-icon-left .ui-button-icon-left {
-        color: #444;
+    .main-nav .p-button-text-icon-left {
+        .p-button-icon-left {
+            color: #7e7e7e;
+            * {
+                color: #848484;
+            }
+        }
     }
 
-    .ui-button-secondary {
-        font-family: $font;
+    .p-button-secondary {
+        @include primary-font;
         font-size: 0.9rem;
         display: flex;
         height: 2.2rem;
         transition: all 150ms ease-in-out;
+        background-color: white;
+        color:rgb(104, 104, 104);
         align-items: center;
         border: 0 !important;
 
         &:enabled:hover {
-            background-color: $white !important;
-            border-color: $white !important;
+            background-color: $white;
+            color:rgb(104, 104, 104);
             box-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.2),
             0px 2px 3px 0px rgba(0, 0, 0, 0.14),
             0px 1px 5px 0px rgba(0,0,0,.12) !important;
         }
 
-        .ui-button-text {
+        .p-button-text {
             padding-left: 2.5em !important;
         }
     
-        .ui-button-icon-left {
+        .p-button-icon-left {
             left: .3em;
-            font-size: 1.6em;
+            font-size: 1em;
         }
     }
 
@@ -49,11 +56,11 @@
                 0px 1px 8px 0px rgba(0,0,0,.12) !important;
         }
 
-        &.ui-button-icon-only {
+        &.p-button-icon-only {
             width: 2.5rem;
         }
 
-        .ui-button-icon-left {
+        .p-button-icon-left {
             font-size: 1.8em;
             margin-top: -0.45em;
         }
@@ -88,12 +95,34 @@
 
     .search {   
         border: none;
-        height: 2.55em;
+        height: 2.6em;
+        border-radius: 3px;
         padding: 0.7em;
+        transition: 150ms box-shadow;
         &:focus {
             box-shadow: 0px 1px 2px -1px rgba(0, 0, 0, 0.2),
             0px 2px 3px 0px rgba(0, 0, 0, 0.14),
             0px 1px 5px 0px rgba(0,0,0,.12) !important;
         }
+        &::-webkit-input-placeholder {
+            color: rgb(145, 145, 145);
+        }
     }
+}
+
+.count {
+    color: rgb(155, 155, 155);
+    background-color: $white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+.arrow-left {
+    margin-left: 0.5rem;
+    width: 0; 
+    height: 0; 
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent; 
+    border-right: 6px solid white; 
 }
