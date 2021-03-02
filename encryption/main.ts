@@ -8,19 +8,19 @@ class Main {
 
   public static execute(event): void {
     if (event.type === 'dbDecrypt') {
-      const {fileData, password, memKey} = event;
+      const {fileData, password, memoryKey} = event;
   
       try {
         const decrypted = JSON.parse(Encryptor.decryptString(fileData, password));
-        Main.encryptPasswords(decrypted[0], memKey);
+        Main.encryptPasswords(decrypted[0], memoryKey);
         process.send({ decrypted });
       } catch (err) {
         process.send({ error: err });
       }
     } else if (event.type === 'dbEncrypt') {
-      const { database, newPassword, memKey } = event;
+      const { database, newPassword, memoryKey } = event;
   
-      Main.decryptPasswords(database[0], memKey);
+      Main.decryptPasswords(database[0], memoryKey);
       const databaseJSON = JSON.stringify(database);
   
       process.send(Encryptor.encryptString(databaseJSON, newPassword));

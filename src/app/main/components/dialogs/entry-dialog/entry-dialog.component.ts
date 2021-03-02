@@ -127,12 +127,11 @@ export class EntryDialogComponent implements OnInit, AfterViewInit, OnDestroy {
       const encrypted = await this.electronService.ipcRenderer
         .invoke('encryptPassword', this.newEntryForm.value.password);
 
-      this.storageService.editedEntry.password = await this.electronService.ipcRenderer
-        .invoke('encryptPassword', encrypted);
+      this.storageService.editedEntry.password = encrypted;
     }
 
     this.storageService.editedEntry = undefined;
-    this.initEntryForm();
+    this.newEntryForm.reset();
 
     this.ref.close();
   }
