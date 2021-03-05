@@ -76,7 +76,6 @@ export class EntriesTableComponent implements OnInit {
 
   ngOnInit() {
     this.storageService.updateEntries();
-
     this.groupContextMenuItems = this.contextMenuBuilderService
       .buildGroupContextMenuItems()
       .getResult();
@@ -105,31 +104,25 @@ export class EntriesTableComponent implements OnInit {
     }
   }
 
-  selectEntry(event: MouseEvent, password: IPasswordEntry) {
+  selectEntry(event: MouseEvent, entry: IPasswordEntry) {
     if (this.hotkeyService.getMultiselectionKey(event) && event.type === 'click') {
-      const foundIndex = this.storageService.selectedPasswords.findIndex(p => p.id === password.id);
+      const foundIndex = this.selectedEntries.findIndex(p => p.id === entry.id);
       if (foundIndex > -1) {
-        this.storageService.selectedPasswords.splice(foundIndex, 1);
+        this.selectedEntries.splice(foundIndex, 1);
         return;
       }
-      this.storageService.selectedPasswords.push(password);
+      this.selectedEntries.push(entry);
     } else {
-      this.storageService.selectedPasswords = [password];
-    }
-  }
-
-  selectEntryContext(event: { data: IPasswordEntry }) {
-    if (this.storageService.selectedPasswords.length === 0) {
-      this.storageService.selectedPasswords = [ event.data ];
+      this.storageService.selectedPasswords = [entry];
     }
   }
 
   onEntryContextMenuShow() {
-    if (this.storageService.selectedPasswords.length === 0) {
+    if (this.selectedEntries.length === 0) {
       this.entryContextMenu.model = undefined;
       this.entryContextMenu.hide();
     } else {
-      if (this.storageService.selectedPasswords.length === 1) {
+      if (this.selectedEntries.length === 1) {
         this.entryContextMenu.model = this.buildEntryMenuItems();
       } else {
         this.entryContextMenu.model = this.buildMultiEntryMenuItems();
@@ -150,7 +143,7 @@ export class EntriesTableComponent implements OnInit {
   }
 
   isEntrySelected(entryData: IPasswordEntry): boolean {
-    return this.storageService.selectedPasswords.filter(e => e.id === entryData.id).length > 0;
+    return this.selectedEntries.filter(e => e.id === entryData.id).length > 0;
   }
 
   isEntryDragged(entryData: IPasswordEntry): boolean {

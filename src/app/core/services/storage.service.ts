@@ -1,15 +1,16 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import { AppConfig } from 'environments/environment';
 import { TreeNode } from 'primeng-lts/api';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { map, shareReplay, tap } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 import { markDirty } from '../decorators/mark-dirty.decorator';
 import { IPasswordEntry } from '../models/password-entry.model';
 import { ArrayUtils } from '../utils';
 import { ElectronService } from './electron/electron.service';
 import { MockDataService } from './mock-data.service';
 import { ISearchResultGroup, SearchResult, SearchService } from './search.service';
-import { v4 as uuidv4 } from 'uuid';
 
 const nameof = <T>(name: keyof T) => name;
 type treeNodeEventObject = { node: TreeNode };
@@ -40,13 +41,15 @@ export class StorageService {
 
   constructor(
     private electronService: ElectronService,
-    private searchService: SearchService
+    private searchService: SearchService,
+    @Inject(DOCUMENT) private document: Document 
   ) {
     this.entries$ = combineLatest([
       this.passwordListSource,
       this.searchService.searchPhrase$
     ]).pipe(
       map(([ passwords, searchPhrase ]) => this.searchService.filterEntries(passwords, searchPhrase, this.groups[0])),
+      tap(() => console.log('updated!')),
       shareReplay()
     );
 
@@ -88,7 +91,6 @@ export class StorageService {
       this.selectedCategory.data.push({...entryModel, id: uuidv4()});
       this.searchService.reset();
     }
-    this.updateEntries();
   }
 
   @markDirty()
@@ -105,7 +107,6 @@ export class StorageService {
       });
     }
     this.selectedPasswords = [];
-    this.updateEntries();
   }
 
   @markDirty()
@@ -123,8 +124,8 @@ export class StorageService {
   @markDirty()
   renameGroup() {
     this.isRenameModeOn = true;
-    requestAnimationFrame(() => {
-      (<HTMLInputElement>document.querySelector('.group-name-input')).focus();
+    setTimeout(() => {
+      (<HTMLInputElement>this.document.querySelector('.group-name-input')).focus();
     });
   }
 
@@ -188,7 +189,10 @@ export class StorageService {
     this.selectedPasswords = [];
     this.searchService.reset();
     this.updateEntries();
-    document.querySelector('.password-table');
+
+    setTimeout(() => {
+      this.document.querySelector('.table-viewport').scrollTop = 0;
+    });
   }
 
   saveDatabase(newPassword: string) {
@@ -196,16 +200,16 @@ export class StorageService {
     this.setDateSaved();
   }
 
-  updateEntries() {
-    this.passwordListSource.next(this.selectedCategory.data);
-  }
-
   moveEntry(targetGroup: string) {
     const copy = [...this.draggedEntry];
     this.deleteEntry();
+
     const groupData = this.findRowGroup(this.groups[0], targetGroup);
     groupData.push(...copy);
-    this.updateEntries();
+  }
+
+  updateEntries() {
+    this.passwordListSource.next([...this.selectedCategory.data]);
   }
 
   saveNewDatabase(newPassword: string) {

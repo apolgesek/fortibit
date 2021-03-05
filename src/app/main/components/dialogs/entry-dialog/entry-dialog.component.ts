@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestro
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
-import { DynamicDialogRef } from 'primeng-lts/dynamicdialog';
+import { DynamicDialogConfig, DynamicDialogRef } from 'primeng-lts/dynamicdialog';
 import { fromEvent, Subject } from 'rxjs';
 import { skipWhile, takeUntil } from 'rxjs/operators';
 
@@ -20,6 +20,7 @@ export class EntryDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private ref: DynamicDialogRef,
+    private config: DynamicDialogConfig,
     private storageService: StorageService,
     private electronService: ElectronService,
     private el: ElementRef,
@@ -99,9 +100,7 @@ export class EntryDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     if (this.storageService.editedEntry) {
-      const decryptedPassword = await this.electronService.ipcRenderer
-        .invoke('decryptPassword', this.storageService.editedEntry.password);
-      this.newEntryForm.patchValue({ ...this.storageService.editedEntry, password: decryptedPassword });
+      this.newEntryForm.patchValue({...this.storageService.editedEntry, password: this.config.data.decryptedPassword});
     }
   }
 

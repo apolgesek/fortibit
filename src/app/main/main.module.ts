@@ -13,7 +13,6 @@ import { InputTextModule } from 'primeng-lts/inputtext';
 import { InputTextareaModule } from 'primeng-lts/inputtextarea';
 import { MessageModule } from 'primeng-lts/message';
 import { MessagesModule } from 'primeng-lts/messages';
-import { TableModule } from 'primeng-lts/table';
 import { TreeModule } from 'primeng-lts/tree';
 import { SharedModule } from '../shared/shared.module';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
@@ -29,12 +28,11 @@ import { EntryDetailsComponent } from './components/entry-details/entry-details.
 import { AutofocusDirective } from './directives/autofocus.directive';
 import { BlurEnterDirective } from './directives/blur-enter.directive';
 import { DroppableDirective } from './directives/droppable.directive';
-import { StickyHeaderDirective } from './directives/sticky-header.directive';
 import { TextEmphasizeDirective } from './directives/text-emphasize.directive';
 import { MainRoutingModule } from './main-routing.module';
 import { MainComponent } from './main.component';
 import { MasterPasswordComponent } from './components/master-password/master-password.component';
-
+import {ScrollingModule} from '@angular/cdk/scrolling';
 @NgModule({
   declarations: [
     MainComponent,
@@ -46,7 +44,6 @@ import { MasterPasswordComponent } from './components/master-password/master-pas
     DroppableDirective,
     AutofocusDirective,
     EntryDetailsComponent,
-    StickyHeaderDirective,
     ClipboardToastComponent,
     DeleteEntryDialogComponent,
     DeleteGroupDialogComponent,
@@ -68,11 +65,11 @@ import { MasterPasswordComponent } from './components/master-password/master-pas
     MessagesModule,
     ConfirmDialogModule,
     DynamicDialogModule,
-    TableModule,
     DropdownModule,
     TreeModule,
     ContextMenuModule,
     DragDropModule,
+    ScrollingModule
   ],
   entryComponents: [
     DeleteEntryDialogComponent,

@@ -49,6 +49,7 @@
 }
 
 @mixin default-table-row {
+  display: flex;
   box-shadow: none;
   outline: none;
   > td {

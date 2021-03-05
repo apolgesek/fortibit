@@ -1,4 +1,24 @@
-<div #sidebar class="sidebar">
+<p-contextMenu
+	#groupContextMenu
+	data-prevent-entry-deselect
+	[model]="groupContextMenuItems"
+	[target]="sidebar"
+	(onShow)="onGroupContextMenuShow()"
+	styleClass="group-contextmenu">
+</p-contextMenu>
+
+<p-contextMenu
+	#entryContextMenu
+	data-prevent-entry-deselect
+	[model]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
+	[target]="passwordTable"
+	(onShow)="onEntryContextMenuShow()"
+	styleClass="entry-contextmenu">
+</p-contextMenu>
+
+<div
+	#sidebar
+	class="sidebar">
 	<div class="header">
 		<div class="file">{{ fileName }}</div>
 		<div class="add-group">
@@ -45,94 +65,68 @@
 </div>
 <div
 	#passwordTable
-	appStickyHeader
 	class="password-table">
-	<div class="table-body">
-		<p-table
-			[value]="passwordList$ | async"
-			[rowTrackBy]="trackEntryById"
-			[contextMenu]="entryContextMenu"
-			(onContextMenuSelect)="selectEntryContext($event)">
-			<ng-template pTemplate="header">
-				<div id="sticky-header">
-					<div>Title</div>
-					<div>Username</div>
-					<div>Password</div>
+	<div
+		id="table-header"
+		(contextmenu)="$event.stopPropagation()"
+		>
+		<div>Title</div>
+		<div>Username</div>
+		<div>Password</div>
+	</div>
+	<ng-container *ngIf="passwordList$ | async as passwordList">
+		<cdk-virtual-scroll-viewport
+		itemSize="32"
+		[ngClass]="{'d-none': passwordList.length === 0}"
+		class="table-viewport">
+			<ng-container *cdkVirtualFor="let item of passwordList; trackBy: trackEntryById; templateCacheSize: 0">
+				<div *ngIf="item.groupPath; else entryTemplate" class="entry-group">
+					<div class="group-separator">
+						<span class="pi pi-folder">
+						</span> {{ item.groupPath }}
+					</div>
 				</div>
-			</ng-template>
-			<ng-template
-				pTemplate="body"
-				let-rowData
-				let-rowIndex="entryIndex">
-				<tr *ngIf="rowData.groupPath; else entryTemplate" class="entry-group">
-					<td colspan="3">
-						<div class="group-separator">
-							<span class="pi pi-folder">
-							</span> {{ rowData.groupPath }}
-						</div>
-					</td>
-				</tr>
 				<ng-template #entryTemplate>
-					<tr
-						pDraggable
-						[pContextMenuRow]="rowData"
-						[pContextMenuRowIndex]="rowIndex"
-						(onDragStart)="onDragStart($event, rowData)"
-						(onDragEnd)="onDragEnd()"
-						(click)="selectEntry($event, rowData)"
-						data-prevent-entry-deselect
-						class="row-entry"
-						[ngClass]="{'selected': isEntrySelected(rowData), 'is-dragging': isEntryDragged(rowData)}">
-						<td
+					<div
+					pDraggable
+					data-prevent-entry-deselect
+					(click)="selectEntry($event, item)"
+					(contextmenu)="selectEntry($event, item)"
+					(onDragStart)="onDragStart($event, item)"
+					(onDragEnd)="onDragEnd()"
+					[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
+					class="row-entry">
+						<div
 							[appTextEmphasize]="searchPhrase$ | async"
-							(dblclick)="copyToClipboard(rowData, 'title', rowData.title)"
-							class="long-text">
-							{{ rowData.title }}
-						</td>
-						<td
+							(dblclick)="copyToClipboard(item, 'title', item.title)"
+							class="column long-text">{{ item.title }}
+						</div>
+						<div
 							[appTextEmphasize]="searchPhrase$ | async"
-							(dblclick)="copyToClipboard(rowData, 'username', rowData.username)"
-							class="long-text">
-							{{ rowData.username }}
-						</td>
-						<td (dblclick)="copyToClipboard(rowData, 'password', rowData.password)">
-							******
-						</td>
-					</tr>
+							(dblclick)="copyToClipboard(item, 'username', item.username)"
+							class="column long-text">{{ item.username }}
+						</div>
+						<div
+							(dblclick)="copyToClipboard(item, 'password', item.password)"
+							class="column">******
+						</div>
+					</div>
 				</ng-template>
-			</ng-template>
-		</p-table>
-		<div
-			*ngIf="!(passwordList$ | async)?.length"
-			class="list-cta">
-			<ng-container *ngIf="(searchPhrase$ | async).length; else ctaContainer">
-				No results found
 			</ng-container>
-			<ng-template #ctaContainer>
-				<p>No entries have been added yet</p>
-				<a href="#" class="outline-btn" (click)="addNewEntry(); false">Add entry</a>
-			</ng-template>
-		</div>
+		</cdk-virtual-scroll-viewport>
+	</ng-container>
+	<div
+		*ngIf="!(passwordList$ | async)?.length"
+		class="list-cta">
+		<ng-container *ngIf="(searchPhrase$ | async).length; else ctaContainer">
+			No results found
+		</ng-container>
+		<ng-template #ctaContainer>
+			<p>No entries have been added yet</p>
+			<a href="#" class="outline-btn" (click)="addNewEntry(); false">Add entry</a>
+		</ng-template>
 	</div>
 </div>
 
 <app-entry-details></app-entry-details>
 <app-clipboard-toast></app-clipboard-toast>
-
-<p-contextMenu
-	#groupContextMenu
-	data-prevent-entry-deselect
-	[model]="groupContextMenuItems"
-	[target]="sidebar"
-	(onShow)="onGroupContextMenuShow()"
-	styleClass="group-contextmenu">
-</p-contextMenu>
-
-<p-contextMenu
-	#entryContextMenu
-	data-prevent-entry-deselect
-	[model]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
-	[target]="passwordTable"
-	(onShow)="onEntryContextMenuShow()"
-	styleClass="entry-contextmenu">
-</p-contextMenu>

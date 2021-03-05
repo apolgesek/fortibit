@@ -11,6 +11,7 @@
     right: 0;
     font-size: 0.8rem;
     overflow: auto;
+    border-left: 1px solid $silver;
         
     @include scrollbar;
 }

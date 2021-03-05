@@ -16,7 +16,7 @@ export class TextEmphasizeDirective {
   constructor(private element: ElementRef) { }
 
   private applyChanges() {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       const elementTextContent = this.element.nativeElement as HTMLElement;
 
       elementTextContent.innerHTML = elementTextContent.innerHTML

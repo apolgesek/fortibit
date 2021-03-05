@@ -8,6 +8,7 @@ import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/mast
 import { DialogService, DynamicDialogConfig, DynamicDialogRef } from 'primeng-lts/dynamicdialog';
 import { EventType } from '../enums';
 import { ElectronService } from './electron/electron.service';
+import { StorageService } from './storage.service';
 
 enum Dialog {
   OpenDeleteEntry,
@@ -31,6 +32,7 @@ export class DialogsService {
     private zone: NgZone,
     private dialogService: DialogService,
     private electronService: ElectronService,
+    private storageService: StorageService,
     @Inject(DOCUMENT) private document: Document
   ) { }
 
@@ -82,13 +84,22 @@ export class DialogsService {
     );
   }
 
-  openEntryWindow() {
+  async openEntryWindow() {
+    let decryptedPassword;
+    if (this.storageService.editedEntry) {
+      decryptedPassword = await this.electronService.ipcRenderer
+        .invoke('decryptPassword', this.storageService.editedEntry.password);
+    }
+
     this.openDialog(
       EntryDialogComponent,
       {
         width: '70%',
         showHeader: false,
         transitionOptions: '0ms',
+        data: {
+          decryptedPassword
+        }
       },
       Dialog.OpenEntry
     );
@@ -114,7 +125,7 @@ export class DialogsService {
 
     this.dialogRefs.set(type, ref);
 
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       this.document.querySelector('.p-dialog-mask').setAttribute('data-prevent-entry-deselect', '');
     });
   }
