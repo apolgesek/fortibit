@@ -1,84 +1,18 @@
-<p-contextMenu
-	#groupContextMenu
-	data-prevent-entry-deselect
-	[model]="groupContextMenuItems"
-	[target]="sidebar"
-	(onShow)="onGroupContextMenuShow()"
-	styleClass="group-contextmenu">
-</p-contextMenu>
-
-<p-contextMenu
-	#entryContextMenu
-	data-prevent-entry-deselect
-	[model]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
-	[target]="passwordTable"
-	(onShow)="onEntryContextMenuShow()"
-	styleClass="entry-contextmenu">
-</p-contextMenu>
-
-<div
-	#sidebar
-	class="sidebar">
-	<div class="header">
-		<div class="file">{{ fileName }}</div>
-		<div class="add-group">
-			<button (click)="addGroup(); false"><span class="pi pi-plus"></span></button>
-			<button (click)="collapseAll(); false"><span class="pi pi-caret-up"></span></button>
-		</div>
-	</div>
-	<p-tree
-		[value]="groups"
-		selectionMode="single"
-		[(selection)]="selectedGroup"
-		(onNodeSelect)="selectGroup($event)"
-		(onNodeCollapse)="collapseGroup($event)"
-		(onNodeContextMenuSelect)="setContextMenuGroup($event)"
-		[draggableNodes]="true"
-		[droppableNodes]="true"
-		[contextMenu]="groupContextMenu">
-		<ng-template
-			let-node
-			pTemplate="default">
-			<input
-				*ngIf="isGroupRenameModeOn && node === contextSelectedCategory; else readOnly"
-				[(ngModel)]="node.label"
-				(blur)="setGroupRenameModeOff(node)"
-				type="text"
-				appBlurEnter
-				class="group-name-input"
-				maxlength="20">
-			<ng-template #readOnly>
-				<div appDroppable>
-					{{ node.label }}
-					<input
-						type="hidden"
-						[value]="node.key"
-						class="node-id">
-				</div>
-			</ng-template>
-		</ng-template>
-	</p-tree>
-    <div class="selected-entries">
-			Gr:&nbsp;<span class="group-name">{{ selectedGroup.label }}</span>
-			&nbsp;/ Sel: {{ selectedEntries.length }} / Tot: {{ selectedGroup.data.length }}
-		</div>
-</div>
 <div
 	#passwordTable
 	class="password-table">
 	<div
 		id="table-header"
-		(contextmenu)="$event.stopPropagation()"
-		>
-		<div>Title</div>
-		<div>Username</div>
+		(contextmenu)="$event.stopPropagation()">
+		<div appSortBy="title">Title</div>
+		<div appSortBy="username">Username</div>
 		<div>Password</div>
 	</div>
 	<ng-container *ngIf="passwordList$ | async as passwordList">
 		<cdk-virtual-scroll-viewport
-		itemSize="32"
-		[ngClass]="{'d-none': passwordList.length === 0}"
-		class="table-viewport">
+			*ngIf="passwordList.length > 0; else noPasswordsTemplate"
+			itemSize="32"
+			class="table-viewport">
 			<ng-container *cdkVirtualFor="let item of passwordList; trackBy: trackEntryById; templateCacheSize: 0">
 				<div *ngIf="item.groupPath; else entryTemplate" class="entry-group">
 					<div class="group-separator">
@@ -88,14 +22,14 @@
 				</div>
 				<ng-template #entryTemplate>
 					<div
-					pDraggable
-					data-prevent-entry-deselect
-					(click)="selectEntry($event, item)"
-					(contextmenu)="selectEntry($event, item)"
-					(onDragStart)="onDragStart($event, item)"
-					(onDragEnd)="onDragEnd()"
-					[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
-					class="row-entry">
+						data-prevent-entry-deselect
+						(click)="selectEntry($event, item)"
+						(contextmenu)="selectEntry($event, item)"
+						draggable="true"					
+						(dragstart)="onDragStart($event, item)"
+						(dragend)="onDragEnd()"
+						[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
+						class="row-entry">
 						<div
 							[appTextEmphasize]="searchPhrase$ | async"
 							(dblclick)="copyToClipboard(item, 'title', item.title)"
@@ -114,19 +48,25 @@
 				</ng-template>
 			</ng-container>
 		</cdk-virtual-scroll-viewport>
-	</ng-container>
-	<div
-		*ngIf="!(passwordList$ | async)?.length"
-		class="list-cta">
-		<ng-container *ngIf="(searchPhrase$ | async).length; else ctaContainer">
-			No results found
-		</ng-container>
-		<ng-template #ctaContainer>
-			<p>No entries have been added yet</p>
-			<a href="#" class="outline-btn" (click)="addNewEntry(); false">Add entry</a>
+		<ng-template #noPasswordsTemplate>
+			<div class="list-cta">
+				<ng-container *ngIf="(searchPhrase$ | async)?.length; else noEntriesTemplate">
+					No results found
+				</ng-container>
+				<ng-template #noEntriesTemplate>
+					<p>No entries have been added yet</p>
+					<a href="#" class="outline-btn" (click)="addNewEntry(); false">Add entry</a>
+				</ng-template>
+			</div>
 		</ng-template>
-	</div>
+	</ng-container>
 </div>
 
-<app-entry-details></app-entry-details>
-<app-clipboard-toast></app-clipboard-toast>
+<p-contextMenu
+	#entryContextMenu
+	data-prevent-entry-deselect
+	[model]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
+	[target]="passwordTable"
+	(onShow)="onEntryContextMenuShow()"
+	styleClass="entry-contextmenu">
+</p-contextMenu>

@@ -1,0 +1,69 @@
+<div
+	data-prevent-entry-deselect
+	class="details-container"
+	[ngClass]="{ db: !isEntrySelected }">
+	<ng-container *ngIf="isEntrySelected; else databaseDetails">
+		<div class="header">Entry details</div>
+		<div class="content">
+			<div class="section">
+				<p><span class="label">Group</span></p>
+				{{ group?.name }}
+			</div>
+
+			<div class="section">
+				<p><span class="label">Title</span></p>
+				{{ entryInfo?.title }}
+			</div>
+
+			<div class="section">
+				<p><span class="label">User</span></p>
+				{{ entryInfo?.username }}
+			</div>
+
+			<div *ngIf="entryInfo?.url" class="section word-wrap">
+				<p><span class="label">URL</span></p>
+				<a (click)="openUrl(entryInfo?.url)" href="#">{{ entryInfo?.url }}</a>
+			</div>
+
+			<div *ngIf="entryInfo?.creationDate" class="section">
+				<p><span class="label">Creation date</span></p>
+				{{ entryInfo?.creationDate | date: "dd/MM/yy HH:mm" }}
+			</div>
+
+			<div *ngIf="entryInfo?.lastAccessDate" class="section">
+				<p><span class="label">Last access date</span></p>
+				{{ entryInfo?.lastAccessDate | date: "dd/MM/yy HH:mm" }}
+			</div>
+
+			<div *ngIf="entryInfo?.notes" class="section">
+				<p><span class="label">Notes</span></p>
+				{{ entryInfo?.notes }}
+			</div>
+		</div>
+	</ng-container>
+</div>
+
+<ng-template #databaseDetails>
+	<div class="header">Database details</div>
+	<div class="content">
+		<div class="section">
+			<p><span class="label">File name</span></p>
+			{{ databaseInformation.name }}
+		</div>
+		<div class="section">
+			<p><span class="label">Encryption algorithm</span></p>
+			AES-256 (Rijndael)
+		</div>
+		<div class="section">
+			<p><span class="label">Key derivation function</span></p>
+			scrypt - 16384 iterations
+		</div>
+		<div class="section">
+			<p><span class="label">Global autotype shortcut</span></p>
+ 			{{ config.autocompleteShortcut }}
+			<span *ngIf="!config.autocompleteRegistered" class="validation-error">(registration failed)</span>
+			<i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
+		</div>
+		<div class="version">fortibit v{{ config.version }}</div>
+	</div>
+</ng-template>

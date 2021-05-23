@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { MenuItem } from 'primeng-lts/api';
 import { CoreService, ElectronService } from '@app/core/services';
 import { AppConfig } from 'environments/environment';
 import { EventType } from '@app/core/enums';
+import { IpcChannel } from '@shared-models/*';
 
 @Component({
   selector: 'app-menu-bar',
@@ -10,63 +10,40 @@ import { EventType } from '@app/core/enums';
   styleUrls: ['./menu-bar.component.scss']
 })
 export class MenuBarComponent {
-  public readonly fileItems = [{
-    label: 'Open file...',
-    command: () => {
-      this.coreService.checkFileSaved(EventType.OpenFile);
-    }
-  },
-  {
-    separator: true
-  },
-  {
-    label: 'Exit',
-    command: () => {
-      this.quit();
-    }
-  }] as MenuItem[];
-
-public helpItems = [
-  {
-    label: 'Keyboard shortcuts',
-    command: () => {
-      this.coreService.openRepositoryLink(AppConfig.urls.keyboardReference);
-    }
-  },
-  {
-    separator: true
-  },
-  {
-    label: 'Release notes',
-    command: () => {
-      this.coreService.openRepositoryLink(AppConfig.urls.releaseNotes);
-    }
-  },
-  {
-    label: 'Report issue',
-    command: () => {
-      this.coreService.openRepositoryLink(AppConfig.urls.reportIssue);
-    }
-  }
-] as MenuItem[];
-
-  public readonly minimizeIconUrl = require('@assets/icons/min.svg').default;
-  public readonly maximizeIconUrl = require('@assets/icons/max.svg').default;
-
   constructor(
     private electronService: ElectronService,
     private coreService: CoreService
   ) { }
 
+  exit() {
+    this.quit();
+  }
+
+  openFile() {
+    this.coreService.checkFileSaved(EventType.OpenFile);
+  }
+
+  openKeyboardShortcuts() {
+    this.coreService.openRepositoryLink(AppConfig.urls.keyboardReference);
+  }
+
+  openReleaseNotes() {
+    this.coreService.openRepositoryLink(AppConfig.urls.releaseNotes);
+  }
+
+  openReportIssue() {
+    this.coreService.openRepositoryLink(AppConfig.urls.reportIssue);
+  }
+
   minimizeWindow() {
-    this.electronService.ipcRenderer.send('minimize');
+    this.electronService.ipcRenderer.send(IpcChannel.Minimize);
   }
 
   maximizeWindow() {
-    this.electronService.ipcRenderer.send('maximize');
+    this.electronService.ipcRenderer.send(IpcChannel.Maximize);
   }
 
   quit() {
-    this.electronService.ipcRenderer.send('close');
+    this.electronService.ipcRenderer.send(IpcChannel.Close);
   }
 }

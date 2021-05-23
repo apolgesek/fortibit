@@ -1,0 +1,65 @@
+<nav class="main-nav">
+	<div class="menu-panel">
+		<button
+			data-prevent-entry-deselect
+			type="button"
+			class="add-entry"
+			(click)="openAddEntryWindow()">
+			<span class="pi pi-plus"></span>
+			<div class="label">Add entry</div>
+		</button>
+		<button
+			data-prevent-entry-deselect
+			type="button"
+			[disabled]="isDatabaseDirty"
+			class="button-secondary save-db"
+			(click)="trySaveDatabase()">
+			<span class="pi pi-save mr-2"></span>
+			<span class="label">Save</span>
+		</button>
+		<button
+			data-prevent-entry-deselect
+			type="button"
+			[disabled]="!(isAnyEntry && isOneEntrySelected)"
+			class="button-secondary edit-entry"
+			(click)="openEditEntryWindow()">
+			<span class="pi pi-pencil mr-2"></span>
+			<span class="label">Edit</span>
+		</button>
+		<button
+			data-prevent-entry-deselect
+			type="button"
+			[disabled]="!(isAnyEntry && isAnyEntrySelected)"
+			class="button-secondary remove-entry"
+			(click)="openDeleteEntryWindow()">
+			<span class="pi pi-trash mr-2"></span>
+			<span class="label">Remove</span>
+		</button>
+		<div class="searchbox" #searchbox>
+			<input
+			type="text"
+			[(ngModel)]="searchPhrase"
+			class="search"
+			placeholder="Search entries" />
+			<div class="search-mode">
+				<div class="dropdown">
+					<button appDropdown class="dropbtn">
+						{{ isGlobalSearchMode ? 'All' : 'Group' }} <span class="pi pi-angle-down"></span>
+					</button>
+					<div #dropdown class="dropdown-content">
+						<a href="#" (click)="toggleSearchMode()">{{ isGlobalSearchMode ? 'Group' : 'All' }}</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div
+			class="results-badge"
+			*ngIf="searchPhrase?.length && (!isSearching || wasSearched )"
+			@fade>
+			<div class="arrow-left"></div>
+			<div class="count">
+				{{ entriesFound | async }} found
+			</div>
+		</div>
+	</div>
+</nav>

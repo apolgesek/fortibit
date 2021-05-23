@@ -1,10 +1,12 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ComponentRef, ElementRef, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ModalService } from '@app/core/services/modal.service';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng-lts/dynamicdialog';
+import { IpcChannel } from '@shared-models/*';
 import { fromEvent, Subject } from 'rxjs';
 import { skipWhile, takeUntil } from 'rxjs/operators';
+import { IAdditionalData, IModal } from '@app/shared';
 
 @Component({
   selector: 'app-entry-dialog',
@@ -12,26 +14,40 @@ import { skipWhile, takeUntil } from 'rxjs/operators';
   styleUrls: ['./entry-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EntryDialogComponent implements OnInit, AfterViewInit, OnDestroy {
+export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDestroy {
   public newEntryForm: FormGroup;
-  public passwordScore;
+  public passwordScore = -1;
+
+  public readonly ref!: ComponentRef<EntryDialogComponent>;
+  public readonly additionalData!: IAdditionalData;
+
   private readonly destroyed$: Subject<void> = new Subject();
 
   constructor(
     private fb: FormBuilder,
-    private ref: DynamicDialogRef,
-    private config: DynamicDialogConfig,
     private storageService: StorageService,
     private electronService: ElectronService,
     private el: ElementRef,
-  ) { }
+    private modalService: ModalService,
+  ) {
+    this.newEntryForm = this.fb.group({
+      id: [null],
+      title: [null],
+      username: [null, Validators.required],
+      password: [null, Validators.required],
+      url: [null],
+      notes: [null],
+      creationDate: [null],
+      lastAccessDate: [null]
+    });
+  }
 
   get header(): string {
     return this.storageService.editedEntry ? 'Edit entry' : 'Add entry';
   }
 
   get passwordLength(): number {
-    return this.newEntryForm.get('password').value?.length;
+    return this.newEntryForm.get('password')?.value?.length;
   }
 
   get textDescription(): string {
@@ -55,11 +71,29 @@ export class EntryDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnInit(): void {
-    this.initEntryForm();
+  ngOnInit() {
+    fromEvent(window, 'keydown').subscribe((event: Event) => {
+      if ((event as KeyboardEvent).key === 'Escape') {
+        this.close();
+      }
+    });
+
+    if (this.storageService.editedEntry) {
+      this.newEntryForm.patchValue({
+        ...this.storageService.editedEntry,
+        password: this.additionalData.payload
+      });
+    }
+
+    const password = this.newEntryForm.get('password')?.value;
+
+    if (password) {
+      this.passwordScore = this.electronService.zxcvbn(password).score;
+    }
   }
 
-  onPasswordChange(password: string) {
+  onPasswordChange(event: Event) {
+    const password = (event.target as HTMLInputElement).value;
     this.passwordScore = this.electronService.zxcvbn(password).score;
   }
 
@@ -67,10 +101,10 @@ export class EntryDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     Array.from(this.el.nativeElement.querySelectorAll('input')).forEach(el => {
       fromEvent(el as HTMLInputElement, 'keydown')
         .pipe(
-          skipWhile((e: KeyboardEvent) => e.repeat === true),
+          skipWhile((e: Event) => (e as KeyboardEvent).repeat === true),
           takeUntil(this.destroyed$)
-        ).subscribe((e: KeyboardEvent) => {
-          if (e.key === 'Enter') {
+        ).subscribe((e: Event) => {
+          if ((e as KeyboardEvent).key === 'Enter') {
             this.addNewEntry();
           }
         });
@@ -83,38 +117,38 @@ export class EntryDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isControlInvalid(controlName: string): boolean {
-    const control = this.newEntryForm?.get(controlName);
+    const control = this.newEntryForm?.get(controlName) as AbstractControl;
     return control.invalid && control.dirty;
   }
 
-  async initEntryForm() {
-    this.newEntryForm = this.fb.group({
-      id: [null],
-      title: [null],
-      username: [null, Validators.required],
-      password: [null, Validators.required],
-      url: [null],
-      notes: [null],
-      creationDate: [null],
-      lastAccessDate: [null]
-    });
-
-    if (this.storageService.editedEntry) {
-      this.newEntryForm.patchValue({...this.storageService.editedEntry, password: this.config.data.decryptedPassword});
-    }
-  }
-
   async addNewEntry() {
+    if (!this.storageService.selectedCategory) {
+      throw new Error('No category has been selected!');
+    }
+
     Object.values(this.newEntryForm.controls).forEach(control => {
       control.markAsDirty();
     });
 
     if (this.newEntryForm.valid) {
-      const encryptedPassword = await this.electronService.ipcRenderer.invoke('encryptPassword', this.newEntryForm.value.password);
+      const encryptedPassword = await this.electronService.ipcRenderer.invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.password);
       if (this.storageService.editedEntry?.id) {
-        this.storageService.addEntry({ ...this.newEntryForm.value, password: encryptedPassword });
+        await this.storageService.addEntry({
+          ...this.newEntryForm.value,
+          password: encryptedPassword,
+          groupId: this.storageService.selectedCategory.data.id,
+          lastModificationDate: new Date()
+        });
       } else {
-        this.storageService.addEntry({ ...this.newEntryForm.value, password: encryptedPassword, creationDate: new Date() });
+        const newEntry = {
+          ...this.newEntryForm.value,
+          password: encryptedPassword,
+          creationDate: new Date(),
+          groupId: this.storageService.selectedCategory.data.id
+        };
+
+        newEntry.id = undefined;
+        await this.storageService.addEntry(newEntry);
       }
 
       this.close();
@@ -124,7 +158,7 @@ export class EntryDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   async close() {
     if (this.storageService.editedEntry) {
       const encrypted = await this.electronService.ipcRenderer
-        .invoke('encryptPassword', this.newEntryForm.value.password);
+        .invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.password);
 
       this.storageService.editedEntry.password = encrypted;
     }
@@ -132,6 +166,6 @@ export class EntryDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     this.storageService.editedEntry = undefined;
     this.newEntryForm.reset();
 
-    this.ref.close();
+    this.modalService.close(this.ref);
   }
 }

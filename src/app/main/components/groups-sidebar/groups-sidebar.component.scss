@@ -1,0 +1,158 @@
+@import "variables";
+@import "mixins";
+
+$sidePanelInDuration: 300ms;
+$sidePanelOutDuration: 250ms;
+
+:host {
+  display: block;
+
+  ::ng-deep {
+    tree-node-drop-slot {
+      display: none;
+    }
+
+    .toggle-children {
+      font-family: 'primeicons';
+      background-image: none;
+      backface-visibility: hidden;
+      width: 14px;
+      height: 14px;
+      margin-top: 3px;
+      &::before {
+        display: flex;
+        content: '\e901';
+        margin-right: 0.5rem;
+      }
+    }
+
+    .toggle-children-wrapper-expanded {
+      .toggle-children {
+        transform: none;
+        &::before {
+          content: '\e902';
+        }
+      }
+    }
+  
+    tree-viewport {
+      display: flex;
+      height: 100%;
+      @include scrollbar;
+
+      > div {
+        padding-top: 0.6rem;
+        margin-left: 0.6rem;
+      }
+    }
+  
+    tree-root {
+      height: calc(100vh - 11.3rem);
+  
+      .tree-node {
+        color: #444;
+        font-size: 0.9rem;
+
+        .node-wrapper {
+          align-items: center;
+        }
+
+        .node-content-wrapper {
+          min-width: 10rem;
+          padding: 5px;
+          margin: 2px 0;
+          box-shadow: none;
+          transition: background-color 50ms;
+          
+          &:hover:not(.node-content-wrapper-active) {
+            background-color: rgba($silver, 0.3);
+          }
+
+          &-active, &-focused {
+            box-shadow: none;
+            background-color: #E3F2FD;
+          }
+        }
+      }
+    }
+  }
+}
+
+.sidebar {
+  width: 16rem;
+  border-right: 1px solid $silver;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    .file {
+      flex: 1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      height: inherit;
+      padding-top: 0.5rem;
+    }
+
+    .add-group {
+      display: none;
+      font-size: 1.2rem;
+      padding-top: 0.3rem;
+      button {
+        background-color: #fff;
+        border: 0;
+        width: 24px;
+        color: $curious-blue;
+        cursor: pointer;
+        transition: 50ms color;
+        &:hover {
+          color: #444;
+        }
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+
+  &:hover {
+    .header .add-group {
+      display: block;
+    }
+  }
+
+  .selected-entries {
+    font-size: 0.7rem;
+    padding: 0.6rem;
+    background-color: $white;
+    border-top: 1px solid #ccc;
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    user-select: none;
+
+    div {
+      border-right: 1px solid #ccc;
+      margin: 0 4px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      width: 20%;
+
+      &:first-child {
+        justify-content: flex-start;
+        flex: 1;
+      }
+
+      &:last-child {
+        border: 0;
+      }
+    }
+  }
+
+  .rename-group {
+    width: 9.5rem;
+  }
+}

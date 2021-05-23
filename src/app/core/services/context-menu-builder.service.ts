@@ -3,7 +3,7 @@ import { CoreService } from '@app/core/services/core.service';
 import { DialogsService } from '@app/core/services/dialogs.service';
 import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
 import { StorageService } from '@app/core/services/storage.service';
-import { MenuItem } from 'primeng-lts/api';
+import { MenuItem } from 'primeng/api';
 
 @Injectable({
   providedIn: 'root'
@@ -16,8 +16,7 @@ export class ContextMenuBuilderService {
     private hotkeyService: HotkeyService,
     private dialogsService: DialogsService,
     private coreService: CoreService
-  ) {
-  }
+  ) {}
 
   buildGroupContextMenuItems(configuration: { isRoot: boolean } = { isRoot: false }): this {
     this.contextMenuItems = [
@@ -34,7 +33,7 @@ export class ContextMenuBuilderService {
         disabled: configuration.isRoot,
         icon: 'pi pi-fw pi-pencil',
         command: () => {
-          this.storageService.renameGroup();
+          this.storageService.renameGroup(true);
         }
       },
       {
@@ -44,36 +43,6 @@ export class ContextMenuBuilderService {
         command: () => this.dialogsService.openDeleteGroupWindow(),
       },
     ];
-
-    return this;
-  }
-  
-  buildRearrangeEntriesContextMenuItem(): this {
-    this.contextMenuItems.push({
-      label: 'Rearrange',
-      items: [
-        {
-          label: this.hotkeyService.configuration.moveTopLabel,
-          icon: 'pi pi-fw pi-angle-double-up',
-          command: () => this.storageService.moveTop()
-        },
-        {
-          label: 'Move up (Alt + ↑)',
-          icon: 'pi pi-fw pi-angle-up',
-          command: () => this.storageService.moveUp()
-        },
-        {
-          label: 'Move down (Alt + ↓)',
-          icon: 'pi pi-fw pi-angle-down',
-          command: () => this.storageService.moveDown()
-        },
-        {
-          label: this.hotkeyService.configuration.moveBottomLabel,
-          icon: 'pi pi-fw pi-angle-double-down',
-          command: () => this.storageService.moveBottom()
-        }
-      ]
-    });
 
     return this;
   }

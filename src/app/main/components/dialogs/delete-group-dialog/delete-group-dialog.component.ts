@@ -1,17 +1,20 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef } from '@angular/core';
+import { ModalService } from '@app/core/services/modal.service';
 import { StorageService } from '@app/core/services/storage.service';
-import { DynamicDialogRef } from 'primeng-lts/dynamicdialog';
-
+import { IAdditionalData, IModal } from '@app/shared';
 @Component({
   selector: 'app-delete-group-dialog',
   templateUrl: './delete-group-dialog.component.html',
   styleUrls: ['./delete-group-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DeleteGroupDialogComponent {
+export class DeleteGroupDialogComponent implements IModal {
+  public readonly ref!: ComponentRef<DeleteGroupDialogComponent>;
+  public readonly additionalData!: IAdditionalData;
+
   constructor(
-    public ref: DynamicDialogRef,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private modalService: ModalService
   ) { }
 
   removeGroup() {
@@ -20,6 +23,6 @@ export class DeleteGroupDialogComponent {
   }
 
   close() {
-    this.ref.close();
+    this.modalService.close(this.ref);
   }
 }

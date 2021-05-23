@@ -8,15 +8,15 @@ export class TextEmphasizeDirective {
 
   private searchPhraseValue = '';
 
-  @Input('appTextEmphasize') set searchPhrase(value: string) {
-    this.searchPhraseValue = value.trim();
+  @Input('appTextEmphasize') set searchPhrase(value: string | null) {
+    this.searchPhraseValue = value ? value.trim() : '';
     this.applyChanges();
   }
 
   constructor(private element: ElementRef) { }
 
   private applyChanges() {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       const elementTextContent = this.element.nativeElement as HTMLElement;
 
       elementTextContent.innerHTML = elementTextContent.innerHTML
@@ -27,7 +27,7 @@ export class TextEmphasizeDirective {
         return;
       }
 
-      const matchedSubstrings = Array.from(elementTextContent.textContent
+      const matchedSubstrings = Array.from((elementTextContent.textContent ?? '')
         .matchAll(new RegExp(this.searchPhraseValue, 'gi'))
       ).map(x => x[0]);
 
@@ -40,7 +40,7 @@ export class TextEmphasizeDirective {
         }
 
         elementTextContent.innerHTML = elementTextContent.innerHTML
-          .substring(0, lastFoundIndex >=0 ? lastFoundIndex + this.closingTag.length : 0)
+          .substring(0, lastFoundIndex >= 0 ? lastFoundIndex + this.closingTag.length : 0)
           + textToReplace.replace(match, this.openingTag + match + this.closingTag);
       }
     });
@@ -48,6 +48,6 @@ export class TextEmphasizeDirective {
 
   private isSubstringNotFound(elementTextContent: HTMLElement) {
     return this.searchPhraseValue.trim().length === 0
-      || !elementTextContent.textContent.toLowerCase().includes(this.searchPhraseValue.toLowerCase());
+      || !elementTextContent.textContent?.toLowerCase().includes(this.searchPhraseValue.toLowerCase());
   }
 }
