@@ -33,9 +33,9 @@ export class CoreService {
       };
     }
 
-    this.electronService.ipcRenderer.on(IpcChannel.ProvidePassword, (_, file) => {
+    this.electronService.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
       this.zone.run(() => {
-        this.storageService.file = file;
+        this.storageService.file = { filePath: filePath, filename: filePath.split('\\').slice(-1)[0] };
         this.router.navigateByUrl('/home');
       });
     });
@@ -53,7 +53,7 @@ export class CoreService {
       this.zone.run(() => {
         if (status) {
           this.storageService.setDateSaved();
-          this.storageService.file = file;
+          this.storageService.file = { filePath: file, filename: file.split('\\').splice(-1)[0] };
 
           this.toastService.add({
             message: 'Database saved',

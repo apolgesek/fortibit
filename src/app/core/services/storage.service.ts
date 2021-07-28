@@ -75,8 +75,8 @@ export class StorageService {
     );
 
     this.loadedDatabaseSource$ = this.loadedDatabase$.asObservable();
-    this.renamedGroupSource$ = this.renamedGroup$.asObservable();
     this.reloadedEntriesSource$ = this.reloadedEntries$.asObservable();
+    this.renamedGroupSource$ = this.renamedGroup$.asObservable().pipe(shareReplay());
   }
 
   @markDirty()

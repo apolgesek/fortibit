@@ -7,18 +7,26 @@ import { ElectronService, StorageService } from '../services';
 @Injectable()
 export class InitialRouteGuard implements CanActivate {
   constructor(
-    private router: Router,
     private electronService: ElectronService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private router: Router
   ) {}
 
   canActivate(): Observable<boolean> {
     return from(this.electronService.ipcRenderer.invoke(IpcChannel.CheckOpenMode))
-      .pipe(tap(fileLoaded => {
-        if (fileLoaded) {
-          this.storageService.file = fileLoaded;
-          this.router.navigate(['/home']);
+      .pipe(tap((filePath: string) => {
+        if (filePath) {
+          this.storageService.file = { filePath: filePath, filename: filePath.split('\\').slice(-1)[0] };
+          
+          // password has not been entered yet - navigate to provide password page
+          if (this.storageService.groups.length === 0) {
+            this.router.navigate(['/home']);
+          }
         }
-      }), map(fileLoaded => !fileLoaded));
+      }), map(filePath => this.hasAccessedFile(filePath) || !filePath));
+  }
+
+  private hasAccessedFile(filePath: string) {
+    return Boolean(filePath) && this.storageService.groups.length > 0;
   }
 }

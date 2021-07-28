@@ -50,10 +50,9 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.electronService.ipcRenderer.on(IpcChannel.DecryptedContent, (_, { decrypted, file }) => {
+    this.electronService.ipcRenderer.on(IpcChannel.DecryptedContent, (_, { decrypted }) => {
       this.zone.run(() => {
         if (decrypted) {
-          this.storageService.file = file;
           this.storageService.setDateSaved();
           this.storageService.loadDatabase(decrypted);
         } else {

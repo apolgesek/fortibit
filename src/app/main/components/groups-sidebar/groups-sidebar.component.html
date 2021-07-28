@@ -10,13 +10,13 @@
 	</div>
 	<tree-root
 		[nodes]="groups"
-		[options]="{ allowDrag: true, useVirtualScroll: true, isExpandedField: 'expanded', actionMapping: actionMapping }">
+		[options]="treeOptions">
 	  <ng-template #treeNodeTemplate let-node let-index="index">
 			<ng-container *ngIf="(isGroupRenamed$ | async) && selectedGroup?.data.id === node.data.id; else groupName">
 				<input
-					#renameGroupInput
-					appBlurEnter
 					type="text"
+					appBlurEnter
+					appAutofocus
 					[(ngModel)]="node.data.name"
 					[ngModelOptions]="{'updateOn': 'blur'}"
 					(blur)="setGroupRenameModeOff(node)"
@@ -25,7 +25,7 @@
 					class="rename-group"/>
 			</ng-container>
 			<ng-template #groupName>
-				<span>{{ node.data.name }}</span>
+				<div class="node-group-name">{{ node.data.name }}</div>
 			</ng-template>
 		</ng-template>
 	</tree-root>

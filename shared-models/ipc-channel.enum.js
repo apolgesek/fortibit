@@ -25,4 +25,3 @@ var IpcChannel;
     IpcChannel["DecryptedContent"] = "decryptedContent";
     IpcChannel["OpenCloseConfirmationWindow"] = "openCloseConfirmationWindow";
 })(IpcChannel = exports.IpcChannel || (exports.IpcChannel = {}));
-//# sourceMappingURL=ipc-channel.enum.js.map

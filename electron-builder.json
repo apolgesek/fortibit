@@ -3,22 +3,23 @@
   "directories": {
     "output": "release/"
   },
+  "asar": false,
   "files": [
     "**/*",
     "!**/*.ts",
+    "!*.map",
     "!**/mock_data.json",
-    "!*.code-workspace",
-    "!LICENSE.md",
-    "!package.json",
-    "!package-lock.json",
-    "!src/",
-    "!e2e/",
-    "!hooks/",
-    "!angular.json",
-    "!_config.yml",
-    "!karma.conf.js",
-    "!tsconfig.json",
-    "!tslint.json"
+    "!node_modules",
+    "!.vscode",
+    "!.github",
+    "!build",
+    "!release",
+    "!release-scripts",
+    "!src",
+    "!*.md",
+    "!*.json",
+    "!.gitignore",
+    "!.editorconfig"
   ],
   "mac": {
     "target": [

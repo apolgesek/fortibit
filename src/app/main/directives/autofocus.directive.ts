@@ -9,13 +9,6 @@ export class AutofocusDirective {
   ) { }
 
   ngAfterViewInit(): void {
-    setTimeout(() => {
-      const element: HTMLInputElement = this.element.nativeElement;
-      element.focus();
-
-      if (element instanceof HTMLInputElement) {
-        element.setSelectionRange(0, 0);
-      }
-    });
+    (this.element.nativeElement as HTMLElement).focus();
   }
 }

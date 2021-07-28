@@ -59,8 +59,8 @@ $sidePanelOutDuration: 250ms;
 
         .node-content-wrapper {
           min-width: 10rem;
-          padding: 5px;
-          margin: 2px 0;
+          padding: 0;
+          margin: 0;
           box-shadow: none;
           transition: background-color 50ms;
           
@@ -71,6 +71,10 @@ $sidePanelOutDuration: 250ms;
           &-active, &-focused {
             box-shadow: none;
             background-color: #E3F2FD;
+          }
+
+          .node-group-name {
+            padding: 5px;
           }
         }
       }
@@ -99,6 +103,7 @@ $sidePanelOutDuration: 250ms;
       display: none;
       font-size: 1.2rem;
       padding-top: 0.3rem;
+
       button {
         background-color: #fff;
         border: 0;
@@ -136,6 +141,7 @@ $sidePanelOutDuration: 250ms;
     div {
       border-right: 1px solid #ccc;
       margin: 0 4px;
+      padding: 0 2px;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -154,5 +160,11 @@ $sidePanelOutDuration: 250ms;
 
   .rename-group {
     width: 9.5rem;
+    border: none;
+    background-color: #E3F2FD;
+    padding: 5px;
+    font-family: open_sansregular,Verdana,Geneva,Tahoma,sans-serif;
+    font-size: 0.9rem;
+    color: #444;
   }
 }

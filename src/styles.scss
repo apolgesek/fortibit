@@ -318,7 +318,6 @@ body .p-menu .p-menuitem-link:not(.p-state-disabled) {
 	}
 }
 
-/* Dropdown Button */
 .dropbtn {
 	display: flex;
 	justify-content: flex-end;
@@ -339,22 +338,23 @@ body .p-menu .p-menuitem-link:not(.p-state-disabled) {
 		color: #444;
 	}
 
+	&.active {
+		border-bottom-right-radius: 0;
+	}
+
 	.pi {
 		margin-left: 0.5rem;
 	}
 }
 
-/* The container <div> - needed to position the dropdown content */
 .dropdown {
   position: relative;
   display: inline-block;
 }
 
-/* Dropdown Content (Hidden by Default) */
 .dropdown-content {
   display: none;
   position: absolute;
-	margin-top: -2px;
 	right: 0;
   background-color: #fff;
   width: 5rem;
@@ -368,7 +368,6 @@ body .p-menu .p-menuitem-link:not(.p-state-disabled) {
 	}
 }
 
-/* Links inside the dropdown */
 .dropdown-content a {
   color: black;
   padding: 0.5rem;
@@ -378,23 +377,16 @@ body .p-menu .p-menuitem-link:not(.p-state-disabled) {
 	font-size: 0.9rem;
 }
 
-/* Change color of dropdown links on hover */
 .dropdown-content a:hover {background-color: #eee}
 
-/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
 .show {display:block;}
 
-/* MODAL STYLES
--------------------------------*/
 	.modal {
-		/* modal container fixed across whole screen */
 		top: 0;
 		left: 0;
 		margin: 0;
 		width: 100%;
 		height: 100%;
-	
-		/* enables scrolling for tall modals */
 		overflow: auto;
 	
 		.modal-body {
@@ -410,18 +402,16 @@ body .p-menu .p-menuitem-link:not(.p-state-disabled) {
 	}
 	
 	.modal-background {
-		/* modal background fixed across whole screen */
 		position: fixed;
 		top: 0;
 		right: 0;
 		bottom: 0;
 		left: 0;
-	
 		background-color: rgba(0, 0, 0, 0.6);
-	
-		/* semi-transparent black  */
 		backdrop-filter: url('#blur-shadow');
-	
-		/* z-index must be below .jw-modal and above everything else  */
 		z-index: 999;
+	}
+
+	.is-unknown-element-dragging:not(.node-content-wrapper-active) {
+		background: #fff !important;
 	}
