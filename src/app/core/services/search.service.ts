@@ -1,20 +1,24 @@
 import { Injectable } from '@angular/core';
-import { TreeNode } from 'primeng-lts/api';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { Sort } from '../enums';
 import { IPasswordEntry } from '../models';
-
-export interface ISearchResultGroup {
-  groupPath: string;
+interface ISearchService {
+  updateSearchResults(): void;
+  reset() : void;
+  setSort(state: Sort, prop: keyof IPasswordEntry) : void;
+  filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]) : IPasswordEntry[];
 }
-
-export type SearchResult = ISearchResultGroup | IPasswordEntry;
-
 @Injectable({
   providedIn: 'root'
 })
-export class SearchService {
+export class SearchService implements ISearchService {
   public searchPhrase$: Observable<string>;
   public searchPhraseValue = '';
+
+  public sortProp: keyof IPasswordEntry = 'creationDate';
+  public sortOrder: Sort = Sort.Desc;
+
+  public isGlobalSearchMode = false;
 
   private searchPhraseSource: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
@@ -31,79 +35,56 @@ export class SearchService {
     this.updateSearchResults();
   }
 
-  public filterEntries(passwords: IPasswordEntry[], phrase: string, group: TreeNode): SearchResult[] {
-    if (!phrase.trim()) {
-      return passwords;
-    }
-    const tempData: SearchResult[] = [];
-    this.createSearchResultList(group, tempData, phrase);
-    return tempData;
+  public setSort(state: Sort, prop: keyof IPasswordEntry) {
+    this.sortOrder = state;
+    this.sortProp = prop;
+    this.updateSearchResults();
   }
 
-  private createSearchResultList(node: TreeNode, output: SearchResult[], phrase: string) {
-    const normalizedPhrase = phrase.trim().toLowerCase();
-
-    if (node.data.length) {
-      const filteredNodes: IPasswordEntry[] = (node.data as IPasswordEntry[])
-        .filter(p => (p.title.toLowerCase().includes(normalizedPhrase)
-          || p.username.toLowerCase().includes(normalizedPhrase))
-        );
-
-      if (filteredNodes.length) {
-        const path: string[] = [];
-
-        this.createPath(node, path);
-        output.push({ groupPath: path.reverse().join('/') });
-
-        filteredNodes.sort((a, b) => this.searchResultsComparer(a, b));
-        output.push(...filteredNodes);
-      }
-    }
-
-    if (node.children?.length) {
-      node.children.forEach((element: TreeNode) => {
-        this.createSearchResultList(element, output, phrase);
+  public filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]): IPasswordEntry[] {
+    if (!searchResults.length) {
+      const filteredPasswords = passwords.filter(p => { 
+        return p.title?.toLowerCase().includes(phrase.toLowerCase())
+          || p.username.toLowerCase().includes(phrase.toLowerCase());
       });
+
+      if (this.sortOrder === Sort.Asc) {
+        filteredPasswords.sort((a, b) => this.compareAscending(a, b));
+      } else if (this.sortOrder === Sort.Desc) {
+        filteredPasswords.sort((a, b) => this.compareDescending(a, b));
+      }
+
+      return filteredPasswords;
     } else {
-      return output;
+      if (this.sortOrder === Sort.Asc) {
+        searchResults.sort((a, b) => this.compareAscending(a, b));
+      } else if (this.sortOrder === Sort.Desc) {
+        searchResults.sort((a, b) => this.compareDescending(a, b));
+      }
+
+      return searchResults;
     }
   }
 
-  private createPath(node: TreeNode, path: string[]) {
-    path.push(node.label);
-    if (node.parent) {
-      this.createPath(node.parent, path);
+  public compareAscending(a: IPasswordEntry, b: IPasswordEntry) {
+    const firstProp = a[this.sortProp];
+    const secondProp = b[this.sortProp];
+
+    if (firstProp && secondProp) {
+      return firstProp > secondProp ? -1 : 1;
     }
+
+    return 0;
   }
 
-  /**
-   * Sort in the following order: found in title, found in username. If found in title, sort by position in the string
-   */
-  private searchResultsComparer(a: IPasswordEntry, b: IPasswordEntry): number {
-    if (!this.searchPhraseValue) {
-      return 0;
+  public compareDescending(a: IPasswordEntry, b: IPasswordEntry) {
+    const firstProp = a[this.sortProp];
+    const secondProp = b[this.sortProp];
+
+    if (firstProp && secondProp) {
+      return firstProp > secondProp ? 1 : -1;
     }
 
-    const normalizedValue = this.searchPhraseValue.toLowerCase();
-
-    const aTitle = a.title.toLowerCase();
-    const bTitle = b.title.toLowerCase();
-    const aUsername = a.username.toLowerCase();
-    const bUsername = b.username.toLowerCase();
-
-    const aTitlePhrase = aTitle.includes(normalizedValue);
-    const bTitlePhrase = bTitle.includes(normalizedValue);
-    const aUsernamePhrase = aUsername.includes(normalizedValue);
-    const bUsernamePhrase = bUsername.includes(normalizedValue);
-
-    if (aTitlePhrase && bTitlePhrase) {
-      return aTitle.indexOf(normalizedValue) < bTitle.indexOf(normalizedValue) ? -1 : 1;
-    } else if (aTitlePhrase && bUsernamePhrase) {
-      return -1;
-    } else if (aUsernamePhrase && bUsernamePhrase) {
-      return aUsername.indexOf(normalizedValue) <= bUsername.indexOf(normalizedValue) ? -1 : 1;
-    } else {
-      return 0;
-    }
+    return 0;
   }
 }

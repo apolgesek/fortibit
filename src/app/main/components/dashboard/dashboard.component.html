@@ -1,61 +1,7 @@
-<nav class="main-nav">
-	<div class="menu-panel">
-		<button
-			pButton
-			data-prevent-entry-deselect
-			type="button"
-			icon="pi pi-plus"
-			iconPos="left"
-			class="add-entry"
-			(click)="openAddEntryWindow()">
-		</button>
-		<button
-			pButton
-			data-prevent-entry-deselect
-			type="button"
-			label="Save"
-			icon="pi pi-save"
-			iconPos="left"
-			[disabled]="isDatabaseDirty"
-			class="p-button-secondary save-db"
-			(click)="trySaveDatabase()">
-		</button>
-		<button
-			pButton
-			data-prevent-entry-deselect
-			type="button"
-			label="Edit"
-			icon="pi pi-pencil"
-			iconPos="left"
-			[disabled]="!(isAnyEntry && isOneEntrySelected)"
-			class="p-button-secondary edit-entry"
-			(click)="openEditEntryWindow()">
-		</button>
-		<button
-			pButton
-			data-prevent-entry-deselect
-			type="button"
-			label="Remove"
-			icon="pi pi-trash"
-			iconPos="left"
-			[disabled]="!(isAnyEntry && isAnyEntrySelected)"
-			class="p-button-secondary remove-entry"
-			(click)="openDeleteEntryWindow()">
-		</button>
-		<input
-			type="text"
-			[(ngModel)]="searchPhrase"
-			class="search"
-			placeholder="Search entries" />
-			<div style="display: flex; align-items: center" @fade *ngIf="searchPhrase?.length && (!isSearching || wasSearched )">
-				<div class="arrow-left"></div>
-				<div class="count">
-					{{ entriesFound | async }} found
-				</div>
-			</div>
-	</div>
-</nav>
+<app-toolbar></app-toolbar>
 
-<router-outlet></router-outlet>
-
-
+<div class="main-container">
+	<app-groups-sidebar></app-groups-sidebar>
+	<app-entries-table></app-entries-table>
+	<app-entry-details-sidebar [entry]="selectedEntry"></app-entry-details-sidebar>
+</div>

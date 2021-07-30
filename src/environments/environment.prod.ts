@@ -3,7 +3,7 @@ export const AppConfig = {
   environment: 'PROD',
   mocks: false,
   urls: {
-    repositoryUrl: 'https://github.com/apolgesek/haslock/',
+    repositoryUrl: 'https://github.com/apolgesek/fortibit/',
     releaseNotes: 'releases',
     reportIssue: 'issues',
     keyboardReference: 'wiki/Keyboard-shortcuts',

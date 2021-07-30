@@ -1,13 +1,22 @@
-// this decorator is used for methods that should trigger database 'dirty' status
-export const markDirty = () => {
+import { StorageService } from '../services';
+
+/**
+ * Marks database as dirty, so that unsaved changes are detected.
+ */
+export const markDirty = ({ updateEntries } = { updateEntries: true }) => {
   return (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) => {
-    if (this && !((this as unknown).constructor.name === 'storageService')) {
-      throw new Error(`${markDirty.name} decorator cannot be used in current context`);
-    }
     const originalMethod = descriptor.value;
-    descriptor.value = function (...args: unknown[]) {
-      const result = originalMethod.apply(this, args);
-      this.dateSaved = undefined;
+    descriptor.value = async function (...args: unknown[]) {
+      const result = await originalMethod.apply(this, args);
+
+      // eslint-disable-next-line
+      const context: StorageService = this as StorageService;
+
+      context.dateSaved = undefined;
+      if (updateEntries) {
+        context.updateEntries();
+      }
+
       return result;
     };
   };

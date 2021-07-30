@@ -2,7 +2,6 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "module": "es6",
     "baseUrl": "",
     "types": []
   },
@@ -14,8 +13,9 @@
     "**/*.spec.ts",
   ],
   "angularCompilerOptions": {
-    "fullTemplateTypeCheck": true,
+    "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
-    "preserveWhitespaces": true
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
   }
 }

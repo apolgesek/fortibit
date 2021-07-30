@@ -1,84 +1,87 @@
-<div
-  data-prevent-entry-deselect
-  class="dialog-header">
-  <h2>{{ header }}</h2>
-  <span
-    class="close-dialog"
-    (click)="close()">&times;
-  </span>
-</div>
-<form
-  data-prevent-entry-deselect
-  [formGroup]="newEntryForm">
-  <div>
-    <div class="p-inputgroup">
-      <span class="p-inputgroup-addon"><i class="pi pi-bookmark"></i></span>
-      <input
-        type="text"
-        spellcheck="false"
-        appAutofocus
-        formControlName="title"
-        placeholder="Title">   
-    </div>
-    <div
-      class="p-inputgroup"
-      [ngClass]="{'ng-invalid': isControlInvalid('username')}">
-      <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
-      <input
-        type="text"
-        formControlName="username"
-        placeholder="Username">         
-    </div>
-    <div
-      *ngIf="isControlInvalid('username')"
-      class="validation-error">
-      Username is required
-    </div>
-    <div
-      class="p-inputgroup"
-      [ngClass]="{'ng-invalid': isControlInvalid('password')}">
-      <span class="p-inputgroup-addon"><i class="pi pi-key"></i></span>
-      <input
-        type="password"
-        formControlName="password"
-        placeholder="Password"
-        (input)="onPasswordChange($event.target.value)">   
-    </div>
-    <div
-      class="password-strength"
-      [class]="'s-' + passwordScore"
-      [ngClass]="{'active': passwordLength > 0}">
-      <div class="text">
-        {{ textDescription }}
+
+<app-modal>
+  <div
+    data-prevent-entry-deselect
+    class="dialog-header">
+    <h2>{{ header }}</h2>
+    <span
+      class="close-dialog"
+      (click)="close()">&times;
+    </span>
+  </div>
+  <form
+    data-prevent-entry-deselect
+    [formGroup]="newEntryForm">
+    <div>
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon"><i class="pi pi-bookmark"></i></span>
+        <input
+          type="text"
+          spellcheck="false"
+          appAutofocus
+          formControlName="title"
+          placeholder="Title">   
+      </div>
+      <div
+        class="p-inputgroup"
+        [ngClass]="{'ng-invalid': isControlInvalid('username')}">
+        <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
+        <input
+          type="text"
+          formControlName="username"
+          placeholder="Username">         
+      </div>
+      <div
+        *ngIf="isControlInvalid('username')"
+        class="validation-error">
+        Username is required
+      </div>
+      <div
+        class="p-inputgroup"
+        [ngClass]="{'ng-invalid': isControlInvalid('password')}">
+        <span class="p-inputgroup-addon"><i class="pi pi-key"></i></span>
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Password"
+          (input)="onPasswordChange($event)">   
+      </div>
+      <div
+        class="password-strength"
+        [class]="passwordScore >= 0 ? 's-' + passwordScore : ''"
+        [ngClass]="{'active': passwordLength > 0}">
+        <div class="text">
+          {{ textDescription }}
+        </div>
+      </div>
+      <div
+        *ngIf="isControlInvalid('password')"
+        class="validation-error">
+        Password is required
+      </div>		
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon"><i class="pi pi-globe"></i></span>
+        <input
+          type="text"
+          formControlName="url"
+          placeholder="Website">      
+      </div>
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon"><i class="pi pi-info"></i></span>
+        <textarea
+          formControlName="notes"
+          placeholder="Optional note"
+          rows="5">
+        </textarea>     
       </div>
     </div>
-    <div
-      *ngIf="isControlInvalid('password')"
-      class="validation-error">
-      Password is required
-    </div>		
-    <div class="p-inputgroup">
-      <span class="p-inputgroup-addon"><i class="pi pi-globe"></i></span>
-      <input
-        type="text"
-        formControlName="url"
-        placeholder="Website">      
+    <div class="footer-container">
+      <button
+        type="button"
+        (click)="addNewEntry()"
+        class="primary-btn">
+        Confirm
+      </button>
     </div>
-    <div class="p-inputgroup">
-      <span class="p-inputgroup-addon"><i class="pi pi-info"></i></span>
-      <textarea
-        formControlName="notes"
-        placeholder="Optional note"
-        rows="5">
-      </textarea>     
-    </div>
-  </div>
-  <div class="footer-container">
-    <button
-      type="button"
-      (click)="addNewEntry()"
-      class="primary-btn">
-      Confirm
-    </button>
-  </div>
-</form>
+  </form>
+</app-modal>

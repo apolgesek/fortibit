@@ -1,263 +1,140 @@
-@import 'variables';
-@import 'mixins';
+@import "variables";
+@import "mixins";
 
 $sidePanelInDuration: 300ms;
 $sidePanelOutDuration: 250ms;
 
 :host {
-    width: 100%;
-    height: calc(100% - 7rem);
-    display: flex;
-    flex-wrap: row;
+	width: 100%;
+	height: calc(100% - 7rem);
+	display: flex;
+	overflow: hidden;
 
-    ::ng-deep {
-        .p-datatable-wrapper {
-            table {
-                .p-datatable-thead {
-                    #sticky-header {
-                        width: calc(100vw - 32rem);
-                        padding: 0.45rem 0;
-                        display: flex;
-                        position: sticky;
-                        top: 0;
-                        background-color: $white;
-                        user-select: none;
-                        transition: all 150ms;
-                        box-shadow: 0px 0px 0px 1px $silver,
-                        0px 0px 0px 1px $silver,
-                        0px 0px 0px 1px $silver;
+	.table-viewport {
+		height: calc(100vh - 9.2rem);
+		@include scrollbar;
+	}
 
-                        &.scrolled {
-                            -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
-                            -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
-                            box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
-                        }
-                        
-                        div {
-                            font-weight: bold;
-                            color: #444;
-                            width: calc((100% / 3) - 3px);
-                            text-align: left;
-                            &:first-child {
-                                border-left: 0;
-                                padding-left: 1rem;
-                            }
-                        }   
-                    }
-                }
+	::ng-deep {
+		.p-selectable-row {
+			outline: none;
+		}
 
-                tbody > tr {
-                    @include default-table-row;
-
-                    &:focus, &:hover {
-                        @include default-table-row;
-                    }
-
-                    &.selected {
-                        background-color: #5d9ed3;
-                        color: $white;
-                        &:hover {
-                            background-color: #5d9ed3;
-                        }
-                    }
-
-                    &:hover {
-                        background-color: rgb(230, 230, 230);
-                    }
-
-                    &.entry-group:hover {
-                        background-color: $white;
-                    }
-                }
-
-                tbody tr td {
-                    word-break: break-all;
-                    user-select: none;
-                    cursor: pointer;
-                    padding: 0;
-                    height: 36px;
-                    &:first-child {
-                        border-left: 0;
-                        padding-left: 1rem;
-                    }
-
-                    &.long-text {
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                    }
-                } 
-            }  
-        }
-
-        .p-selectable-row {
-            outline: none;
-        }
-
-        .is-dragging {
-            opacity: 0.5;
-        }
-
-        .sidebar {
-            width: 16rem;
-            border-right: 1px solid $silver;
-            overflow-y: auto;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-
-            .header {   
-                .file {
-                    flex: 1;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    height: inherit;
-                    padding-top: 0.5rem;
-                }
-
-                .add-group {
-                    display: none;
-                    font-size: 1.2rem;
-                    padding-top: 0.3rem;
-                    button {
-                        background-color: #fff;
-                        border: 0;
-                        width: 24px;
-                        color: $curious-blue;
-                        cursor: pointer;
-                        transition: 150ms color;
-                        &:hover {
-                            color: #444;
-                        }
-                        &:last-child {
-                            margin-right: 0;
-                        }
-                    }
-                }
-            }
-
-            &:hover {
-                .add-group {
-                    display: block;
-                }
-            }
-
-            p-tree {
-                height: 100%;
-                display: flex;
-                overflow: auto;
-                @include scrollbar;               
-                .p-tree {
-                    width: 100%;
-                    padding: 0;
-                    border: 0;
-                
-                    .p-tree-wrapper {
-                        height: 100%;
-                        .p-tree-container > p-treenode > .p-treenode-droppoint {
-                            display: none;
-                        }
-                    }
-
-                    .p-tree-container {
-                        height: 100%;
-                        @include scrollbar;
-                        .p-treenode {
-                            padding: 0;
-                        }
-                    }
-
-                    .p-treenode-children {
-                        width: 100%;
-                        min-width: 12rem;
-                    }
-
-                    .p-treenode-content {
-                        padding: 0;
-                        border-radius: 0;
-                        height: 36px;
-                        &:focus {
-                            outline: 0;
-                            box-shadow: none;
-                        }
-                    }
-                }
-            }
-            
-            .selected-entries {
-                text-align: center;
-                font-size: 0.8rem;
-                padding: 0.4rem 0;
-                border-top: 1px solid #e9ecef;
-                min-height: 37px;
-                position: sticky;
-                bottom: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                user-select: none;
-
-                .group-name {
-                    display: inline-block;
-                    max-width: 5rem;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-            }   
-        }
-    }
+		.is-dragging {
+			opacity: 0.5;
+		}
+	}
 }
 
 .password-table {
-    overflow-y: auto;
-    width: calc(100vw - 32rem);
-    overflow-x: hidden;
-    overflow-y: scroll;
+	width: calc(100vw - 32rem);
+	@include primary-font;
 
-    .table-body {
-        width: 100%;
-    }
+	.row-entry {
+		font-size: 0.8rem;
+		cursor: pointer;
+		@include default-table-row;
 
-    @include scrollbar;
+		&:focus,
+		&:hover {
+			@include default-table-row;
+		}
+
+		&.selected {
+			background-color: #C2DBFF;
+			&:hover {
+				background-color: #C2DBFF;
+			}
+		}
+
+		&:hover {
+			background-color: #ededed;
+		}
+
+		.column {
+			width: calc((100% / 3) - 0.2rem);
+			padding: 0.5rem;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+
+			&:first-child {
+				padding-left: 1rem;
+			}
+
+			padding-left: 0;
+		}
+	}
+
+	#table-header {
+		display: flex;
+		width: 100%;
+		background-color: $white;
+		user-select: none;
+		font-size: 0.9rem;
+		border-bottom: 1px solid $silver;
+
+		div {
+			display: flex;
+			padding: 9px 0;
+			color: #444;
+			width: calc((100% / 3) - 0.2rem);
+			align-items: center;
+			text-align: left;
+			cursor: pointer;
+
+			&:first-child {
+				border-left: 0;
+				padding-left: 1rem;
+			}
+
+			&:last-child {
+				cursor: default;
+			}
+
+			i {
+				font-size: 0.8rem;
+				margin-left: 0.5rem;
+			}
+		}
+	}
+
+	@include scrollbar;
 }
 
 .list-cta {
-    text-align: center;
-    margin-top: 5rem;
-    color: rgba(0,0,0,0.4);
-    font-size: 1.2rem;
-    user-select: none;
-    a {
-        font-size: 0.9rem;
-    }
+	text-align: center;
+	margin-top: 5rem;
+	color: rgba(0, 0, 0, 0.4);
+	font-size: 1.2rem;
+	user-select: none;
+	a {
+		font-size: 0.9rem;
+	}
 }
 
 .table-body {
-    flex: 1;
-}
-
-.group-name-input {
-    font-size: 0.9rem;
-    width: 6rem;
+	height: 100%;
 }
 
 .group-separator {
-    display: flex;
-    align-items: center;
+	display: flex;
+	padding: 0.5rem 1rem;
+	align-items: center;
+	font-size: 0.9rem;
+	color: #777;
 
-    span {
-        margin-right: 0.5rem;
-        color: #777;
-    }
+	span {
+		margin-right: 0.6rem;
+	}
 }
 
 .outline-btn {
-    transition: background-color 150ms;
-    border-radius: 4px;
-    padding: 0.5rem;
-    &:hover {
-        background-color: rgba($silver, 0.3);
-    }
+	transition: background-color 50ms;
+	border-radius: 4px;
+	padding: 0.5rem;
+
+	&:hover {
+		background-color: rgba($silver, 0.3);
+	}
 }

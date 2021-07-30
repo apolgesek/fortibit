@@ -1,211 +1,253 @@
 import { Injectable } from '@angular/core';
+import { markDirty } from '@app/core/decorators/mark-dirty.decorator';
+import { IPasswordGroup } from '@app/core/models';
+import { IPasswordEntry } from '@app/core/models/password-entry.model';
+import { EntryRepository, GroupRepository } from '@app/core/repositories';
+import { TreeNode } from '@circlon/angular-tree-component';
+import { IpcChannel } from '@shared-models/*';
 import { AppConfig } from 'environments/environment';
-import { TreeNode } from 'primeng-lts/api';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
-import { markDirty } from '../decorators/mark-dirty.decorator';
-import { IPasswordEntry } from '../models/password-entry.model';
-import { ArrayUtils } from '../utils';
+import { BehaviorSubject, combineLatest, from, Observable, of, Subject } from 'rxjs';
+import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { DbContext, initialEntries } from '../database';
 import { ElectronService } from './electron/electron.service';
-import { MockDataService } from './mock-data.service';
-import { ISearchResultGroup, SearchResult, SearchService } from './search.service';
-import { v4 as uuidv4 } from 'uuid';
+import { SearchService } from './search.service';
 
-const nameof = <T>(name: keyof T) => name;
-type treeNodeEventObject = { node: TreeNode };
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const IDBExportImport = require('indexeddb-export-import');
+interface SearchResultsModel {
+  passwords: IPasswordEntry[],
+  searchPhrase: string,
+  searchResults: IPasswordEntry[]
+}
 
-@Injectable({
-  providedIn: 'root'
-})
+type GetSearchResultsModel = [passwords: IPasswordEntry[], searchPhrase: string];
+
+@Injectable({ providedIn: 'root' })
 export class StorageService {
-  public readonly entries$: Observable<SearchResult[]>;
-  public readonly entryIndex: number;
-  public entriesFound$: Observable<number>;
+  public readonly entries$: Observable<IPasswordEntry[]>;
+  public readonly renamedGroupSource$: Observable<boolean>;
+  public readonly loadedDatabaseSource$: Observable<boolean>;
+  public readonly reloadedEntriesSource$: Observable<void>;
 
-  public dateSaved: Date;
+  public dateSaved: Date | undefined;
+  public draggedEntry: number[] = [];
+  public editedEntry: IPasswordEntry | undefined;
+  public groups: IPasswordGroup[] = [];
+  public selectedCategory: TreeNode | undefined;
+  public contextSelectedCategory: TreeNode | undefined;
+  public file: { filePath: string, filename: string } | undefined;
+
+  public passwordEntries: IPasswordEntry[] = [];
   public selectedPasswords: IPasswordEntry[] = [];
-  public draggedEntry: IPasswordEntry[] = [];
-  public selectedCategory: TreeNode;
-  public editedEntry: IPasswordEntry;
-  public contextSelectedCategory: TreeNode;
-  public isRenameModeOn = false;
-  public file: { filePath: string, filename: string };
-  public groups: TreeNode[];
+  
+  private readonly loadedDatabase$: Subject<boolean> = new Subject();
+  private readonly reloadedEntries$: Subject<void> = new Subject();
+  private readonly renamedGroup$: Subject<boolean> = new Subject();
+
+  private readonly passwordListSource$: BehaviorSubject<IPasswordEntry[]> = new BehaviorSubject<IPasswordEntry[]>([]);
+
+  get isGlobalSearch(): boolean {
+    return this.searchService.isGlobalSearchMode;
+  }
+
+  set isGlobalSearch(value: boolean) {
+    this.searchService.isGlobalSearchMode = value;
+  }
 
   get databaseFileName(): string {
-    return this.file?.filename ?? '*New db';
+    return this.file?.filename ?? '*New db (unsaved)';
   }
-  
-  private passwordListSource: BehaviorSubject<IPasswordEntry[]> = new BehaviorSubject<IPasswordEntry[]>([]);
 
   constructor(
     private electronService: ElectronService,
-    private searchService: SearchService
+    private searchService: SearchService,
+    private entryRepository: EntryRepository,
+    private groupRepository: GroupRepository,
+    private dbContext: DbContext,
   ) {
     this.entries$ = combineLatest([
-      this.passwordListSource,
+      this.passwordListSource$,
       this.searchService.searchPhrase$
     ]).pipe(
-      map(([ passwords, searchPhrase ]) => this.searchService.filterEntries(passwords, searchPhrase, this.groups[0])),
+      switchMap(([passwords, searchPhrase]) => this.getSearchResults$([passwords, searchPhrase])),
+      map(({passwords, searchPhrase, searchResults}) => this.searchService.filterEntries(passwords, searchPhrase, searchResults)),
       shareReplay()
     );
 
-    this.entriesFound$ = this.entries$
-      .pipe(map((entries) => entries.filter(e => !(e as ISearchResultGroup).groupPath).length));
-
-    this.groups = [{
-      key: uuidv4(),
-      label: 'Database',
-      expanded: true,
-      expandedIcon: 'pi pi-folder-open',
-      draggable: false,
-      data: [],
-      children: [
-        this.buildGroup('General'),
-        this.buildGroup('Email'),
-        this.buildGroup('Work'),
-        this.buildGroup('Banking'),
-      ]
-    }];
-
-    if (AppConfig.mocks) {
-      MockDataService.loadMockedEntries(this.groups[0]);
-    }
-
-    this.setDateSaved();
-    this.selectedCategory = this.groups[0];
+    this.loadedDatabaseSource$ = this.loadedDatabase$.asObservable();
+    this.reloadedEntriesSource$ = this.reloadedEntries$.asObservable();
+    this.renamedGroupSource$ = this.renamedGroup$.asObservable().pipe(shareReplay());
   }
 
-  //#region mark dirty methods
   @markDirty()
-  addEntry(entryModel: IPasswordEntry) {
-    if (entryModel.id) {
-      const catalogData = this.findRow(this.groups[0], entryModel.id);
-      const entryIdx = catalogData.findIndex(p => p.id === entryModel.id);
-      catalogData[entryIdx] = {...entryModel, id: uuidv4()}; // update id for entries table change detection
-      this.selectedPasswords = [catalogData[entryIdx]];
+  async addEntry(entry: IPasswordEntry): Promise<void> {
+    if (!this.selectedCategory) {
+      this.throwCategoryNotSelectedError();
+    }
+
+    if (entry.id) {
+      await this.entryRepository.update(entry);
+      this.passwordEntries = await this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
+      this.selectedPasswords = [entry];
     } else {
-      this.selectedCategory.data.push({...entryModel, id: uuidv4()});
+      await this.entryRepository.add(entry);
+      this.passwordEntries = await this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
       this.searchService.reset();
     }
-    this.updateEntries();
   }
 
   @markDirty()
-  deleteEntry() {
-    if (this.selectedPasswords.length === 0) { // drag entry when it's not selected first
-      const catalogData = this.findRow(this.groups[0], this.draggedEntry[0].id);
-      const idx = catalogData.findIndex(e => e.id === this.draggedEntry[0].id);
-      catalogData.splice(idx, 1);
-    } else {
-      this.selectedPasswords.forEach(el => {
-        const catalogData = this.findRow(this.groups[0], el.id);
-        const idx = catalogData.findIndex(e => e.id === el.id);
-        catalogData.splice(idx, 1);
-      });
-    }
-    this.selectedPasswords = [];
-    this.updateEntries();
-  }
-
-  @markDirty()
-  setGroups(groups: TreeNode[]) {
-    this.groups = groups;
-  }
-
-  @markDirty()
-  removeGroup() {
-    const index = this.selectedCategory.parent.children.findIndex(g => g.key === this.contextSelectedCategory.key);
-    this.selectedCategory.parent.children.splice(index, 1);
-    this.selectedCategory = this.groups[0];
-  }
-
-  @markDirty()
-  renameGroup() {
-    this.isRenameModeOn = true;
-    requestAnimationFrame(() => {
-      (<HTMLInputElement>document.querySelector('.group-name-input')).focus();
-    });
-  }
-
-  @markDirty()
-  addGroup() {
-    if (!this.selectedCategory.children) {
-      this.selectedCategory.children = [];
+  async deleteEntry() {
+    if (!this.selectedCategory) {
+      this.throwCategoryNotSelectedError();
     }
   
-    this.selectedCategory.children.push(this.buildGroup('New group'));
-    this.selectedCategory.expanded = true;
+    if (this.selectedPasswords.length === 0) { // drag entry when it's not selected first
+      await this.entryRepository.delete(this.draggedEntry[0]);
+    } else {
+      await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id) as number[]);
+    }
 
-    const addedGroup = this.selectedCategory.children.slice(-1)[0];
-    this.contextSelectedCategory = addedGroup;
-    this.selectGroup({ node: addedGroup } as treeNodeEventObject);
-    this.renameGroup();
-  }
-
-  @markDirty()
-  moveUp() {
-    ArrayUtils.moveElementsLeft<IPasswordEntry>(
-      this.selectedCategory.data,
-      this.selectedPasswords,
-      nameof<IPasswordEntry>('id')
-    );
-  }
-
-  @markDirty()
-  moveDown() {
-    ArrayUtils.moveElementsRight<IPasswordEntry>(
-      this.selectedCategory.data,
-      this.selectedPasswords,
-      nameof<IPasswordEntry>('id')
-    );
-  }
-
-  @markDirty()
-  moveTop() {
-    const groupData = (this.selectedCategory.data as IPasswordEntry[]);    
-    this.selectedPasswords.forEach(element => {
-      const elIdx = groupData.findIndex(e => e.id === element.id);
-      groupData.splice(elIdx, 1);
-      groupData.unshift(element);
-    });
-  }
-
-  @markDirty()
-  moveBottom() {
-    const groupData = (this.selectedCategory.data as IPasswordEntry[]);
-    this.selectedPasswords.forEach(element => {
-      const elIdx = groupData.findIndex(e => e.id === element.id);
-      groupData.splice(elIdx, 1);
-      groupData.push(element);
-    });
-  }
-  //#endregion
-
-  selectGroup(event: treeNodeEventObject) {
-    this.selectedCategory = event.node;
-    this.selectedCategory.data = event.node.data || [];
+    this.passwordEntries = await this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
     this.selectedPasswords = [];
-    this.searchService.reset();
-    this.updateEntries();
-    document.querySelector('.password-table');
   }
 
-  saveDatabase(newPassword: string) {
-    this.electronService.ipcRenderer.send('saveFile', { passwordList: this.groups, newPassword });
-    this.setDateSaved();
+  @markDirty()
+  async moveEntry(targetGroupId: number) {
+    if (!this.selectedCategory) {
+      this.throwCategoryNotSelectedError();
+    }
+
+    this.passwordEntries = this.passwordEntries.filter(e => !this.draggedEntry.includes(e.id as number));
+    this.updateEntries();
+
+    const draggedEntries = [...this.draggedEntry];
+    await this.entryRepository.moveEntries(draggedEntries, targetGroupId);
+    this.passwordEntries = await this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
+  }
+
+  @markDirty({ updateEntries: false })
+  async removeGroup() {
+    if (!this.selectedCategory) {
+      this.throwCategoryNotSelectedError();
+    }
+
+    const groupsToDelete = [this.selectedCategory.data.id] as number[];
+    this.getGroupsRecursive(this.selectedCategory, groupsToDelete);
+
+    await this.groupRepository.bulkDelete(groupsToDelete);
+    const node = this.selectedCategory;
+    node.parent.data.children.splice(node.parent.data.children.indexOf(node.data), 1);
+    this.selectedCategory.treeModel.update();
+    this.selectedCategory.treeModel.getNodeById(1).setIsActive(true);
+  }
+
+  @markDirty({ updateEntries: false })
+  async updateGroup(group: IPasswordGroup) {
+    await this.groupRepository.update({
+      id: group.id,
+      name: group.name,
+    });
+  }
+
+  @markDirty({ updateEntries: false })
+  async moveGroup(from: TreeNode, to: TreeNode){
+    this.groupRepository.update({ ...from.data, parent: to.parent.data.id });
+  }
+
+  @markDirty({ updateEntries: false })
+  async addGroup() {
+    if (!this.selectedCategory) {
+      this.throwCategoryNotSelectedError();
+    }
+
+    if (!this.selectedCategory.data.children) {
+      this.selectedCategory.data.children = [];
+    }
+  
+    const newGroup = {
+      name: 'New group',
+      parent: this.selectedCategory.data.id
+    };
+
+    const groupId = await this.groupRepository.add(newGroup);
+
+    if (groupId > 0) {
+      const newGroupNode = {
+        id: groupId,
+        name: newGroup.name,
+      };
+
+      this.selectedCategory.data.children.push(newGroupNode);
+
+      this.selectedCategory.treeModel.update();
+      this.selectedCategory.treeModel.getNodeById(newGroupNode.id).ensureVisible();
+      this.selectedCategory.treeModel.getNodeById(newGroupNode.id).setIsActive(true);
+      this.selectedCategory = this.selectedCategory.treeModel.getNodeById(newGroupNode.id);
+
+      this.renameGroup(true);
+    }
+  }
+
+  renameGroup(value: boolean) {
+    this.renamedGroup$.next(value);
+  }
+
+  async selectGroup(event: { node: TreeNode }) {
+    this.selectedCategory = event.node;
+    this.selectedPasswords = [];
+
+    this.passwordEntries = await this.entryRepository.getAllByGroup(event.node.data.id);
+    this.searchService.reset();
+
+    this.updateEntries();
+    this.reloadedEntries$.next();
+  }
+
+  setDatabaseLoaded(): void {
+    this.loadedDatabase$.next(true);
+  }
+
+  async loadDatabase(jsonString: JSON) {
+    const db = this.dbContext.backendDB();
+
+    IDBExportImport.clearDatabase(db, (err: Error) => {
+      if (err) {
+        throw new Error('Database emptying failed.');
+      }
+  
+      IDBExportImport.importFromJsonString(db, jsonString, async (err: Error) => {
+        if (err) {
+          throw new Error('Database import failed.');
+        }
+
+        this.groups = await this.getGroupsTree();
+        this.setDatabaseLoaded();
+      });
+    });
+  }
+
+  async saveDatabase(newPassword?: string): Promise<true | Error> {
+    return new Promise((resolve, reject) => {
+      const db = this.dbContext.backendDB();
+      IDBExportImport.exportToJsonString(db, (err: Error, database: unknown) => {
+        if (err) {
+          reject(err);
+        } else {
+          this.electronService.ipcRenderer.send(IpcChannel.SaveFile, { database, newPassword });
+          resolve(true);
+        }
+      });
+    });
+  }
+
+  async clearDb() {
+    await this.dbContext.resetDb();
+    this.passwordEntries = [];
   }
 
   updateEntries() {
-    this.passwordListSource.next(this.selectedCategory.data);
-  }
-
-  moveEntry(targetGroup: string) {
-    const copy = [...this.draggedEntry];
-    this.deleteEntry();
-    const groupData = this.findRowGroup(this.groups[0], targetGroup);
-    groupData.push(...copy);
-    this.updateEntries();
+    this.passwordListSource$.next([...this.passwordEntries as IPasswordEntry[]]);
   }
 
   saveNewDatabase(newPassword: string) {
@@ -216,40 +258,71 @@ export class StorageService {
     this.dateSaved = new Date();
   }
 
-  private findRow(node: TreeNode, id?: string): IPasswordEntry[] {
-    if (!id) {
-      return node.data;
+  async setupDatabase() {
+    await this.groupRepository.bulkAdd(initialEntries);
+
+    this.groups[0] = {
+      id: 1,
+      name: 'Database',
+      expanded: true,
+      children: initialEntries.splice(1)
+    };
+
+    if (AppConfig.mocks) {
+      // eslint-disable-next-line
+      await this.entryRepository.bulkAdd(require('assets/data/mock_data.json'));
     }
-    if (node.data.find(e => e.id === id)) {
-      return node.data;
-    } else if (node.children != null) {
-      let result;
-      for (let i = 0; result == null && i < node.children.length; i++) {
-        result = this.findRow(node.children[i], id);
-      }
-      return result;
-    }
-  }
-  
-  private findRowGroup(node: TreeNode, targetGroupKey: string): IPasswordEntry[] {
-    if (node.key === targetGroupKey) {
-      return node.data;
-    } else if (node.children != null) {
-      let result;
-      for (let i = 0; result == null && i < node.children.length; i++) {
-        result = this.findRowGroup(node.children[i], targetGroupKey);
-      }
-      return result;
-    }
+
+    this.setDateSaved();
   }
 
-  private buildGroup(title: string): TreeNode {
-    return {
-      key: uuidv4(),
-      label: title,
-      data: [],
-      collapsedIcon: 'pi pi-folder',
-      expandedIcon: 'pi pi-folder-open'
-    };
+  private getSearchResults$([passwords, searchPhrase]: GetSearchResultsModel): Observable<SearchResultsModel> {
+    if (this.isGlobalSearch) {
+      return from(this.entryRepository.getSearchResults(searchPhrase))
+        .pipe(map((searchResults) => ({ passwords, searchPhrase, searchResults })));
+    }
+    
+    return of({ passwords, searchPhrase, searchResults: []});
+  }
+
+  private getGroupsRecursive(node: TreeNode, groups: number[]): number[] {
+    if (!node.children?.length) {
+      return [];
+    }
+
+    groups.push(...node.children.map(c => c.id));
+    node.children.forEach((child) => {
+      const a = this.getGroupsRecursive(child, groups);
+      groups.push(...a);
+    });
+
+    return [];
+  }
+
+  private async getGroupsTree(): Promise<IPasswordGroup[]> {
+    const allGroups = await this.groupRepository.getAll();
+    this.groups[0] = allGroups.find(g => g.id === 1) as IPasswordGroup;
+    this.groups[0].expanded = true;
+
+    this.buildGroupsTree(this.groups[0], allGroups);
+
+    return this.groups;
+  }
+
+  private buildGroupsTree(group: IPasswordGroup, groups: IPasswordGroup[]) {
+    const children = groups.filter(g => g.parent === group.id);
+
+    if (!children.length) {
+      return;
+    }
+
+    group.children = children;
+    group.children.forEach(child => {
+      this.buildGroupsTree(child, groups);
+    });
+  }
+
+  private throwCategoryNotSelectedError(): never {
+    throw new Error('No category has been selected.');
   }
 }

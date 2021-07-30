@@ -1,9 +1,12 @@
-import { ChangeDetectionStrategy, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ModalService } from '@app/core/services/modal.service';
 import { CoreService } from '@app/core/services/core.service';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng-lts/dynamicdialog';
+import { IpcChannel } from '@shared-models/*';
+import { IAdditionalData, IModal } from '@app/shared';
+import { EventType } from '@app/core/enums';
 
 @Component({
   selector: 'app-master-password-dialog',
@@ -11,15 +14,18 @@ import { DynamicDialogConfig, DynamicDialogRef } from 'primeng-lts/dynamicdialog
   styleUrls: ['./master-password-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MasterPasswordDialogComponent implements OnInit, OnDestroy {
+export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal {
   public readonly minPasswordLength = 6;
 
   public masterPasswordForm: FormGroup;
-  public handler: (_, { status, message, file }) => void;
-
+  public handler: (_: Electron.IpcRendererEvent, { status, message, file }: {status: boolean, message: string, file: unknown}) => void;
+  
+  public readonly ref!: ComponentRef<MasterPasswordDialogComponent>;
+  public readonly additionalData!: IAdditionalData;
+  
   get passwordsNotMatch(): boolean {
-    return this.masterPasswordForm.get('newPassword').value 
-      !== this.masterPasswordForm.get('newPasswordDuplicate').value;
+    return this.masterPasswordForm.get('newPassword')?.value 
+      !== this.masterPasswordForm.get('newPasswordDuplicate')?.value;
   }
 
   constructor(
@@ -27,29 +33,29 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private storageService: StorageService,
     private electronService: ElectronService,
-    private ref: DynamicDialogRef,
-    private config: DynamicDialogConfig,
-    private coreService: CoreService
-  ) { }
-
-  ngOnInit(): void {
+    private coreService: CoreService,
+    private modalService: ModalService
+  ) { 
     this.masterPasswordForm = this.fb.group({
       newPassword: ['', Validators.required],
       newPasswordDuplicate: ['', Validators.required]
     });
 
-    this.handler = (_, { status})  => {
+    this.handler = (_, { status })  => {
       this.zone.run(() => {
         if (status) {
-          this.ref.destroy();
-          if (this.config.data) {
-            this.coreService.execute(this.config.data.event, this.config.data.payload);
+          if (typeof this.additionalData?.event !== 'undefined' && this.additionalData?.event !== null) {
+            this.coreService.execute(this.additionalData.event as EventType, this.additionalData.payload);
           }
+          
+          this.close();
         }
       });
     };
+  }
 
-    this.electronService.ipcRenderer.on('saveStatus', this.handler);
+  ngOnInit(): void {
+    this.electronService.ipcRenderer.on(IpcChannel.GetSaveStatus, this.handler);
   }
 
   ngOnDestroy(): void {
@@ -65,7 +71,7 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.storageService.saveNewDatabase(this.masterPasswordForm.get('newPassword').value);
+    this.storageService.saveNewDatabase(this.masterPasswordForm.get('newPassword')?.value);
   }
 
   resetNewPasswordForm() {
@@ -73,6 +79,6 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy {
   }
 
   close() {
-    this.ref.close();
+    this.modalService.close(this.ref);
   }
 }

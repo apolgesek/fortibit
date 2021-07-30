@@ -52,4 +52,4 @@ encryption/*.map
 # System Files
 .DS_Store
 Thumbs.db
-post-release/*
+main/services/native-api/fbitnative/build/*

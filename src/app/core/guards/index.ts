@@ -1,1 +1,1 @@
-export * from './auth-required.resolver';
+export * from './initial-route.guard';

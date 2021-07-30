@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthRequiredResolver } from '../core/guards/auth-required.resolver';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { EntriesTableComponent } from './components/entries-table/entries-table.component';
 import { MasterPasswordComponent } from './components/master-password/master-password.component';
+import { InitialRouteGuard } from '../core/guards/initial-route.guard';
 
 const routes: Routes = [
   {
@@ -14,18 +13,13 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
-    canActivate: [AuthRequiredResolver],
-    children: [
-      {
-        path: '',
-        component: EntriesTableComponent
-      },
-    ]
+    canActivate: [InitialRouteGuard]
   }
 ];
 
 @NgModule({
   declarations: [],
+  providers: [InitialRouteGuard],
   imports: [ CommonModule, RouterModule.forChild(routes) ],
   exports: [ RouterModule ]
 })

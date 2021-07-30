@@ -1,0 +1,61 @@
+@import "variables";
+@import "mixins";
+
+:host {
+	display: block;
+	height: calc(100vh - 7rem);
+	width: 16rem;
+	background-color: $white;
+	position: fixed;
+	z-index: 2;
+	right: 0;
+	font-size: 0.8rem;
+	overflow: auto;
+	border-left: 1px solid $silver;
+
+	@include scrollbar;
+}
+
+.details-container {
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	transition: background-color 50ms;
+
+	.header {
+		padding-top: 0.5rem;
+	}
+
+	i {
+		color: $curious-blue;
+		cursor: pointer;
+		margin-left: 0.3rem;
+	}
+
+	&.db {
+		background-color: #f1f3f4;
+	}
+
+	> div:not(.header) {
+		padding: 0 1rem;
+
+		.section {
+			margin: 1rem 0;
+			word-break: break-all;
+		}
+
+		p {
+			margin: 0.25rem 0;
+		}
+
+		.label {
+			color: rgb(107, 107, 107);
+		}
+	}
+}
+
+.version {
+	color: darken($silver, 10%);
+	user-select: none;
+}

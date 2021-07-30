@@ -1,6 +1,6 @@
 # Haslock
 
-Haslock is a multiplatform desktop password manager built with Electron.js and Angular framework. It encrypts passwords database with 256-bit AES key cipher, preventing unauthorized access.
+Fortibit is a multiplatform desktop password manager built with Electron.js and Angular framework. It encrypts passwords database with 256-bit AES key cipher, preventing unauthorized access.
 ## Installation
 
 Run .exe file on Windows or .dmg file on macOS to install the app.
