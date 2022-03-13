@@ -1,0 +1,109 @@
+
+<app-modal>
+  <div
+    data-prevent-entry-deselect
+    class="dialog-header">
+    <h2>{{ header }}</h2>
+    <span
+      class="close-dialog"
+      (click)="close()">&times;
+    </span>
+  </div>
+  <form
+    data-prevent-entry-deselect
+    id="entry-form"
+    (submit)="addNewEntry()"
+    [formGroup]="newEntryForm">
+    <div>
+      <div class="inputgroup">
+        <span class="inputgroup-addon"><i class="pi pi-bookmark"></i></span>
+        <input
+          type="text"
+          id="entry-title"
+          appAutofocus
+          formControlName="title"
+          placeholder="Title">   
+      </div>
+      <div
+        class="inputgroup required"
+        [ngClass]="{'ng-invalid': isControlInvalid(newEntryForm.get('username'))}">
+        <span class="inputgroup-addon"><i class="pi pi-user"></i></span>
+        <input
+          type="text"
+          id="entry-username"
+          formControlName="username"
+          placeholder="Username (required)">         
+      </div>
+      <div
+        *ngIf="isControlInvalid(newEntryForm.get('username'))"
+        class="validation-error">
+        Username is required
+      </div>
+      <ng-container formGroupName="passwords">
+        <div
+          class="inputgroup required"
+          [ngClass]="{'ng-invalid': isControlInvalid(passwordsGroup.get('password'))}">
+          <span class="inputgroup-addon"><i class="pi pi-key"></i></span>
+          <input
+            type="password"
+            id="entry-password"
+            class="password"
+            formControlName="password"
+            placeholder="Password (required)"
+            (input)="onPasswordChange($event)">
+            <div class="password-strength">
+            <div
+              [ngClass]="{'active': passwordLength > 0}"
+              [class]="passwordScore >= 0 ? 'text s-' + passwordScore : 'text'">
+              {{ textDescription }}
+            </div>
+          </div> 
+        </div>
+        <div
+          *ngIf="isControlInvalid(passwordsGroup.get('password'))"
+          class="validation-error">
+          Password is required
+        </div>
+        <div
+          class="inputgroup required">
+          <span class="inputgroup-addon"><i class="pi pi-replay"></i></span>
+          <input
+            type="password"
+            id="entry-password-r"
+            formControlName="repeatPassword"
+            placeholder="Repeat password (required)">
+        </div>
+        <div
+          *ngIf="isControlInvalid(passwordsGroup)"
+          class="validation-error">
+          Passwords must match
+        </div>
+      </ng-container>
+      <div class="inputgroup">
+        <div class="inputgroup-addon"><i class="pi pi-globe"></i></div>
+        <input
+          type="text"
+          id="entry-website"
+          formControlName="url"
+          placeholder="Website">      
+      </div>
+      <div class="inputgroup">
+        <div class="inputgroup-addon"><i class="pi pi-info-circle"></i></div>
+        <textarea
+          formControlName="notes"
+          id="entry-note"
+          placeholder="Note"
+          rows="5">
+        </textarea>     
+      </div>
+    </div>
+    <div class="footer-container">
+      <button
+        type="submit"
+        id="entry-submit"
+        class="primary-btn">
+        Confirm
+      </button>
+    </div>
+  </form>
+</app-modal>

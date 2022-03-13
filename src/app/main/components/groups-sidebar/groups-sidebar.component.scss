@@ -1,0 +1,182 @@
+@import "mixins";
+
+:host {
+  display: block;
+  position: relative;
+  width: 16rem;
+  z-index: 0;
+
+  ::ng-deep {
+    tree-node-drop-slot {
+      display: none;
+    }
+
+    .toggle-children {
+      font-family: 'primeicons';
+      background-image: none;
+      backface-visibility: hidden;
+      width: 14px;
+      height: 14px;
+      margin-top: 3px;
+      &::before {
+        display: flex;
+        content: '\e901';
+        margin-right: 0.5rem;
+      }
+    }
+
+    .toggle-children-wrapper-expanded {
+      .toggle-children {
+        transform: none;
+        &::before {
+          content: '\e902';
+        }
+      }
+    }
+  
+    tree-viewport {
+      display: flex;
+      height: 100%;
+      @include scrollbar;
+
+      > div {
+        padding-top: 0.6rem;
+        margin-left: 0.6rem;
+      }
+    }
+  
+    tree-root {
+      height: calc(100vh - 11.3rem);
+
+      &.tree-focused .tree-node .node-content-wrapper-focused {
+        border: 1px solid #a3cae6;
+      }
+  
+      .tree-node {
+        color: $grey;
+        font-size: 0.9rem;
+
+        .node-wrapper {
+          align-items: center;
+        }
+
+        .node-content-wrapper {
+          min-width: 10rem;
+          padding: 0;
+          margin: 0;
+          box-shadow: none;
+          transition: background-color 50ms;
+          border: 1px solid #fff;
+          
+          &:hover:not(.node-content-wrapper-focused) {
+            background-color: #f8f8f8;
+          }
+
+          &-active, &-focused {
+            box-shadow: none;
+            background-color: #e3f2fd;
+          }
+
+          .node-group-name {
+            padding: 5px;
+          }
+        }
+      }
+    }
+  }
+
+  &:hover {
+    .handle {
+      background: #ededed;
+    }
+  }
+}
+
+.sidebar {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .header {
+    .file {
+      flex: 1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      height: inherit;
+    }
+
+    .quick-actions {
+      display: none;
+      font-size: 1.2rem;
+
+      button {
+        background-color: #fff;
+        border: 0;
+        width: 24px;
+        color: $curious-blue;
+        cursor: pointer;
+        transition: 50ms color;
+        &:hover {
+          color: $grey;
+        }
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+
+  &:hover {
+    .header .quick-actions {
+      display: block;
+    }
+  }
+
+  .group-info {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+    background-color: $white;
+    border-top: 1px solid $silver;
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    user-select: none;
+
+    div {
+      border-right: 1px solid $silver;
+      margin: 0 4px;
+      padding: 0 2px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      width: 20%;
+
+      &:first-child {
+        justify-content: flex-start;
+        flex: 1;
+      }
+
+      &:last-child {
+        border: 0;
+      }
+    }
+  }
+
+  .rename-group {
+    @include font-regular;
+    width: 9.5rem;
+    border: none;
+    background-color: #E3F2FD;
+    padding: 5px;
+    font-size: 0.9rem;
+    color: $grey;
+  }
+}
+
+.pi-download {
+  margin-right: 0.4rem;
+}

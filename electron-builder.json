@@ -1,0 +1,48 @@
+{
+  "asar": false,
+  "productName": "fortibit",
+  "directories": {
+    "output": "release/"
+  },
+  "files": [
+    "**/*",
+    "!**/*.ts",
+    "!*.map",
+    "!package.json",
+    "!package-lock.json",
+    "!**/mock_data.json",
+    "!.vscode",
+    "!.github",
+    "!build",
+    "!release",
+    "!release-scripts",
+    "!src",
+    "!e2e",
+    "!.angular",
+    "!*.md",
+    "!*.json",
+    "!.gitignore",
+    "!.editorconfig",
+    "product.json"
+  ],
+  "extraResources": [
+    {
+      "from": "dist",
+      "to": "app",
+      "filter": [
+        "**/*"
+      ]
+    }
+  ],
+  "mac": {
+    "target": [
+      "dmg"
+    ]
+  },
+  "linux": {
+    "icon": "dist",
+    "target": [
+      "AppImage"
+    ]
+  }
+}
