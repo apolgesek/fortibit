@@ -1,0 +1,29 @@
+<app-modal>
+  <div
+    data-prevent-entry-deselect
+    class="dialog-header">
+    <h2>Remove group</h2>
+    <span class="close-dialog" (click)="close()">&times;</span>
+  </div>
+  <div
+    data-prevent-entry-deselect
+    class="dialog-message">
+    Are you sure you want to remove this group?
+  </div>
+  <div
+    data-prevent-entry-deselect
+    class="footer-container">
+    <button
+      type="button"
+      class="text-btn"
+      (click)="close()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="primary-btn"
+      (click)="removeGroup()">
+      Remove
+    </button>
+  </div>
+</app-modal>

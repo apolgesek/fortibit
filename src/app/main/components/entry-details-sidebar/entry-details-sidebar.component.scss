@@ -1,0 +1,54 @@
+@import "mixins";
+
+:host {
+	position: relative;
+	display: block;
+	height: calc(100vh - 7rem);
+	width: 16rem;
+	background-color: $white;
+	border-left: 1px solid $silver;
+	font-size: 0.8rem;
+	z-index: 0;
+
+	@include scrollbar;
+}
+
+.details-container {
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	transition: background-color 50ms;
+
+	i {
+		color: $curious-blue;
+		cursor: pointer;
+		margin-left: 0.3rem;
+	}
+
+	&.database-summary {
+		background-color: #f1f3f4;
+	}
+
+	> div:not(.header) {
+		padding: 0 1rem;
+
+		.section {
+			margin: 1rem 0;
+			word-break: break-all;
+		}
+
+		p {
+			margin: 0.25rem 0;
+		}
+	}
+}
+
+.section {
+	margin: 0.5rem 0;
+	color: $grey-text;
+}
+
+.new-update {
+	font-size: 0.8rem;
+}

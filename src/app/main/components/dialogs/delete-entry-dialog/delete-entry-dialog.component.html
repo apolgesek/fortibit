@@ -1,0 +1,36 @@
+<app-modal>
+  <div
+    data-prevent-entry-deselect
+    class="dialog-header">
+    <h2>Remove entry</h2>
+    <span class="close-dialog" (click)="close()">&times;</span>
+  </div>
+  <div
+    data-prevent-entry-deselect
+    class="dialog-message">
+    <ng-container *ngIf="selectedRowsCount === 1; else multiRemove">
+      Are you sure you want to remove this entry?
+    </ng-container>
+    <ng-template #multiRemove>
+      Are you sure you want to remove <strong>{{ selectedRowsCount }}</strong> entries?
+    </ng-template>
+  </div>
+  <div
+    data-prevent-entry-deselect
+    class="footer-container">
+    <button
+      type="button"
+      class="text-btn"
+      (click)="close()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      appAutofocus
+      id="entry-remove"
+      class="primary-btn"
+      (click)="deleteEntry()">
+      Remove
+    </button>
+  </div>
+</app-modal>

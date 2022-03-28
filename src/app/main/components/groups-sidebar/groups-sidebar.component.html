@@ -1,0 +1,47 @@
+<div class="sidebar">
+	<div class="header blur-groups">
+		<div class="file">{{ fileName }}</div>
+		<div class="quick-actions">
+			<button (click)="addGroup(); false"><span class="pi pi-plus"></span></button>
+			<button (click)="collapseAll(); false"><span class="pi pi-angle-double-up"></span></button>
+		</div>
+	</div>
+	<tree-root
+		[nodes]="groups"
+		[options]="treeOptions"
+		[focused]="true"
+		(focus)="selectGroup($event)"
+		class="tree-focused">
+	  <ng-template #treeNodeTemplate let-node let-index="index">
+			<ng-container *ngIf="(isGroupRenamed$ | async) && selectedGroup?.data.id === node.data.id; else groupName">
+				<input
+					type="text"
+					appBlurEnter
+					appAutofocus
+					[(ngModel)]="node.data.name"
+					[ngModelOptions]="{'updateOn': 'blur'}"
+					(blur)="setGroupRenameModeOff(node)"
+					maxlength="20"
+					class="rename-group"/>
+			</ng-container>
+			<ng-template #groupName>
+				<div
+					[appContextMenuItem]="node.data.id === rootNodeId ? groupContextMenuRoot : groupContextMenuItems"
+					class="node-group-name">
+					<span *ngIf="node.data.isImported" class="pi pi-download"></span>
+					{{ node.data.name }}
+				</div>
+			</ng-template>
+		</ng-template>
+	</tree-root>
+	<div *ngIf="selectedGroup" class="blur-groups group-info">
+		<div class="group-name">{{ selectedGroup.data.name }}</div>
+		<div>S: {{ selectedEntries.length }}</div>
+		<div>T: {{ passwordEntries.length }}</div>
+	</div>
+</div>
+
+<div
+	appSidebarHandle
+	position="right">
+</div>

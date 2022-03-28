@@ -1,0 +1,150 @@
+@import "mixins";
+
+$sidePanelInDuration: 300ms;
+$sidePanelOutDuration: 250ms;
+
+:host {
+	flex: 1;
+	height: calc(100% - 7rem);
+	display: flex;
+	overflow: auto;
+	overflow-y: hidden;
+	position: relative;
+
+	@include scrollbar;
+
+	.table-viewport {
+		height: calc(100vh - 9.2rem);
+		@include scrollbar;
+	}
+
+	::ng-deep {
+		.p-selectable-row {
+			outline: none;
+		}
+	}
+}
+
+.password-table {
+	min-width: 25rem;
+	width: 100%;
+
+	@include font-regular;
+
+	.row-entry {
+		font-size: 0.8rem;
+		cursor: pointer;
+		@include default-table-row;
+
+		&:focus,
+		&:hover {
+			@include default-table-row;
+		}
+
+		&.selected {
+			background-color: #C2DBFF;
+			&:hover {
+				background-color: #C2DBFF;
+			}
+		}
+
+		&:hover {
+			background-color: #ededed;
+		}
+
+		.column {
+			width: calc((100% / 3) - 0.2rem);
+			padding: 0.5rem;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+
+			&:first-child {
+				padding-left: 1rem;
+			}
+
+			padding-left: 0;
+		}
+	}
+
+	#table-header {
+		display: flex;
+		width: 100%;
+		background-color: $white;
+		user-select: none;
+		font-size: 0.9rem;
+		border-bottom: 1px solid $silver;
+		min-height: 2.3rem;
+		position: relative;
+		z-index: 1;
+
+		div {
+			display: flex;
+			color: $grey;
+			width: calc((100% / 3) - 0.2rem);
+			align-items: center;
+			text-align: left;
+			cursor: pointer;
+
+			&:first-child {
+				border-left: 0;
+				padding-left: 1rem;
+			}
+
+			&:last-child {
+				cursor: default;
+			}
+
+			i {
+				margin-left: 0.5rem;
+			}
+		}
+	}
+
+	@include scrollbar;
+}
+
+.list-cta {
+	text-align: center;
+	margin-top: 5rem;
+	color: $grey-text;
+	font-size: 1.2rem;
+	user-select: none;
+
+	a {
+		font-size: 0.9rem;
+	}
+}
+
+.table-body {
+	height: 100%;
+}
+
+.group-separator {
+	display: flex;
+	padding: 0.5rem 1rem;
+	align-items: center;
+	font-size: 0.9rem;
+	color: #777;
+
+	span {
+		margin-right: 0.6rem;
+	}
+}
+
+.outline-btn {
+	transition: background-color 50ms;
+	border-radius: 4px;
+	padding: 0.5rem;
+
+	&:hover {
+		background-color: rgba($silver, 0.3);
+	}
+}
+
+.results-badge {
+	background: #f1f3f4;
+	font-size: 12px;
+	padding: 0.5rem 1rem;
+	z-index: 0;
+}

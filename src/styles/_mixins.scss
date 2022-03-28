@@ -1,0 +1,66 @@
+@import 'variables';
+
+@font-face {
+	font-family: 'open_sans';
+	src: url('~assets/fonts/open_sans.woff2') format('woff2'),
+	url('~assets/fonts/open_sans.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'open_sans';
+	src: url('~assets/fonts/open_sans_bold.woff2') format('woff2'),
+	url('~assets/fonts/open_sans_bold.woff') format('woff');
+	font-weight: bold;
+}
+
+@mixin font-regular {
+  font-family: "open_sans", Verdana, Geneva, Tahoma, sans-serif;
+}
+
+@mixin font-bold {
+  font-family: "open_sans", Verdana, Geneva, Tahoma, sans-serif;
+  font-weight: bold;
+}
+
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    -webkit-appearance: none;
+  }
+  
+  &::-webkit-scrollbar{
+    height: 8px;
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: #999;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #dedede;
+  }
+}
+
+@mixin default-table-row {
+  display: flex;
+  box-shadow: none;
+  outline: none;
+  transition: all 50ms;
+  user-select: none;
+  
+  > div {
+    box-shadow: none !important;
+    outline: none !important;
+    user-select: none;
+  }
+}
+
+@mixin toolbar-btn {
+  @include font-regular;
+  position: relative;
+  transition: all 200ms ease-in-out;
+
+	&:hover:not(:disabled) {
+    background: $curious-blue-light;
+  }
+}

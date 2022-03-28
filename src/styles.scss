@@ -1,0 +1,418 @@
+/* You can add global styles to this file, and also import other style files */
+@import "mixins";
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+	background-color: $white;
+	@include font-regular;
+}
+
+input,
+textarea {
+	@include font-regular;
+}
+
+a {
+	text-decoration: none;
+}
+
+.loader {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	margin: 0;
+	top: 0;
+	left: 0;
+	z-index: 999;
+	background-color: $white;
+
+	svg {
+		display: block;
+		position: relative;
+		top: 40%;
+		left: calc(50% - 3em);
+	}
+}
+
+button {
+	user-select: none;
+}
+
+button,
+a {
+	&:focus {
+		color: $silver;
+	}
+}
+
+input,
+button,
+a {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+.primary-btn {
+	@include font-regular;
+	border: 0;
+	padding: 0.35rem 0.5rem;
+	border-radius: 4px;
+	font-size: 1rem;
+	color: $curious-blue;
+	background: $white;
+	width: auto;
+	border: 1px solid $curious-blue;
+	transition: all 150ms;
+	cursor: pointer;
+
+	&:hover {
+		background-color: $curious-blue-light;
+	}
+
+	&:focus {
+		color: $curious-blue;
+	}
+
+	&:disabled {
+		background-color: $silver;
+
+		&:hover {
+			box-shadow: none !important;
+		}
+	}
+}
+
+.text-btn {
+	@include font-regular;
+	color: $curious-blue;
+	margin: 0 0.5rem;
+	padding: 0.5rem;
+	border: 1px solid transparent;
+	font-size: 0.9rem;
+	border-radius: 4px;
+	transition: background-color 50ms;
+	letter-spacing: 1px;
+	background-color: $white;
+	cursor: pointer;
+
+	&:hover {
+		background-color: rgb(245, 245, 245);
+	}
+
+	&:focus {
+		color: $curious-blue;
+	}
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	position: relative;
+	z-index: 2;
+	padding: 0 0.6rem;
+	color: $grey;
+	font-size: 0.9rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	min-height: 2.3rem;
+	user-select: none;
+	border-bottom: 1px solid $silver;
+}
+
+.validation-error {
+	color: $bright-red;
+	font-size: 0.8rem;
+	margin-left: 1.5rem;
+}
+
+.footer-container {
+	display: flex;
+	justify-content: flex-end;
+	margin: 1rem 0;
+}
+
+.dialog-message {
+	padding: 1rem 0;
+	font-size: 0.8rem;
+}
+
+.dialog-header {
+	display: flex;
+	align-items: center;
+	margin: 0;
+	padding: 0;
+	user-select: none;
+
+	h2 {
+		@include font-bold;
+		margin: 0;
+		font-size: 1rem;
+		flex: 1;
+	}
+
+	.close-dialog {
+		color: darken($silver, 30%);
+		font-size: 1.8rem;
+		font-weight: bold;
+		cursor: pointer;
+		transition: color 100ms;
+
+		&:hover {
+			color: darken($silver, 60%);
+		}
+	}
+}
+
+.d-none {
+	display: none;
+}
+
+.entry-contextmenu {
+	width: 10rem;
+}
+
+.label {
+	user-select: none;
+}
+
+.dropbtn {
+	@include font-regular;
+
+	display: flex;
+	align-items: center;
+  background-color: #fff;
+	height: 2.2rem;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+	color: #919191;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	transition: color 100ms;
+	width: auto;
+	padding: 0 0.5rem 0;
+	justify-content: flex-start;
+
+	&:hover, &.active {
+		background: #f1f3f4;
+		color: $grey;
+	}
+
+	&.active {
+		border-bottom-right-radius: 0;
+	}
+
+	.pi {
+		margin-left: 0.5rem;
+	}
+}
+
+a.dropbtn {
+	height: auto;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+
+	&.open {
+		button, a {
+			border-bottom-right-radius: 0;
+		}
+	}
+}
+
+.dropdown-content {
+  position: absolute;
+	right: 0;
+  background-color: #fff;
+  width: 5rem;
+	box-shadow: -1px 1px 2px 1px rgba(0, 0, 0, 0.12);
+  z-index: 9999;
+
+	.divider {
+		padding: 4px;
+
+		hr {
+			margin: 0;
+			border: 0;
+			border-top: 1px solid $silver;
+		}
+	}
+
+	a {
+		color: black;
+		padding: 0.5rem;
+		text-decoration: none;
+		display: block;
+		color: $grey;
+		font-size: 0.9rem;
+
+		&.focused {
+			background: #f1f3f4;
+		}
+	}
+}
+
+.show {
+	display:block;
+}
+
+.modal {
+	top: 0;
+	left: 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+
+	.modal-body {
+		background: #fff;
+		min-width: 600px;
+		padding: 20px;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translateY(-50%) translateX(-50%);
+		z-index: 1000;
+		border-radius: 3px;
+	}
+}
+	
+.modal-background {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.6);
+	backdrop-filter: url('#blur-shadow');
+	z-index: 999;
+}
+
+.node-content-wrapper-active:not(.node-content-wrapper-focused):not(:hover) {
+	background: #fff !important;
+}
+
+.is-unknown-element-dragging {
+	background: #fff !important;
+}
+
+.dropdown-content {
+	width: 200px;	
+	padding-top: 4px;
+	padding-bottom: 4px;
+	position: absolute;
+
+	&.left {
+		left: 0;
+	}
+
+	&.right {
+		right: 0;
+	}
+
+	.disabled {
+		color: $grey-80;
+		cursor: default;
+
+		&:hover {
+			background-color: $white;
+		}
+	}
+}
+
+.inputgroup {
+	margin: 0.5rem 0;
+	display: flex;
+	box-sizing: border-box;
+	position: relative;
+
+	&.checkbox {
+		align-items: center;
+	}
+
+	input[type='text'], input[type='password'], textarea {
+		border: 0;
+		border-bottom: 1px solid #c4c4c4;
+		width: 100%;
+		background: transparent;
+		padding: 0.5rem;
+		padding-left: 1.5rem;
+		z-index: 1;
+		outline: none;
+	}
+}
+
+.inputgroup-addon {
+	position: absolute;
+	border: 0;
+	background-color: transparent;
+	color: $grey;
+	z-index: 0;
+	margin-top: 6px;
+}
+
+.handle {
+  position: absolute;
+  top: 0;
+	right: 0;
+  min-width: $sidebar-width;
+  display: flex;
+  height: 100%;
+  z-index: 990;
+	justify-content: flex-end;
+	transition: background-color 50ms;
+	cursor: w-resize;
+
+	&::after {
+		content: '';
+		width: 0.75px;
+		background-color: $silver;
+		opacity: 1;
+	}
+
+	&:hover {
+		animation-name: active-sidebar;
+    animation-delay: 600ms;
+    animation-timing-function: ease-in-out 100ms;
+    animation-fill-mode: forwards; 
+
+		&::after {
+			opacity: 0;
+			transition-delay: 600ms;
+		}
+	}
+
+	&.active {
+		background-color: $curious-blue;
+    width: 4px;
+
+		&::after {
+			display: none;
+		}
+	}
+}
+
+.is-dragging {
+	opacity: 0.5;
+}
+
+.settings-modal {
+	height: 460px;
+}
+
+@keyframes active-sidebar {
+  0% {
+    background-color: transparent;
+  }
+  100% {
+    background-color: $curious-blue;
+    width: 4px;
+  }
+}

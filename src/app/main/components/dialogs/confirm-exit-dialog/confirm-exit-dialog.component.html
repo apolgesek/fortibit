@@ -1,0 +1,29 @@
+<app-modal>
+  <div class="dialog-header">
+    <h2>Quit fortibit</h2>
+    <span class="close-dialog" (click)="close()">&times;</span>
+  </div>
+  <div class="dialog-message">
+    Are you sure you want to quit? There are unsaved changes.
+  </div>
+  <div class="footer-container">
+    <button
+      type="button"
+      class="text-btn"
+      (click)="saveChanges()">
+      Save
+    </button>
+    <button
+      type="button"
+      class="text-btn"
+      (click)="executeTask()">
+      Don't save
+    </button>
+    <button
+      type="button"
+      class="primary-btn"
+      (click)="close()">
+      Cancel
+    </button>
+  </div>
+</app-modal>

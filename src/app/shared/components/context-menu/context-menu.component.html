@@ -1,0 +1,13 @@
+<div
+  *ngIf="model"
+  data-prevent-entry-deselect
+  class="context-menu">
+  <ul class="items-list">
+    <li
+      *ngFor="let item of model"
+      [ngClass]="{'separator': item.separator, 'disabled': item.disabled}"
+      (click)="!item.disabled && item.command && item.command($event)">
+      {{ item.label }}
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,92 @@
+<ng-template #saveFileTemplate>
+  <div class="change-password">
+    <div>
+      <p>To change your password you need to set it up first.</p>
+      <app-master-password-setup [additionalData]="additionalData"></app-master-password-setup>
+    </div>
+  </div>
+</ng-template>
+
+<app-modal bodyClass="settings-modal">
+  <div
+    data-prevent-entry-deselect
+    class="dialog-header">
+    <h2>Database settings</h2>
+    <span class="close-dialog" (click)="close()">&times;</span>
+  </div>
+  <div data-prevent-entry-deselect class="dialog-message">
+    <ul>
+      <li>
+        <button type="button" class="text-btn" [ngClass]="{'active': currentTab === tabs.Encryption}"
+          (click)="setTab(tabs.Encryption)">
+          <span class="pi pi-shield"></span> Encryption
+        </button>
+        <button type="button" class="text-btn" [ngClass]="{'active': currentTab === tabs.Compression}"
+          (click)="setTab(tabs.Compression)">
+          <span class="pi pi-file-o"></span> Compression
+        </button>
+      </li>
+    </ul>
+    <div class="template-container">
+        <div [ngSwitch]="currentTab">
+          <div *ngSwitchCase="tabs.Encryption">
+            <form
+              *ngIf="passwordFormEnabled; else saveFileTemplate"
+              [formGroup]="passwordForm"
+              (submit)="savePassword()">
+              <div class="inputgroup">
+                <input
+                  type="password"
+                  formControlName="currentPassword"
+                  placeholder="Current password">      
+              </div>
+              <div
+                *ngIf="isControlInvalid(passwordForm.get('currentPassword'))"
+                class="validation-error">
+                Password is incorrect
+              </div>
+              <ng-container formGroupName="newPasswords">
+                <div class="inputgroup">
+                  <input
+                    type="password"
+                    formControlName="password"
+                    placeholder="New password">      
+                </div>
+                <div
+                  *ngIf="isControlInvalid(passwordsGroup.get('password'))"
+                  class="validation-error">
+                  Password must be at least 6 characters long
+                </div>
+                <div class="inputgroup">
+                  <input
+                    type="password"
+                    formControlName="repeatPassword"
+                    placeholder="New password">      
+                </div>
+                <div
+                  *ngIf="isControlInvalid(passwordsGroup)"
+                  class="validation-error">
+                  Passwords must match
+                </div>
+              </ng-container>
+              <button type="submit" class="primary-btn save">Save</button>
+            </form>
+          </div>
+          <div *ngSwitchCase="tabs.Compression">
+            <form [formGroup]="compressionForm">
+              <div class="inputgroup checkbox">
+                Enable gzip compression:
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    (change)="onCompressionChange()"
+                    formControlName="compression">
+                    <span class="slider"></span>
+                </label>    
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+  </div>
+</app-modal>

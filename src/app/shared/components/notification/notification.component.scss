@@ -1,0 +1,56 @@
+@import 'variables';
+
+:host {
+	display: block;
+	width: 14rem;
+	height: 5rem;
+	transform: translateY(80px);
+	bottom: 0;
+	right: 1rem;
+	position: absolute;
+	font-size: 0.9rem;
+	z-index: 99;
+	background-color: $white;
+	cursor: pointer;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+
+	.toast-body {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		height: 100%;
+	}
+
+	.message {
+		padding-left: 0.5rem;
+	}
+
+	&.success {
+		color: $keppel;
+		border-color: $keppel;
+		border-left: 2px solid $keppel;
+
+		.seconds-left {
+			background: $keppel;
+		}
+	}
+
+	&.error {
+		color: $bright-red;
+		border-color: $bright-red;
+		border-left: 2px solid $bright-red;
+
+		.seconds-left {
+			background: $bright-red;
+		}
+	}
+
+	.seconds-left {
+		min-width: 2rem;
+		text-align: center;
+		padding: 0.2rem 0;
+		color: $white;
+		border-top-left-radius: 3px;
+		border-bottom-left-radius: 3px;
+	}
+}

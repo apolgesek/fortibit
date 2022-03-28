@@ -1,0 +1,23 @@
+
+<app-modal>
+  <div class="dialog-header">
+    <h2>About fortibit</h2>
+    <span class="close-dialog" (click)="close()">&times;</span>
+  </div>
+  <div>
+    <ul>
+      <li>Version: {{ config.version }} ({{ config.commit }})</li>
+      <li>Electron version: {{ config.electronVersion }}</li>
+      <li>Node version: {{ config.nodeVersion }}</li>
+      <li>OS: {{ config.os }}</li>
+    </ul>
+  </div>
+  <div class="footer-container">
+    <button
+      type="button"
+      class="primary-btn"
+      (click)="close()">
+      Close
+    </button>
+  </div>
+</app-modal>

@@ -1,0 +1,21 @@
+<app-modal>
+	<div data-prevent-entry-deselect class="dialog-header">
+		<h2>Import database</h2>
+		<span class="close-dialog" (click)="close()">&times; </span>
+	</div>
+	<div class="dialog-message">
+    <p>Database path: {{ additionalData!.payload.filePath }}</p>
+    <p>Total entries found: <strong>{{ additionalData!.payload.size }}</strong></p>
+	</div>
+	<div class="footer-container">
+    <button type="button" class="text-btn" (click)="close()">Close</button>
+    <button
+			*ngIf="additionalData!.payload.size > 0"
+			type="button"
+			class="primary-btn"
+			[disabled]="isConfirmButtonLocked"
+			(click)="confirm()">
+			Confirm
+		</button>
+	</div>
+</app-modal>

@@ -1,0 +1,49 @@
+@import "variables";
+
+:host {
+  position: absolute;
+  z-index: 9999;
+  display: block;
+  width: 200px;
+  background-color: #fff;
+  color: $grey;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+
+  &.hidden {
+    visibility: hidden;
+  }
+}
+
+.items-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    padding: 0.4rem 0.5rem;
+    color: $grey;
+    font-size: 0.8rem;
+    cursor: pointer;
+
+    &.separator {
+      border-top: 1px solid #ededed;
+      padding: 0;
+    }
+
+    &.disabled {
+      cursor: default;
+      color: $grey-80;
+
+      &:hover {
+        background-color: #fff;
+      }
+    }
+
+    &:hover {
+      background-color: #ededed;
+    }
+  }
+}

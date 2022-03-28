@@ -1,0 +1,13 @@
+<ng-container *ngIf="isDatabaseLoaded | async">
+  <app-menu-bar></app-menu-bar>
+
+  <div [@routeAnimations]="getRouteAnimationData()">
+    <router-outlet></router-outlet>
+  </div>
+</ng-container>
+
+<svg class="d-none">
+  <filter id="blur-shadow">
+    <feGaussianBlur stdDeviation="2" />
+  </filter>
+</svg>
