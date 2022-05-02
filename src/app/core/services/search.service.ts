@@ -64,8 +64,12 @@ export class SearchService implements ISearchService {
   public filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]): IPasswordEntry[] {
     if (!searchResults.length) {
       const filteredPasswords = passwords.filter(p => { 
-        return p.title?.toLowerCase().includes(phrase.toLowerCase())
-          || p.username.toLowerCase().includes(phrase.toLowerCase());
+        if (phrase.length) {
+          return p.title?.toLowerCase().includes(phrase.toLowerCase())
+          || p.username?.toLowerCase().includes(phrase.toLowerCase());
+        }
+
+        return true;
       });
 
       if (this.sortOrder === Sort.Asc) {

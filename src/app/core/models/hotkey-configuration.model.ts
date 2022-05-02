@@ -1,5 +1,8 @@
 export interface IHotkeyConfiguration {
   deleteLabel: string;
-  moveTopLabel: string;
-  moveBottomLabel: string;
+  copyPasswordLabel: string;
+  copyUsernameLabel: string;
+  removeGroupLabel: string;
+  renameGroupLabel: string;
+  addGroupLabel: string;
 }

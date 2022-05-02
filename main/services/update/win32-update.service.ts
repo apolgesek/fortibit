@@ -1,4 +1,3 @@
-import { getAppDataPath } from 'appdata-path';
 import { spawn } from 'child_process';
 import { createWriteStream, emptyDirSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync } from 'fs-extra';
 import { request } from 'https';
@@ -30,7 +29,7 @@ export class Win32UpdateService implements IUpdateService {
     @IConfigService private readonly _configService: IConfigService,
     @IWindowService private readonly _windowService: IWindowService
   ) {
-    this.updateDirectory = getAppDataPath(join(this._configService.appConfig.name.toLowerCase(), 'update'));
+    this.updateDirectory = join(app.getPath('appData'), this._configService.appConfig.name.toLowerCase(), 'update');
   }
 
   public get updateState() {

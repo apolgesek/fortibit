@@ -1,3 +1,4 @@
+@import 'variables';
 @import 'mixins';
 
 .inputgroup {
@@ -20,14 +21,14 @@
   top: 6px;
 
   .text {
+    @include font-medium;
     display: flex;
     align-items: center;
     justify-content: center;
     position: absolute;
     width: 100%;
     height: 100%;
-    font-size: 0.8rem;
-    font-weight: bold;
+    font-size: 0.875rem;
     color: $white;
 
     &.active {
@@ -40,7 +41,7 @@
       }
     
       &.s-2 {
-        color: 	#FAE442;
+        color: #FBA949;
       }
     
       &.s-3 {

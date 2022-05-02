@@ -45,22 +45,6 @@ export class DropdownStateService {
     node.close();
   }
 
-  // closeRoot() {
-  //   let root = this.getRoot(this);
-
-  //   root.closeRecursive(root);
-  // }
-
-  // getRoot(node: DropdownStateService): DropdownStateService {
-  //   const parent = node.parent;
-
-  //   if (parent) {
-  //     return parent.getRoot(parent);
-  //   } else {
-  //     return node;
-  //   }
-  // }
-
   focusFirstItem() {
     this._focusFirstSource.next();
   }

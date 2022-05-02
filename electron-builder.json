@@ -23,12 +23,14 @@
     "!*.json",
     "!.gitignore",
     "!.editorconfig",
-    "product.json"
+    "product.json",
+    "build/*.ico",
+    "build/*.png"
   ],
   "extraResources": [
     {
       "from": "dist",
-      "to": "app",
+      "to": "app/src",
       "filter": [
         "**/*"
       ]

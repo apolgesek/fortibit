@@ -1,7 +1,7 @@
-<ng-container *ngIf="isDatabaseLoaded | async">
+<ng-container *ngIf="(isDatabaseLoaded | async) && fontsLoaded">
   <app-menu-bar></app-menu-bar>
 
-  <div [@routeAnimations]="getRouteAnimationData()">
+  <div [@routeAnimations]="getRouteAnimationData()" style="flex: 1">
     <router-outlet></router-outlet>
   </div>
 </ng-container>

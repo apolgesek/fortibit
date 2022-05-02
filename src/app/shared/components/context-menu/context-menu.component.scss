@@ -4,13 +4,14 @@
   position: absolute;
   z-index: 9999;
   display: block;
-  width: 200px;
-  background-color: #fff;
-  color: $grey;
+  min-width: 200px;
+  background-color: $white;
+  color: $pickled-bluewood;
   top: 0;
   left: 0;
   visibility: hidden;
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  border-radius: 0.25rem;
 
   &.hidden {
     visibility: hidden;
@@ -24,12 +25,12 @@
 
   li {
     padding: 0.4rem 0.5rem;
-    color: $grey;
+    color: $pickled-bluewood;
     font-size: 0.8rem;
     cursor: pointer;
 
     &.separator {
-      border-top: 1px solid #ededed;
+      border-top: 1px solid $silver;
       padding: 0;
     }
 
@@ -38,12 +39,12 @@
       color: $grey-80;
 
       &:hover {
-        background-color: #fff;
+        background-color: $white;
       }
     }
 
     &:hover {
-      background-color: #ededed;
+      background-color: $porcelain;
     }
   }
 }

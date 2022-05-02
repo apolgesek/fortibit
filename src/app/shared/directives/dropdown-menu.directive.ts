@@ -1,8 +1,8 @@
-import { Directive, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, ElementRef, HostBinding, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
 import { DropdownStateService } from '../services/dropdown-state.service';
 
 @Directive({
-  selector: '[appDropdownMenu]'
+  selector: '[appDropdownMenu]',
 })
 export class DropdownMenuDirective implements OnInit {
   private hasView = false;
@@ -10,7 +10,8 @@ export class DropdownMenuDirective implements OnInit {
   constructor(
     private readonly dropdownState: DropdownStateService,
     private readonly templateRef: TemplateRef<any>,
-    private readonly viewContainer: ViewContainerRef
+    private readonly viewContainer: ViewContainerRef,
+    private readonly el: ElementRef
   ) { }
 
   ngOnInit(): void {

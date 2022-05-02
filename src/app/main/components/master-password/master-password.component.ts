@@ -1,8 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, OnInit, NgZone, OnDestroy, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
-import { GroupRepository } from '@app/core/repositories';
+import { ActivatedRoute  } from '@angular/router';
 import { ConfigService } from '@app/core/services/config.service';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
@@ -40,10 +39,9 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   constructor(
     private readonly fb: FormBuilder,
     private readonly zone: NgZone,
-    private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly configService: ConfigService,
     private readonly storageService: StorageService,
-    private readonly groupRepository: GroupRepository,
     private readonly electronService: ElectronService,
     @Inject(DOCUMENT) private readonly document: Document
   ) { 
@@ -67,13 +65,22 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.electronService.ipcRenderer.on(IpcChannel.DecryptedContent, this.onDecryptedContent);
 
-    this.storageService.loadedDatabaseSource$
+    this.storageService.loadedDatabase$
       .pipe(
         switchMap(() => from(this.storageService.selectGroup({ node: { data: { id: 1 }} as TreeNode}))),
         takeUntil(this.destroyed$)
       ).subscribe(() => {
-        this.router.navigate(['/dashboard']);
+        this.storageService.unlock();
       });
+  }
+
+  // make sure window preview displays password entry page
+  ngAfterViewInit() {
+    if (this.route.snapshot.queryParams.minimize === 'true') {
+      setTimeout(() => {
+        this.electronService.ipcRenderer.send(IpcChannel.Minimize);
+      });
+    }
   }
 
   ngOnDestroy() {

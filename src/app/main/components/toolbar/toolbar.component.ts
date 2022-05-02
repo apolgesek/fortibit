@@ -1,7 +1,6 @@
 import { Component, ElementRef, NgZone, ViewChild } from '@angular/core';
-import { DialogsService } from '@app/core/services/dialogs.service';
+import { ModalService } from '@app/core/services/modal.service';
 import { ElectronService } from '@app/core/services/electron/electron.service';
-import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
 import { SearchService } from '@app/core/services/search.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { IpcChannel, UpdateState } from '@shared-renderer/index';
@@ -33,7 +32,7 @@ export class ToolbarComponent {
 
   private updateListener: (event: Electron.IpcRendererEvent, state: UpdateState, version: string) => void;
 
-  get isDatabasePristine(): boolean {
+  get isDatabaseInSync(): boolean {
     return !!this.storageService.dateSaved;
   }
 
@@ -53,6 +52,10 @@ export class ToolbarComponent {
     return this.storageService.selectedPasswords.length;
   }
 
+  get searchPhrase(): string {
+    return this.searchService.searchPhraseValue;
+  }
+
   set searchPhrase(value: string) {
     this.searchService.searchInputSource.next(value);
   }
@@ -68,8 +71,7 @@ export class ToolbarComponent {
   constructor(
     private readonly storageService: StorageService,
     private readonly searchService: SearchService,
-    private readonly dialogsService: DialogsService,
-    private readonly hotkeyService: HotkeyService,
+    private readonly modalService: ModalService,
     private readonly electronService: ElectronService,
     private readonly zone: NgZone
   ) {
@@ -93,14 +95,6 @@ export class ToolbarComponent {
 
   ngAfterViewInit(): void {
     this.registerFocusEvent(this.searchBox.nativeElement, 'shadow');
-
-    fromEvent(window, 'keydown')
-      .pipe(
-        tap((event: Event) => {
-          this.hotkeyService.intercept(event as KeyboardEvent);
-        }),
-        takeUntil(this.destroyed$)
-      ).subscribe();
   }
 
   ngOnDestroy() {
@@ -111,26 +105,27 @@ export class ToolbarComponent {
   }
 
   openAddEntryWindow() {
-    this.dialogsService.openEntryWindow();
+    this.modalService.openEntryWindow();
   }
 
   openEditEntryWindow() {
     this.storageService.editedEntry = this.storageService.selectedPasswords[0];
-    this.dialogsService.openEntryWindow();
+    this.modalService.openEntryWindow();
   }
 
   openDeleteEntryWindow() {
-    this.dialogsService.openDeleteEntryWindow();
+    this.modalService.openDeleteEntryWindow();
   }
 
   trySaveDatabase() {
     !this.storageService.file
-      ? this.dialogsService.openMasterPasswordWindow()
+      ? this.modalService.openMasterPasswordWindow()
       : this.storageService.saveDatabase();
   }
 
   toggleSearchMode() {
-    this.storageService.isGlobalSearch = !this.storageService.isGlobalSearch;
+    this.isGlobalSearchMode = !this.isGlobalSearchMode;
+    this.storageService.updateEntries();
   }
 
   updateAndRelaunch() {
@@ -138,7 +133,7 @@ export class ToolbarComponent {
   }
 
   openSettings() {
-    this.dialogsService.openSettingsWindow();
+    this.modalService.openSettingsWindow();
   }
 
   private registerFocusEvent(element: HTMLElement, className: string) {

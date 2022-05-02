@@ -5,39 +5,48 @@
 	<ng-container *ngIf="isEntrySelected; else databaseDetails">
 		<div class="header">Entry details</div>
 		<div class="content">
+			<div class="section quick-actions">
+				<button #toggleStarBtn class="action-btn" [ngClass]="{ active: entry?.isStarred }" (click)="toggleStarred(entry)">
+					<span class="pi pi-star"></span>
+				</button>
+				<button (click)="revealInGroup()" class="action-btn">
+					<span class="pi pi-home"></span>
+				</button>
+			</div>
+	
 			<div class="section">
-				<p><span class="label">Group</span></p>
-				{{ entry?.group }}
+				<p class="label">Group</p>
+				<p>{{ group?.name }}</p>
 			</div>
 
-			<div class="section">
-				<p><span class="label">Title</span></p>
-				{{ entry?.title }}
+			<div *ngIf="entry?.title" class="section">
+				<p class="label">Title</p>
+				<p>{{ entry?.title }}</p>
 			</div>
 
-			<div class="section">
-				<p><span class="label">User</span></p>
-				{{ entry?.username }}
+			<div *ngIf="entry?.username" class="section">
+				<p class="label">Username</p>
+				<p>{{ entry?.username }}</p>
 			</div>
 
 			<div *ngIf="entry?.url" class="section word-wrap">
-				<p><span class="label">URL</span></p>
-				<a tabindex="-1" (click)="openUrl(entry?.url)" href="#">{{ entry?.url }}</a>
+				<p class="label">URL</p>
+				<p><a (click)="openUrl(entry?.url)" href="#">{{ entry?.url }}</a></p>
 			</div>
 
 			<div *ngIf="entry?.creationDate" class="section">
-				<p><span class="label">Creation date</span></p>
-				{{ entry?.creationDate | date: "dd/MM/yy HH:mm" }}
+				<p class="label">Creation date</p>
+				<p>{{ entry?.creationDate | date: "dd/MM/yy HH:mm" }}</p>
 			</div>
 
 			<div *ngIf="entry?.lastAccessDate" class="section">
-				<p><span class="label">Last access date</span></p>
-				{{ entry?.lastAccessDate | date: "dd/MM/yy HH:mm" }}
+				<p class="label">Last access date</p>
+				<p>{{ entry?.lastAccessDate | date: "dd/MM/yy HH:mm" }}</p>
 			</div>
 
 			<div *ngIf="entry?.notes" class="section">
-				<p><span class="label">Notes</span></p>
-				{{ entry?.notes }}
+				<p class="label">Notes</p>
+				<p>{{ entry?.notes }}</p>
 			</div>
 		</div>
 	</ng-container>
@@ -47,22 +56,24 @@
 	<div class="header">Database details</div>
 	<ng-container *ngIf="config">
 		<div class="section">
-			<p><span class="label">File name</span></p>
-			{{ databaseInformation.name }}
+			<p class="label">File name</p>
+			<p>{{ databaseInformation.name }}</p>
 		</div>
 		<div class="section">
-			<p><span class="label">Encryption algorithm</span></p>
-			AES-256 (Rijndael)
+			<p class="label">Encryption algorithm</p>
+			<p>AES-256 (Rijndael)</p>
 		</div>
 		<div class="section">
-			<p><span class="label">Key derivation function</span></p>
-			scrypt
+			<p class="label">Key derivation function</p>
+			<p>scrypt</p>
 		</div>
 		<div class="section">
-			<p><span class="label">Global autotype shortcut</span></p>
- 			{{ config.autocompleteShortcut }}
-			<span *ngIf="!config.autocompleteRegistered" class="validation-error">(registration failed)</span>
-			<i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
+			<p class="label">Global autotype shortcut</p>
+ 			<p>
+				{{ config.autocompleteShortcut }}
+				<span *ngIf="!config.autocompleteRegistered" class="validation-error">(registration failed)</span>
+				<i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
+			</p>
 		</div>
 	</ng-container>
 </ng-template>

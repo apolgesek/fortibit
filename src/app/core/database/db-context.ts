@@ -15,7 +15,7 @@ export class DbContext extends Dexie {
 
     this.version(1).stores({
       entries: '++id,groupId,title,username',
-      groups: '++id,parent,isImported'
+      groups: '++id,parent'
     });
 
     this.entries = this.table('entries');

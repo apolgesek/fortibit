@@ -1,16 +1,58 @@
-@import "mixins";
+@import 'variables';
+@import 'mixins';
 
 :host {
 	position: relative;
-	display: block;
-	height: calc(100vh - 7rem);
+	display: flex;
 	width: 16rem;
 	background-color: $white;
 	border-left: 1px solid $silver;
-	font-size: 0.8rem;
+	font-size: 0.875rem;
 	z-index: 0;
+}
 
-	@include scrollbar;
+.action-btn {
+	@include font-regular;
+	font-size: 1.25rem;
+	cursor: pointer;
+	background-color: transparent;
+	border: 0;
+	outline: 0;
+	color: $curious-blue;
+	padding: 0;
+	width: 2.5rem;
+	height: 2.5rem;
+	text-align: left;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: $curious-blue-light;
+	border-radius: 0.25rem;
+	transition: all 150ms ease-in-out;
+	position: relative;
+
+	&.active {
+		background: $picton-blue;
+	}
+
+	&:first-child {
+		padding-top: 0;
+	}
+
+	&:hover {
+		color: $pickled-bluewood;
+	}
+
+	&:focus-visible:not(:hover) {
+		color: $barberry;
+		border: 1px solid $barberry;
+	}
+}
+
+.section.quick-actions {
+	display: flex;
+	align-items: center;
+	column-gap: 0.5rem;
 }
 
 .details-container {
@@ -18,20 +60,19 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	width: 100%;
 	transition: background-color 50ms;
 
 	i {
 		color: $curious-blue;
 		cursor: pointer;
-		margin-left: 0.3rem;
-	}
-
-	&.database-summary {
-		background-color: #f1f3f4;
+		margin-left: 0.25rem;
 	}
 
 	> div:not(.header) {
 		padding: 0 1rem;
+		overflow: auto;
+		@include scrollbar;
 
 		.section {
 			margin: 1rem 0;
@@ -46,9 +87,51 @@
 
 .section {
 	margin: 0.5rem 0;
-	color: $grey-text;
+	color: $pickled-bluewood;
+
+	.label {
+		@include font-medium;
+	}
+
+	&:first-child {
+		margin-top: 1rem;
+	}
 }
 
 .new-update {
-	font-size: 0.8rem;
+	font-size: 0.875rem;
+}
+
+.active .pi {
+	color: $white;
+}
+
+.starred .pi {
+	color: white;
+	animation-duration: 250ms;
+	animation-name: star;
+	animation-delay: 100ms;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes star {
+	0% {
+		transform: scale(1);
+	}
+
+	25% {
+		transform: scale(1.5);
+	}
+
+	50% {
+		transform: scale(0.9);
+	}
+
+	75% {
+		transform: scale(1.2);
+	}
+
+	100% {
+		transform: scale(1);
+	}
 }

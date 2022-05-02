@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { markDirty } from '@app/core/decorators/mark-dirty.decorator';
 import { IPasswordGroup } from '@app/core/models';
 import { EntryRepository, GroupRepository } from '@app/core/repositories';
+import { ElectronService } from '@app/core/services/electron/electron.service';
+import { SearchService } from '@app/core/services/search.service';
 import { TreeNode } from '@circlon/angular-tree-component';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
@@ -10,8 +12,7 @@ import { BehaviorSubject, combineLatest, from, Observable, of, Subject } from 'r
 import { map, shareReplay, switchMap } from 'rxjs/operators';
 import { DbContext, initialEntries } from '../database';
 import { EventType } from '../enums';
-import { ElectronService } from '@app/core/services/electron/electron.service';
-import { SearchService } from '@app/core/services/search.service';
+import { NotificationService } from './notification.service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const IDBExportImport = require('indexeddb-export-import');
@@ -26,9 +27,11 @@ type GetSearchResultsModel = [passwords: IPasswordEntry[], searchPhrase: string]
 @Injectable({ providedIn: 'root' })
 export class StorageService {
   public readonly entries$: Observable<IPasswordEntry[]>;
-  public readonly renamedGroupSource$: Observable<boolean>;
-  public readonly loadedDatabaseSource$: Observable<boolean>;
-  public readonly reloadedEntriesSource$: Observable<void>;
+  public readonly renamedGroup$: Observable<boolean>;
+  public readonly loadedDatabase$: Observable<boolean>;
+  public readonly reloadedEntries$: Observable<void>;
+  public readonly revealInGroup$: Observable<IPasswordEntry>;
+  public readonly selectEntry$: Observable<IPasswordEntry>;
 
   public draggedEntries: number[] = [];
   public groups: IPasswordGroup[] = [];
@@ -38,13 +41,16 @@ export class StorageService {
   public selectedCategory?: TreeNode;
   public contextSelectedCategory?: TreeNode;
   public file?: { filePath: string, filename: string };
+  public isLocked = true;
 
   public passwordEntries: IPasswordEntry[] = [];
   public selectedPasswords: IPasswordEntry[] = [];
   
-  private readonly loadedDatabase$: Subject<boolean> = new Subject();
-  private readonly reloadedEntries: Subject<void> = new Subject();
-  private readonly renamedGroup$: Subject<boolean> = new Subject();
+  private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
+  private readonly reloadedEntriesSource: Subject<void> = new Subject();
+  private readonly renamedGroupSource: Subject<boolean> = new Subject();
+  private readonly revealedInGroupSource: Subject<IPasswordEntry> = new Subject();
+  private readonly entrySelectedSource: Subject<IPasswordEntry> = new Subject();
 
   private readonly passwordListSource$: BehaviorSubject<IPasswordEntry[]> = new BehaviorSubject<IPasswordEntry[]>([]);
 
@@ -61,10 +67,11 @@ export class StorageService {
   }
 
   constructor(
-    private readonly electronService: ElectronService,
     private readonly router: Router,
     private readonly zone: NgZone,
+    private readonly electronService: ElectronService,
     private readonly searchService: SearchService,
+    private readonly notificationService: NotificationService,
     private readonly entryRepository: EntryRepository,
     private readonly groupRepository: GroupRepository,
     private readonly dbContext: DbContext,
@@ -78,43 +85,43 @@ export class StorageService {
       shareReplay()
     );
 
-    this.loadedDatabaseSource$ = this.loadedDatabase$.asObservable();
-    this.reloadedEntriesSource$ = this.reloadedEntries.asObservable();
+    this.loadedDatabase$ = this.loadedDatabaseSource.asObservable();
+    this.reloadedEntries$ = this.reloadedEntriesSource.asObservable();
+    this.revealInGroup$ = this.revealedInGroupSource.asObservable();
+    this.selectEntry$ = this.entrySelectedSource.asObservable();
 
     // shareReplay is used here to allow immediate rename mode on a new, manually created group
-    this.renamedGroupSource$ = this.renamedGroup$.asObservable().pipe(shareReplay());
+    this.renamedGroup$ = this.renamedGroupSource.asObservable().pipe(shareReplay());
 
-    this.electronService.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
-      this.zone.run(() => {
-        this.file = { filePath: filePath, filename: filePath.split('\\').slice(-1)[0] };
-        this.router.navigateByUrl('/home');
-      });
-    });
-
-    this.electronService.ipcRenderer.on(IpcChannel.GetAutotypeFoundEntry, (_, title: string) => {
-      this.zone.run(async () => {
-        const entries = await this.entryRepository.getAll();
-        const entry = entries.find(e => this.isEntryMatching(e, title));
-
-        this.electronService.ipcRenderer.send(IpcChannel.AutocompleteEntry, entry);
-      });
-    });
+    this.handleDatabaseLock();
+    this.handleFoundAutotypeEntry();
+    this.handleDatabaseSaved();
   }
 
   @markDirty()
-  async addEntry(entry: IPasswordEntry): Promise<void> {
+  async addOrUpdateEntry(entry: Partial<IPasswordEntry>): Promise<void> {
     if (!this.selectedCategory) {
       this.throwCategoryNotSelectedError();
     }
 
     if (entry.id) {
       await this.entryRepository.update(entry);
-      this.passwordEntries = await this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
-      this.selectedPasswords = [entry];
+      this.passwordEntries = await this.getEntries();
+
+      this.selectedPasswords = [entry as IPasswordEntry];
     } else {
       await this.entryRepository.add(entry);
-      this.passwordEntries = await this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
+      this.passwordEntries = await this.getEntries();
+
       this.searchService.reset();
+    }
+  }
+
+  private async getEntries(): Promise<IPasswordEntry[]> {
+    if (this.selectedCategory.data.id === Number.MAX_SAFE_INTEGER) {
+      return this.entryRepository.getAllByPredicate(x => x.isStarred);
+    } else {
+      return this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
     }
   }
 
@@ -252,34 +259,74 @@ export class StorageService {
     case EventType.DropFile:
       this.electronService.ipcRenderer.send(IpcChannel.DropFile, payload);
       break;
+    case EventType.Lock:
+      this.lock({ minimize: true });
     default:
       break;
     }
   }
 
   renameGroup(isRenamed: boolean) {
-    this.renamedGroup$.next(isRenamed);
+    this.renamedGroupSource.next(isRenamed);
   }
 
-  async selectGroup(event: { node: TreeNode }): Promise<number> {
-    const groupId = event.node.data.id;
+  async selectGroup(event: { node: TreeNode }, reveal = false): Promise<number> {
+    const groupId = event.node?.data.id;
+
+    if (!groupId) {
+      return;
+    }
 
     if (this.selectedCategory?.id === groupId) {
       return groupId;
     }
 
     this.selectedCategory = event.node;
-    this.selectedPasswords = [];
-    this.passwordEntries = await this.entryRepository.getAllByGroup(groupId);
+
+    if (!reveal) {
+      this.selectedPasswords = [];
+    }
+
+    if (this.selectedCategory.data.id === Number.MAX_SAFE_INTEGER) {
+      this.passwordEntries = await this.entryRepository.getAllByPredicate((x) => x.isStarred);
+    } else {
+      this.passwordEntries = await this.entryRepository.getAllByGroup(groupId);
+    }
+  
     this.searchService.reset();
     this.updateEntries();
-    this.reloadedEntries.next();
+    this.reloadedEntriesSource.next();
 
     return groupId;
   }
 
   setDatabaseLoaded(): void {
-    this.loadedDatabase$.next(true);
+    this.loadedDatabaseSource.next(true);
+  }
+
+  lock({ minimize = false }): void {
+    this.isLocked = true;
+
+    this.selectedCategory = undefined;
+    this.dateSaved = undefined;
+    this.passwordEntries = [];
+    this.groups = [];
+    
+    const db = this.dbContext.backendDB();
+    IDBExportImport.clearDatabase(db, (err: Error) => {
+      if (err) {
+        throw new Error('Database emptying failed.');
+      }
+
+      this.electronService.ipcRenderer.send(IpcChannel.Lock);
+      this.router.navigate(['/home'], { queryParams: { minimize } });
+    });
+  }
+
+  unlock(): void {
+    this.isLocked = false;
+    this.router.navigate(['/dashboard']);
+    this.electronService.ipcRenderer.send(IpcChannel.Unlock);
   }
 
   async loadDatabase(jsonString: string) {
@@ -340,6 +387,14 @@ export class StorageService {
     this.dateSaved = new Date();
   }
 
+  revealInGroup(entry: IPasswordEntry) {
+    this.revealedInGroupSource.next(entry);
+  }
+
+  selectEntry(entry: IPasswordEntry) {
+    this.entrySelectedSource.next(entry);
+  }
+
   async setupDatabase() {
     await this.groupRepository.bulkAdd(initialEntries);
 
@@ -347,7 +402,14 @@ export class StorageService {
       id: 1,
       name: 'Database',
       expanded: true,
-      children: initialEntries.splice(1)
+      children: initialEntries.filter(x => x.parent === 1)
+    };
+
+    this.groups[1] = {
+      id: Number.MAX_SAFE_INTEGER,
+      name: 'Starred entries',
+      expanded: true,
+      children: []
     };
 
     if (AppConfig.mocks) {
@@ -421,10 +483,30 @@ export class StorageService {
     throw new Error('No category has been selected.');
   }
 
+  private handleFoundAutotypeEntry() {
+    this.electronService.ipcRenderer.on(IpcChannel.GetAutotypeFoundEntry, (_, title: string) => {
+      this.zone.run(async () => {
+        const entries = await this.entryRepository.getAll();
+        const entry = entries.find(e => this.isEntryMatching(e, title));
+
+        this.electronService.ipcRenderer.send(IpcChannel.AutocompleteEntry, entry);
+      });
+    });
+  }
+
+  private handleDatabaseLock() {
+    this.electronService.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
+      this.zone.run(() => {
+        this.file = { filePath: filePath, filename: filePath.split('\\').slice(-1)[0] };
+        this.lock({ minimize: false });
+      });
+    });
+  }
+
   private isEntryMatching(entry: IPasswordEntry, title: string): boolean {
     if (entry.notes?.length) {
-      const autoTypeKey = 'AUTO_TYPE';
-      const autoTypePatternStart = entry.notes.indexOf(autoTypeKey);
+      const autoTypeKey = 'auto_type';
+      const autoTypePatternStart = entry.notes.toLowerCase().indexOf(autoTypeKey);
 
       if (autoTypePatternStart >= 0) {
         const pattern = entry.notes
@@ -436,5 +518,28 @@ export class StorageService {
     }
 
     return title.toLowerCase().includes((entry.title as string).toLowerCase());
+  }
+
+  private handleDatabaseSaved() {
+    this.electronService.ipcRenderer.on(IpcChannel.GetSaveStatus, (_, { status, message, file }) => {
+      this.zone.run(() => {
+        if (status) {
+          this.setDateSaved();
+          this.file = { filePath: file, filename: file.split('\\').splice(-1)[0] };
+
+          this.notificationService.add({
+            message: 'Database saved',
+            alive: 5000,
+            type: 'success'
+          });
+        } else if (message) {
+          this.notificationService.add({
+            type: 'error',
+            message: 'Error occured',
+            alive: 5000,
+          });
+        }
+      });
+    });
   }
 }

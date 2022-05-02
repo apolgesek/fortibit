@@ -1,12 +1,12 @@
-import { AfterViewInit, ContentChildren, Directive, ElementRef, HostBinding, Input, OnDestroy, Optional, QueryList } from '@angular/core';
-import { filter, fromEvent, Subject, take, takeUntil } from 'rxjs';
+import { AfterViewInit, ContentChildren, Directive, ElementRef, HostBinding, Input, OnDestroy, Optional, QueryList, SkipSelf } from '@angular/core';
+import { delay, filter, fromEvent, Subject, takeUntil } from 'rxjs';
 import { DropdownStateService } from '../services/dropdown-state.service';
 import { MenuService } from '../services/menu.service';
 import { MenuItemDirective } from './menu-item.directive';
 
 @Directive({
   selector: '[appDropdown]',
-  providers: [DropdownStateService]
+  providers: [DropdownStateService],
 })
 export class DropdownDirective implements AfterViewInit, OnDestroy {
   @Input() index;
@@ -26,8 +26,9 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
   private dropdownClosed: Subject<void> = new Subject();
 
   constructor(
-    private readonly dropdownState: DropdownStateService,
     private readonly el: ElementRef,
+    private readonly dropdownState: DropdownStateService,
+    @SkipSelf() @Optional() private readonly parentDropdownState: DropdownStateService,
     @Optional() private readonly menuService: MenuService,
   ) {}
 
@@ -67,16 +68,20 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.dropdownState.stateChanges$.pipe(filter(x => x.notifyChanges), takeUntil(this.destroyed)).subscribe(state => {
-      if (state.isOpen) {
-        this.menuItems.changes.pipe(take(1)).subscribe((items: QueryList<MenuItemDirective>) => {
-          setTimeout(() => {
-            this.dropdownState.items = items.toArray();
-            this.dropdownState.currentItem = items.get(0);
-            this.dropdownState.currentItem.focus();
-          });
-        });
-        
+    if (this.parentDropdownState) {
+      this.dropdownState.parent = this.parentDropdownState;
+      this.parentDropdownState.child = this.dropdownState;
+    }
+
+    this.menuItems.changes.pipe(delay(0), takeUntil(this.destroyed)).subscribe((items: QueryList<MenuItemDirective>) => {
+      this.dropdownState.items = items.toArray();
+    });
+
+    this.dropdownState.stateChanges$.pipe(delay(0), filter(x => x.notifyChanges), takeUntil(this.destroyed)).subscribe(state => {
+      if (state.isOpen) {  
+        this.dropdownState.currentItem = this.menuItems.first;
+        this.dropdownState.currentItem.focus();
+      
         this.enableKeyboardNavigation();
 
         if (this.menuService) {
@@ -92,10 +97,9 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
       }
     });
 
-    this.dropdownState.focusFirstItem$.pipe(takeUntil(this.destroyed)).subscribe(() => {
-      setTimeout(() => {
-        this.dropdownState.currentItem = this.menuItems.get(1);
-      });
+    this.dropdownState.focusFirstItem$.pipe(delay(0), takeUntil(this.destroyed)).subscribe(() => {
+      this.dropdownState.currentItem = this.menuItems.get(1);
+      this.dropdownState.currentItem.focus();
     });
   }
 
@@ -140,13 +144,8 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
     const currentItemService = this.dropdownState.currentItem?.stateService;
 
     if (currentItemService && currentItemService !== this.dropdownState) {
-      currentItemService.parent = this.dropdownState;
-      this.dropdownState.child = currentItemService;
       currentItemService.open();
-
-      setTimeout(() => {
-        currentItemService.focusFirstItem();
-      });
+      currentItemService.focusFirstItem();
     } else {
       if (this.menuService) {
         this.menuService.focusNext();

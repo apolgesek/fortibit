@@ -1,16 +1,16 @@
-
 <app-modal>
   <div
-    data-prevent-entry-deselect
     class="dialog-header">
     <h2>{{ header }}</h2>
-    <span
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
       class="close-dialog"
       (click)="close()">&times;
-    </span>
+    </a>
   </div>
   <form
-    data-prevent-entry-deselect
     id="entry-form"
     (submit)="addNewEntry()"
     [formGroup]="newEntryForm">
@@ -34,17 +34,13 @@
           formControlName="username"
           placeholder="Username (required)">         
       </div>
-      <div
-        *ngIf="isControlInvalid(newEntryForm.get('username'))"
-        class="validation-error">
-        Username is required
-      </div>
       <ng-container formGroupName="passwords">
         <div
           class="inputgroup required"
           [ngClass]="{'ng-invalid': isControlInvalid(passwordsGroup.get('password'))}">
           <span class="inputgroup-addon"><i class="pi pi-key"></i></span>
           <input
+            #passwordInput
             type="password"
             id="entry-password"
             class="password"
@@ -68,6 +64,7 @@
           class="inputgroup required">
           <span class="inputgroup-addon"><i class="pi pi-replay"></i></span>
           <input
+            #passwordInput
             type="password"
             id="entry-password-r"
             formControlName="repeatPassword"

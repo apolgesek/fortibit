@@ -13,12 +13,6 @@ export class GroupRepository implements IGroupRepository {
     });
   }
 
-  getAllChildren(parentId: number): Promise<IPasswordGroup[]> {
-    return this.db.transaction('r', this.db.groups, () => {
-      return this.db.groups.where('parent').equals(parentId).toArray();
-    });
-  }
-
   get(id: number): Promise<IPasswordGroup | undefined> {
     return this.db.transaction('r', this.db.groups, () => {
       return this.db.groups.get(id);

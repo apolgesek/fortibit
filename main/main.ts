@@ -73,7 +73,9 @@ class MainProcess {
     app.once('ready', () => this.onReady());
 
     app.once('window-all-closed', () => {
+      this._databaseService.clear();
       globalShortcut.unregisterAll();
+
       app.quit();
     });
   }
@@ -82,7 +84,7 @@ class MainProcess {
     const key = randomBytes(8).toString('hex');
     global['__memKey'] = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(key) : key;
 
-    const windowRef = this._windowService.createWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));
+    const windowRef = this._windowService.createWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));    
     const windowLoaded = this._windowService.loadWindow(windowRef);
     
     windowLoaded.then(() => {

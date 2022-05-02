@@ -1,11 +1,11 @@
-@import "mixins";
+@import 'variables';
+@import 'mixins';
 
 $sidePanelInDuration: 300ms;
 $sidePanelOutDuration: 250ms;
 
 :host {
 	flex: 1;
-	height: calc(100% - 7rem);
 	display: flex;
 	overflow: auto;
 	overflow-y: hidden;
@@ -14,7 +14,7 @@ $sidePanelOutDuration: 250ms;
 	@include scrollbar;
 
 	.table-viewport {
-		height: calc(100vh - 9.2rem);
+		height: 100%;
 		@include scrollbar;
 	}
 
@@ -32,7 +32,7 @@ $sidePanelOutDuration: 250ms;
 	@include font-regular;
 
 	.row-entry {
-		font-size: 0.8rem;
+		font-size: 0.875rem;
 		cursor: pointer;
 		@include default-table-row;
 
@@ -42,28 +42,26 @@ $sidePanelOutDuration: 250ms;
 		}
 
 		&.selected {
-			background-color: #C2DBFF;
+			background-color: darken($curious-blue-light, 2);
 			&:hover {
-				background-color: #C2DBFF;
+				background-color: darken($curious-blue-light, 2);
 			}
 		}
 
-		&:hover {
-			background-color: #ededed;
+		&:focus {
+			background-color: darken($curious-blue-light, 2);
+		}
+
+		&:hover:not(:focus) {
+			background-color: $porcelain;
 		}
 
 		.column {
-			width: calc((100% / 3) - 0.2rem);
-			padding: 0.5rem;
+			width: calc((100% / 3) - 0.25rem);
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
-
-			&:first-child {
-				padding-left: 1rem;
-			}
-
-			padding-left: 0;
+			padding-left: 1rem;
 		}
 	}
 
@@ -72,31 +70,43 @@ $sidePanelOutDuration: 250ms;
 		width: 100%;
 		background-color: $white;
 		user-select: none;
-		font-size: 0.9rem;
+		font-size: 0.875rem;
 		border-bottom: 1px solid $silver;
-		min-height: 2.3rem;
+		min-height: 2rem;
 		position: relative;
 		z-index: 1;
 
 		div {
 			display: flex;
-			color: $grey;
-			width: calc((100% / 3) - 0.2rem);
+			color: $pickled-bluewood;
+			width: calc((100% / 3) - 0.25rem);
 			align-items: center;
 			text-align: left;
 			cursor: pointer;
+			outline: none;
+			padding-left: 1rem;
+
+			i {
+				display: none;
+				margin-left: 0.5rem;
+			}
+
+			&:hover, &:focus, &.active {
+				i {
+					display: block;
+				}
+			}
+
+			&:focus {
+				background-color: $curious-blue-light;
+			}
 
 			&:first-child {
 				border-left: 0;
-				padding-left: 1rem;
 			}
 
 			&:last-child {
 				cursor: default;
-			}
-
-			i {
-				margin-left: 0.5rem;
 			}
 		}
 	}
@@ -106,13 +116,17 @@ $sidePanelOutDuration: 250ms;
 
 .list-cta {
 	text-align: center;
-	margin-top: 5rem;
 	color: $grey-text;
-	font-size: 1.2rem;
+	font-size: 1rem;
 	user-select: none;
+	margin-top: 2rem;
+
+	p {
+		margin: 2rem 0;
+	}
 
 	a {
-		font-size: 0.9rem;
+		font-size: 1rem;
 	}
 }
 
@@ -124,26 +138,16 @@ $sidePanelOutDuration: 250ms;
 	display: flex;
 	padding: 0.5rem 1rem;
 	align-items: center;
-	font-size: 0.9rem;
-	color: #777;
+	font-size: 0.875rem;
+	color: $grey-text;
 
 	span {
 		margin-right: 0.6rem;
 	}
 }
 
-.outline-btn {
-	transition: background-color 50ms;
-	border-radius: 4px;
-	padding: 0.5rem;
-
-	&:hover {
-		background-color: rgba($silver, 0.3);
-	}
-}
-
 .results-badge {
-	background: #f1f3f4;
+	background: $porcelain;
 	font-size: 12px;
 	padding: 0.5rem 1rem;
 	z-index: 0;

@@ -6,6 +6,8 @@ export interface IPasswordEntry {
 	creationDate: Date;
 	lastAccessDate: Date;
 	lastModificationDate: Date;
+	isStarred: boolean;
+	group?: string;
 	title?: string;
 	url?: string;
 	notes?: string;

@@ -2,7 +2,13 @@
 <app-modal>
   <div class="dialog-header">
     <h2>About fortibit</h2>
-    <span class="close-dialog" (click)="close()">&times;</span>
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
+      class="close-dialog"
+      (click)="close()">&times;
+    </a> 
   </div>
   <div>
     <ul>
@@ -14,6 +20,7 @@
   </div>
   <div class="footer-container">
     <button
+      appAutofocus
       type="button"
       class="primary-btn"
       (click)="close()">

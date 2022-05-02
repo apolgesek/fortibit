@@ -1,28 +1,34 @@
 <app-modal>
   <div
-    data-prevent-entry-deselect
     class="dialog-header">
     <h2>Remove group</h2>
-    <span class="close-dialog" (click)="close()">&times;</span>
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
+      class="close-dialog"
+      (click)="close()">&times;
+    </a>
   </div>
   <div
-    data-prevent-entry-deselect
     class="dialog-message">
     Are you sure you want to remove this group?
   </div>
   <div
-    data-prevent-entry-deselect
     class="footer-container">
     <button
       type="button"
+      appAutofocus
       class="text-btn"
-      (click)="close()">
+      (click)="close()"
+      (keyup.enter)="close()">
       Cancel
     </button>
     <button
       type="button"
       class="primary-btn"
-      (click)="removeGroup()">
+      (click)="removeGroup()"
+      (keyup.enter)="removeGroup()">
       Remove
     </button>
   </div>

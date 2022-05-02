@@ -1,6 +1,6 @@
 import { Component, ComponentRef } from '@angular/core';
 import { ElectronService } from '@app/core/services/electron/electron.service';
-import { ModalService } from '@app/core/services/modal.service';
+import { ModalManager } from '@app/core/services/modal-manager';
 import { NotificationService } from '@app/core/services/notification.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -18,7 +18,7 @@ export class ImportDatabaseMetadataComponent implements IModal {
   isConfirmButtonLocked = false;
 
   constructor(
-    private readonly modalService: ModalService,
+    private readonly modalManager: ModalManager,
     private readonly electronService: ElectronService,
     private readonly storageService: StorageService,
     private readonly notificationService: NotificationService
@@ -43,6 +43,6 @@ export class ImportDatabaseMetadataComponent implements IModal {
   }
 
   close() {
-    this.modalService.close(this.ref);
+    this.modalManager.close(this.ref);
   }
 }

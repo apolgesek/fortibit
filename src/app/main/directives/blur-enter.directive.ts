@@ -7,7 +7,7 @@ export class BlurEnterDirective {
     private readonly element: ElementRef,
   ) { }
 
-  @HostListener('document:keydown.enter', ['$event']) onKeydown() {
+  @HostListener('keydown.enter', ['$event']) onEnterDown() {
     this.element.nativeElement.blur();
   }
 }

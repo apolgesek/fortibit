@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { MasterPasswordComponent } from './components/master-password/master-password.component';
-import { InitialRouteGuard } from '../core/guards/initial-route.guard';
+import { DashboardGuard } from '../core/guards/dashboard.guard';
 
 const routes: Routes = [
   {
@@ -15,13 +15,13 @@ const routes: Routes = [
     path: 'dashboard',
     component: DashboardComponent,
     data: { animation:  'dashboardPage' },
-    canActivate: [InitialRouteGuard]
+    canActivate: [DashboardGuard]
   }
 ];
 
 @NgModule({
   declarations: [],
-  providers: [InitialRouteGuard],
+  providers: [DashboardGuard],
   imports: [ CommonModule, RouterModule.forChild(routes) ],
   exports: [ RouterModule ]
 })

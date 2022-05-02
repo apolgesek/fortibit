@@ -1,0 +1,42 @@
+@import 'variables';
+
+:host {
+  display: flex;
+  width: 100%;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  width: 180px;
+}
+
+.template-container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: 100%;
+}
+
+.text-btn {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+
+  &.active {
+    background-color: $curious-blue-light;
+  }
+
+  &:focus {
+    border: 1px solid $curious-blue;
+  }
+}
+
+ul li {
+  display: block;
+
+  button {
+    width: 10rem;
+    text-align: left;
+  }
+}

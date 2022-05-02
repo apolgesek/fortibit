@@ -1,7 +1,8 @@
-@import "mixins";
+@import 'variables';
+@import 'mixins';
 
 :host {
-  display: block;
+  display: flex;
   position: relative;
   width: 16rem;
   z-index: 0;
@@ -15,9 +16,10 @@
       font-family: 'primeicons';
       background-image: none;
       backface-visibility: hidden;
-      width: 14px;
-      height: 14px;
+      width: 0.875rem;
+      height: 0.875rem;
       margin-top: 3px;
+
       &::before {
         display: flex;
         content: '\e901';
@@ -35,26 +37,27 @@
     }
   
     tree-viewport {
+      margin-top: 1rem;
+      margin-left: 1rem;
       display: flex;
       height: 100%;
       @include scrollbar;
-
-      > div {
-        padding-top: 0.6rem;
-        margin-left: 0.6rem;
-      }
     }
   
     tree-root {
-      height: calc(100vh - 11.3rem);
+      flex: 1;
+
+      &:focus {
+        outline: none;
+      }
 
       &.tree-focused .tree-node .node-content-wrapper-focused {
-        border: 1px solid #a3cae6;
+        border: 1px solid $picton-blue;
       }
   
       .tree-node {
-        color: $grey;
-        font-size: 0.9rem;
+        color: $pickled-bluewood;
+        font-size: 0.875rem;
 
         .node-wrapper {
           align-items: center;
@@ -62,23 +65,28 @@
 
         .node-content-wrapper {
           min-width: 10rem;
-          padding: 0;
+          padding: 2px 0;
           margin: 0;
           box-shadow: none;
           transition: background-color 50ms;
-          border: 1px solid #fff;
+          border: 1px solid $white;
+          border-radius: 0.25rem;
           
           &:hover:not(.node-content-wrapper-focused) {
-            background-color: #f8f8f8;
+            background-color: $porcelain;
           }
 
           &-active, &-focused {
             box-shadow: none;
-            background-color: #e3f2fd;
+            background-color: darken($curious-blue-light, 2);
           }
 
-          .node-group-name {
-            padding: 5px;
+          .node-group {
+            padding: 0.25rem;
+
+            &:focus {
+              outline: none;
+            }
           }
         }
       }
@@ -87,7 +95,7 @@
 
   &:hover {
     .handle {
-      background: #ededed;
+      background: $porcelain;
     }
   }
 }
@@ -98,8 +106,22 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
 
   .header {
+    &:focus-within {
+      outline: none;
+      background-color: $curious-blue-light;
+
+      .quick-actions {
+        display: block;
+
+        button {
+          background-color: $curious-blue-light;
+        }
+      }
+    }
+
     .file {
       flex: 1;
       text-overflow: ellipsis;
@@ -110,20 +132,25 @@
 
     .quick-actions {
       display: none;
-      font-size: 1.2rem;
 
       button {
-        background-color: #fff;
+        background-color: $white;
         border: 0;
-        width: 24px;
+        width: 1.5rem;
         color: $curious-blue;
         cursor: pointer;
         transition: 50ms color;
-        &:hover {
-          color: $grey;
+
+        &:hover, &:focus {
+          color: $pickled-bluewood;
         }
+
         &:last-child {
           margin-right: 0;
+        }
+
+        .pi {
+          font-size: 0.875rem;
         }
       }
     }
@@ -131,13 +158,14 @@
 
   &:hover {
     .header .quick-actions {
-      display: block;
+      margin-top: 0.25rem;
+      display: flex;
     }
   }
 
   .group-info {
-    font-size: 0.7rem;
-    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    padding: 0 1rem;
     background-color: $white;
     border-top: 1px solid $silver;
     position: sticky;
@@ -145,6 +173,7 @@
     display: flex;
     align-items: center;
     user-select: none;
+    min-height: 2rem;
 
     div {
       border-right: 1px solid $silver;
@@ -170,13 +199,16 @@
     @include font-regular;
     width: 9.5rem;
     border: none;
-    background-color: #E3F2FD;
-    padding: 5px;
-    font-size: 0.9rem;
-    color: $grey;
+    padding: 0.25rem;
+    font-size: 0.875rem;
+    color: $pickled-bluewood;
   }
 }
 
 .pi-download {
-  margin-right: 0.4rem;
+  margin-right: 0.5rem;
+}
+
+.pi-star-fill {
+  color: $picton-blue;
 }

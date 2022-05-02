@@ -11,4 +11,5 @@ export interface IDatabaseService {
   saveDatabase(event: IpcMainEvent, database: JSON, newPassword: string, config: any): void;
   openDatabase(event: IpcMainEvent): void;
   decryptDatabase(event: IpcMainEvent, password: string): void;
+  clear(): void;
 }
