@@ -1,6 +1,7 @@
-import { dialog, FileFilter, ipcMain, IpcMainEvent, safeStorage } from 'electron';
+import { app, dialog, FileFilter, ipcMain, IpcMainEvent, safeStorage } from 'electron';
 import { XMLParser } from 'fast-xml-parser';
-import { readFileSync, writeFile } from 'fs-extra';
+import { existsSync, readFileSync, rmSync, writeFile } from 'fs-extra';
+import { join } from 'path';
 import { IEncryptionProcessService, IWindowService, MessageEventType } from '..';
 import { IpcChannel } from '../../../shared-models';
 import { IConfigService } from '../config';
@@ -21,7 +22,11 @@ export class DatabaseService implements IDatabaseService {
   private _currentPassword: Buffer;
 
   set dbPassword(value: string) {
-    this._currentPassword = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(value) : Buffer.from(value);
+    if (!value) {
+      this._currentPassword = Buffer.alloc(0);
+    } else {
+      this._currentPassword = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(value) : Buffer.from(value);
+    }
   }
 
   get dbPassword(): string {
@@ -58,6 +63,19 @@ export class DatabaseService implements IDatabaseService {
     ipcMain.on('setCompression', (_, value) => {
       this._configService.set({ compressionEnabled: value });
     });
+
+    ipcMain.on(IpcChannel.Lock, (_: IpcMainEvent) => {
+      this.clear();
+      this.dbPassword = undefined;
+    });
+  }
+
+  public clear() {
+    const partitionsDir = join(app.getPath("appData"), this._configService.appConfig.name.toLowerCase(), 'Partitions');
+
+    if (existsSync(partitionsDir)) {
+      rmSync(partitionsDir, { recursive: true });
+    }
   }
 
   public setFilePath(windowId: number, filePath: string) {
@@ -110,7 +128,7 @@ export class DatabaseService implements IDatabaseService {
   public async openDatabase(event: IpcMainEvent): Promise<void> {
     const fileObj = await dialog.showOpenDialog({
       properties: ['openFile'],
-      filters: [{  name: 'Extensible Markup Language', extensions: [''] }]
+      filters: [{  name: 'Fortibit database file', extensions: [this._configService.appConfig.fileExtension] }]
     });
 
     if (!fileObj.canceled) {
@@ -196,12 +214,12 @@ export class DatabaseService implements IDatabaseService {
     return entries.map(x => {
       return {
         groupId: 1,
-        username: x.String.find(x => x.Key === 'UserName').Value,
-        password: x.String.find(x => x.Key === 'Password').Value,
+        username: x.String.find(x => x.Key === 'UserName').Value?.toString(),
+        password: x.String.find(x => x.Key === 'Password').Value?.toString(),
+        title: x.String.find(x => x.Key === 'Title').Value?.toString(),
+        url: x.String.find(x => x.Key === 'URL').Value?.toString(),
+        notes: x.String.find(x => x.Key === 'Notes').Value?.toString(),
         creationDate: new Date(),
-        title: x.String.find(x => x.Key === 'Title').Value,
-        url: x.String.find(x => x.Key === 'URL').Value,
-        notes: x.String.find(x => x.Key === 'Notes').Value
       };
     });
   }

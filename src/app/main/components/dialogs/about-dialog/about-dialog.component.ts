@@ -1,6 +1,6 @@
 import { Component, ComponentRef } from '@angular/core';
+import { ModalManager } from '@app/core/services/modal-manager';
 import { ConfigService } from '@app/core/services/config.service';
-import { ModalService } from '@app/core/services/modal.service';
 import { IAdditionalData, IModal } from '@app/shared';
 import { IAppConfig } from '../../../../../../app-config';
 
@@ -15,13 +15,13 @@ export class AboutDialogComponent implements IModal {
   public readonly config: IAppConfig;
 
   constructor(
-    private readonly modalService: ModalService,
+    private readonly modalManager: ModalManager,
     private readonly configService: ConfigService
   ) {
     this.config = this.configService.config as IAppConfig;
   }
 
   close() {
-    this.modalService.close(this.ref);
+    this.modalManager.close(this.ref);
   }
 }

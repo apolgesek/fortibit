@@ -3,6 +3,8 @@ import { IPasswordEntry } from '@shared-renderer/index';
 import { DbContext } from '../database/db-context';
 import { IEntryRepository } from './index';
 
+type PredicateFn = (entry: IPasswordEntry) => boolean;
+
 @Injectable({providedIn: 'root'})
 export class EntryRepository implements IEntryRepository {
   constructor(private readonly db: DbContext) {}
@@ -19,15 +21,21 @@ export class EntryRepository implements IEntryRepository {
     });
   }
 
+  getAllByPredicate(fn: PredicateFn): Promise<IPasswordEntry[]> {
+    return this.db.transaction('r', this.db.entries, () => {
+      return this.db.entries.filter(x => fn(x)).toArray();
+    });
+  }
+
   get(id: number): Promise<IPasswordEntry | undefined> {
     return this.db.transaction('r', this.db.entries, () => {
       return this.db.entries.get(id);
     });
   }
 
-  add(item: IPasswordEntry): Promise<number> {
+  add(item: Partial<IPasswordEntry>): Promise<number> {
     return this.db.transaction('rw', this.db.entries, () => {
-      return this.db.entries.add(item);
+      return this.db.entries.add(item as IPasswordEntry);
     });
   }
 
@@ -37,7 +45,7 @@ export class EntryRepository implements IEntryRepository {
     });
   }
 
-  update(item: IPasswordEntry): Promise<number> {
+  update(item: Partial<IPasswordEntry>): Promise<number> {
     return this.db.transaction('rw', this.db.entries, () => {
       if (!item.id) {
         throw new Error('No id provided for the entry to update');
@@ -80,7 +88,7 @@ export class EntryRepository implements IEntryRepository {
 
       return this.db.entries
         .filter(x => x.title?.toLowerCase().includes(lowerCasePhrase)
-          || x.username.toLowerCase().includes(lowerCasePhrase)
+          || x.username?.toLowerCase().includes(lowerCasePhrase)
         ).toArray();
     });
   }

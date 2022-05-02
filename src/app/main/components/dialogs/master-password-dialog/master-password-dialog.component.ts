@@ -1,5 +1,5 @@
 import { Component, ComponentRef, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { ModalService } from '@app/core/services/modal.service';
+import { ModalManager } from '@app/core/services/modal-manager';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { IpcChannel } from '@shared-renderer/index';
@@ -21,7 +21,7 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal 
     private readonly zone: NgZone,
     private readonly storageService: StorageService,
     private readonly electronService: ElectronService,
-    private readonly modalService: ModalService
+    private readonly modalManager: ModalManager
   ) { 
     this.onGetSaveStatus = (_, { status })  => {
       this.zone.run(() => {
@@ -45,6 +45,6 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal 
   }
 
   close() {
-    this.modalService.close(this.ref);
+    this.modalManager.close(this.ref);
   }
 }

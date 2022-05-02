@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import "variables";
 @import "mixins";
+@import "buttons";
 
 html,
 body {
@@ -8,12 +11,14 @@ body {
 	height: 100%;
 	overflow: hidden;
 	background-color: $white;
+	color: $pickled-bluewood;
 	@include font-regular;
 }
 
 input,
 textarea {
 	@include font-regular;
+	color: $pickled-bluewood;
 }
 
 a {
@@ -38,88 +43,18 @@ a {
 	}
 }
 
-button {
-	user-select: none;
-}
-
-button,
-a {
-	&:focus {
-		color: $silver;
-	}
-}
-
-input,
-button,
-a {
-	outline: none !important;
-	box-shadow: none !important;
-}
-
-.primary-btn {
-	@include font-regular;
-	border: 0;
-	padding: 0.35rem 0.5rem;
-	border-radius: 4px;
-	font-size: 1rem;
-	color: $curious-blue;
-	background: $white;
-	width: auto;
-	border: 1px solid $curious-blue;
-	transition: all 150ms;
-	cursor: pointer;
-
-	&:hover {
-		background-color: $curious-blue-light;
-	}
-
-	&:focus {
-		color: $curious-blue;
-	}
-
-	&:disabled {
-		background-color: $silver;
-
-		&:hover {
-			box-shadow: none !important;
-		}
-	}
-}
-
-.text-btn {
-	@include font-regular;
-	color: $curious-blue;
-	margin: 0 0.5rem;
-	padding: 0.5rem;
-	border: 1px solid transparent;
-	font-size: 0.9rem;
-	border-radius: 4px;
-	transition: background-color 50ms;
-	letter-spacing: 1px;
-	background-color: $white;
-	cursor: pointer;
-
-	&:hover {
-		background-color: rgb(245, 245, 245);
-	}
-
-	&:focus {
-		color: $curious-blue;
-	}
-}
-
 .header {
 	display: flex;
 	align-items: center;
 	position: relative;
 	z-index: 2;
-	padding: 0 0.6rem;
-	color: $grey;
-	font-size: 0.9rem;
+	padding: 0 1rem;
+	color: $pickled-bluewood;
+	font-size: 0.875rem;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
-	min-height: 2.3rem;
+	min-height: 2rem;
 	user-select: none;
 	border-bottom: 1px solid $silver;
 }
@@ -138,32 +73,35 @@ a {
 
 .dialog-message {
 	padding: 1rem 0;
-	font-size: 0.8rem;
+	font-size: 0.875rem;
 }
 
 .dialog-header {
 	display: flex;
-	align-items: center;
 	margin: 0;
 	padding: 0;
 	user-select: none;
+	margin-bottom: 1.5rem;
 
 	h2 {
-		@include font-bold;
+		@include font-regular;
 		margin: 0;
-		font-size: 1rem;
+		font-weight: normal;
+		font-size: 1.625rem;
+		color: $pickled-bluewood;
 		flex: 1;
 	}
 
 	.close-dialog {
-		color: darken($silver, 30%);
-		font-size: 1.8rem;
+		color: $gumbo;
+		font-size: 2rem;
+		line-height: 1rem;
 		font-weight: bold;
 		cursor: pointer;
 		transition: color 100ms;
 
 		&:hover {
-			color: darken($silver, 60%);
+			color: $pickled-bluewood;
 		}
 	}
 }
@@ -180,45 +118,13 @@ a {
 	user-select: none;
 }
 
-.dropbtn {
-	@include font-regular;
-
-	display: flex;
-	align-items: center;
-  background-color: #fff;
-	height: 2.2rem;
-  font-size: 0.9rem;
-  border: none;
-  cursor: pointer;
-	color: #919191;
-	border-top-right-radius: 3px;
-	border-bottom-right-radius: 3px;
-	transition: color 100ms;
-	width: auto;
-	padding: 0 0.5rem 0;
-	justify-content: flex-start;
-
-	&:hover, &.active {
-		background: #f1f3f4;
-		color: $grey;
-	}
-
-	&.active {
-		border-bottom-right-radius: 0;
-	}
-
-	.pi {
-		margin-left: 0.5rem;
-	}
-}
-
-a.dropbtn {
-	height: auto;
-}
-
 .dropdown {
   position: relative;
-  display: inline-block;
+  display: block;
+
+	a:focus {
+		outline: none;
+	}
 
 	&.open {
 		button, a {
@@ -228,12 +134,13 @@ a.dropbtn {
 }
 
 .dropdown-content {
-  position: absolute;
+  position: relative;
 	right: 0;
-  background-color: #fff;
+  background-color: $white;
   width: 5rem;
-	box-shadow: -1px 1px 2px 1px rgba(0, 0, 0, 0.12);
-  z-index: 9999;
+  z-index: 999;
+	// Box shadow changes anchor color inside for some reason
+	filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.12));
 
 	.divider {
 		padding: 4px;
@@ -246,15 +153,14 @@ a.dropbtn {
 	}
 
 	a {
-		color: black;
+		color: $pickled-bluewood;
 		padding: 0.5rem;
 		text-decoration: none;
 		display: block;
-		color: $grey;
-		font-size: 0.9rem;
+		font-size: 0.875rem;
 
 		&.focused {
-			background: #f1f3f4;
+			background: $porcelain;
 		}
 	}
 }
@@ -272,15 +178,15 @@ a.dropbtn {
 	overflow: auto;
 
 	.modal-body {
-		background: #fff;
+		background: $white;
 		min-width: 600px;
 		padding: 20px;
 		position: absolute;
 		top: 50%;
 		left: 50%;
 		transform: translateY(-50%) translateX(-50%);
-		z-index: 1000;
-		border-radius: 3px;
+		z-index: 991;
+		border-radius: 0.5rem;
 	}
 }
 	
@@ -292,15 +198,15 @@ a.dropbtn {
 	left: 0;
 	background-color: rgba(0, 0, 0, 0.6);
 	backdrop-filter: url('#blur-shadow');
-	z-index: 999;
+	z-index: 990;
 }
 
 .node-content-wrapper-active:not(.node-content-wrapper-focused):not(:hover) {
-	background: #fff !important;
+	background: $white !important;
 }
 
 .is-unknown-element-dragging {
-	background: #fff !important;
+	background: $white !important;
 }
 
 .dropdown-content {
@@ -339,7 +245,7 @@ a.dropbtn {
 
 	input[type='text'], input[type='password'], textarea {
 		border: 0;
-		border-bottom: 1px solid #c4c4c4;
+		border-bottom: 1px solid $silver;
 		width: 100%;
 		background: transparent;
 		padding: 0.5rem;
@@ -353,9 +259,9 @@ a.dropbtn {
 	position: absolute;
 	border: 0;
 	background-color: transparent;
-	color: $grey;
+	color: $pickled-bluewood;
 	z-index: 0;
-	margin-top: 6px;
+	margin-top: 0.5rem;
 }
 
 .handle {
@@ -415,4 +321,33 @@ a.dropbtn {
     background-color: $curious-blue;
     width: 4px;
   }
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0,0,0,0);
+	border: 0;
+}
+
+.pi-star-fill {
+	color: $picton-blue;
+}
+
+app-root, app-dashboard {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+form .primary-btn {
+	margin-top: 1.625rem;
+}
+
+.is-dragging-over {
+	background-color: $porcelain !important;
 }

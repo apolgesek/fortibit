@@ -1,5 +1,5 @@
 <div class="sidebar">
-	<div class="header blur-groups">
+	<div class="header blur-groups" tabindex="0">
 		<div class="file">{{ fileName }}</div>
 		<div class="quick-actions">
 			<button (click)="addGroup(); false"><span class="pi pi-plus"></span></button>
@@ -7,17 +7,19 @@
 		</div>
 	</div>
 	<tree-root
+		role="tree"
+		aria-label="Groups"
+		tabindex="0"
 		[nodes]="groups"
 		[options]="treeOptions"
-		[focused]="true"
-		(focus)="selectGroup($event)"
-		class="tree-focused">
+		[focused]="false"
+		(focus)="selectGroup($event)">
 	  <ng-template #treeNodeTemplate let-node let-index="index">
 			<ng-container *ngIf="(isGroupRenamed$ | async) && selectedGroup?.data.id === node.data.id; else groupName">
 				<input
 					type="text"
-					appBlurEnter
 					appAutofocus
+					appBlurEnter
 					[(ngModel)]="node.data.name"
 					[ngModelOptions]="{'updateOn': 'blur'}"
 					(blur)="setGroupRenameModeOff(node)"
@@ -26,9 +28,16 @@
 			</ng-container>
 			<ng-template #groupName>
 				<div
-					[appContextMenuItem]="node.data.id === rootNodeId ? groupContextMenuRoot : groupContextMenuItems"
-					class="node-group-name">
+					#treeItem
+					role="treeitem"
+					tabindex="0"
+					(focus)="focusTree()"
+					[ngClass]="{'node-selected': selectedGroup?.data.id === node.data.id }"
+					[attr.aria-level]="node.level"
+					[appContextMenuItem]="getContextMenu(node)"
+					class="node-group">
 					<span *ngIf="node.data.isImported" class="pi pi-download"></span>
+					<span *ngIf="node.data.id === starredEntriesId" class="pi pi-star"></span>
 					{{ node.data.name }}
 				</div>
 			</ng-template>

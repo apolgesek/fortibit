@@ -1,17 +1,29 @@
 <app-modal>
-	<div data-prevent-entry-deselect class="dialog-header">
+	<div class="dialog-header">
 		<h2>Import database</h2>
-		<span class="close-dialog" (click)="close()">&times; </span>
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
+      class="close-dialog"
+      (click)="close()">&times;
+    </a>
 	</div>
 	<div class="dialog-message">
     <p>Database path: {{ additionalData!.payload.filePath }}</p>
     <p>Total entries found: <strong>{{ additionalData!.payload.size }}</strong></p>
 	</div>
 	<div class="footer-container">
-    <button type="button" class="text-btn" (click)="close()">Close</button>
+    <button
+			type="button"
+			class="text-btn"
+			(click)="close()">
+			Close
+		</button>
     <button
 			*ngIf="additionalData!.payload.size > 0"
 			type="button"
+			appAutofocus
 			class="primary-btn"
 			[disabled]="isConfirmButtonLocked"
 			(click)="confirm()">

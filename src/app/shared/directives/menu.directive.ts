@@ -4,7 +4,10 @@ import { DropdownDirective } from './dropdown.directive';
 
 @Directive({
   selector: '[appMenu]',
-  providers: [MenuService]
+  providers: [MenuService],
+  host: {
+    role: 'menubar'
+  }
 })
 export class MenuDirective {
   @ContentChildren(DropdownDirective) items: QueryList<DropdownDirective>;

@@ -1,10 +1,9 @@
 import { trigger, style, transition, animate } from '@angular/animations';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ClipboardService } from '@app/core/services/clipboard.service';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
-import { DialogsService } from '@app/core/services/dialogs.service';
-import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
+import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { MenuItem } from '@app/shared';
@@ -12,7 +11,9 @@ import { DomUtils } from '@app/utils';
 import { TreeNode } from '@circlon/angular-tree-component';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { fromEvent, Observable, Subject } from 'rxjs';
-import { filter, map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
+import { HotkeyHandler } from '@app/app.module';
+import { IHotkeyHandler, IPasswordGroup } from '@app/core/models';
 
 @Component({
   selector: 'app-entries-table',
@@ -31,8 +32,9 @@ import { filter, map, takeUntil } from 'rxjs/operators';
     ])
   ]
 })
-export class EntriesTableComponent implements OnInit, OnDestroy {
+export class EntriesTableComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(CdkVirtualScrollViewport) public readonly scrollViewport: CdkVirtualScrollViewport | undefined;
+  @ViewChildren('rowEntry') public readonly rowEntries: QueryList<ElementRef>;
 
   public passwordList$: Observable<IPasswordEntry[]>;
   public searchPhrase$: Observable<string>;
@@ -44,10 +46,11 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   constructor(
     private readonly storageService: StorageService,
     private readonly searchService: SearchService,
-    private readonly hotkeyService: HotkeyService,
     private readonly clipboardService: ClipboardService,
     private readonly contextMenuBuilderService: ContextMenuBuilderService,
-    private readonly dialogsService: DialogsService,
+    private readonly modalService: ModalService,
+    private readonly el: ElementRef,
+    @Inject(HotkeyHandler) private readonly hotkeyService: IHotkeyHandler,
   ) { 
     this.passwordList$ = this.storageService.entries$;
     this.searchPhrase$ = this.searchService.searchPhrase$;
@@ -85,44 +88,19 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     return this.searchService.wasSearched;
   }
 
+  get entriesDragEnabled(): boolean {
+    return this.storageService.selectedCategory?.data?.id !== Number.MAX_SAFE_INTEGER;
+  }
+
   ngOnInit() {
-    fromEvent(document, 'keydown')
-      .pipe(
-        filter(x => x instanceof KeyboardEvent),
-      ).subscribe(x => {
-        if (this.storageService.selectedPasswords.length === 0) {
-          return;
-        }
-
-        const event = x as KeyboardEvent;
-        const selectedPasswordIndex = this.storageService.passwordEntries.indexOf(this.storageService.selectedPasswords[0]);
-
-        switch (event.key) {
-        case 'ArrowDown':
-          if (selectedPasswordIndex === this.storageService.passwordEntries.length - 1) {
-            return;
-          }
-
-          this.storageService.selectedPasswords = [this.storageService.passwordEntries[selectedPasswordIndex + 1]];   
-          break;
-        case 'ArrowUp':
-          if (this.storageService.selectedPasswords[0] === this.storageService.passwordEntries[0]) {
-            return;
-          }
-
-          this.storageService.selectedPasswords = [this.storageService.passwordEntries[selectedPasswordIndex - 1]];
-          break; 
-        }
-      });
+    this.handleEntriesReload();
 
     this.multiEntryMenuItems = this.buildMultiEntryMenuItems();
     this.entryMenuItems = this.buildEntryMenuItems();
+  }
 
-    this.storageService.reloadedEntriesSource$
-      .pipe(takeUntil(this.destroyed$))
-      .subscribe(() => {
-        this.scrollViewport?.scrollTo({ top: 0 });
-      });
+  ngAfterViewInit() {
+    this.handleFocus();
   }
 
   ngOnDestroy() {
@@ -134,23 +112,28 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     return entry.id + (entry.lastModificationDate ? new Date(entry.lastModificationDate).getTime() : 0);
   }
 
-  copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry, value: string) {
-    this.clipboardService.copyToClipboard(entry, property, value);
+  copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry) {
+    this.clipboardService.copyToClipboard(entry, property);
   }
 
   selectEntry(event: MouseEvent, entry: IPasswordEntry) {
-    if (this.hotkeyService.getMultiselectionKey(event) && event.type === 'click') {
+    if (this.hotkeyService.isMultiselectionKeyDown(event)) {
       const foundIndex = this.selectedEntries.findIndex(p => p.id === entry.id);
+
       if (foundIndex > -1) {
         this.selectedEntries.splice(foundIndex, 1);
         return;
       }
+  
       this.selectedEntries.push(entry);
     } else {
       this.storageService.selectedPasswords = [entry];
-    }
+      this.storageService.selectEntry(entry);
 
-    (document.querySelector('tree-root') as HTMLElement).classList.remove('focused');
+      setTimeout(() => {
+        this.rowEntries.find(x => x.nativeElement.classList.contains('selected')).nativeElement.focus();
+      });
+    }
   }
 
   showEntryContextMenu(event: MouseEvent, item: IPasswordEntry) {
@@ -159,16 +142,16 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  isEntrySelected(entryData: IPasswordEntry): boolean {
-    return this.selectedEntries.filter(e => e.id === entryData.id).length > 0;
+  isEntrySelected(entry: IPasswordEntry): boolean {
+    return this.selectedEntries.filter(e => e.id === entry.id).length > 0;
   }
 
-  isEntryDragged(entryData: IPasswordEntry): boolean {
-    return this.storageService.draggedEntries.filter(e => e === entryData.id).length > 0;
+  isEntryDragged(entry: IPasswordEntry): boolean {
+    return this.storageService.draggedEntries.filter(e => e === entry.id).length > 0;
   }
 
   addNewEntry() {
-    this.dialogsService.openEntryWindow();
+    this.modalService.openEntryWindow();
   }
 
   startDrag(event: DragEvent, item: IPasswordEntry) {
@@ -181,6 +164,64 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
 
   endDrag() {
     this.storageService.draggedEntries = [];
+  }
+
+  private handleEntriesReload() {
+    this.storageService.reloadedEntries$
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe(() => {
+        this.scrollViewport?.scrollTo({ top: 0 });
+      });
+  }
+
+  private handleFocus() {
+    fromEvent(this.el.nativeElement, 'keydown')
+      .pipe(
+        takeUntil(this.destroyed$)
+      ).subscribe((event: KeyboardEvent) => {
+        if (this.storageService.selectedPasswords.length === 0) {
+          return;
+        }
+        
+        const selectedPasswordIndex = this.storageService.passwordEntries.indexOf(this.storageService.selectedPasswords[0]);
+
+        switch (event.key) {
+          case 'Tab':
+            this.handleTabKeydown();
+            break;
+          case 'ArrowDown':
+            if (selectedPasswordIndex === this.storageService.passwordEntries.length - 1) {
+              return;
+            }
+
+            this.storageService.selectedPasswords = [this.storageService.passwordEntries[selectedPasswordIndex + 1]];
+
+            setTimeout(() => {
+              this.rowEntries.find(x => x.nativeElement.classList.contains('selected')).nativeElement.focus();
+            });
+            break;
+          case 'ArrowUp':
+            if (this.storageService.selectedPasswords[0] === this.storageService.passwordEntries[0]) {
+              return;
+            }
+
+            this.storageService.selectedPasswords = [this.storageService.passwordEntries[selectedPasswordIndex - 1]];
+
+            setTimeout(() => {
+              this.rowEntries.find(x => x.nativeElement.classList.contains('selected')).nativeElement.focus();
+            });
+            break;
+        }
+      });
+  }
+
+  private handleTabKeydown() {
+    if (this.rowEntries.find(x => x.nativeElement === document.activeElement)) {
+      this.rowEntries.forEach(x => (x.nativeElement as HTMLElement).setAttribute('tabindex', "-1"));
+      setTimeout(() => {
+        this.rowEntries.forEach(x => (x.nativeElement as HTMLElement).setAttribute('tabindex', "0"));
+      });
+    }
   }
 
   private buildEntryMenuItems(): MenuItem[] {

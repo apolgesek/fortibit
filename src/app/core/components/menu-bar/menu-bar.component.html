@@ -1,43 +1,43 @@
 <div
 	data-prevent-entry-deselect
 	class="topbar">
-	<ul appMenu class="menu">
+	<div appMenu class="menu">
 		<div class="brand-logo"></div>
-		<li appDropdown [index]="0" class="dropdown">
-			<button tabindex="-1" appDropdownToggle appMenuItem>
+		<div appDropdown [index]="0" class="dropdown">
+			<a href="#" role="button" appDropdownToggle appMenuItem aria-hidden="true">
 				File
-			</button>
+			</a>
 			<div *appDropdownMenu class="dropdown-content left">
-				<a href="#" appMenuItem (click)="openFile()">Open file...</a>
+				<a href="#" appMenuItem (activate)="openFile()">Open file...</a>
 				<div class="divider"><hr /></div>
-				<a href="#" appMenuItem (click)="save()" [disabled]="isDatabasePristine">Save</a>
-				<a href="#" appMenuItem (click)="saveAs()">Save as...</a>
+				<a href="#" appMenuItem (activate)="save()" [disabled]="isDatabasePristine">Save</a>
+				<a href="#" appMenuItem [disabled]="isLocked" (activate)="saveAs()">Save as...</a>
 				<div appDropdown class="dropdown" style="width: 100%;">
-					<a href="#" appDropdownToggle trigger="hover" class="submenu-open" appMenuItem>
+					<a href="#" appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
 						Import <span class="pi pi-angle-right"></span>
 					</a>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<a href="#" appMenuItem (click)="import()">KeePass (XML)</a>
-						<a href="#" appMenuItem>example</a>
+						<a href="#" aria-hidden="true" appMenuItem (activate)="import()">KeePass (XML)</a>
 					</div>
 				</div>
+				<a href="#" appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">Lock</a>
 				<div class="divider"><hr /></div>
-				<a href="#" appMenuItem (click)="exit()">Exit</a>
+				<a href="#" appMenuItem (activate)="exit()">Exit</a>
 			</div>
-		</li>
-		<li appDropdown [index]="1" class="dropdown">
-			<button tabindex="-1" appDropdownToggle appMenuItem>
+		</div>
+		<div appDropdown [index]="1" class="dropdown">
+			<a href="#" role="button" appDropdownToggle appMenuItem aria-hidden="true">
 				Help
-			</button>
+			</a>
 			<div *appDropdownMenu class="dropdown-content left">
-				<a href="#" appMenuItem (click)="openKeyboardShortcuts()">Keyboard shortcuts</a>
+				<a href="#" appMenuItem (activate)="openKeyboardShortcuts()">Keyboard shortcuts</a>
 				<div class="divider"><hr /></div>
-				<a href="#" appMenuItem (click)="openReleaseNotes()">Release notes</a>
-				<a href="#" appMenuItem (click)="openReportIssue()">Report issue</a>
-				<a href="#" appMenuItem (click)="openAboutModal()">About</a>
+				<a href="#" appMenuItem (activate)="openReleaseNotes()">Release notes</a>
+				<a href="#" appMenuItem (activate)="openReportIssue()">Report issue</a>
+				<a href="#" appMenuItem (activate)="openAboutModal()">About</a>
 			</div>
-		</li>
-	</ul>
+		</div>
+	</div>
 	<div class="window-icons">
 		<ul>
 			<li (click)="minimizeWindow()" class="minimize-icon">
@@ -46,7 +46,7 @@
 			<li (click)="maximizeWindow()" class="restore-icon">
 				<img class="icon" [srcset]="maximizeRestoreIcons" draggable="false" />
 			</li>
-			<li class="quit-icon" (click)="quit()">
+			<li (click)="quit()" class="quit-icon">
 				<img class="icon" [srcset]="closeIcons" draggable="false" />
 			</li>
 		</ul>

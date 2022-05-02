@@ -1,5 +1,6 @@
 .main-container {
 	display: flex;
 	width: 100vw;
-	height: 100vh;
+	max-height: calc(100vh - 7rem);
+	flex: 1;
 }

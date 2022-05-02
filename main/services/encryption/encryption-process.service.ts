@@ -7,13 +7,6 @@ import { IEncryptionProcessService } from './encryption-process-service.model';
 export class EncryptionProcessService implements IEncryptionProcessService {
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
 
-  public async processEvent(event: Serializable, callbackFn: (payload) => void): Promise<void> {
-    const process = await this.createEncryptionProcess();
-
-    process.once('message', callbackFn);
-    process.send(event);
-  }
-
   public async processEventAsync(event): Promise<Serializable> {
     const process = await this.createEncryptionProcess();
     process.send({...event, memoryKey: this.getMemoryKey(global['__memKey']) });

@@ -23,6 +23,8 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { AboutDialogComponent } from './components/dialogs/about-dialog/about-dialog.component';
 import { SettingsDialogComponent } from './components/dialogs/settings-dialog/settings-dialog.component';
 import { ImportDatabaseMetadataComponent } from './components/dialogs/import-database-metadata/import-database-metadata.component';
+import { CompressionTabComponent } from './components/dialogs/settings-dialog/compression-tab/compression-tab.component';
+import { PasswordChangeTabComponent } from './components/dialogs/settings-dialog/password-change-tab/password-change-tab.component';
 @NgModule({
   declarations: [
     MainComponent,
@@ -44,6 +46,8 @@ import { ImportDatabaseMetadataComponent } from './components/dialogs/import-dat
     AboutDialogComponent,
     SettingsDialogComponent,
     ImportDatabaseMetadataComponent,
+    CompressionTabComponent,
+    PasswordChangeTabComponent,
   ],
   imports: [
     CommonModule,

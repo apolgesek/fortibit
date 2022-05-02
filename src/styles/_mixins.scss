@@ -1,25 +1,22 @@
-@import 'variables';
-
 @font-face {
-	font-family: 'open_sans';
-	src: url('~assets/fonts/open_sans.woff2') format('woff2'),
-	url('~assets/fonts/open_sans.woff') format('woff');
+	font-family: 'roboto-regular';
+	src: url('~assets/fonts/roboto-regular.woff2') format('woff2'),
+	url('~assets/fonts/roboto-regular.woff') format('woff');
 }
 
 @font-face {
-	font-family: 'open_sans';
-	src: url('~assets/fonts/open_sans_bold.woff2') format('woff2'),
-	url('~assets/fonts/open_sans_bold.woff') format('woff');
+	font-family: 'roboto-medium';
+	src: url('~assets/fonts/roboto-medium.woff2') format('woff2'),
+	url('~assets/fonts/roboto-medium.woff') format('woff');
 	font-weight: bold;
 }
 
 @mixin font-regular {
-  font-family: "open_sans", Verdana, Geneva, Tahoma, sans-serif;
+  font-family: 'roboto-regular', sans-serif;
 }
 
-@mixin font-bold {
-  font-family: "open_sans", Verdana, Geneva, Tahoma, sans-serif;
-  font-weight: bold;
+@mixin font-medium {
+  font-family: 'roboto-medium', sans-serif;
 }
 
 @mixin scrollbar {
@@ -43,10 +40,12 @@
 
 @mixin default-table-row {
   display: flex;
+  align-items: center;
   box-shadow: none;
   outline: none;
   transition: all 50ms;
   user-select: none;
+  height: 32px;
   
   > div {
     box-shadow: none !important;
@@ -56,11 +55,28 @@
 }
 
 @mixin toolbar-btn {
-  @include font-regular;
+  @include font-medium;
   position: relative;
-  transition: all 200ms ease-in-out;
+  border: 0;
+  outline: 0;
+  font-size: 0.875rem;
+	padding: 0.875rem 1.625rem;
+	display: flex;
+	align-items: center;
+	background: $white;
+	color: $curious-blue;
+	border-radius: 0.25rem;
+	cursor: pointer;
+	transition: transform 100ms;
+  text-transform: uppercase;
 
 	&:hover:not(:disabled) {
+    background: linear-gradient(90deg, $curious-blue-light, $white);
+    color: $pickled-bluewood;
+  }
+
+  &:focus {
     background: $curious-blue-light;
+    outline: 3px solid $barberry !important;
   }
 }

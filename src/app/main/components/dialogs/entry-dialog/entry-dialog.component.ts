@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ComponentRef, ElementRef, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ModalService } from '@app/core/services/modal.service';
+import { ModalManager } from '@app/core/services/modal-manager';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { IpcChannel } from '@shared-renderer/index';
 import { fromEvent, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import { IAdditionalData, IModal } from '@app/shared';
 import { generate } from 'generate-password';
 import { valueMatchValidator } from '@app/shared/validators';
@@ -17,7 +17,9 @@ import { isControlInvalid, markAllAsDirty } from '@app/utils';
   styleUrls: ['./entry-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EntryDialogComponent implements IModal, OnInit, OnDestroy {
+export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDestroy {
+  @ViewChildren('passwordInput') passwordInputs: QueryList<ElementRef>;
+
   public newEntryForm: FormGroup;
   public passwordScore = -1;
 
@@ -31,12 +33,12 @@ export class EntryDialogComponent implements IModal, OnInit, OnDestroy {
     private readonly fb: FormBuilder,
     private readonly storageService: StorageService,
     private readonly electronService: ElectronService,
-    private readonly modalService: ModalService,
+    private readonly modalManager: ModalManager,
   ) {
     this.newEntryForm = this.fb.group({
       id: [null],
       title: [null],
-      username: [null, Validators.required],
+      username: [null],
       passwords: this.fb.group({
         password: [null, Validators.required],
         repeatPassword: [null],
@@ -101,6 +103,19 @@ export class EntryDialogComponent implements IModal, OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit() {
+    this.passwordInputs.forEach(el => {
+      fromEvent(el.nativeElement, 'keydown')
+        .pipe(
+          filter((e: KeyboardEvent) => e.ctrlKey && e.key === 'z'),
+          takeUntil(this.destroyed$)
+        )
+        .subscribe((event: KeyboardEvent) => {
+          event.preventDefault();
+        });
+    });
+  }
+
   onPasswordChange(event: Event) {
     const password = (event.target as HTMLInputElement).value;
     this.passwordScore = this.electronService.zxcvbn(password).score;
@@ -123,24 +138,31 @@ export class EntryDialogComponent implements IModal, OnInit, OnDestroy {
     }
 
     const encryptedPassword = await this.electronService.ipcRenderer.invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
-    
+    const formData = this.newEntryForm.value;
+
     if (this.storageService.editedEntry?.id) {
-      await this.storageService.addEntry({
-        ...this.newEntryForm.value,
+      await this.storageService.addOrUpdateEntry({
+        id: formData.id,
+        title: formData.title,
+        username: formData.username,
+        url: formData.url,
+        notes: formData.notes,
         password: encryptedPassword,
-        groupId: this.storageService.selectedCategory.data.id,
-        lastModificationDate: new Date()
+        lastModificationDate: new Date(),
       });
     } else {
       const newEntry = {
-        ...this.newEntryForm.value,
+        title: formData.title,
+        username: formData.username,
+        url: formData.url,
+        notes: formData.notes,
         password: encryptedPassword,
         creationDate: new Date(),
-        groupId: this.storageService.selectedCategory.data.id
+        groupId: this.storageService.selectedCategory.data.id,
+        isStarred: false
       };
 
-      newEntry.id = undefined;
-      await this.storageService.addEntry(newEntry);
+      await this.storageService.addOrUpdateEntry(newEntry);
     }
 
     this.close();
@@ -157,7 +179,7 @@ export class EntryDialogComponent implements IModal, OnInit, OnDestroy {
     this.storageService.editedEntry = undefined;
     this.newEntryForm.reset();
 
-    this.modalService.close(this.ref);
+    this.modalManager.close(this.ref);
   }
 
   private fillNewEntry() {

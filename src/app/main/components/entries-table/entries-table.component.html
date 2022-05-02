@@ -1,7 +1,7 @@
 <div class="password-table">
-	<div id="table-header">
-		<div appSortBy="title">Title</div>
-		<div appSortBy="username">Username</div>
+	<div id="table-header" data-prevent-entry-deselect>
+		<div tabindex="0" appSortBy="title">Title</div>
+		<div tabindex="0" appSortBy="username">Username</div>
 		<div>Password</div>
 	</div>
 	<div *ngIf="searchPhrase?.length && (!isSearching || wasSearched)" @slideIn>
@@ -13,41 +13,37 @@
 		<cdk-virtual-scroll-viewport
 			*ngIf="passwordList.length > 0; else noPasswordsTemplate"
 			itemSize="32"
+			role="rowgroup"
 			class="table-viewport">
-			<ng-container *cdkVirtualFor="let item of passwordList; trackBy: trackEntryById; templateCacheSize: 0">
-				<div *ngIf="item.groupPath; else entryTemplate" class="entry-group">
-					<div class="group-separator">
-						<span class="pi pi-folder">
-						</span> {{ item.groupPath }}
+			<ng-container *cdkVirtualFor="let item of passwordList; let i = index; trackBy: trackEntryById; templateCacheSize: 0">
+				<div
+					#rowEntry
+					data-prevent-entry-deselect
+					[appContextMenuItem]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
+					(click)="selectEntry($event, item)"
+					(contextmenu)="showEntryContextMenu($event, item)"
+					[attr.draggable]="entriesDragEnabled"
+					role="row"
+					tabindex="0"
+					(dragstart)="startDrag($event, item)"
+					(dragend)="endDrag()"
+					[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
+					class="row-entry">
+					<div
+						[appTextEmphasize]="searchPhrase$ | async"
+						(dblclick)="copyToClipboard(item, 'title')"
+						class="column long-text">{{ item.title }}
+					</div>
+					<div
+						[appTextEmphasize]="searchPhrase$ | async"
+						(dblclick)="copyToClipboard(item, 'username')"
+						class="column long-text">{{ item.username }}
+					</div>
+					<div
+						(dblclick)="copyToClipboard(item, 'password')"
+						class="column">******
 					</div>
 				</div>
-				<ng-template #entryTemplate>
-					<div
-						data-prevent-entry-deselect
-						[appContextMenuItem]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
-						(click)="selectEntry($event, item)"
-						(contextmenu)="showEntryContextMenu($event, item)"
-						draggable="true"
-						(dragstart)="startDrag($event, item)"
-						(dragend)="endDrag()"
-						[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
-						class="row-entry">
-						<div
-							[appTextEmphasize]="searchPhrase$ | async"
-							(dblclick)="copyToClipboard(item, 'title', item.title)"
-							class="column long-text">{{ item.title }}
-						</div>
-						<div
-							[appTextEmphasize]="searchPhrase$ | async"
-							(dblclick)="copyToClipboard(item, 'username', item.username)"
-							class="column long-text">{{ item.username }}
-						</div>
-						<div
-							(dblclick)="copyToClipboard(item, 'password', item.password)"
-							class="column">******
-						</div>
-					</div>
-				</ng-template>
 			</ng-container>
 		</cdk-virtual-scroll-viewport>
 		<ng-template #noPasswordsTemplate>
@@ -56,8 +52,8 @@
 					No results found
 				</ng-container>
 				<ng-template #noEntriesTemplate>
-					<p>No entries have been added yet</p>
-					<button tabindex="-1" class="primary-btn" (click)="addNewEntry(); false">Add entry</button>
+					<p class="no-entries">There are no entries in this group</p>
+					<button class="outline-btn" (click)="addNewEntry(); false">Add entry</button>
 				</ng-template>
 			</div>
 		</ng-template>

@@ -1,10 +1,15 @@
-import { Directive, ElementRef, HostBinding, HostListener, Input } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output } from '@angular/core';
 import { DropdownStateService } from '../services/dropdown-state.service';
 
 @Directive({
-  selector: '[appMenuItem]'
+  selector: '[appMenuItem]',
+  host: {
+    'role': 'menuitem',
+    'aria-hidden': 'true'
+  },
 })
 export class MenuItemDirective {
+  @Output() activate = new EventEmitter();
   @Input() public set disabled(value: boolean) {
     this._isDisabled = value;
   }
@@ -25,6 +30,7 @@ export class MenuItemDirective {
   }
 
   @HostBinding('class.disabled')
+  @HostBinding('attr.aria-disabled')
   public get isDisabled(): boolean {
     return this._isDisabled;
   }
@@ -34,6 +40,19 @@ export class MenuItemDirective {
     return this.dropdownState.currentItem === this
       || (this.dropdownState.parent && this.dropdownState.parent.currentItem === this)
       || (this.dropdownState.isOpen && this.dropdownState.items && this === this.dropdownState.items[0]);
+  }
+
+  @HostListener('click', ['$event'])
+  public onClick(event: MouseEvent) {
+    if (this.isDisabled) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      return;
+    }
+
+    this.activate.emit();
+    event.preventDefault();
   }
 
   @HostListener('mouseenter')
@@ -49,9 +68,14 @@ export class MenuItemDirective {
   @HostListener('mouseleave')
   public onMouseLeave() {
     this.dropdownState.currentItem = undefined;
+    this.blur();
   }
 
   public focus() {
     this.nativeElement.focus();
+  }
+
+  public blur() {
+    this.nativeElement.blur();
   }
 }

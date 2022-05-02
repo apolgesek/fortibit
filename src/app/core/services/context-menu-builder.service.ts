@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
-import { DialogsService } from '@app/core/services/dialogs.service';
-import { HotkeyService } from '@app/core/services/hotkey/hotkey.service';
+import { Inject, Injectable } from '@angular/core';
+import { HotkeyHandler } from '@app/app.module';
+import { ModalService } from '@app/core/services/modal.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { MenuItem } from '@app/shared';
 import { ClipboardService } from '.';
+import { IHotkeyHandler } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -13,15 +14,15 @@ export class ContextMenuBuilderService {
 
   constructor(
     private readonly storageService: StorageService,
-    private readonly hotkeyService: HotkeyService,
-    private readonly dialogsService: DialogsService,
-    private readonly clipboardService: ClipboardService
+    private readonly modalService: ModalService,
+    private readonly clipboardService: ClipboardService,
+    @Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler
   ) {}
 
   buildGroupContextMenuItems(configuration: { isRoot: boolean } = { isRoot: false }): this {
     this.contextMenuItems = [
       {
-        label: 'Add subgroup',
+        label: this.hotkeyHandler.configuration.addGroupLabel,
         icon: 'pi pi-fw pi-plus',
         command: () => this.storageService.addGroup(),
       },
@@ -29,7 +30,7 @@ export class ContextMenuBuilderService {
         separator: true,
       },
       {
-        label: 'Rename',
+        label: this.hotkeyHandler.configuration.renameGroupLabel,
         disabled: configuration.isRoot,
         icon: 'pi pi-fw pi-pencil',
         command: () => {
@@ -37,10 +38,10 @@ export class ContextMenuBuilderService {
         }
       },
       {
-        label: 'Delete',
+        label: this.hotkeyHandler.configuration.removeGroupLabel,
         disabled: configuration.isRoot,
         icon: 'pi pi-fw pi-trash',
-        command: () => this.dialogsService.openDeleteGroupWindow(),
+        command: () => this.modalService.openDeleteGroupWindow(),
       },
     ];
 
@@ -49,10 +50,10 @@ export class ContextMenuBuilderService {
   
   buildRemoveEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: this.hotkeyService.configuration.deleteLabel,
+      label: this.hotkeyHandler.configuration.deleteLabel,
       icon: 'pi pi-fw pi-trash',
       command: () => {
-        this.dialogsService.openDeleteEntryWindow();
+        this.modalService.openDeleteEntryWindow();
       }
     });
 
@@ -61,12 +62,11 @@ export class ContextMenuBuilderService {
 
   buildCopyUsernameEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: 'Copy username',
+      label: this.hotkeyHandler.configuration.copyUsernameLabel,
       command: () => {
         this.clipboardService.copyToClipboard(
           this.storageService.selectedPasswords[0],
-          'username',
-          this.storageService.selectedPasswords[0].username
+          'username'
         );
       }
     });
@@ -76,12 +76,11 @@ export class ContextMenuBuilderService {
 
   buildCopyPasswordEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: 'Copy password',
+      label: this.hotkeyHandler.configuration.copyPasswordLabel,
       command: () => {
         this.clipboardService.copyToClipboard(
           this.storageService.selectedPasswords[0],
-          'password',
-          this.storageService.selectedPasswords[0].password
+          'password'
         );
       }
     });
@@ -91,11 +90,11 @@ export class ContextMenuBuilderService {
 
   buildEditEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: 'Edit (Enter)',
+      label: 'Edit (E)',
       icon: 'pi pi-fw pi-pencil',
       command: () => {
         this.storageService.editedEntry = this.storageService.selectedPasswords[0];
-        this.dialogsService.openEntryWindow();
+        this.modalService.openEntryWindow();
       }
     });
 

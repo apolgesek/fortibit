@@ -1,7 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StorageService } from '@app/core/services/storage.service';
-import { IAdditionalData } from '@app/shared';
 import { valueMatchValidator } from '@app/shared/validators';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 
@@ -11,8 +10,6 @@ import { isControlInvalid, markAllAsDirty } from '@app/utils';
   styleUrls: ['./master-password-setup.component.scss']
 })
 export class MasterPasswordSetupComponent {
-  @Input() additionalData: IAdditionalData;
-
   public readonly minPasswordLength = 6;
   public readonly isControlInvalid = isControlInvalid;
 
@@ -35,8 +32,13 @@ export class MasterPasswordSetupComponent {
       return;
     }
 
-    await this.storageService.saveNewDatabase(this.masterPasswordForm.get('newPassword')?.value, {
+    const success = await this.storageService.saveNewDatabase(this.masterPasswordForm.get('newPassword')?.value, {
       forceNew: true
     });
+
+
+    if (success) {
+      this.masterPasswordForm.reset();
+    }
   }
 }

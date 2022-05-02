@@ -1,11 +1,13 @@
-import { AfterViewInit, Directive, ElementRef, HostListener, Input, OnDestroy, Renderer2 } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, HostBinding, HostListener, Input, OnDestroy, Renderer2 } from '@angular/core';
 import { Sort } from '@app/core/enums';
 import { SearchService } from '@app/core/services/search.service';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 @Directive({
-  selector: '[appSortBy]'
+  selector: '[appSortBy]',
+  host: {
+    'role': 'button'
+  }
 })
 
 export class SortByDirective implements AfterViewInit, OnDestroy {
@@ -21,38 +23,16 @@ export class SortByDirective implements AfterViewInit, OnDestroy {
   constructor(
     private readonly searchService: SearchService,
     private readonly renderer: Renderer2,
-    private readonly element: ElementRef) {
-    
-    this.icon = this.renderer.createElement('i');
+    private readonly element: ElementRef) {    
   }
 
-  public get isActiveSortProp() {
+  @HostBinding('class.active')
+  public get isActiveSortProp(): boolean {
     return this.sortBy === this.searchService.sortProp;
   }
 
-  @HostListener('mouseenter')
-  onMouseEnter() {
-    this.renderer.appendChild(this.element.nativeElement, this.icon);
-
-    if (this.isActiveSortProp) {
-      return;
-    }
-
-    this.icon.className = this.iconDesc;
-  }
-
-  @HostListener('mouseleave')
-  onMouseLeave() {
-    if (this.isActiveSortProp) {
-      return;
-    }
-
-    this.icon.className = '';
-  
-    this.renderer.removeChild(this.element.nativeElement, this.icon);
-  }
-
   @HostListener('click')
+  @HostListener('keyup.enter')
   onClick() {
     if (!this.isActiveSortProp) {
       this.setDescending();
@@ -72,17 +52,9 @@ export class SortByDirective implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    if (this.sortBy === this.searchService.sortProp) {
-      this.setDescending();
-    }
-
-    this.searchService.searchPhrase$
-      .pipe(takeUntil(this.destroyed$))
-      .subscribe(() => {
-        if (this.searchService.sortProp !== this.sortBy) {
-          this.icon.className = '';
-        }
-      });
+    this.icon = this.renderer.createElement('i');
+    this.icon.className = this.iconDesc;
+    this.renderer.appendChild(this.element.nativeElement, this.icon);
   }
 
   ngOnDestroy() {

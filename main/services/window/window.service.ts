@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { app, BrowserWindow, ipcMain, IpcMainEvent } from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage } from 'electron';
 import { join } from 'path';
 import { format } from 'url';
 import { IpcChannel } from '../../../shared-models';
@@ -13,6 +13,8 @@ import { IWindowService } from './';
 
 export class WindowService implements IWindowService {
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
+  private readonly _isTestMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E));
+
   private readonly _windows: BrowserWindow[] = [];
 
   get windows(): BrowserWindow[] {
@@ -35,6 +37,17 @@ export class WindowService implements IWindowService {
     ipcMain.on(IpcChannel.Exit, (event: IpcMainEvent) => {
       const win = this._windows.find(x => x.webContents.id === event.sender.id);
       win.close();
+    });
+
+    ipcMain.on(IpcChannel.Lock, (event: IpcMainEvent) => {
+      const win = this._windows.find(x => x.webContents.id === event.sender.id);
+      const appIcon = nativeImage.createFromPath(join(global['__basedir'], 'build', 'lock.png'));
+      win.setOverlayIcon(appIcon, 'Database locked');
+    });
+
+    ipcMain.on(IpcChannel.Unlock, (event: IpcMainEvent) => {
+      const win = this._windows.find(x => x.webContents.id === event.sender.id);
+      win.setOverlayIcon(null, '');
     });
 
     ipcMain.on(IpcChannel.Minimize, (event: IpcMainEvent) => {
@@ -95,7 +108,6 @@ export class WindowService implements IWindowService {
       },
     });
 
-
     this._isDevMode && window.webContents.openDevTools();
 
     window.on('maximize', () => {
@@ -128,8 +140,10 @@ export class WindowService implements IWindowService {
 
       loadedWindow = windowRef.loadURL('http://localhost:4200');
     } else {
+      const directory = this._isTestMode ? 'dist' : 'src';
+
       loadedWindow = windowRef.loadURL(format({
-        pathname: join(global['__basedir'], 'index.html'),
+        pathname: join(global['__basedir'], directory, 'index.html'),
         protocol: 'file:',
         slashes: true
       }));
@@ -149,16 +163,15 @@ export class WindowService implements IWindowService {
             encrypted: entry.password,
             memoryKey: global['__memKey']
           };
-
-          const callback = async ({ decrypted }) => {
-            await this._sendInputService.sleep(200);
-            await this._sendInputService.typeWord(entry.username);
-            await this._sendInputService.pressKey(Keys.Tab);
-            await this._sendInputService.typeWord(decrypted);
-            await this._sendInputService.pressKey(Keys.Enter);
-          };
           
-          this._encryptionProcessService.processEvent(encryptionEvent, callback);
+          const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { decrypted: string };
+
+          await this._sendInputService.sleep(200);
+          await this._sendInputService.typeWord(entry.username);
+          await this._sendInputService.pressKey(Keys.Tab);
+          await this._sendInputService.typeWord(payload.decrypted);
+          await this._sendInputService.pressKey(Keys.Enter);
+  
           windowsListeners.forEach((l, i) => this._windows[i].webContents.off('ipc-message', l));
         }
       };

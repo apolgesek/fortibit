@@ -1,6 +1,6 @@
 import { Component, NgZone, OnInit } from '@angular/core';
 import { EventType } from '@app/core/enums';
-import { DialogsService } from '@app/core/services/dialogs.service';
+import { ModalService } from '@app/core/services/modal.service';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { DatabaseType, IpcChannel } from '@shared-renderer/index';
@@ -46,11 +46,19 @@ export class MenuBarComponent implements OnInit {
     return !!this.storageService.dateSaved;
   }
 
+  get isLockingEnabled(): boolean {
+    return this.storageService.file && !this.isLocked;
+  }
+
+  get isLocked(): boolean {
+    return this.storageService.isLocked;
+  }
+
   constructor(
     private readonly zone: NgZone,
     private readonly electronService: ElectronService,
     private readonly storageService: StorageService,
-    private readonly dialogsService: DialogsService
+    private readonly modalService: ModalService
   ) {}
 
   ngOnInit() {
@@ -61,63 +69,47 @@ export class MenuBarComponent implements OnInit {
     });
   }
 
-  exit(): false {
+  exit() {
     this.quit();
-
-    return false;
   }
 
-  openFile(): false {
+  openFile() {
     this.storageService.checkFileSaved(EventType.OpenFile);
-
-    return false;
   }
 
-  save(): false {
-    if (this.isDatabasePristine) return false;
-  
+  save() {  
     !this.storageService.file
-      ? this.dialogsService.openMasterPasswordWindow()
+      ? this.modalService.openMasterPasswordWindow()
       : this.storageService.saveDatabase();
-
-    return false;
   }
 
-  saveAs(): false {
-    this.dialogsService.openMasterPasswordWindow({ forceNew: true });
-
-    return false;
+  saveAs() {
+    this.modalService.openMasterPasswordWindow({ forceNew: true });
   }
 
-  async import(): Promise<false> {
+  async import(): Promise<void> {
     const payload = await this.electronService.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, DatabaseType.Keepass);
-    this.dialogsService.openImportedDbMetadataWindow(payload);
-
-    return false;
+    this.modalService.openImportedDbMetadataWindow(payload);
   }
 
-  openKeyboardShortcuts(): false {
+  lock() {
+    this.storageService.checkFileSaved(EventType.Lock);
+  }
+
+  openKeyboardShortcuts() {
     this.openUrl(AppConfig.urls.keyboardReference);
-
-    return false;
   }
 
-  openReleaseNotes(): false {
+  openReleaseNotes() {
     this.openUrl(AppConfig.urls.releaseNotes);
-
-    return false;
   }
 
-  openReportIssue(): false {
+  openReportIssue() {
     this.openUrl(AppConfig.urls.reportIssue);
-
-    return false;
   }
 
-  openAboutModal(): false {
-    this.dialogsService.openAboutWindow();
-
-    return false;
+  openAboutModal() {
+    this.modalService.openAboutWindow();
   }
 
   minimizeWindow() {

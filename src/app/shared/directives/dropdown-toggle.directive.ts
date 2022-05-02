@@ -1,17 +1,23 @@
-import { AfterViewInit, Directive, ElementRef, Input, OnDestroy, Renderer2 } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, HostBinding, Input, OnDestroy, Renderer2 } from '@angular/core';
 import { DropdownStateService } from '../services/dropdown-state.service';
+
+enum TriggerType {
+  Click = 'click',
+  Hover = 'hover'
+}
 
 @Directive({
   selector: '[appDropdownToggle]',
   host: {
-    'class': 'dropbtn' 
+    'class': 'dropbtn',
+    'aria-haspopup': 'true',
   }
 })
 export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
-  @Input() public trigger: 'click' | 'hover' = 'click';
+  @Input() public trigger: TriggerType = TriggerType.Click;
+  @Input() public disabled = false;
 
-  private readonly disabledClass = 'disabled';
-  private unlisten: (() => void)[] = [];
+  private listeners: (() => void)[] = [];
 
   constructor(
     private readonly element: ElementRef,
@@ -19,47 +25,68 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
     private readonly dropdownState: DropdownStateService
   ) {}
 
+  @HostBinding('attr.aria-expanded')
+  public get isExpanded(): boolean {
+    return this.dropdownState.isOpen;
+  }
+
   ngAfterViewInit() {
-    if (this.trigger === 'click') {
-      this.renderer.listen(this.element.nativeElement, 'click', () => {
-        if (this.dropdownState.isOpen) {
-          this.dropdownState.close();
-        } else {
-          this.dropdownState.open();
-        }
-      });
-
-      const listener = this.renderer.listen(window, 'click', (event: MouseEvent) => {
-        const el = this.element.nativeElement as HTMLElement;
-        const eventTarget = event.target as HTMLElement;
-  
-        if (!el.contains(eventTarget) && !eventTarget.classList.contains(this.disabledClass)) {
-          this.dropdownState.close();
-        }
-      });
-
-      this.unlisten.push(listener);
-
-    } else if (this.trigger === 'hover') {
-      const mouseOverListener = this.renderer.listen(this.element.nativeElement, 'mouseenter', () => {
-        if (this.dropdownState.isOpen) {
+    switch (this.trigger) {
+      case TriggerType.Click:
+        this.handleClick();
+        break;
+      case TriggerType.Hover:
+        if (this.disabled) {
           return;
         }
+  
+        this.handleHover();
+        break;
+      default:
+        throw new Error('Unsupported trigger type');
+    }
+  }
 
+  private handleHover() {
+    const mouseOverListener = this.renderer.listen(this.element.nativeElement, 'mouseenter', () => {
+      if (this.dropdownState.isOpen) {
+        return;
+      }
+
+      this.dropdownState.open();
+    });
+
+    const mouseLeaveListener = this.renderer.listen(this.renderer.parentNode(this.element.nativeElement), 'mouseleave', () => {
+      if (this.dropdownState.isOpen) {
+        this.dropdownState.close();
+      }
+    });
+
+    this.listeners.push(mouseOverListener, mouseLeaveListener);
+  }
+
+  private handleClick() {
+    this.renderer.listen(this.element.nativeElement, 'click', () => {
+      if (this.dropdownState.isOpen) {
+        this.dropdownState.close();
+      } else {
         this.dropdownState.open();
-      });
+      }
+    });
 
-      const mouseLeaveListener = this.renderer.listen(this.renderer.parentNode(this.element.nativeElement), 'mouseleave', () => {
-        if (this.dropdownState.isOpen) {
-          this.dropdownState.close();
-        }
-      });
+    const listener = this.renderer.listen(window, 'click', (event: MouseEvent) => {
+      const el = this.element.nativeElement as HTMLElement;
+      const eventTarget = event.target as HTMLElement;
 
-      this.unlisten.push(mouseOverListener, mouseLeaveListener);
-    }   
+      if (!el.contains(eventTarget)) {
+        this.dropdownState.close();
+      }
+    });
+
+    this.listeners.push(listener);
   }
 
   ngOnDestroy(): void {
-    this.unlisten.forEach(unlisten => unlisten());
+    this.listeners.forEach(unlisten => unlisten());
   }
 }

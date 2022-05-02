@@ -10,10 +10,11 @@ import { DropdownMenuDirective } from './directives/dropdown-menu.directive';
 import { DropdownToggleDirective } from './directives/dropdown-toggle.directive';
 import { DropdownDirective } from './directives/dropdown.directive';
 import { MenuItemDirective } from './directives/menu-item.directive';
-import { SidebarHandleDirective } from './directives/sidebar-handle.directive';
-import { TabDirective } from './directives/tab.directive';
-import { ModalComponent } from './index';
 import { MenuDirective } from './directives/menu.directive';
+import { SidebarHandleDirective } from './directives/sidebar-handle.directive';
+import { ModalComponent } from './index';
+import { TabsetComponent } from './components/tabset/tabset.component';
+import { TabComponent } from './components/tab/tab.component';
 
 @NgModule({
   declarations: [
@@ -22,13 +23,14 @@ import { MenuDirective } from './directives/menu.directive';
     ContextMenuComponent,
     ContextMenuItemDirective,
     NotificationComponent,
-    TabDirective,
     SidebarHandleDirective,
     DropdownDirective,
     DropdownMenuDirective,
     MenuItemDirective,
     MasterPasswordSetupComponent,
     MenuDirective,
+    TabsetComponent,
+    TabComponent,
   ],
   imports: [BrowserAnimationsModule, CommonModule, ReactiveFormsModule],
   exports: [
@@ -44,7 +46,9 @@ import { MenuDirective } from './directives/menu.directive';
     DropdownToggleDirective,
     MenuItemDirective,
     MenuDirective,
-    MasterPasswordSetupComponent
+    MasterPasswordSetupComponent,
+    TabsetComponent,
+    TabComponent
   ],
 })
 export class SharedModule {}

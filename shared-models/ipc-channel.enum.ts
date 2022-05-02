@@ -13,6 +13,8 @@ export enum IpcChannel {
   SaveFile = 'saveFile',
   Minimize = 'minimize',
   Maximize = 'maximize',
+  Lock = 'lock',
+  Unlock = 'unlock',
   Close = 'close',
   AutocompleteEntry = 'autocompleteEntry',
   DecryptDatabase = 'decryptDatabase',

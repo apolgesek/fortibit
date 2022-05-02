@@ -1,7 +1,13 @@
 <app-modal>
   <div class="dialog-header">
     <h2>Quit fortibit</h2>
-    <span class="close-dialog" (click)="close()">&times;</span>
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
+      class="close-dialog"
+      (click)="close()">&times;
+    </a>
   </div>
   <div class="dialog-message">
     Are you sure you want to quit? There are unsaved changes.
@@ -21,6 +27,7 @@
     </button>
     <button
       type="button"
+      appAutofocus
       class="primary-btn"
       (click)="close()">
       Cancel

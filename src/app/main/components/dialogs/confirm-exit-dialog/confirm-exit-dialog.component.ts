@@ -2,10 +2,10 @@ import { ChangeDetectionStrategy, Component, ComponentRef } from '@angular/core'
 import { StorageService } from '@app/core/services/storage.service';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { IpcChannel } from '@shared-renderer/index';
-import { ModalService } from '@app/core/services/modal.service';
 import { MasterPasswordDialogComponent } from '../master-password-dialog/master-password-dialog.component';
 import { IAdditionalData, IModal } from '@app/shared';
 import { EventType } from '@app/core/enums';
+import { ModalManager } from '@app/core/services/modal-manager';
 
 @Component({
   selector: 'app-confirm-exit-dialog',
@@ -20,12 +20,12 @@ export class ConfirmExitDialogComponent implements IModal {
   constructor(
     private readonly electronService: ElectronService,
     private readonly storageService: StorageService,
-    private readonly modalService: ModalService,
+    private readonly modalManager: ModalManager,
   ) { }
 
   async saveChanges() {
     if (!this.storageService.file) {
-      this.modalService.open(MasterPasswordDialogComponent, { event: this.additionalData.event });
+      this.modalManager.open(MasterPasswordDialogComponent, { event: this.additionalData.event });
       this.close();
 
     } else {
@@ -45,6 +45,6 @@ export class ConfirmExitDialogComponent implements IModal {
   }
 
   close() {
-    this.modalService.close(this.ref);
+    this.modalManager.close(this.ref);
   }
 }

@@ -1,27 +1,24 @@
 <nav class="main-nav">
 	<div class="menu-panel">
 		<button
-			tabindex="-1"
 			data-prevent-entry-deselect
 			type="button"
 			class="add-entry"
 			id="add-entry"
 			(click)="openAddEntryWindow()">
-			<span class="pi pi-plus"></span>
+			<span class="pi pi-plus-circle"></span>
 			<div class="label">Add entry</div>
 		</button>
 		<button
-			tabindex="-1"
 			data-prevent-entry-deselect
 			type="button"
-			[disabled]="isDatabasePristine"
+			[disabled]="isDatabaseInSync"
 			class="button-secondary save-db"
 			(click)="trySaveDatabase()">
 			<span class="pi pi-save mr-2"></span>
 			<span class="label">Save</span>
 		</button>
 		<button
-			tabindex="-1"
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="!(isAnyEntry && isOneEntrySelected)"
@@ -31,7 +28,6 @@
 			<span class="label">Edit</span>
 		</button>
 		<button
-			tabindex="-1"
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="!(isAnyEntry && isAnyEntrySelected)"
@@ -42,14 +38,14 @@
 		</button>
 		<div class="searchbox" #searchbox>
 			<input
-			type="text"
-			tabindex="-1"
-			[(ngModel)]="searchPhrase"
-			class="search"
-			placeholder="Search entries" />
+				role="searchbox"
+				type="text"
+				[(ngModel)]="searchPhrase"
+				class="search"
+				placeholder="Search entries" />
 			<div class="search-mode">
 				<div appDropdown class="dropdown">
-					<button tabindex="-1" appDropdownToggle appMenuItem>
+					<button appDropdownToggle appMenuItem class="group-mode-btn">
 						{{ isGlobalSearchMode ? 'All' : 'Group' }} <span class="pi pi-angle-down"></span>
 					</button>
 					<div *appDropdownMenu class="dropdown-content right">
@@ -60,8 +56,9 @@
 		</div>
 		<ng-container *ngIf="notifications$ | async as notifications">
 			<div appDropdown class="settings dropdown" [ngClass]="{'new': notifications.length}">
-				<button tabindex="-1" appDropdownToggle appMenuItem>
-					<div *ngIf="notifications.length" class="badge">{{ notifications.length }}</div>
+				<button appDropdownToggle appMenuItem class="icon-btn">
+					<span class="sr-only">Settings</span>
+					<div *ngIf="notifications.length" class="badge">{{ notifications.length }} <span class="sr-only">notifications</span></div>
 					<span class="pi pi-cog"></span>
 				</button>
 				<div *appDropdownMenu class="dropdown-content right">

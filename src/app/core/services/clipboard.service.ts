@@ -12,13 +12,11 @@ export class ClipboardService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry, value: string) {
-    if (!value) {
-      return;
-    }
+  async copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry) {
+    let value = entry[property];
 
     if (property === 'password') {
-      value = await this.electronService.ipcRenderer.invoke(IpcChannel.DecryptPassword, value);
+      value = await this.electronService.ipcRenderer.invoke(IpcChannel.DecryptPassword, entry[property]);
     }
 
     entry.lastAccessDate = new Date();
@@ -30,7 +28,8 @@ export class ClipboardService {
           + property.substr(1)
           + ' copied',
         alive: 15000,
-        type: 'success'
+        type: 'success',
+        showCount: true
       });
     }
   }

@@ -1,10 +1,7 @@
 import { DOCUMENT } from '@angular/common';
-import { ApplicationRef, ComponentFactoryResolver, ComponentRef, EmbeddedViewRef, Inject, Injectable, Injector, NgZone, Renderer2, RendererFactory2 } from '@angular/core';
+import { ApplicationRef, ComponentFactoryResolver, ComponentRef, EmbeddedViewRef, Inject, Injectable, Injector, Renderer2, RendererFactory2 } from '@angular/core';
 import { NotificationComponent } from '@app/shared/components/notification/notification.component';
-import { IpcChannel } from '@shared-renderer/index';
 import { IToastModel } from '../models';
-import { ElectronService } from '@app/core/services/electron/electron.service';
-import { StorageService } from '@app/core/services/storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,37 +11,13 @@ export class NotificationService {
   private toasts: ComponentRef<NotificationComponent>[] = [];
 
   constructor(
-    private readonly zone: NgZone,
     private readonly rendererFactory: RendererFactory2,
     private readonly componentFactoryResolver: ComponentFactoryResolver,
     private readonly injector: Injector,
     private readonly appRef: ApplicationRef,
-    private readonly electronService: ElectronService,
-    private readonly storageService: StorageService,
     @Inject(DOCUMENT) private readonly document: Document,
   ) {
     this.renderer = this.rendererFactory.createRenderer(null, null);
-
-    this.electronService.ipcRenderer.on(IpcChannel.GetSaveStatus, (_, { status, message, file }) => {
-      this.zone.run(() => {
-        if (status) {
-          this.storageService.setDateSaved();
-          this.storageService.file = { filePath: file, filename: file.split('\\').splice(-1)[0] };
-
-          this.add({
-            message: 'Database saved',
-            alive: 5000,
-            type: 'success'
-          });
-        } else if (message) {
-          this.add({
-            type: 'error',
-            message: 'Error occured',
-            alive: 5000,
-          });
-        }
-      });
-    });
   }
 
   add(model: IToastModel) {
