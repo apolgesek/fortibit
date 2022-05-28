@@ -2,8 +2,6 @@
 @import 'mixins';
 
 .inputgroup {
-  position: relative;
-
   .password {
     padding-right: 100px;
   }
@@ -18,7 +16,6 @@
   justify-content: flex-end;
   transition: color 50ms;
   right: 0;
-  top: 6px;
 
   .text {
     @include font-medium;

@@ -111,9 +111,9 @@ button {
 	font-size: 1rem;
 	border-radius: 0.25rem;
 	transition: background-color 50ms;
-	letter-spacing: 1px;
 	background-color: $white;
 	cursor: pointer;
+	text-transform: uppercase;
 	-webkit-font-smoothing: antialiased;
 
 	&:hover {

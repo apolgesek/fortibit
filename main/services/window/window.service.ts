@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage } from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, powerMonitor } from 'electron';
+import { uptime } from 'os';
 import { join } from 'path';
 import { format } from 'url';
 import { IpcChannel } from '../../../shared-models';
@@ -7,15 +8,19 @@ import { EventType } from '../../../src/app/core/enums';
 import { ProcessArgument } from '../../process-argument.enum';
 import { IConfigService } from '../config';
 import { IEncryptionProcessService, Keys, MessageEventType } from '../index';
+import { INativeApiService } from '../native';
 import { IPerformanceService } from '../performance/performance-service.model';
 import { ISendInputService } from '../send-input';
 import { IWindowService } from './';
 
+const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
+const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
+
 export class WindowService implements IWindowService {
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
   private readonly _isTestMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E));
-
   private readonly _windows: BrowserWindow[] = [];
+  private _idleTimer: NodeJS.Timeout;
 
   get windows(): BrowserWindow[] {
     return this._windows;
@@ -25,7 +30,8 @@ export class WindowService implements IWindowService {
     @IConfigService private readonly _configService: IConfigService,
     @IEncryptionProcessService private readonly _encryptionProcessService: IEncryptionProcessService,
     @IPerformanceService private readonly _performanceService: IPerformanceService,
-    @ISendInputService private readonly _sendInputService: ISendInputService
+    @ISendInputService private readonly _sendInputService: ISendInputService,
+    @INativeApiService private readonly _nativeApiService: INativeApiService
   ) {
     ipcMain.on(IpcChannel.TryClose, (ipcEvent: IpcMainEvent, event?: EventType, payload?: unknown) => {
       const win = this._windows.find(x => x.webContents.id === ipcEvent.sender.id);
@@ -40,14 +46,16 @@ export class WindowService implements IWindowService {
     });
 
     ipcMain.on(IpcChannel.Lock, (event: IpcMainEvent) => {
-      const win = this._windows.find(x => x.webContents.id === event.sender.id);
-      const appIcon = nativeImage.createFromPath(join(global['__basedir'], 'build', 'lock.png'));
-      win.setOverlayIcon(appIcon, 'Database locked');
+      this.onLock(event.sender.id);
     });
 
     ipcMain.on(IpcChannel.Unlock, (event: IpcMainEvent) => {
       const win = this._windows.find(x => x.webContents.id === event.sender.id);
+
       win.setOverlayIcon(null, '');
+      win.unhookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP);
+      win.unhookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP);
+      this._nativeApiService.unsetIconicBitmap(win.getNativeWindowHandle());
     });
 
     ipcMain.on(IpcChannel.Minimize, (event: IpcMainEvent) => {
@@ -183,5 +191,38 @@ export class WindowService implements IWindowService {
     this._windows.forEach((win) => {
       win.webContents.send(IpcChannel.GetAutotypeFoundEntry, activeWindowTitle);
     });
+  }
+
+  setIdleTimer(windowId: number) {
+    clearInterval(this._idleTimer);
+
+    this._idleTimer = setInterval(() => {
+      if (powerMonitor.getSystemIdleTime() > this._configService.appConfig.idleSeconds) {
+        this.windows.find(x => x.webContents.id === windowId).webContents.send(IpcChannel.Lock);
+        clearInterval(this._idleTimer);
+      }
+    }, 1000);
+  }
+
+  private onLock(windowId: number) {
+    const win = this._windows.find(x => x.webContents.id === windowId);
+    const appIcon = nativeImage.createFromPath(join(global['__basedir'], 'assets', 'forbidden.png'));
+    win.setOverlayIcon(appIcon, 'Database locked');
+
+    const windowHandle = win.getNativeWindowHandle();
+    this._nativeApiService.setIconicBitmap(windowHandle);
+    
+    const iconPath = join(app.getAppPath(), 'assets', 'icon.bmp');
+    this._nativeApiService.setThumbnailBitmap(windowHandle, iconPath);
+
+    win.hookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP, () => {
+      this._nativeApiService.setThumbnailBitmap(windowHandle, iconPath);
+    });
+
+    win.hookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP, () => {
+      this._nativeApiService.setLivePreviewBitmap(windowHandle, iconPath);
+    });
+
+    clearInterval(this._idleTimer);
   }
 }

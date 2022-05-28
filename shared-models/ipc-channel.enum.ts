@@ -28,4 +28,6 @@ export enum IpcChannel {
   ChangePassword = 'changePassword',
   Import = 'import',
   GetImportedDatabaseMetadata = 'getImportedDatabaseMetadata',
+  ScanLeaks = 'scanLeaks',
+  ChangeEncryptionSettings = 'changeEncryptionSettings'
 }

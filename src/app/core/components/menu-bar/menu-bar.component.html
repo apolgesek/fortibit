@@ -3,7 +3,7 @@
 	class="topbar">
 	<div appMenu class="menu">
 		<div class="brand-logo"></div>
-		<div appDropdown [index]="0" class="dropdown">
+		<div appDropdown class="dropdown">
 			<a href="#" role="button" appDropdownToggle appMenuItem aria-hidden="true">
 				File
 			</a>
@@ -25,7 +25,24 @@
 				<a href="#" appMenuItem (activate)="exit()">Exit</a>
 			</div>
 		</div>
-		<div appDropdown [index]="1" class="dropdown">
+		<div appDropdown class="dropdown">
+			<a href="#" role="button" appDropdownToggle appMenuItem aria-hidden="true">
+				Tools
+			</a>
+			<div *appDropdownMenu class="dropdown-content left">
+				<div appDropdown class="dropdown" style="width: 100%;">
+					<a href="#" appDropdownToggle trigger="hover" appMenuItem class="submenu-open" [disabled]="isLocked">
+						Report <span class="pi pi-angle-right"></span>
+					</a>
+					<div *appDropdownMenu class="dropdown-content left submenu-container">
+						<a href="#" aria-hidden="true" appMenuItem (activate)="openExposedPasswordsWindow()">
+							Check exposed passwords
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div appDropdown class="dropdown">
 			<a href="#" role="button" appDropdownToggle appMenuItem aria-hidden="true">
 				Help
 			</a>

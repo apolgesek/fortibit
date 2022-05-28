@@ -11,4 +11,5 @@ export interface IWindowService {
   getWindowByWebContentsId(id: number);
   removeWindow(windowRef: BrowserWindow): void;
   registerWindowsAutotypeHandler(activeWindowTitle: string): void;
+  setIdleTimer(windowId: number): void;
 }

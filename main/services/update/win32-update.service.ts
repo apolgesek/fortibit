@@ -9,7 +9,6 @@ import { app } from 'electron';
 import { createHash } from 'crypto';
 import { IpcChannel, UpdateState } from '../../../shared-models';
 import { IConfigService } from '../config';
-import { ProcessArgument } from '../../process-argument.enum';
 
 interface UpdateInformation {
   version: string;
@@ -48,8 +47,14 @@ export class Win32UpdateService implements IUpdateService {
       }
 
       const req = request(this._configService.appConfig.updateUrl, res => {
+        let body = '';
+
         res.on('data', async (data: Buffer) => {
-          const updateMetadataArray = data.toString().trim().split(',');
+          body += data.toString();
+        });
+
+        res.on('end', () => {
+          const updateMetadataArray = body.trim().split(',');
           const updateMetadata = {
             productName: updateMetadataArray[0],
             version: updateMetadataArray[1],

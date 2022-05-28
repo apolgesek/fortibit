@@ -67,7 +67,7 @@ export class MenuItemDirective {
 
   @HostListener('mouseleave')
   public onMouseLeave() {
-    this.dropdownState.currentItem = undefined;
+    this.dropdownState.currentItem = null;
     this.blur();
   }
 

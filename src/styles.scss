@@ -62,7 +62,6 @@ a {
 .validation-error {
 	color: $bright-red;
 	font-size: 0.8rem;
-	margin-left: 1.5rem;
 }
 
 .footer-container {
@@ -72,8 +71,11 @@ a {
 }
 
 .dialog-message {
-	padding: 1rem 0;
+	@include scrollbar;
+	padding: 0.5rem 0;
 	font-size: 0.875rem;
+	flex: 1;
+	overflow: auto;
 }
 
 .dialog-header {
@@ -84,10 +86,9 @@ a {
 	margin-bottom: 1.5rem;
 
 	h2 {
-		@include font-regular;
+		@include font-medium;
 		margin: 0;
-		font-weight: normal;
-		font-size: 1.625rem;
+		font-size: 1.375rem;
 		color: $pickled-bluewood;
 		flex: 1;
 	}
@@ -178,9 +179,12 @@ a {
 	overflow: auto;
 
 	.modal-body {
+		display: flex;
+		flex-direction: column;
 		background: $white;
 		min-width: 600px;
-		padding: 20px;
+		max-height: calc(100% - 4rem);
+		padding: 2rem;
 		position: absolute;
 		top: 50%;
 		left: 50%;
@@ -234,8 +238,13 @@ a {
 }
 
 .inputgroup {
+	background-color: $porcelain;
+	box-shadow: inset 0px 0.25rem 0px 0px darken($porcelain, 1);
+	border: 0;
+	border-radius: 0.25rem;
 	margin: 0.5rem 0;
 	display: flex;
+	padding: 0.5rem;
 	box-sizing: border-box;
 	position: relative;
 
@@ -243,15 +252,30 @@ a {
 		align-items: center;
 	}
 
-	input[type='text'], input[type='password'], textarea {
+	input[type='text'],
+	input[type='password'],
+	input[type='number'],
+	textarea {
 		border: 0;
-		border-bottom: 1px solid $silver;
+		border-radius: 0.25rem;
 		width: 100%;
 		background: transparent;
-		padding: 0.5rem;
-		padding-left: 1.5rem;
 		z-index: 1;
 		outline: none;
+	}
+
+	.inputgroup-addon {
+		& + input, & + textarea {
+			padding-left: 1.5rem;
+		}
+	}
+}
+
+input[type='number'] {
+	&::-webkit-outer-spin-button,
+	&::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 	}
 }
 
@@ -261,7 +285,6 @@ a {
 	background-color: transparent;
 	color: $pickled-bluewood;
 	z-index: 0;
-	margin-top: 0.5rem;
 }
 
 .handle {
@@ -350,4 +373,9 @@ form .primary-btn {
 
 .is-dragging-over {
 	background-color: $porcelain !important;
+}
+
+.section-header {
+  @include font-medium;
+  padding-bottom: 0.5rem;
 }

@@ -1,5 +1,4 @@
-import { DOCUMENT } from '@angular/common';
-import { ApplicationRef, ComponentFactoryResolver, ComponentRef, EmbeddedViewRef, Inject, Injectable, Injector, Renderer2, RendererFactory2 } from '@angular/core';
+import { ApplicationRef, ComponentFactoryResolver, ComponentRef, EmbeddedViewRef, Injectable, Injector, Renderer2, RendererFactory2 } from '@angular/core';
 import { NotificationComponent } from '@app/shared/components/notification/notification.component';
 import { IToastModel } from '../models';
 
@@ -15,7 +14,6 @@ export class NotificationService {
     private readonly componentFactoryResolver: ComponentFactoryResolver,
     private readonly injector: Injector,
     private readonly appRef: ApplicationRef,
-    @Inject(DOCUMENT) private readonly document: Document,
   ) {
     this.renderer = this.rendererFactory.createRenderer(null, null);
   }
@@ -30,14 +28,14 @@ export class NotificationService {
 
     const componentRef = this.componentFactoryResolver.resolveComponentFactory(NotificationComponent).create(this.injector);
     this.appRef.attachView(componentRef.hostView);
+    const instance = componentRef.instance as NotificationComponent;
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    (<any>componentRef.instance).model = model;
-    (<any>componentRef.instance).componentRef = componentRef;
-    /* eslint-enable @typescript-eslint/no-explicit-any */
+    instance.model = model;
+    instance.componentRef = componentRef;
 
-    const domElem = (componentRef.hostView as EmbeddedViewRef<NotificationComponent>).rootNodes[0] as HTMLElement;
-    this.renderer.appendChild(this.document.body, domElem);
+    const notification = (componentRef.hostView as EmbeddedViewRef<NotificationComponent>).rootNodes[0] as HTMLElement;
+    const root = (this.appRef.components[0].hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement;
+    this.renderer.appendChild(root, notification);
 
     this.toasts.push(componentRef);
   }

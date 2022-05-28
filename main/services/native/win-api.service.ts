@@ -18,4 +18,24 @@ export class WinApiService implements INativeApiService {
   getActiveWindowTitle(): string {
     return this._instance.getActiveWindowTitle();
   }
+
+  getLastActive(): any {
+    return this._instance.getLastInputInfo();
+  }
+
+  setLivePreviewBitmap(handle: Buffer, path: string): number {
+    return this._instance.setLivePreviewBitmap(handle, path);
+  }
+
+  setThumbnailBitmap(handle: Buffer, path: string): number {
+    return this._instance.setThumbnailBitmap(handle, path);
+  }
+
+  setIconicBitmap(handle: Buffer): number {
+    return this._instance.setIconicBitmap(handle);
+  }
+
+  unsetIconicBitmap(handle: Buffer): number {
+    return this._instance.unsetIconicBitmap(handle);
+  }
 }

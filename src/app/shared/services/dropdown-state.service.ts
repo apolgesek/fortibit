@@ -31,7 +31,7 @@ export class DropdownStateService {
   }
 
   close(notifyChanges = true): void {
-    this.currentItem = undefined;
+    this.currentItem = null;
     this._stateChangesSource.next({ isOpen: false, notifyChanges });
   }
 

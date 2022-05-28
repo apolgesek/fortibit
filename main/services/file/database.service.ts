@@ -1,8 +1,9 @@
-import { app, dialog, FileFilter, ipcMain, IpcMainEvent, safeStorage } from 'electron';
+import { app, dialog, FileFilter, ipcMain, IpcMainEvent, powerMonitor, safeStorage } from 'electron';
 import { XMLParser } from 'fast-xml-parser';
 import { existsSync, readFileSync, rmSync, writeFile } from 'fs-extra';
 import { join } from 'path';
 import { IEncryptionProcessService, IWindowService, MessageEventType } from '..';
+import { IProduct } from '../../../product';
 import { IpcChannel } from '../../../shared-models';
 import { IConfigService } from '../config';
 import { IDatabaseService } from './database-service.model';
@@ -18,6 +19,20 @@ interface ISaveFilePayload {
 export class DatabaseService implements IDatabaseService {
   private readonly _fileFilters: { filters: FileFilter[] };
   private readonly _fileMap: Map<number, string> = new Map<number, string>();
+  private readonly _screenLockHandler = () => {
+    if (!this._currentPassword) {
+      return;
+    }
+
+    this.clear();
+    this.dbPassword = null;
+
+    this._windowService.windows.forEach((win) => {
+      if (this._fileMap.get(win.id)) {
+        this._windowService.windows.find(x => x.webContents.id === win.id).webContents.send(IpcChannel.Lock);
+      }
+    });
+  };
 
   private _currentPassword: Buffer;
 
@@ -60,14 +75,22 @@ export class DatabaseService implements IDatabaseService {
       return await this.importKeepassDatabase(event, filePath);
     });
 
-    ipcMain.on('setCompression', (_, value) => {
-      this._configService.set({ compressionEnabled: value });
+    ipcMain.handle(IpcChannel.ScanLeaks, async (event: IpcMainEvent, database: string) => {
+      return await this.getLeaks(event, database);
     });
 
     ipcMain.on(IpcChannel.Lock, (_: IpcMainEvent) => {
       this.clear();
-      this.dbPassword = undefined;
+      this.dbPassword = null;
     });
+
+    ipcMain.on(IpcChannel.ChangeEncryptionSettings, (_: IpcMainEvent, form: Partial<IProduct>) => {
+      this.changeEncryptionSettings(form);
+    });
+
+    if (this._configService.appConfig.lockOnSystemLock) {
+      powerMonitor.addListener('lock-screen', this._screenLockHandler);
+    }
   }
 
   public clear() {
@@ -99,12 +122,12 @@ export class DatabaseService implements IDatabaseService {
       }
 
       this.dbPassword = newPassword;
+      this._windowService.setIdleTimer(event.sender.id);
     }
 
     const encryptionEvent = {
       database,
       newPassword: newPassword ?? this.dbPassword,
-      memoryKey: global['__memKey'],
       type: MessageEventType.EncryptDatabase
     };
 
@@ -145,16 +168,29 @@ export class DatabaseService implements IDatabaseService {
     const encryptionEvent = {
       fileData,
       password,
-      memoryKey: global['__memKey'],
       type: MessageEventType.DecryptDatabase
     };
 
     const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { error: string, decrypted: string };
+    this._windowService.setIdleTimer(event.sender.id);
 
     event.reply(IpcChannel.DecryptedContent, {
       decrypted: !payload.error && payload.decrypted,
       file: this._fileMap.get(event.sender.id)
     });
+  }
+
+  public async getLeaks(_: IpcMainEvent, database: string) {
+    const encryptionEvent = {
+      database,
+      type: MessageEventType.GetLeaks
+    };
+
+    const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { error: string, data: string };
+
+    return {
+      data: !payload.error && payload.data,
+    };
   }
 
   private async getKeepassDatabaseInfo(): Promise<any> {
@@ -195,7 +231,6 @@ export class DatabaseService implements IDatabaseService {
     const encryptedOutput = await Promise.all(output.map(async (e) => {
       const encryptionEvent = {
         plain: e.password,
-        memoryKey: global['__memKey'],
         type: MessageEventType.EncryptString
       };
   
@@ -226,5 +261,18 @@ export class DatabaseService implements IDatabaseService {
 
   private appendExtension(name: string): string {
     return `${name}.${this._configService.appConfig.fileExtension}`;
+  }
+
+  private changeEncryptionSettings(settings: Partial<IProduct>) {
+  
+    if (settings.lockOnSystemLock !== this._configService.appConfig.lockOnSystemLock) {
+      if (settings.lockOnSystemLock) {
+        powerMonitor.addListener('lock-screen', this._screenLockHandler);
+      } else {
+        powerMonitor.removeListener('lock-screen', this._screenLockHandler);
+      }
+    }
+  
+    this._configService.set(settings);
   }
 }

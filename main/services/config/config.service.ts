@@ -26,12 +26,22 @@ export class ConfigService implements IConfigService {
       commit: productInformation.commit,
       updateUrl: productInformation.updateUrl,
       webUrl: productInformation.webUrl,
+      leakedPasswordsUrl: productInformation.leakedPasswordsUrl,
       temporaryFileExtension: productInformation.temporaryFileExtension,
       compressionEnabled: productInformation.compressionEnabled,
       fileExtension: 'fbit',
       autocompleteRegistered: false,
       autocompleteShortcut: 'Alt+F',
-      clipboardClearTimeMs: 15000
+      clipboardClearTimeMs: 15000,
+      encryption: {
+        lowercase: productInformation.encryption.lowercase ?? true,
+        numbers: productInformation.encryption.numbers ?? true,
+        uppercase: productInformation.encryption.uppercase ?? true,
+        specialChars: productInformation.encryption.specialChars ?? true,
+        passwordLength: productInformation.encryption.passwordLength ?? 15,
+      },
+      idleSeconds: productInformation.idleSeconds ?? 600,
+      lockOnSystemLock: productInformation.lockOnSystemLock ?? true
     };
   }
 

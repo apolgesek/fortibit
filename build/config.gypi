@@ -30,7 +30,7 @@
     "is_debug": 0,
     "llvm_version": "0.0",
     "napi_build_version": "8",
-    "nasm_version": "2.14",
+    "nasm_version": "2.15",
     "node_byteorder": "little",
     "node_debug_lib": "false",
     "node_enable_d8": "false",
@@ -212,11 +212,11 @@
       "lib/internal/modules/esm/create_dynamic_module.js",
       "lib/internal/modules/esm/get_format.js",
       "lib/internal/modules/esm/get_source.js",
+      "lib/internal/modules/esm/load.js",
       "lib/internal/modules/esm/loader.js",
       "lib/internal/modules/esm/module_job.js",
       "lib/internal/modules/esm/module_map.js",
       "lib/internal/modules/esm/resolve.js",
-      "lib/internal/modules/esm/transform_source.js",
       "lib/internal/modules/esm/translators.js",
       "lib/internal/perf/event_loop_delay.js",
       "lib/internal/perf/event_loop_utilization.js",
@@ -343,9 +343,9 @@
     "v8_trace_maps": 0,
     "v8_use_siphash": 1,
     "want_separate_host_toolset": 0,
-    "nodedir": "C:\\Users\\icema\\AppData\\Local\\node-gyp\\Cache\\16.0.5",
+    "nodedir": "C:\\Users\\icema\\AppData\\Local\\node-gyp\\Cache\\17.4.0",
     "standalone_static_library": 1,
     "msbuild_path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\MSBuild\\15.0\\Bin\\MSBuild.exe",
-    "target": "16.0.5"
+    "target": "17.4.0"
   }
 }

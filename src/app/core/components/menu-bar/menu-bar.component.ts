@@ -73,6 +73,10 @@ export class MenuBarComponent implements OnInit {
     this.quit();
   }
 
+  openExposedPasswordsWindow() {
+    this.modalService.openExposedPasswordsWindow();
+  }
+
   openFile() {
     this.storageService.checkFileSaved(EventType.OpenFile);
   }

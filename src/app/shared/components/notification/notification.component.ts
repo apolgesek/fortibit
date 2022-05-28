@@ -8,19 +8,19 @@ import { NotificationService } from '@app/core/services/notification.service';
   styleUrls: ['./notification.component.scss']
 })
 export class NotificationComponent implements AfterViewInit, OnDestroy {
-  public readonly model!: IToastModel;
+  public model!: IToastModel;
+  public componentRef!: ComponentRef<NotificationComponent>;
   public timeLeft = 0;
 
-  private readonly componentRef!: ComponentRef<NotificationComponent>;
   private animationStartTime = 0;
   private timer: NodeJS.Timeout | undefined;
 
   constructor(
     private readonly element: ElementRef,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
   ) {}
 
-  @HostListener('click', ['$event'])
+  @HostListener('click')
   onClick() {
     this.notificationService.remove(this.componentRef);
   }

@@ -15,7 +15,7 @@ export const markDirty = ({ updateEntries } = { updateEntries: true }) => {
       // eslint-disable-next-line
       const context: StorageService = this as StorageService;
 
-      context.dateSaved = undefined;
+      context.dateSaved = null;
       if (updateEntries) {
         context.updateEntries();
       }

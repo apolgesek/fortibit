@@ -1,4 +1,4 @@
-import { AfterViewInit, ContentChildren, Directive, ElementRef, HostBinding, Input, OnDestroy, Optional, QueryList, SkipSelf } from '@angular/core';
+import { AfterViewInit, ContentChildren, Directive, ElementRef, HostBinding, OnDestroy, Optional, QueryList, SkipSelf } from '@angular/core';
 import { delay, filter, fromEvent, Subject, takeUntil } from 'rxjs';
 import { DropdownStateService } from '../services/dropdown-state.service';
 import { MenuService } from '../services/menu.service';
@@ -9,9 +9,9 @@ import { MenuItemDirective } from './menu-item.directive';
   providers: [DropdownStateService],
 })
 export class DropdownDirective implements AfterViewInit, OnDestroy {
-  @Input() index;
+  public index: number;
   @ContentChildren(MenuItemDirective, { descendants: true })
-  menuItems: QueryList<MenuItemDirective>;
+  public menuItems: QueryList<MenuItemDirective>;
 
   @HostBinding('class.open')
   public get isOpen(): boolean {
@@ -92,7 +92,7 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
           this.dropdownClosed.next();
           this.dropdownClosed.complete();
     
-          this.dropdownClosed = undefined;
+          this.dropdownClosed = null;
         }
       }
     });
@@ -110,7 +110,7 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
 
   focusNext() {
     if (this.dropdownState.currentItem && this.dropdownState.currentItem.stateService !== this.dropdownState) {
-      this.dropdownState.currentItem.stateService.currentItem = undefined;
+      this.dropdownState.currentItem.stateService.currentItem = null;
     }
   
     const items = this.menuItems.toArray().filter(x => !x.isDisabled);
@@ -126,7 +126,7 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
 
   focusPrevious() {
     if (this.dropdownState.currentItem &&  this.dropdownState.currentItem.stateService !== this.dropdownState) {
-      this.dropdownState.currentItem.stateService.currentItem = undefined;
+      this.dropdownState.currentItem.stateService.currentItem = null;
     }
   
     const items = this.menuItems.toArray().filter(x => !x.isDisabled);

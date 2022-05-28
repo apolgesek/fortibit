@@ -10,6 +10,7 @@ import { IAdditionalData, IModal } from '@app/shared';
 import { generate } from 'generate-password';
 import { valueMatchValidator } from '@app/shared/validators';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
+import { ConfigService } from '@app/core/services';
 
 @Component({
   selector: 'app-entry-dialog',
@@ -33,6 +34,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     private readonly fb: FormBuilder,
     private readonly storageService: StorageService,
     private readonly electronService: ElectronService,
+    private readonly configService: ConfigService,
     private readonly modalManager: ModalManager,
   ) {
     this.newEntryForm = this.fb.group({
@@ -176,7 +178,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
       this.storageService.editedEntry.password = encrypted;
     }
 
-    this.storageService.editedEntry = undefined;
+    this.storageService.editedEntry = null;
     this.newEntryForm.reset();
 
     this.modalManager.close(this.ref);
@@ -204,13 +206,15 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   }
 
   private generatePassword(): string {
+    const settings = this.configService.config.encryption;
+
     return generate({
-      length: 15,
-      lowercase: true,
-      uppercase: true,
-      symbols: true,
-      numbers: true,
-      strict: true,
+      length: settings.passwordLength,
+      lowercase: settings.lowercase,
+      uppercase: settings.uppercase,
+      symbols: settings.specialChars,
+      numbers: settings.numbers,
+      strict: false,
       excludeSimilarCharacters: true
     });
   }

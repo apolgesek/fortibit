@@ -1,7 +1,7 @@
-## 1.0.0 (2022-05-02)
+## 1.1.0 (2022-05-06)
 
-* 1.0.0 ([305dd8b](https://github.com/apolgesek/fortibit/commit/305dd8b))
-* Initial commit ([18c2a0b](https://github.com/apolgesek/fortibit/commit/18c2a0b))
+* - exposed passwords feature ([58627cf](https://github.com/apolgesek/fortibit/commit/58627cf))
+* 1.0.0 (#14) ([154e817](https://github.com/apolgesek/fortibit/commit/154e817)), closes [#14](https://github.com/apolgesek/fortibit/issues/14)
 
 
 

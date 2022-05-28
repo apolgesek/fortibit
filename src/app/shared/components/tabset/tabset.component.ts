@@ -11,6 +11,7 @@ import { TabService } from '../../services/tab.service';
 export class TabsetComponent implements AfterContentInit {
   @ViewChildren('headerButton') headerButtons: QueryList<ElementRef>;
   @ContentChildren(TabComponent) tabs: QueryList<TabComponent>;
+
   public headers = [];
 
   public get activeTab(): TabComponent {
@@ -22,11 +23,10 @@ export class TabsetComponent implements AfterContentInit {
   ) { }
 
   setTab(tab: TabComponent): void {
-    this.tabService.activeTab = tab;
+    this.tabService.setActiveTab(tab);
   }
 
   ngAfterContentInit(): void {
     this.headers = this.tabs.map(x => x.header);
-    this.tabService.activeTab = this.tabs.first;
   }
 }

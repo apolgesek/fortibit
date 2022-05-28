@@ -2,20 +2,19 @@ import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { markDirty } from '@app/core/decorators/mark-dirty.decorator';
 import { IPasswordGroup } from '@app/core/models';
-import { EntryRepository, GroupRepository } from '@app/core/repositories';
+import { EntryRepository, GroupRepository, ReportRepository } from '@app/core/repositories';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { SearchService } from '@app/core/services/search.service';
 import { TreeNode } from '@circlon/angular-tree-component';
-import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { IPasswordEntry, IpcChannel, IReport } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
 import { BehaviorSubject, combineLatest, from, Observable, of, Subject } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
 import { DbContext, initialEntries } from '../database';
 import { EventType } from '../enums';
 import { NotificationService } from './notification.service';
+import { exportDB, importInto } from "dexie-export-import";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const IDBExportImport = require('indexeddb-export-import');
 interface SearchResultsModel {
   passwords: IPasswordEntry[],
   searchPhrase: string,
@@ -74,6 +73,7 @@ export class StorageService {
     private readonly notificationService: NotificationService,
     private readonly entryRepository: EntryRepository,
     private readonly groupRepository: GroupRepository,
+    private readonly reportRepository: ReportRepository,
     private readonly dbContext: DbContext,
   ) {
     this.entries$ = combineLatest([
@@ -96,6 +96,12 @@ export class StorageService {
     this.handleDatabaseLock();
     this.handleFoundAutotypeEntry();
     this.handleDatabaseSaved();
+
+    this.electronService.ipcRenderer.on(IpcChannel.Lock, () => {
+      this.zone.run(() => {
+        this.checkFileSaved(EventType.Lock);
+      });
+    });
   }
 
   @markDirty()
@@ -304,23 +310,17 @@ export class StorageService {
     this.loadedDatabaseSource.next(true);
   }
 
-  lock({ minimize = false }): void {
+  async lock({ minimize = false }): Promise<void> {
     this.isLocked = true;
 
-    this.selectedCategory = undefined;
-    this.dateSaved = undefined;
+    this.selectedCategory = null;
     this.passwordEntries = [];
     this.groups = [];
     
-    const db = this.dbContext.backendDB();
-    IDBExportImport.clearDatabase(db, (err: Error) => {
-      if (err) {
-        throw new Error('Database emptying failed.');
-      }
+    await this.dbContext.resetDb();
 
-      this.electronService.ipcRenderer.send(IpcChannel.Lock);
-      this.router.navigate(['/home'], { queryParams: { minimize } });
-    });
+    this.electronService.ipcRenderer.send(IpcChannel.Lock);
+    this.router.navigate(['/home'], { queryParams: { minimize } });
   }
 
   unlock(): void {
@@ -329,23 +329,25 @@ export class StorageService {
     this.electronService.ipcRenderer.send(IpcChannel.Unlock);
   }
 
+  async saveDatabase(newPassword?: string, config?: { forceNew: boolean }): Promise<true | Error> {
+    const blob = await exportDB(this.dbContext);
+
+    const fr = new FileReader();
+    fr.readAsText(blob);
+    fr.onloadend = () => {
+      this.electronService.ipcRenderer.send(IpcChannel.SaveFile, { database: fr.result , newPassword, config });
+    };
+
+    return true;
+  }
+
   async loadDatabase(jsonString: string) {
-    const db = this.dbContext.backendDB();
+    const blob = new Blob([jsonString]);
 
-    IDBExportImport.clearDatabase(db, (err: Error) => {
-      if (err) {
-        throw new Error('Database emptying failed.');
-      }
-  
-      IDBExportImport.importFromJsonString(db, jsonString, async (err: Error) => {
-        if (err) {
-          throw new Error('Database import failed.');
-        }
+    await importInto(this.dbContext, blob);
 
-        this.groups = await this.getGroupsTree();
-        this.setDatabaseLoaded();
-      });
-    });
+    this.groups = await this.getGroupsTree();
+    this.setDatabaseLoaded();
   }
 
   async importDatabase(name: string, entries: IPasswordEntry[]): Promise<number> {
@@ -355,19 +357,48 @@ export class StorageService {
     return this.bulkAddEntries(updated);
   }
 
-  async saveDatabase(newPassword?: string, config?: { forceNew: boolean }): Promise<true | Error> {
-    return new Promise((resolve, reject) => {
-      const db = this.dbContext.backendDB();
+  @markDirty({ updateEntries: false })
+  async scanLeaks(): Promise<any> {
+    return new Promise(async (resolve) => {
+      const blob = await exportDB(this.dbContext);
 
-      IDBExportImport.exportToJsonString(db, (err: Error, database: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          this.electronService.ipcRenderer.send(IpcChannel.SaveFile, { database, newPassword, config });
-          resolve(true);
-        }
-      });
+      const fr = new FileReader();
+      fr.readAsText(blob);
+      fr.onloadend = async () => {
+        const data = await this.electronService.ipcRenderer.invoke(IpcChannel.ScanLeaks, fr.result);
+
+        resolve(data);
+      };
     });
+  }
+
+  async getExposedPasswords(): Promise<any> {
+    const report = await this.reportRepository.getLastReport();
+
+    if (!report) {
+      return;
+    }
+
+    const reportPayload = JSON.parse(report.payload);
+    const reportIds: number[] = JSON.parse(report.payload).map(x => x.id);
+
+    const entries = await this.entryRepository.getAllByPredicate(x => reportIds.includes(x.id));
+    const groups = await this.groupRepository.getAll();
+
+    const reportedEntries = entries.map(e => {
+      return {
+        groupName: groups.find(x => x.id === e.groupId).name,
+        title: e.title,
+        username: e.username,
+        occurrences: reportPayload.find(x => x.id === e.id).occurrences,
+      }}
+    );
+
+    return { report, entries: reportedEntries };
+  }
+
+  addReport(report: IReport): Promise<number> {
+    return this.reportRepository.add(report);
   }
 
   async clearDatabase() {

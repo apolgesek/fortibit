@@ -42,13 +42,14 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
         }
       });
 
-      this.focusTrap = focusTrap.createFocusTrap(this.el.nativeElement);
+      // outside click must be enabled for any outer elements,, e.g. notification
+      this.focusTrap = focusTrap.createFocusTrap(this.el.nativeElement, { allowOutsideClick: true });
       this.focusTrap.activate();
   }
 
   ngOnDestroy(): void {
     this.focusTrap.deactivate();
-    this.focusTrap = undefined;
+    this.focusTrap = null;
 
     this.destroyed.next();
     this.destroyed.complete();

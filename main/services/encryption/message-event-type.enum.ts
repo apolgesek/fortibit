@@ -2,5 +2,6 @@ export enum MessageEventType {
   EncryptDatabase = 'encryptDatabase',
   DecryptDatabase = 'decryptDatabase',
   EncryptString = 'encryptString',
-  DecryptString = 'decryptString'
+  DecryptString = 'decryptString',
+  GetLeaks = 'getLeaks' 
 }

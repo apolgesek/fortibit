@@ -17,5 +17,11 @@ export class MenuDirective {
   ngAfterViewInit() {
     this.menuService.items = this.items.toArray();
     this.menuService.currentItem = this.items.first;
+
+    const dropdownCollection = this.items.toArray();
+
+    for (let index = 0; index < dropdownCollection.length; index++) {
+      dropdownCollection[index].index = index;
+    }
   }
 }

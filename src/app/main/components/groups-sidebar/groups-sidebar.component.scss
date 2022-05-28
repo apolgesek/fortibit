@@ -78,7 +78,7 @@
 
           &-active, &-focused {
             box-shadow: none;
-            background-color: darken($curious-blue-light, 2);
+            background-color: $curious-blue-light;
           }
 
           .node-group {
@@ -197,6 +197,7 @@
 
   .rename-group {
     @include font-regular;
+    background: $curious-blue-light;
     width: 9.5rem;
     border: none;
     padding: 0.25rem;

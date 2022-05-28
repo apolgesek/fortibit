@@ -27,6 +27,7 @@ export class SingleInstanceServices extends ServiceCollection {
       this.get(IEncryptionProcessService),
       this.get(IPerformanceService),
       this.get(ISendInputService),
+      this.get(INativeApiService)
     ));
   
     this.set(IDatabaseService, new DatabaseService(

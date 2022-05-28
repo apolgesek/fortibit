@@ -1,8 +1,10 @@
 @import 'variables';
+@import 'mixins';
 
-.compression {
+.container {
   flex-direction: column;
   flex: 1;
+  padding-right: 1.5rem;
 }
 
 .switch {
@@ -59,4 +61,31 @@ input:checked + .slider:before {
   -webkit-transform: translateX(22px);
   -ms-transform: translateX(22px);
   transform: translateX(22px);
+}
+
+.label {
+  flex: 1;
+}
+
+.inputgroup .number {
+  width: 2.5rem;
+}
+
+.validation-error {
+  margin-left: 0;
+}
+
+.inputgroup {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+
+  input {
+    padding: 0.5rem;
+    background-color: $porcelain;
+  }
+}
+
+.description {
+  margin-top: 0;
 }

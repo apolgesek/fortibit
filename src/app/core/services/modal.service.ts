@@ -12,6 +12,7 @@ import { EventType } from '../enums';
 import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { ModalManager } from '@app/core/services/modal-manager';
+import { CheckExposedPasswordsComponent } from '@app/main/components/dialogs/check-exposed-passwords/check-exposed-passwords.component';
 
 @Injectable({
   providedIn: 'root'
@@ -73,6 +74,10 @@ export class ModalService {
 
   openImportedDbMetadataWindow(metadata: any) {
     this.modalManager.open(ImportDatabaseMetadataComponent, { payload: metadata });
+  }
+
+  openExposedPasswordsWindow() {
+    this.modalManager.open(CheckExposedPasswordsComponent);
   }
 }
 
