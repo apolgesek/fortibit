@@ -29,5 +29,9 @@ export enum IpcChannel {
   Import = 'import',
   GetImportedDatabaseMetadata = 'getImportedDatabaseMetadata',
   ScanLeaks = 'scanLeaks',
-  ChangeEncryptionSettings = 'changeEncryptionSettings'
+  ChangeEncryptionSettings = 'changeEncryptionSettings',
+  TryGetIcon = 'tryGetIcon',
+  TryReplaceIcon = 'tryReplaceIcon',
+  RemoveIcon = 'removeIcon',
+  UpdateIcon = 'updateIcon'
 }

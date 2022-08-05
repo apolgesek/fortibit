@@ -89,11 +89,13 @@
 					background-color: $porcelain;
 				}
 
-				&.quit-icon:hover {
-					background-color: $red-orange;
-
-					img {
-						filter: brightness(0) invert(1);
+				&.quit-icon {
+					&:hover {
+						background-color: $red-orange;
+	
+						img {
+							filter: invert(1);
+						}
 					}
 				}
 			}

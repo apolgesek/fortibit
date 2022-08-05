@@ -6,10 +6,10 @@
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "target": "es5",
+    "target": "ES2015",
     "typeRoots": [
       "node_modules/@types"
     ],
@@ -20,6 +20,7 @@
   },
   "exclude": [
     "node_modules",
-    ".angular"
+    ".angular",
+    "main"
   ],
 }

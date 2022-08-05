@@ -4,6 +4,6 @@ import { createServiceDecorator } from '../../dependency-injection/create-servic
 export const IEncryptionProcessService = createServiceDecorator<IEncryptionProcessService>('encryptionProcessService');
 
 export interface IEncryptionProcessService {
-  processEventAsync(event: Serializable): Promise<Serializable>;
+  processEventAsync(event: Serializable, key: string): Promise<Serializable>;
   createEncryptionProcess(): Promise<ChildProcess>;
 }

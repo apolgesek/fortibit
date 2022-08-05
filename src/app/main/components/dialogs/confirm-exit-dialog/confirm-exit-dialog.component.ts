@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component, ComponentRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, Inject } from '@angular/core';
 import { StorageService } from '@app/core/services/storage.service';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { IpcChannel } from '@shared-renderer/index';
 import { MasterPasswordDialogComponent } from '../master-password-dialog/master-password-dialog.component';
 import { IAdditionalData, IModal } from '@app/shared';
 import { EventType } from '@app/core/enums';
 import { ModalManager } from '@app/core/services/modal-manager';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '@app/core/models';
 
 @Component({
   selector: 'app-confirm-exit-dialog',
@@ -18,7 +19,7 @@ export class ConfirmExitDialogComponent implements IModal {
   public readonly additionalData!: IAdditionalData;
 
   constructor(
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly storageService: StorageService,
     private readonly modalManager: ModalManager,
   ) { }
@@ -29,7 +30,7 @@ export class ConfirmExitDialogComponent implements IModal {
       this.close();
 
     } else {
-      this.electronService.ipcRenderer.once(IpcChannel.GetSaveStatus, () => {
+      this.communicationService.ipcRenderer.once(IpcChannel.GetSaveStatus, () => {
         setTimeout(() => {
           this.executeTask();
         }, 500);

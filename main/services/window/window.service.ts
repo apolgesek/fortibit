@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, powerMonitor } from 'electron';
-import { uptime } from 'os';
+import { randomBytes } from 'crypto';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, powerMonitor, safeStorage } from 'electron';
 import { join } from 'path';
 import { format } from 'url';
 import { IpcChannel } from '../../../shared-models';
 import { EventType } from '../../../src/app/core/enums';
 import { ProcessArgument } from '../../process-argument.enum';
 import { IConfigService } from '../config';
-import { IEncryptionProcessService, Keys, MessageEventType } from '../index';
+import { IEncryptionProcessService, MessageEventType } from '../encryption';
 import { INativeApiService } from '../native';
 import { IPerformanceService } from '../performance/performance-service.model';
-import { ISendInputService } from '../send-input';
+import { ISendInputService, Keys } from '../send-input';
 import { IWindowService } from './';
+import { IWindow } from './window-model';
 
 const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
 const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
@@ -19,10 +20,10 @@ const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
 export class WindowService implements IWindowService {
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
   private readonly _isTestMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E));
-  private readonly _windows: BrowserWindow[] = [];
+  private readonly _windows: IWindow[] = [];
   private _idleTimer: NodeJS.Timeout;
 
-  get windows(): BrowserWindow[] {
+  get windows(): IWindow[] {
     return this._windows;
   }
 
@@ -34,15 +35,15 @@ export class WindowService implements IWindowService {
     @INativeApiService private readonly _nativeApiService: INativeApiService
   ) {
     ipcMain.on(IpcChannel.TryClose, (ipcEvent: IpcMainEvent, event?: EventType, payload?: unknown) => {
-      const win = this._windows.find(x => x.webContents.id === ipcEvent.sender.id);
+      const win = this._windows.find(x => x.browserWindow.webContents.id === ipcEvent.sender.id);
   
-      win.focus();
-      win.webContents.send(IpcChannel.OpenCloseConfirmationWindow, event, payload);
+      win.browserWindow.focus();
+      win.browserWindow.webContents.send(IpcChannel.OpenCloseConfirmationWindow, event, payload);
     });
 
     ipcMain.on(IpcChannel.Exit, (event: IpcMainEvent) => {
-      const win = this._windows.find(x => x.webContents.id === event.sender.id);
-      win.close();
+      const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
+      win.browserWindow.close();
     });
 
     ipcMain.on(IpcChannel.Lock, (event: IpcMainEvent) => {
@@ -50,45 +51,45 @@ export class WindowService implements IWindowService {
     });
 
     ipcMain.on(IpcChannel.Unlock, (event: IpcMainEvent) => {
-      const win = this._windows.find(x => x.webContents.id === event.sender.id);
+      const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
 
-      win.setOverlayIcon(null, '');
-      win.unhookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP);
-      win.unhookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP);
-      this._nativeApiService.unsetIconicBitmap(win.getNativeWindowHandle());
+      win.browserWindow.setOverlayIcon(null, '');
+      win.browserWindow.unhookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP);
+      win.browserWindow.unhookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP);
+      this._nativeApiService.unsetIconicBitmap(win.browserWindow.getNativeWindowHandle());
     });
 
     ipcMain.on(IpcChannel.Minimize, (event: IpcMainEvent) => {
-      const win = this._windows.find(x => x.webContents.id === event.sender.id);
-      win.minimize();
+      const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
+      win.browserWindow.minimize();
     });
 
     ipcMain.on(IpcChannel.Maximize, (event: IpcMainEvent) => {
-      const win = this._windows.find(x => x.webContents.id === event.sender.id);
-      win.isMaximized() ? win.unmaximize() : win.maximize();
+      const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
+      win.browserWindow.isMaximized() ? win.browserWindow.unmaximize() : win.browserWindow.maximize();
     });
 
     ipcMain.on(IpcChannel.Close, (event: IpcMainEvent) => {
-      const win = this._windows.find(x => x.webContents.id === event.sender.id);
+      const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
     
-      if (win.webContents.isDevToolsOpened()) {
-        win.webContents.closeDevTools();
+      if (win.browserWindow.webContents.isDevToolsOpened()) {
+        win.browserWindow.webContents.closeDevTools();
       }
 
-      win.close();
+      win.browserWindow.close();
     });
   }
 
   getWindow(index: number): BrowserWindow {
-    return this._windows[index];
+    return this._windows[index].browserWindow;
   }
 
-  getWindowByWebContentsId(id: number): BrowserWindow {
-    return this._windows.find(x => x.webContents.id === id);
+  getWindowByWebContentsId(id: number): IWindow {
+    return this._windows.find(x => x.browserWindow.webContents.id === id);
   }
 
   removeWindow(window: BrowserWindow) {
-    const index = this._windows.findIndex(x => x === window);
+    const index = this._windows.findIndex(x => x.browserWindow === window);
     this._windows.splice(index, 1);
   }
 
@@ -110,13 +111,17 @@ export class WindowService implements IWindowService {
         devTools: this._isDevMode,
         backgroundThrottling: false,
         partition: `persist:${timestamp}`,
-        v8CacheOptions: 'bypassHeatCheck',
+        v8CacheOptions: 'code',
         enableWebSQL: false,
         spellcheck: false,
+        webgl: false,
+        webSecurity: !this._isDevMode
       },
     });
 
-    this._isDevMode && window.webContents.openDevTools();
+    if (this._isDevMode) {
+      window.webContents.openDevTools({ mode: 'detach' });
+    }
 
     window.on('maximize', () => {
       window.webContents.send('windowMaximized', true);
@@ -126,7 +131,11 @@ export class WindowService implements IWindowService {
       window.webContents.send('windowMaximized', false);
     });
 
-    this._windows.push(window);
+    // generate random key to be used for in memory encryption of db entries
+    const key = randomBytes(32).toString('base64');
+    const secureKey = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(key).toString('base64') : key;
+
+    this._windows.push({ browserWindow: window, key: secureKey });
 
     // log performance only for the first window when the app initializes
     if (window.id === 1) {
@@ -169,10 +178,10 @@ export class WindowService implements IWindowService {
           const encryptionEvent = {
             type: MessageEventType.DecryptString,
             encrypted: entry.password,
-            memoryKey: global['__memKey']
+            memoryKey: win.key
           };
           
-          const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { decrypted: string };
+          const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent, win.key) as { decrypted: string };
 
           await this._sendInputService.sleep(200);
           await this._sendInputService.typeWord(entry.username);
@@ -180,16 +189,16 @@ export class WindowService implements IWindowService {
           await this._sendInputService.typeWord(payload.decrypted);
           await this._sendInputService.pressKey(Keys.Enter);
   
-          windowsListeners.forEach((l, i) => this._windows[i].webContents.off('ipc-message', l));
+          windowsListeners.forEach((l, i) => this._windows[i].browserWindow.webContents.off('ipc-message', l));
         }
       };
 
       windowsListeners.push(listener);
-      win.webContents.on('ipc-message', listener);
+      win.browserWindow.webContents.on('ipc-message', listener);
     });
 
     this._windows.forEach((win) => {
-      win.webContents.send(IpcChannel.GetAutotypeFoundEntry, activeWindowTitle);
+      win.browserWindow.webContents.send(IpcChannel.GetAutotypeFoundEntry, activeWindowTitle);
     });
   }
 
@@ -198,28 +207,32 @@ export class WindowService implements IWindowService {
 
     this._idleTimer = setInterval(() => {
       if (powerMonitor.getSystemIdleTime() > this._configService.appConfig.idleSeconds) {
-        this.windows.find(x => x.webContents.id === windowId).webContents.send(IpcChannel.Lock);
+        this.windows.find(x => x.browserWindow.webContents.id === windowId).browserWindow.webContents.send(IpcChannel.Lock);
         clearInterval(this._idleTimer);
       }
     }, 1000);
   }
 
-  private onLock(windowId: number) {
-    const win = this._windows.find(x => x.webContents.id === windowId);
-    const appIcon = nativeImage.createFromPath(join(global['__basedir'], 'assets', 'forbidden.png'));
-    win.setOverlayIcon(appIcon, 'Database locked');
+  setTitle(windowId: number, title: string): void {
+    this.windows.find(x => x.browserWindow.id === windowId).browserWindow.setTitle(`${title} - Fortibit`);
+  }
 
-    const windowHandle = win.getNativeWindowHandle();
+  private onLock(windowId: number) {
+    const win = this._windows.find(x => x.browserWindow.webContents.id === windowId);
+    const appIcon = nativeImage.createFromPath(join(global['__basedir'], 'assets', 'forbidden.png'));
+    win.browserWindow.setOverlayIcon(appIcon, 'Database locked');
+
+    const windowHandle = win.browserWindow.getNativeWindowHandle();
     this._nativeApiService.setIconicBitmap(windowHandle);
     
     const iconPath = join(app.getAppPath(), 'assets', 'icon.bmp');
     this._nativeApiService.setThumbnailBitmap(windowHandle, iconPath);
 
-    win.hookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP, () => {
+    win.browserWindow.hookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP, () => {
       this._nativeApiService.setThumbnailBitmap(windowHandle, iconPath);
     });
 
-    win.hookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP, () => {
+    win.browserWindow.hookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP, () => {
       this._nativeApiService.setLivePreviewBitmap(windowHandle, iconPath);
     });
 

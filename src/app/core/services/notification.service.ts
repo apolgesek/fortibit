@@ -1,6 +1,7 @@
-import { ApplicationRef, ComponentFactoryResolver, ComponentRef, EmbeddedViewRef, Injectable, Injector, Renderer2, RendererFactory2 } from '@angular/core';
+import { ApplicationRef, ComponentRef, EmbeddedViewRef, Injectable, Renderer2, RendererFactory2, ViewContainerRef } from '@angular/core';
 import { NotificationComponent } from '@app/shared/components/notification/notification.component';
 import { IToastModel } from '../models';
+import { AppViewContainer } from './app-view-container';
 
 @Injectable({
   providedIn: 'root'
@@ -11,9 +12,8 @@ export class NotificationService {
 
   constructor(
     private readonly rendererFactory: RendererFactory2,
-    private readonly componentFactoryResolver: ComponentFactoryResolver,
-    private readonly injector: Injector,
     private readonly appRef: ApplicationRef,
+    private readonly appViewContainer: AppViewContainer
   ) {
     this.renderer = this.rendererFactory.createRenderer(null, null);
   }
@@ -26,8 +26,7 @@ export class NotificationService {
 
     this.toasts = [];
 
-    const componentRef = this.componentFactoryResolver.resolveComponentFactory(NotificationComponent).create(this.injector);
-    this.appRef.attachView(componentRef.hostView);
+    const componentRef = this.appViewContainer.getRootViewContainer().createComponent(NotificationComponent);
     const instance = componentRef.instance as NotificationComponent;
 
     instance.model = model;

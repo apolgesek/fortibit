@@ -1,14 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { NotificationService } from '@app/core/services/notification.service';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '../models';
 @Injectable({
   providedIn: 'root'
 })
 
 export class ClipboardService {
   constructor(
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly notificationService: NotificationService,
   ) {}
 
@@ -16,11 +17,11 @@ export class ClipboardService {
     let value = entry[property];
 
     if (property === 'password') {
-      value = await this.electronService.ipcRenderer.invoke(IpcChannel.DecryptPassword, entry[property]);
+      value = await this.communicationService.ipcRenderer.invoke(IpcChannel.DecryptPassword, entry[property]);
     }
 
     entry.lastAccessDate = new Date();
-    const isCopied = await this.electronService.ipcRenderer.invoke(IpcChannel.CopyCliboard, value);
+    const isCopied = await this.communicationService.ipcRenderer.invoke(IpcChannel.CopyCliboard, value);
 
     if (isCopied) {
       this.notificationService.add({

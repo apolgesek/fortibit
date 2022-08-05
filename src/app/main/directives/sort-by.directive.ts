@@ -1,5 +1,6 @@
 import { AfterViewInit, Directive, ElementRef, HostBinding, HostListener, Input, OnDestroy, Renderer2 } from '@angular/core';
 import { Sort } from '@app/core/enums';
+import { StorageService } from '@app/core/services';
 import { SearchService } from '@app/core/services/search.service';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { Subject } from 'rxjs';

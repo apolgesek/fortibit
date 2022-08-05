@@ -3,6 +3,7 @@ import { ModalManager } from '@app/core/services/modal-manager';
 import { ConfigService } from '@app/core/services/config.service';
 import { IAdditionalData, IModal } from '@app/shared';
 import { IAppConfig } from '../../../../../../app-config';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-about-dialog',
@@ -12,13 +13,17 @@ import { IAppConfig } from '../../../../../../app-config';
 export class AboutDialogComponent implements IModal {
   public readonly ref!: ComponentRef<AboutDialogComponent>;
   public readonly additionalData!: IAdditionalData;
-  public readonly config: IAppConfig;
+  public config: IAppConfig;
 
   constructor(
     private readonly modalManager: ModalManager,
     private readonly configService: ConfigService
-  ) {
-    this.config = this.configService.config as IAppConfig;
+  ) {}
+
+  ngOnInit() {
+    this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
+      this.config = config as IAppConfig;
+    });
   }
 
   close() {

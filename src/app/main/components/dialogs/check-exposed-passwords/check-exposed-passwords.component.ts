@@ -1,5 +1,6 @@
-import { Component, ComponentRef } from '@angular/core';
-import { ElectronService } from '@app/core/services';
+import { Component, ComponentRef, Inject } from '@angular/core';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '@app/core/models';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { StorageService } from '@app/core/services/storage.service';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -25,7 +26,7 @@ export class CheckExposedPasswordsComponent implements IModal {
   constructor(
     private readonly modalManager: ModalManager,
     private readonly storageService: StorageService,
-    private readonly electronService: ElectronService
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService
   ) { }
 
   close() {
@@ -63,7 +64,7 @@ export class CheckExposedPasswordsComponent implements IModal {
   }
 
   openUrl(url: string) {
-    this.electronService.ipcRenderer.send(IpcChannel.OpenUrl, url);
+    this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, url);
   }
 
   private async getLastReport() {

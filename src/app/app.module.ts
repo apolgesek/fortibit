@@ -6,16 +6,18 @@ import '../polyfills';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
-import { IHotkeyHandler } from './core/models';
+import { ICommunicationService, IHotkeyHandler } from './core/models';
+import { ClipboardService } from './core/services/clipboard.service';
+import { ElectronService } from './core/services/electron/electron.service';
+import { WebService } from './core/services/electron/web.service';
+import { WindowsHotkeyHandler } from './core/services/hotkey/windows-hotkey-handler';
+import { ModalService } from './core/services/modal.service';
+import { StorageService } from './core/services/storage.service';
 import { MainModule } from './main/main.module';
 import { SharedModule } from './shared/shared.module';
-import { WindowsHotkeyHandler } from './core/services/hotkey/windows-hotkey-handler';
-import { ElectronService } from './core/services/electron/electron.service';
-import { StorageService } from './core/services/storage.service';
-import { ModalService } from './core/services/modal.service';
-import { ClipboardService } from './core/services/clipboard.service';
 
 export const HotkeyHandler = new InjectionToken<IHotkeyHandler>('hotkeyHandler');
+export const CommunicationService = new InjectionToken<ICommunicationService>('communicationService');
 
 @NgModule({
   declarations: [AppComponent],
@@ -29,27 +31,38 @@ export const HotkeyHandler = new InjectionToken<IHotkeyHandler>('hotkeyHandler')
   ],
   providers: [
     {
+      provide: CommunicationService,
+      useFactory: () => {
+        if (!!(window && window.process && window.process.type)) {
+          return new ElectronService();
+        } else {
+          return new WebService();
+        }
+      }
+    },
+    {
       provide: HotkeyHandler,
       useFactory: (
-        electronService: ElectronService,
+        electronService: ICommunicationService,
         storageService: StorageService,
         modalService: ModalService,
         clipboardService: ClipboardService
       ) => {
         switch (electronService.os.platform()) {
           case 'win32':
+          case 'web':
             return new WindowsHotkeyHandler(storageService, modalService, clipboardService);
           default:
             throw new Error('HotkeyHandler: Unsupported platform');
         }
       },
       deps: [
-        ElectronService,
+        CommunicationService,
         StorageService,
         ModalService,
         ClipboardService
       ]
-    }
+    },
   ],
   bootstrap: [AppComponent]
 })

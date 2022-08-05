@@ -7,9 +7,9 @@ import { IEncryptionProcessService } from './encryption-process-service.model';
 export class EncryptionProcessService implements IEncryptionProcessService {
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
 
-  public async processEventAsync(event): Promise<Serializable> {
+  public async processEventAsync(event, key): Promise<Serializable> {
     const process = await this.createEncryptionProcess();
-    process.send({...event, memoryKey: this.getMemoryKey(global['__memKey']) });
+    process.send({...event, memoryKey: this.getMemoryKey(key) });
 
     return new Promise((resolve) => {
       process.once('message', (result) => {
@@ -29,7 +29,7 @@ export class EncryptionProcessService implements IEncryptionProcessService {
     });
   }
 
-  private getMemoryKey(key: Buffer | string): string {
-    return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(key as Buffer) : key as string;
+  private getMemoryKey(key: string): string {
+    return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(Buffer.from(key, 'base64')) : key;
   }
 }

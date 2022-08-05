@@ -9,6 +9,7 @@ import { app } from 'electron';
 import { createHash } from 'crypto';
 import { IpcChannel, UpdateState } from '../../../shared-models';
 import { IConfigService } from '../config';
+import { IFileService } from '../file';
 
 interface UpdateInformation {
   version: string;
@@ -26,7 +27,8 @@ export class Win32UpdateService implements IUpdateService {
 
   constructor(
     @IConfigService private readonly _configService: IConfigService,
-    @IWindowService private readonly _windowService: IWindowService
+    @IWindowService private readonly _windowService: IWindowService,
+    @IFileService private readonly _fileService: IFileService
   ) {
     this.updateDirectory = join(app.getPath('appData'), this._configService.appConfig.name.toLowerCase(), 'update');
   }
@@ -88,8 +90,8 @@ export class Win32UpdateService implements IUpdateService {
   }
 
   async updateAndRelaunch(): Promise<void> {
-    this._windowService.windows.forEach(w => {
-      w.hide();
+    this._windowService.windows.forEach(window => {
+      window.browserWindow.hide();
     });
 
     this.spawnUpdateProcess();
@@ -134,27 +136,19 @@ export class Win32UpdateService implements IUpdateService {
     app.quit();
   }
 
-  private async getUpdate(): Promise<void> {
+  private async getUpdate(): Promise<string> {
     this.cleanup();
 
-    const file = createWriteStream(this._updateDestinationPath);
+    const onError = () => {
+      this.cleanup();
+    };
 
-    const req = request(this._updateInformation.url, res => {
-      const stream = res.pipe(file);
+    const onFinish = () => {
+      renameSync(this._updateDestinationPath, this.getExecutablePath(this._updateDestinationPath));
+      this.validateUpdateFile();
+    };
 
-      stream.on('error', () => {
-        this.cleanup();
-      });
-
-      stream.on('finish', () => {
-        renameSync(this._updateDestinationPath, this.getExecutablePath(this._updateDestinationPath));
-        this.validateUpdateFile();
-      });
-    }).on('error', (err) => {
-      console.log(err.message);
-    });
-
-    req.end();
+    return this._fileService.download(this._updateInformation.url, this._updateDestinationPath, onError, onFinish);
   }
 
   private cleanup() {
@@ -189,8 +183,8 @@ export class Win32UpdateService implements IUpdateService {
   private setUpdateState(state: UpdateState) {
     this._updateState = state;
 
-    this._windowService.windows.forEach(w => {
-      w.webContents.send(IpcChannel.UpdateState, this.updateState, this._updateInformation.version);
+    this._windowService.windows.forEach(window => {
+      window.browserWindow.webContents.send(IpcChannel.UpdateState, this.updateState, this._updateInformation.version);
     });
   }
 }

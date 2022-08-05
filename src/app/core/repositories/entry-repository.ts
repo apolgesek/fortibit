@@ -46,12 +46,15 @@ export class EntryRepository implements IEntryRepository {
   }
 
   update(item: Partial<IPasswordEntry>): Promise<number> {
-    return this.db.transaction('rw', this.db.entries, () => {
+    return this.db.transaction('rw', this.db.entries, async () => {
       if (!item.id) {
         throw new Error('No id provided for the entry to update');
       }
+
+      const originalItem = await this.get(item.id);
+      const updatedItem = { ...originalItem, ...item };
   
-      return this.db.entries.update(item.id, {...item});
+      return this.db.entries.put(updatedItem, item.id);
     });
   }
 

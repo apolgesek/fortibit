@@ -8,7 +8,12 @@
 	font-family: 'roboto-medium';
 	src: url('~assets/fonts/roboto-medium.woff2') format('woff2'),
 	url('~assets/fonts/roboto-medium.woff') format('woff');
-	font-weight: bold;
+}
+
+@font-face {
+	font-family: 'roboto-bold';
+	src: url('~assets/fonts/roboto-bold.woff2') format('woff2'),
+	url('~assets/fonts/roboto-bold.woff') format('woff');
 }
 
 @mixin font-regular {
@@ -17,6 +22,10 @@
 
 @mixin font-medium {
   font-family: 'roboto-medium', sans-serif;
+}
+
+@mixin font-bold {
+  font-family: 'roboto-bold', sans-serif;
 }
 
 @mixin scrollbar {

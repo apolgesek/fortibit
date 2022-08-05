@@ -1,16 +1,18 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ComponentRef, ElementRef, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ComponentRef, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '@app/core/models';
+import { ConfigService } from '@app/core/services';
 import { ModalManager } from '@app/core/services/modal-manager';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
-import { IpcChannel } from '@shared-renderer/index';
-import { fromEvent, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
 import { IAdditionalData, IModal } from '@app/shared';
-import { generate } from 'generate-password';
 import { valueMatchValidator } from '@app/shared/validators';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
-import { ConfigService } from '@app/core/services';
+import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { generate } from 'generate-password';
+import { fromEvent, Subject } from 'rxjs';
+import { filter, take, takeUntil } from 'rxjs/operators';
+import { IAppConfig } from '../../../../../../app-config';
 
 @Component({
   selector: 'app-entry-dialog',
@@ -23,6 +25,8 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   public newEntryForm: FormGroup;
   public passwordScore = -1;
+  public config: IAppConfig;
+  public saveLocked = false;
 
   public readonly ref!: ComponentRef<EntryDialogComponent>;
   public readonly additionalData!: IAdditionalData;
@@ -33,7 +37,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   constructor(
     private readonly fb: FormBuilder,
     private readonly storageService: StorageService,
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly configService: ConfigService,
     private readonly modalManager: ModalManager,
   ) {
@@ -86,12 +90,20 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   }
 
   ngOnInit() {
+    this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
+      this.config = config;
+
+      this.prefillForm();
+    });
+
     fromEvent(window, 'keydown').pipe(takeUntil(this.destroyed$)).subscribe((event: Event) => {
       if ((event as KeyboardEvent).key === 'Escape') {
         this.close();
       }
     });
+  }
 
+  private prefillForm() {
     if (this.storageService.editedEntry) {
       this.fillExistingEntry();
     } else {
@@ -101,7 +113,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     const password = this.newEntryForm.get('passwords.password')?.value;
 
     if (password) {
-      this.passwordScore = this.electronService.zxcvbn(password).score;
+      this.passwordScore = this.communicationService.zxcvbn(password).score;
     }
   }
 
@@ -120,7 +132,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   onPasswordChange(event: Event) {
     const password = (event.target as HTMLInputElement).value;
-    this.passwordScore = this.electronService.zxcvbn(password).score;
+    this.passwordScore = this.communicationService.zxcvbn(password).score;
   }
 
   ngOnDestroy(): void {
@@ -139,7 +151,9 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
       return;
     }
 
-    const encryptedPassword = await this.electronService.ipcRenderer.invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
+    this.saveLocked = true;
+
+    const encryptedPassword = await this.communicationService.ipcRenderer.invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
     const formData = this.newEntryForm.value;
 
     if (this.storageService.editedEntry?.id) {
@@ -151,7 +165,9 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
         notes: formData.notes,
         password: encryptedPassword,
         lastModificationDate: new Date(),
+        iconPath: this.storageService.editedEntry.iconPath
       });
+
     } else {
       const newEntry = {
         title: formData.title,
@@ -161,10 +177,10 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
         password: encryptedPassword,
         creationDate: new Date(),
         groupId: this.storageService.selectedCategory.data.id,
-        isStarred: false
+        isStarred: false,
       };
 
-      await this.storageService.addOrUpdateEntry(newEntry);
+      const id = await this.storageService.addOrUpdateEntry(newEntry);
     }
 
     this.close();
@@ -172,7 +188,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   async close() {
     if (this.storageService.editedEntry) {
-      const encrypted = await this.electronService.ipcRenderer
+      const encrypted = await this.communicationService.ipcRenderer
         .invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
 
       this.storageService.editedEntry.password = encrypted;
@@ -206,7 +222,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   }
 
   private generatePassword(): string {
-    const settings = this.configService.config.encryption;
+    const settings = this.config.encryption;
 
     return generate({
       length: settings.passwordLength,

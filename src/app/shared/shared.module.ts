@@ -15,6 +15,8 @@ import { SidebarHandleDirective } from './directives/sidebar-handle.directive';
 import { ModalComponent } from './index';
 import { TabsetComponent } from './components/tabset/tabset.component';
 import { TabComponent } from './components/tab/tab.component';
+import { FocusableListDirective } from './directives/focusable-list.directive';
+import { FocusableListItemDirective } from './directives/focusable-list-item.directive';
 
 @NgModule({
   declarations: [
@@ -31,6 +33,8 @@ import { TabComponent } from './components/tab/tab.component';
     MenuDirective,
     TabsetComponent,
     TabComponent,
+    FocusableListDirective,
+    FocusableListItemDirective,
   ],
   imports: [BrowserAnimationsModule, CommonModule, ReactiveFormsModule],
   exports: [

@@ -26,6 +26,7 @@ export class ConfigService implements IConfigService {
       commit: productInformation.commit,
       updateUrl: productInformation.updateUrl,
       webUrl: productInformation.webUrl,
+      staticContentUrl: productInformation.staticContentUrl,
       leakedPasswordsUrl: productInformation.leakedPasswordsUrl,
       temporaryFileExtension: productInformation.temporaryFileExtension,
       compressionEnabled: productInformation.compressionEnabled,
@@ -41,7 +42,8 @@ export class ConfigService implements IConfigService {
         passwordLength: productInformation.encryption.passwordLength ?? 15,
       },
       idleSeconds: productInformation.idleSeconds ?? 600,
-      lockOnSystemLock: productInformation.lockOnSystemLock ?? true
+      lockOnSystemLock: productInformation.lockOnSystemLock ?? true,
+      displayIcons: productInformation.displayIcons ?? true
     };
   }
 

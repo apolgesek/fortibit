@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { ConfigService, ElectronService, ModalService, NotificationService, StorageService } from '@app/core/services';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '@app/core/models';
+import { ConfigService, ModalService, NotificationService, StorageService } from '@app/core/services';
 import { valueMatchValidator } from '@app/shared/validators';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
@@ -39,7 +41,7 @@ export class PasswordChangeTabComponent {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly storageService: StorageService,
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly modalService: ModalService,
     private readonly notificationService: NotificationService,
     private readonly configService: ConfigService
@@ -80,11 +82,12 @@ export class PasswordChangeTabComponent {
         numbers: true,
       },
       idleSeconds: 600,
-      lockOnSystemLock: true
+      lockOnSystemLock: true,
+      displayIcons: true
     } as Partial<IProduct>;
 
-    this.electronService.ipcRenderer.send(IpcChannel.ChangeEncryptionSettings, configPartial);
-    this.configService.config = { ...this.configService.config, ...configPartial };
+    this.communicationService.ipcRenderer.send(IpcChannel.ChangeEncryptionSettings, configPartial);
+    this.configService.setConfig(configPartial);
 
     this.notificationService.add({
       type: 'success',
@@ -97,7 +100,7 @@ export class PasswordChangeTabComponent {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       const password = control.value;
 
-      return from(this.electronService.ipcRenderer.invoke(IpcChannel.ValidatePassword, password))
+      return from(this.communicationService.ipcRenderer.invoke(IpcChannel.ValidatePassword, password))
         .pipe(
           tap(() => control.markAsPristine()),
           delay(300),

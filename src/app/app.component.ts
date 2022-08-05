@@ -1,14 +1,15 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { DOCUMENT } from '@angular/common';
-import { Component, HostListener, Inject, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { ChildrenOutletContexts, NavigationStart, Router } from '@angular/router';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { fromEvent, Observable } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { AppConfig } from '../environments/environment';
+import { CommunicationService } from './app.module';
 import { EventType } from './core/enums';
-import { ModalManager } from './core/services';
+import { ICommunicationService } from './core/models';
+import { AppViewContainer, ModalManager } from './core/services';
 
 export const routeAnimations = trigger("routeAnimations", [
 	transition("masterPasswordPage => dashboardPage", [
@@ -55,6 +56,7 @@ export const routeAnimations = trigger("routeAnimations", [
 })
 export class AppComponent implements OnInit {
   public fontsLoaded = false;
+  public isElectron = false;
 
   get isDatabaseLoaded(): Observable<boolean> {
     return this.storageService.loadedDatabase$;
@@ -66,14 +68,18 @@ export class AppComponent implements OnInit {
   }
 
   constructor(
-    public readonly electronService: ElectronService,
+    @Inject(CommunicationService) public readonly communicationService: ICommunicationService,
     private readonly storageService: StorageService,
     private readonly contexts: ChildrenOutletContexts,
     private readonly router: Router,
     private readonly modalManager: ModalManager,
+    private readonly appViewContainer: AppViewContainer,
+    private readonly viewContainerRef: ViewContainerRef,
     @Inject(DOCUMENT) private document: Document,
   ) {
     console.log('AppConfig', AppConfig);
+    this.isElectron = this.communicationService.os.platform() != 'web';
+    this.appViewContainer.appViewContainerRef = this.viewContainerRef;
   }
 
   ngOnInit() {
@@ -94,6 +100,7 @@ export class AppComponent implements OnInit {
     const fontsArray = []
     document.fonts.forEach(x => fontsArray.push(x));
 
+    console.log(fontsArray);
     return Promise.all(fontsArray.map(x => x.status === 'unloaded' && x.load()));
   }
 

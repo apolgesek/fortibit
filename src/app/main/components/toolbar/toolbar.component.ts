@@ -1,11 +1,12 @@
-import { Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, NgZone, ViewChild } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { SearchService } from '@app/core/services/search.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { IpcChannel, UpdateState } from '@shared-renderer/index';
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { scan, startWith, takeUntil, tap } from 'rxjs/operators';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '@app/core/models';
 
 interface INotification {
   type: 'update';
@@ -72,7 +73,7 @@ export class ToolbarComponent {
     private readonly storageService: StorageService,
     private readonly searchService: SearchService,
     private readonly modalService: ModalService,
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly zone: NgZone
   ) {
     this.notifications$ = this.notificationsSource.asObservable()
@@ -90,7 +91,7 @@ export class ToolbarComponent {
       });
     };
 
-    this.electronService.ipcRenderer.on(IpcChannel.UpdateState, this.updateListener);
+    this.communicationService.ipcRenderer.on(IpcChannel.UpdateState, this.updateListener);
   }
 
   ngAfterViewInit(): void {
@@ -98,7 +99,7 @@ export class ToolbarComponent {
   }
 
   ngOnDestroy() {
-    this.electronService.ipcRenderer.off(IpcChannel.UpdateState, this.updateListener);
+    this.communicationService.ipcRenderer.off(IpcChannel.UpdateState, this.updateListener);
 
     this.destroyed$.next();
     this.destroyed$.complete();
@@ -120,7 +121,7 @@ export class ToolbarComponent {
   trySaveDatabase() {
     !this.storageService.file
       ? this.modalService.openMasterPasswordWindow()
-      : this.storageService.saveDatabase();
+      : this.storageService.saveDatabase(null, { notify: true });
   }
 
   toggleSearchMode() {
@@ -129,7 +130,7 @@ export class ToolbarComponent {
   }
 
   updateAndRelaunch() {
-    this.electronService.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
+    this.communicationService.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
   }
 
   openSettings() {

@@ -5,10 +5,12 @@ export interface IProduct {
   temporaryFileExtension: string;
   commit: string;
   webUrl: string;
+  staticContentUrl: string;
   updateUrl: string;
   leakedPasswordsUrl: string;
   compressionEnabled: boolean;
   encryption: IEncryptionSettings;
   idleSeconds: number;
   lockOnSystemLock: boolean;
+  displayIcons: boolean;
 }

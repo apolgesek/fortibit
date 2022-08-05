@@ -1,15 +1,19 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { randomBytes } from 'crypto';
-import { app, globalShortcut, ipcMain, safeStorage, shell } from 'electron';
+import { app, globalShortcut, ipcMain, shell } from 'electron';
 import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
+import { basename } from 'path';
 import { IpcChannel } from '../shared-models';
 import { SingleInstanceServices } from './dependency-injection';
 import { ProcessArgument } from './process-argument.enum';
-import { IEncryptionProcessService, INativeApiService, IUpdateService, IWindowService, MessageEventType } from './services';
 import { IConfigService } from './services/config';
-import { IDatabaseService } from './services/file/database-service.model';
 import { IPerformanceService } from './services/performance/performance-service.model';
+import { IIconService } from './services/icon';
+import { INativeApiService } from './services/native';
+import { IDatabaseService } from './services/database';
+import { IWindowService } from './services/window';
+import { IEncryptionProcessService, MessageEventType } from './services/encryption';
+import { IUpdateService } from './services/update';
 
 class MainProcess {
   private readonly _fileArg: string;
@@ -43,6 +47,10 @@ class MainProcess {
     return this._services.get(IConfigService);
   }
 
+  private get _iconService(): IIconService {
+    return this._services.get(IIconService);
+  }
+
   constructor() {
     this._services = new SingleInstanceServices();
     this._fileArg = process.argv.find(x => x.endsWith(this._services.get(IConfigService).appConfig.fileExtension));
@@ -51,7 +59,7 @@ class MainProcess {
   }
 
   private registerAppEvents() {
-    app.on('second-instance', (_, argv) => {
+    app.on('second-instance', (event: Electron.Event, argv) => {
       const windowRef = this._windowService.createWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve)));
       const windowLoaded = this._windowService.loadWindow(windowRef);
 
@@ -63,6 +71,7 @@ class MainProcess {
 
       if (filePath) {
         this._databaseService.setFilePath(windowRef.webContents.id, filePath);
+        this._windowService.setTitle(windowRef.id, basename(filePath));
       }
 
       windowRef.once('closed', () => {
@@ -81,9 +90,6 @@ class MainProcess {
   }
 
   private onReady() {
-    const key = randomBytes(8).toString('hex');
-    global['__memKey'] = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(key) : key;
-
     const windowRef = this._windowService.createWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));    
     const windowLoaded = this._windowService.loadWindow(windowRef);
     
@@ -101,6 +107,7 @@ class MainProcess {
 
     if (this._fileArg) {
       this._databaseService.setFilePath(windowRef.webContents.id, this._fileArg);
+      this._windowService.setTitle(windowRef.id, basename(this._fileArg));
     }
   }
 
@@ -118,20 +125,21 @@ class MainProcess {
       }
 
       this._databaseService.setFilePath(event.sender.id, filePath);
+      this._windowService.setTitle(event.sender.id, basename(filePath));
 
       event.reply(IpcChannel.ProvidePassword, this._databaseService.getFilePath(event.sender.id));
     });
 
-    ipcMain.handle(IpcChannel.EncryptPassword, async (_, password) => {
+    ipcMain.handle(IpcChannel.EncryptPassword, async (event, password) => {
       const encryptionEvent = { type: MessageEventType.EncryptString, plain: password };
-      const response = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { encrypted: string };
+      const response = await this._encryptionProcessService.processEventAsync(encryptionEvent, this._windowService.getWindowByWebContentsId(event.sender.id).key ) as { encrypted: string };
 
       return response.encrypted;
     });
 
-    ipcMain.handle(IpcChannel.DecryptPassword, async (_, password) => {
+    ipcMain.handle(IpcChannel.DecryptPassword, async (event, password) => {
       const encryptionEvent = { type: MessageEventType.DecryptString, encrypted: password };
-      const response = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { decrypted: string };
+      const response = await this._encryptionProcessService.processEventAsync(encryptionEvent, this._windowService.getWindowByWebContentsId(event.sender.id).key) as { decrypted: string };
 
       return response.decrypted;
     });

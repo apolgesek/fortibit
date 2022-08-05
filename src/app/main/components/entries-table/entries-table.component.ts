@@ -1,6 +1,9 @@
-import { trigger, style, transition, animate } from '@angular/animations';
+import { animate, style, transition, trigger } from '@angular/animations';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { HotkeyHandler } from '@app/app.module';
+import { IHotkeyHandler } from '@app/core/models';
+import { ConfigService } from '@app/core/services';
 import { ClipboardService } from '@app/core/services/clipboard.service';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
 import { ModalService } from '@app/core/services/modal.service';
@@ -12,8 +15,6 @@ import { TreeNode } from '@circlon/angular-tree-component';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { HotkeyHandler } from '@app/app.module';
-import { IHotkeyHandler, IPasswordGroup } from '@app/core/models';
 
 @Component({
   selector: 'app-entries-table',
@@ -40,16 +41,20 @@ export class EntriesTableComponent implements OnInit, OnDestroy, AfterViewInit {
   public searchPhrase$: Observable<string>;
   public entryMenuItems: MenuItem[] = [];
   public multiEntryMenuItems: MenuItem[] = [];
+  public iconsEnabled: boolean;
 
   private readonly destroyed$: Subject<void> = new Subject();
+  private previousFocusedEntry = null;
+  private entryToBeFocusedByMouse: number;
 
   constructor(
+    private readonly el: ElementRef,
     private readonly storageService: StorageService,
     private readonly searchService: SearchService,
+    private readonly configService: ConfigService,
     private readonly clipboardService: ClipboardService,
     private readonly contextMenuBuilderService: ContextMenuBuilderService,
     private readonly modalService: ModalService,
-    private readonly el: ElementRef,
     @Inject(HotkeyHandler) private readonly hotkeyService: IHotkeyHandler,
   ) { 
     this.passwordList$ = this.storageService.entries$;
@@ -97,6 +102,10 @@ export class EntriesTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.multiEntryMenuItems = this.buildMultiEntryMenuItems();
     this.entryMenuItems = this.buildEntryMenuItems();
+
+    this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed$)).subscribe((config) => {
+      this.iconsEnabled = config.displayIcons;
+    });
   }
 
   ngAfterViewInit() {
@@ -108,8 +117,11 @@ export class EntriesTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.destroyed$.complete();
   }
 
-  trackEntryById(_: number, entry: IPasswordEntry): number {
-    return entry.id + (entry.lastModificationDate ? new Date(entry.lastModificationDate).getTime() : 0);
+  trackEntryById(_: number, entry: IPasswordEntry): string {
+    return entry.id
+      + '_'
+      + (entry.lastModificationDate ? new Date(entry.lastModificationDate).getTime() : 0)
+      + entry.iconPath ?? '';
   }
 
   copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry) {
@@ -131,23 +143,48 @@ export class EntriesTableComponent implements OnInit, OnDestroy, AfterViewInit {
       this.storageService.selectEntry(entry);
 
       setTimeout(() => {
-        this.rowEntries.find(x => x.nativeElement.classList.contains('selected')).nativeElement.focus();
+        this.rowEntries.find(x => parseInt(x.nativeElement.dataset.id) === this.selectedEntries[0].id).nativeElement.focus();
       });
     }
   }
 
-  showEntryContextMenu(event: MouseEvent, item: IPasswordEntry) {
+  // this is used only for keyboard navigqtion to focus the list of entries (first element by default)
+  focusFirstElement(index: number) {
+    if (!this.previousFocusedEntry && index !== this.entryToBeFocusedByMouse) {
+      this.previousFocusedEntry = this.rowEntries.get(index);
+      const entry = this.passwordEntries.find(x => x.id === parseInt(this.rowEntries.get(0).nativeElement.dataset.id));
+
+      this.storageService.selectedPasswords = [entry];
+      this.storageService.selectEntry(entry);
+
+      this.rowEntries.get(0).nativeElement.focus();
+    }
+
+    this.entryToBeFocusedByMouse = undefined;
+  }
+
+  // detect whether entry gets focused by explicit mouse click and do not fire focusFirstElement in that case 
+  // used the fact that mousedown event takes precedence over focus event
+  onMouseDown(index: number) {
+    this.previousFocusedEntry = this.rowEntries.get(index);
+
+    this.entryToBeFocusedByMouse = index;
+  }
+
+  showEntryContextMenu(event: MouseEvent, item: IPasswordEntry) {    
     if (this.selectedEntries.length === 0 || this.selectedEntries.length === 1) {
       this.selectEntry(event, item);
     }
+
+    event.preventDefault();
   }
 
   isEntrySelected(entry: IPasswordEntry): boolean {
-    return this.selectedEntries.filter(e => e.id === entry.id).length > 0;
+    return Boolean(this.selectedEntries.find(e => e.id === entry?.id));
   }
 
   isEntryDragged(entry: IPasswordEntry): boolean {
-    return this.storageService.draggedEntries.filter(e => e === entry.id).length > 0;
+    return Boolean(this.storageService.draggedEntries.find(e => e === entry?.id));
   }
 
   addNewEntry() {
@@ -164,6 +201,14 @@ export class EntriesTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   endDrag() {
     this.storageService.draggedEntries = [];
+  }
+
+  onFocusOut(event, container: CdkVirtualScrollViewport) {
+    const tableViewport = container.elementRef.nativeElement;
+
+    if (!tableViewport.contains(event.relatedTarget)) {
+      this.previousFocusedEntry = null;
+    }
   }
 
   private handleEntriesReload() {
@@ -183,33 +228,42 @@ export class EntriesTableComponent implements OnInit, OnDestroy, AfterViewInit {
           return;
         }
         
-        const selectedPasswordIndex = this.storageService.passwordEntries.indexOf(this.storageService.selectedPasswords[0]);
+        const selectedPasswordIndex = this.rowEntries
+          .toArray()
+          .indexOf(this.rowEntries.find(x => parseInt(x.nativeElement.dataset.id) === this.selectedEntries[0].id));
 
-        switch (event.key) {
+        let entryId;
+        let entry;
+
+        switch (event.key) {  
           case 'Tab':
             this.handleTabKeydown();
             break;
           case 'ArrowDown':
-            if (selectedPasswordIndex === this.storageService.passwordEntries.length - 1) {
+            if (selectedPasswordIndex === this.rowEntries.length - 1) {
               return;
             }
 
-            this.storageService.selectedPasswords = [this.storageService.passwordEntries[selectedPasswordIndex + 1]];
+            entryId = parseInt(this.rowEntries.get(selectedPasswordIndex + 1).nativeElement.dataset.id);
+            entry = this.passwordEntries.find(x => x.id === entryId);
 
-            setTimeout(() => {
-              this.rowEntries.find(x => x.nativeElement.classList.contains('selected')).nativeElement.focus();
-            });
+            this.storageService.selectedPasswords = [entry];
+            this.storageService.selectEntry(entry);
+
+            this.rowEntries.get(selectedPasswordIndex + 1).nativeElement.focus();
             break;
           case 'ArrowUp':
-            if (this.storageService.selectedPasswords[0] === this.storageService.passwordEntries[0]) {
+            if (selectedPasswordIndex === 0) {
               return;
             }
 
-            this.storageService.selectedPasswords = [this.storageService.passwordEntries[selectedPasswordIndex - 1]];
+            entryId = parseInt(this.rowEntries.get(selectedPasswordIndex - 1).nativeElement.dataset.id);
+            entry = this.passwordEntries.find(x => x.id === entryId);
 
-            setTimeout(() => {
-              this.rowEntries.find(x => x.nativeElement.classList.contains('selected')).nativeElement.focus();
-            });
+            this.storageService.selectedPasswords = [entry];
+            this.storageService.selectEntry(entry);
+  
+            this.rowEntries.get(selectedPasswordIndex - 1).nativeElement.focus();
             break;
         }
       });
@@ -218,6 +272,8 @@ export class EntriesTableComponent implements OnInit, OnDestroy, AfterViewInit {
   private handleTabKeydown() {
     if (this.rowEntries.find(x => x.nativeElement === document.activeElement)) {
       this.rowEntries.forEach(x => (x.nativeElement as HTMLElement).setAttribute('tabindex', "-1"));
+  
+      // navigate outside the list of entries on tab key and restore the ability to navigate on next render
       setTimeout(() => {
         this.rowEntries.forEach(x => (x.nativeElement as HTMLElement).setAttribute('tabindex', "0"));
       });

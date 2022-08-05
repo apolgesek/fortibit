@@ -1,24 +1,25 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Inject, Injectable, NgZone } from '@angular/core';
 import { IpcChannel } from '@shared-renderer/index';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { IAppConfig } from '../../../../app-config';
-import { ElectronService } from '@app/core/services/electron/electron.service';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '../models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConfigService {
-  public config: IAppConfig | null = null;
   public readonly configLoadedSource$: Observable<IAppConfig>;
   private readonly configLoaded: Subject<IAppConfig> = new ReplaySubject(1);
+  private config: IAppConfig | null = null;
 
   constructor(
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly zone: NgZone
   ) { 
     this.configLoadedSource$ = this.configLoaded.asObservable();
 
-    this.electronService.ipcRenderer
+    this.communicationService.ipcRenderer
       .invoke(IpcChannel.GetAppConfig)
       .then((result: IAppConfig) => {
         this.zone.run(() => {
@@ -27,5 +28,10 @@ export class ConfigService {
           this.configLoaded.next(this.config);
         });
       });
+  }
+
+  setConfig(config: Partial<IAppConfig>) {
+    this.config = {...this.config, ...config};
+    this.configLoaded.next(this.config);
   }
 }

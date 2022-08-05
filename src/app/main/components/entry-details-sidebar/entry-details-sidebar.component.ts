@@ -1,8 +1,8 @@
-import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { IPasswordGroup } from '@app/core/models';
+import { Component, ElementRef, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService, IPasswordGroup } from '@app/core/models';
 import { NotificationService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { TreeNode } from '@circlon/angular-tree-component';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
@@ -18,11 +18,8 @@ import { IAppConfig } from '../../../../../app-config';
 export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
   @ViewChild('toggleStarBtn') public readonly toggleStarBtn: ElementRef;
   public group: IPasswordGroup;
+  public config: IAppConfig;
   private readonly destroyed: Subject<void> = new Subject();
-
-  get config(): IAppConfig {
-    return this.configService.config as IAppConfig;
-  }
 
   get entry(): IPasswordEntry {
     if (this.isEntrySelected) {
@@ -46,13 +43,17 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly storageService: StorageService,
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly configService: ConfigService,
     private readonly notificationService: NotificationService,
     private readonly renderer: Renderer2,
   ) {}
 
   ngOnInit(): void {
+    this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed)).subscribe(config => {
+      this.config = config;
+    });
+
     this.storageService.selectEntry$.pipe(takeUntil(this.destroyed)).subscribe(entry => {
       this.group = this.findGroup(this.storageService.groups[0], entry.groupId);
     });
@@ -60,7 +61,7 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
 
   openUrl(url: string | undefined) {
     if (url) {
-      this.electronService.ipcRenderer.send(IpcChannel.OpenUrl, url);
+      this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, url);
     }
   }
 
@@ -70,7 +71,7 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
   }
 
   openAutotypeInformation() {
-    this.electronService.ipcRenderer.send(IpcChannel.OpenUrl, AppConfig.urls.repositoryUrl + AppConfig.urls.keyboardReference + AppConfig.urls.autotypeShortcut);
+    this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, AppConfig.urls.repositoryUrl + AppConfig.urls.keyboardReference + AppConfig.urls.autotypeShortcut);
   }
 
   toggleStarred(entry: IPasswordEntry) {

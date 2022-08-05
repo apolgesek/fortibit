@@ -49,7 +49,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
       if (!this.storageService.file) {
         this.modalService.openMasterPasswordWindow()
       } else if (!this.storageService.dateSaved) {
-        this.storageService.saveDatabase();
+        this.storageService.saveDatabase(null, { notify: true });
       }
 
       event.preventDefault();

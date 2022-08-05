@@ -1,11 +1,13 @@
 import { app, dialog, FileFilter, ipcMain, IpcMainEvent, powerMonitor, safeStorage } from 'electron';
 import { XMLParser } from 'fast-xml-parser';
 import { existsSync, readFileSync, rmSync, writeFile } from 'fs-extra';
-import { join } from 'path';
-import { IEncryptionProcessService, IWindowService, MessageEventType } from '..';
+import { basename, join } from 'path';
 import { IProduct } from '../../../product';
 import { IpcChannel } from '../../../shared-models';
 import { IConfigService } from '../config';
+import { IEncryptionProcessService, MessageEventType } from '../encryption';
+import { IIconService } from '../icon';
+import { IWindowService } from '../window';
 import { IDatabaseService } from './database-service.model';
 
 interface ISaveFilePayload {
@@ -13,6 +15,7 @@ interface ISaveFilePayload {
   newPassword: string;
   config: {
     forceNew: boolean;
+    notify: boolean;
   };
 }
 
@@ -28,8 +31,9 @@ export class DatabaseService implements IDatabaseService {
     this.dbPassword = null;
 
     this._windowService.windows.forEach((win) => {
-      if (this._fileMap.get(win.id)) {
-        this._windowService.windows.find(x => x.webContents.id === win.id).webContents.send(IpcChannel.Lock);
+      if (this._fileMap.get(win.browserWindow.id)) {
+        this._windowService.windows.find(x => x.browserWindow.webContents.id === win.browserWindow.id)
+          .browserWindow.webContents.send(IpcChannel.Lock);
       }
     });
   };
@@ -51,7 +55,8 @@ export class DatabaseService implements IDatabaseService {
   constructor(
     @IConfigService private readonly _configService: IConfigService,
     @IEncryptionProcessService private readonly _encryptionProcessService: IEncryptionProcessService,
-    @IWindowService private readonly _windowService: IWindowService
+    @IWindowService private readonly _windowService: IWindowService,
+    @IWindowService private readonly _iconService: IIconService
   ) {
     this._fileFilters = {
       filters: [{ name: 'Fortibit database file', extensions: [ this._configService.appConfig.fileExtension ] }]
@@ -109,12 +114,12 @@ export class DatabaseService implements IDatabaseService {
     return this._fileMap.get(windowId);
   }
 
-  public async saveDatabase(event: IpcMainEvent, database: JSON, newPassword: string, config: { forceNew: boolean }): Promise<void> {    
+  public async saveDatabase(event: IpcMainEvent, database: JSON, newPassword: string, config: { forceNew: boolean, notify: boolean }): Promise<void> {    
     let savePath: Electron.SaveDialogReturnValue = { filePath: this._fileMap.get(event.sender.id), canceled: false };
-    
+    const window = this._windowService.getWindowByWebContentsId(event.sender.id);
+
     if (config?.forceNew || !this.dbPassword) {
-      const browserWindow = this._windowService.getWindowByWebContentsId(event.sender.id);
-      savePath = await dialog.showSaveDialog(browserWindow, this._fileFilters);
+      savePath = await dialog.showSaveDialog(window.browserWindow, this._fileFilters);
 
       if (savePath.canceled) {
         event.reply(IpcChannel.GetSaveStatus, { status: false });
@@ -131,7 +136,7 @@ export class DatabaseService implements IDatabaseService {
       type: MessageEventType.EncryptDatabase
     };
 
-    const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { encrypted: string };
+    const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { encrypted: string };
 
     const finalFilePath = savePath.filePath.endsWith(this._configService.appConfig.fileExtension)
       ? savePath.filePath
@@ -140,7 +145,9 @@ export class DatabaseService implements IDatabaseService {
     try {
       writeFile(finalFilePath, payload.encrypted, { encoding: 'base64' }, () => {
         this._fileMap.set(event.sender.id, finalFilePath);
-        event.reply(IpcChannel.GetSaveStatus, { status: true, file: this._fileMap.get(event.sender.id) });
+        this._windowService.setTitle(event.sender.id, basename(finalFilePath));
+
+        event.reply(IpcChannel.GetSaveStatus, { status: true, file: this._fileMap.get(event.sender.id), notify: config?.notify });
       });
     } catch (err) {
       event.reply(IpcChannel.GetSaveStatus, { status: false, message: err });
@@ -162,6 +169,7 @@ export class DatabaseService implements IDatabaseService {
 
   public async decryptDatabase(event: IpcMainEvent, password: string): Promise<void> {
     this.dbPassword = password;
+    const window = this._windowService.getWindowByWebContentsId(event.sender.id);
   
     const fileData = readFileSync(this._fileMap.get(event.sender.id), { encoding: 'base64' });
 
@@ -171,7 +179,9 @@ export class DatabaseService implements IDatabaseService {
       type: MessageEventType.DecryptDatabase
     };
 
-    const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { error: string, decrypted: string };
+    const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { error: string, decrypted: string };
+    
+    this._iconService.getIcons(window.browserWindow.id, payload.decrypted);
     this._windowService.setIdleTimer(event.sender.id);
 
     event.reply(IpcChannel.DecryptedContent, {
@@ -180,13 +190,14 @@ export class DatabaseService implements IDatabaseService {
     });
   }
 
-  public async getLeaks(_: IpcMainEvent, database: string) {
+  public async getLeaks(event: IpcMainEvent, database: string) {
     const encryptionEvent = {
       database,
       type: MessageEventType.GetLeaks
     };
 
-    const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { error: string, data: string };
+    const window = this._windowService.getWindowByWebContentsId(event.sender.id);
+    const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { error: string, data: string };
 
     return {
       data: !payload.error && payload.data,
@@ -220,7 +231,7 @@ export class DatabaseService implements IDatabaseService {
     });
   }
 
-  private async importKeepassDatabase(_: IpcMainEvent, filePath: string): Promise<string> {
+  private async importKeepassDatabase(event: IpcMainEvent, filePath: string): Promise<string> {
     const xmlFile = readFileSync(filePath).toString();
     const parser = new XMLParser();
     const data = parser.parse(xmlFile);
@@ -234,7 +245,8 @@ export class DatabaseService implements IDatabaseService {
         type: MessageEventType.EncryptString
       };
   
-      const password = await this._encryptionProcessService.processEventAsync(encryptionEvent) as { encrypted: string };
+      const window = this._windowService.getWindowByWebContentsId(event.sender.id);
+      const password = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { encrypted: string };
 
       return {
         ...e,

@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
-import { ApplicationRef, ComponentFactoryResolver, ComponentRef, Directive, EmbeddedViewRef, HostListener, Inject, Injector, Input, Renderer2 } from '@angular/core';
+import { ApplicationRef, ComponentRef, Directive, EmbeddedViewRef, HostListener, Inject, Input, Renderer2 } from '@angular/core';
+import { AppViewContainer } from '@app/core/services';
 import { fromEvent, race, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MenuItem } from '..';
@@ -14,12 +15,11 @@ export class ContextMenuItemDirective {
   private destroyed: Subject<void> = new Subject();
 
   constructor(
-    private readonly componentFactoryResolver: ComponentFactoryResolver,
-    private readonly injector: Injector,
     private readonly appRef: ApplicationRef,
     private readonly renderer: Renderer2,
+    private readonly appViewContainer: AppViewContainer,
     @Inject(DOCUMENT) private readonly document: Document
-  ) { }
+  ) {}
 
   @HostListener('contextmenu', ['$event'])
   onContextMenu(event: Event) {
@@ -34,14 +34,12 @@ export class ContextMenuItemDirective {
   }
 
   private createContextMenu(event: Event): void {
-    this.componentRef = this.componentFactoryResolver.resolveComponentFactory(ContextMenuComponent).create(this.injector);
+    this.componentRef = this.appViewContainer.getRootViewContainer().createComponent(ContextMenuComponent);
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
     (<any>this.componentRef.instance).sourceEvent = event as Event;
     (<any>this.componentRef.instance).model = this.model;
     /* eslint-enable @typescript-eslint/no-explicit-any */
-
-    this.appRef.attachView(this.componentRef.hostView);
 
     const domElem = (this.componentRef.hostView as EmbeddedViewRef<ContextMenuComponent>).rootNodes[0] as HTMLElement;
     this.renderer.appendChild(this.document.body, domElem);

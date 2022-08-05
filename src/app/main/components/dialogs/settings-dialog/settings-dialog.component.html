@@ -18,6 +18,9 @@
       <app-tab header="Encryption" #encryptionTab>
         <app-encryption-tab *ngIf="encryptionTab.active"></app-encryption-tab>
       </app-tab>
+      <app-tab header="View" #viewTab>
+        <app-view-tab *ngIf="viewTab.active"></app-view-tab>
+      </app-tab>
     </app-tabset>
   </div>
 </app-modal>

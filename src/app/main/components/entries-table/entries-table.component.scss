@@ -62,6 +62,18 @@ $sidePanelOutDuration: 250ms;
 			text-overflow: ellipsis;
 			white-space: nowrap;
 			padding-left: 1rem;
+
+			&-icon {
+				width: 32px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				border-radius: 3px;
+
+				img {
+					border-radius: 3px;
+				}
+			}
 		}
 	}
 
@@ -148,7 +160,7 @@ $sidePanelOutDuration: 250ms;
 
 .results-badge {
 	background: $porcelain;
-	font-size: 12px;
+	font-size: 0.75rem;
 	padding: 0.5rem 1rem;
 	z-index: 0;
 }

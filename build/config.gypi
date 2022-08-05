@@ -343,9 +343,9 @@
     "v8_trace_maps": 0,
     "v8_use_siphash": 1,
     "want_separate_host_toolset": 0,
-    "nodedir": "C:\\Users\\icema\\AppData\\Local\\node-gyp\\Cache\\17.4.0",
+    "nodedir": "C:\\Users\\icema\\AppData\\Local\\node-gyp\\Cache\\18.3.5",
     "standalone_static_library": 1,
     "msbuild_path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\MSBuild\\15.0\\Bin\\MSBuild.exe",
-    "target": "17.4.0"
+    "target": "18.3.5"
   }
 }

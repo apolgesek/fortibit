@@ -1,10 +1,11 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, Inject, NgZone, OnInit } from '@angular/core';
 import { EventType } from '@app/core/enums';
 import { ModalService } from '@app/core/services/modal.service';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { DatabaseType, IpcChannel } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '@app/core/models';
 
 @Component({
   selector: 'app-menu-bar',
@@ -16,15 +17,15 @@ export class MenuBarComponent implements OnInit {
 
   public get closeIcons(): string {
     return [
-      'assets/icons/close-k-10.png 1x',
-      'assets/icons/close-k-12.png 1.25x',
-      'assets/icons/close-k-15.png 1.5x',
-      'assets/icons/close-k-15.png 1.75x',
-      'assets/icons/close-k-20.png 2x',
-      'assets/icons/close-k-20.png 2.25x',
-      'assets/icons/close-k-24.png 2.5x',
-      'assets/icons/close-k-30.png 3x',
-      'assets/icons/close-k-30.png 3.5x'
+      'assets/icons/close.png',
+      // 'assets/icons/close-k-12.png 1.25x',
+      // 'assets/icons/close-k-15.png 1.5x',
+      // 'assets/icons/close-k-15.png 1.75x',
+      // 'assets/icons/close-k-20.png 2x',
+      // 'assets/icons/close-k-20.png 2.25x',
+      // 'assets/icons/close-k-24.png 2.5x',
+      // 'assets/icons/close-k-30.png 3x',
+      // 'assets/icons/close-k-30.png 3.5x'
     ].join(',');
   }
 
@@ -42,6 +43,20 @@ export class MenuBarComponent implements OnInit {
     ].join(',');
   }
 
+  public get minimizeIcons(): string {
+    return [
+      `assets/icons/min-k-10.png 1x`,
+      `assets/icons/min-k-12.png 1.25x`,
+      `assets/icons/min-k-15.png 1.5x`,
+      `assets/icons/min-k-15.png 1.75x`,
+      `assets/icons/min-k-20.png 2x`,
+      `assets/icons/min-k-20.png 2.25x`,
+      `assets/icons/min-k-24.png 2.5x`,
+      `assets/icons/min-k-30.png 3x`,
+      `assets/icons/min-k-30.png 3.5x`
+    ].join(',');
+  }
+
   get isDatabasePristine(): boolean {
     return !!this.storageService.dateSaved;
   }
@@ -56,13 +71,13 @@ export class MenuBarComponent implements OnInit {
 
   constructor(
     private readonly zone: NgZone,
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly storageService: StorageService,
     private readonly modalService: ModalService
   ) {}
 
   ngOnInit() {
-    this.electronService.ipcRenderer.on('windowMaximized', (_event, isMaximized: boolean) => {
+    this.communicationService.ipcRenderer.on('windowMaximized', (_event, isMaximized: boolean) => {
       this.zone.run(() => {
         this.maximizeIconPath = isMaximized ? 'restore-k' : 'max-k';
       });
@@ -84,7 +99,7 @@ export class MenuBarComponent implements OnInit {
   save() {  
     !this.storageService.file
       ? this.modalService.openMasterPasswordWindow()
-      : this.storageService.saveDatabase();
+      : this.storageService.saveDatabase(null, { notify: true });
   }
 
   saveAs() {
@@ -92,7 +107,7 @@ export class MenuBarComponent implements OnInit {
   }
 
   async import(): Promise<void> {
-    const payload = await this.electronService.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, DatabaseType.Keepass);
+    const payload = await this.communicationService.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, DatabaseType.Keepass);
     this.modalService.openImportedDbMetadataWindow(payload);
   }
 
@@ -117,18 +132,18 @@ export class MenuBarComponent implements OnInit {
   }
 
   minimizeWindow() {
-    this.electronService.ipcRenderer.send(IpcChannel.Minimize);
+    this.communicationService.ipcRenderer.send(IpcChannel.Minimize);
   }
 
   maximizeWindow() {
-    this.electronService.ipcRenderer.send(IpcChannel.Maximize);
+    this.communicationService.ipcRenderer.send(IpcChannel.Maximize);
   }
 
   quit() {
-    this.electronService.ipcRenderer.send(IpcChannel.Close);
+    this.communicationService.ipcRenderer.send(IpcChannel.Close);
   }
 
   private openUrl(path: string) {
-    this.electronService.ipcRenderer.send(IpcChannel.OpenUrl, AppConfig.urls.repositoryUrl + path);
+    this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, AppConfig.urls.repositoryUrl + path);
   }
 }

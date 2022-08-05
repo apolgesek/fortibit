@@ -1,0 +1,18 @@
+<div class="container">
+  <p class="description">
+    Display or hide entry icons on the password list. If entry URL has been provided and the associated icon
+    exists in the database, the icon will be downloaded
+    automatically from fortibit CDN server <code>static.fortibit.com</code>.
+  <form [formGroup]="viewForm">
+    <div class="inputgroup checkbox">
+      <label class="label" for="displayIcons">Display entry icons:</label>
+      <label class="switch">
+        <input
+          id="displayIcons"
+          type="checkbox"
+          formControlName="displayIcons">
+          <span class="slider"></span>
+      </label>    
+    </div>
+  </form>
+</div>

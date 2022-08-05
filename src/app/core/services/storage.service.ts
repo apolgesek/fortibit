@@ -1,9 +1,8 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Inject, Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { markDirty } from '@app/core/decorators/mark-dirty.decorator';
-import { IPasswordGroup } from '@app/core/models';
+import { ICommunicationService, IPasswordGroup } from '@app/core/models';
 import { EntryRepository, GroupRepository, ReportRepository } from '@app/core/repositories';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { SearchService } from '@app/core/services/search.service';
 import { TreeNode } from '@circlon/angular-tree-component';
 import { IPasswordEntry, IpcChannel, IReport } from '@shared-renderer/index';
@@ -11,9 +10,10 @@ import { AppConfig } from 'environments/environment';
 import { BehaviorSubject, combineLatest, from, Observable, of, Subject } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
 import { DbContext, initialEntries } from '../database';
-import { EventType } from '../enums';
+import { EventType, Sort } from '../enums';
 import { NotificationService } from './notification.service';
 import { exportDB, importInto } from "dexie-export-import";
+import { CommunicationService } from '@app/app.module';
 
 interface SearchResultsModel {
   passwords: IPasswordEntry[],
@@ -66,9 +66,9 @@ export class StorageService {
   }
 
   constructor(
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly router: Router,
     private readonly zone: NgZone,
-    private readonly electronService: ElectronService,
     private readonly searchService: SearchService,
     private readonly notificationService: NotificationService,
     private readonly entryRepository: EntryRepository,
@@ -97,30 +97,55 @@ export class StorageService {
     this.handleFoundAutotypeEntry();
     this.handleDatabaseSaved();
 
-    this.electronService.ipcRenderer.on(IpcChannel.Lock, () => {
+    this.communicationService.ipcRenderer.on(IpcChannel.Lock, () => {
       this.zone.run(() => {
         this.checkFileSaved(EventType.Lock);
+      });
+    });
+
+    this.communicationService.ipcRenderer.on(IpcChannel.UpdateIcon, (_, id: number, iconPath: string) => {
+      this.zone.run(() => {
+        this.entryRepository.update({ id, iconPath }).then(() => {
+          const entry = this.passwordEntries.find(x => x.id === id);
+
+          if (!entry) {
+            return;
+          }
+
+          entry.lastModificationDate = new Date();
+          entry.iconPath = iconPath;
+
+          this.updateEntries();
+        });
       });
     });
   }
 
   @markDirty()
-  async addOrUpdateEntry(entry: Partial<IPasswordEntry>): Promise<void> {
-    if (!this.selectedCategory) {
-      this.throwCategoryNotSelectedError();
-    }
+  async addOrUpdateEntry(entry: Partial<IPasswordEntry>): Promise<number> {
+    let id: number;
 
     if (entry.id) {
-      await this.entryRepository.update(entry);
-      this.passwordEntries = await this.getEntries();
+      const editedEntry = { ...this.editedEntry };
 
+      id = await this.entryRepository.update(entry);
+      this.passwordEntries = await this.getEntries();
       this.selectedPasswords = [entry as IPasswordEntry];
-    } else {
-      await this.entryRepository.add(entry);
-      this.passwordEntries = await this.getEntries();
 
+      if (editedEntry.iconPath) {
+        this.replaceIconPath(id, editedEntry, entry);
+      } else {
+        this.getIconPath(id, entry);
+      }
+    } else {
+      id = await this.entryRepository.add(entry);
+      this.passwordEntries = await this.getEntries();
       this.searchService.reset();
+
+      this.getIconPath(id, entry);
     }
+
+    return id;
   }
 
   private async getEntries(): Promise<IPasswordEntry[]> {
@@ -145,14 +170,10 @@ export class StorageService {
 
   @markDirty()
   async deleteEntry() {
-    if (!this.selectedCategory) {
-      this.throwCategoryNotSelectedError();
-    }
-  
-    if (this.selectedPasswords.length === 0) { // drag entry when it's not selected first
-      await this.entryRepository.delete(this.draggedEntries[0]);
-    } else {
-      await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id) as number[]);
+    await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id) as number[]);
+
+    for (const entry of this.selectedPasswords) {
+      this.removeIconPath(entry);
     }
 
     this.passwordEntries = await this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
@@ -161,10 +182,6 @@ export class StorageService {
 
   @markDirty()
   async moveEntry(targetGroupId: number) {
-    if (!this.selectedCategory) {
-      this.throwCategoryNotSelectedError();
-    }
-
     this.passwordEntries = this.passwordEntries.filter(e => !this.draggedEntries.includes(e.id as number));
     this.updateEntries();
 
@@ -251,7 +268,7 @@ export class StorageService {
       return;
     }
 
-    this.electronService.ipcRenderer.send(IpcChannel.TryClose, event, payload);
+    this.communicationService.ipcRenderer.send(IpcChannel.TryClose, event, payload);
   }
 
   execute(event?: EventType, payload?: unknown) {
@@ -260,10 +277,10 @@ export class StorageService {
       this.exitApp();
       break;
     case EventType.OpenFile:
-      this.electronService.ipcRenderer.send(IpcChannel.OpenFile);
+      this.communicationService.ipcRenderer.send(IpcChannel.OpenFile);
       break;
     case EventType.DropFile:
-      this.electronService.ipcRenderer.send(IpcChannel.DropFile, payload);
+      this.communicationService.ipcRenderer.send(IpcChannel.DropFile, payload);
       break;
     case EventType.Lock:
       this.lock({ minimize: true });
@@ -319,23 +336,23 @@ export class StorageService {
     
     await this.dbContext.resetDb();
 
-    this.electronService.ipcRenderer.send(IpcChannel.Lock);
+    this.communicationService.ipcRenderer.send(IpcChannel.Lock);
     this.router.navigate(['/home'], { queryParams: { minimize } });
   }
 
   unlock(): void {
     this.isLocked = false;
     this.router.navigate(['/dashboard']);
-    this.electronService.ipcRenderer.send(IpcChannel.Unlock);
+    this.communicationService.ipcRenderer.send(IpcChannel.Unlock);
   }
 
-  async saveDatabase(newPassword?: string, config?: { forceNew: boolean }): Promise<true | Error> {
+  async saveDatabase(newPassword?: string, config?: { forceNew?: boolean, notify?: boolean }): Promise<true | Error> {
     const blob = await exportDB(this.dbContext);
 
-    const fr = new FileReader();
-    fr.readAsText(blob);
-    fr.onloadend = () => {
-      this.electronService.ipcRenderer.send(IpcChannel.SaveFile, { database: fr.result , newPassword, config });
+    const fileReader = new FileReader();
+    fileReader.readAsText(blob);
+    fileReader.onloadend = () => {
+      this.communicationService.ipcRenderer.send(IpcChannel.SaveFile, { database: fileReader.result , newPassword, config });
     };
 
     return true;
@@ -365,7 +382,7 @@ export class StorageService {
       const fr = new FileReader();
       fr.readAsText(blob);
       fr.onloadend = async () => {
-        const data = await this.electronService.ipcRenderer.invoke(IpcChannel.ScanLeaks, fr.result);
+        const data = await this.communicationService.ipcRenderer.invoke(IpcChannel.ScanLeaks, fr.result);
 
         resolve(data);
       };
@@ -410,7 +427,7 @@ export class StorageService {
     this.passwordListSource$.next([...this.passwordEntries as IPasswordEntry[]]);
   }
 
-  async saveNewDatabase(newPassword: string, config: { forceNew: boolean }): Promise<true | Error> {
+  async saveNewDatabase(newPassword: string, config: { forceNew?: boolean, notify?: boolean }): Promise<true | Error> {
     return this.saveDatabase(newPassword, config);
   }
 
@@ -452,11 +469,25 @@ export class StorageService {
     this.setDatabaseLoaded();
   }
 
+  private getIconPath(id: number, entry: Partial<IPasswordEntry>): void {
+    if (entry.url) {
+      this.communicationService.ipcRenderer.send(IpcChannel.TryGetIcon, id, entry.url);
+    }
+  }
+
+  private replaceIconPath(id: number, editedEntry: IPasswordEntry, newEntry: Partial<IPasswordEntry>): void {
+    this.communicationService.ipcRenderer.send(IpcChannel.TryReplaceIcon, id, editedEntry.iconPath, newEntry.url);
+  }
+
+  private removeIconPath(entry: Partial<IPasswordEntry>): void {
+    this.communicationService.ipcRenderer.send(IpcChannel.RemoveIcon, entry);
+  }
+
   private exitApp() {
     window.onbeforeunload = null;
 
     setTimeout(() => {
-      this.electronService.ipcRenderer.send(IpcChannel.Exit);
+      this.communicationService.ipcRenderer.send(IpcChannel.Exit);
     });
   }
 
@@ -515,18 +546,18 @@ export class StorageService {
   }
 
   private handleFoundAutotypeEntry() {
-    this.electronService.ipcRenderer.on(IpcChannel.GetAutotypeFoundEntry, (_, title: string) => {
+    this.communicationService.ipcRenderer.on(IpcChannel.GetAutotypeFoundEntry, (_, title: string) => {
       this.zone.run(async () => {
         const entries = await this.entryRepository.getAll();
         const entry = entries.find(e => this.isEntryMatching(e, title));
 
-        this.electronService.ipcRenderer.send(IpcChannel.AutocompleteEntry, entry);
+        this.communicationService.ipcRenderer.send(IpcChannel.AutocompleteEntry, entry);
       });
     });
   }
 
   private handleDatabaseLock() {
-    this.electronService.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
+    this.communicationService.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
       this.zone.run(() => {
         this.file = { filePath: filePath, filename: filePath.split('\\').slice(-1)[0] };
         this.lock({ minimize: false });
@@ -552,17 +583,20 @@ export class StorageService {
   }
 
   private handleDatabaseSaved() {
-    this.electronService.ipcRenderer.on(IpcChannel.GetSaveStatus, (_, { status, message, file }) => {
+    this.communicationService.ipcRenderer.on(IpcChannel.GetSaveStatus, (_, { status, message, file, notify }) => {
       this.zone.run(() => {
         if (status) {
-          this.setDateSaved();
           this.file = { filePath: file, filename: file.split('\\').splice(-1)[0] };
 
-          this.notificationService.add({
-            message: 'Database saved',
-            alive: 5000,
-            type: 'success'
-          });
+          if (notify) {
+            this.setDateSaved();
+
+            this.notificationService.add({
+              message: 'Database saved',
+              alive: 5000,
+              type: 'success'
+            });
+          }
         } else if (message) {
           this.notificationService.add({
             type: 'error',

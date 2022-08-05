@@ -1,9 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ConfigService, ElectronService, NotificationService } from '@app/core/services';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '@app/core/models';
+import { ConfigService } from '@app/core/services';
 import { isControlInvalid } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject, take, takeUntil } from 'rxjs';
 import { IProduct } from '../../../../../../../product';
 
 @Component({
@@ -20,25 +22,26 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly formBuilder: FormBuilder,
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly configService: ConfigService,
   ) { }
 
   ngOnInit(): void {
-    this.encryptionForm = this.formBuilder.group({
-      passwordLength: new FormControl(
-        this.configService.config.encryption.passwordLength, {
-        validators: Validators.compose([Validators.required, Validators.min(6), Validators.max(32)]),
-      }),
-      lowercase: [this.configService.config.encryption.lowercase],
-      uppercase: [this.configService.config.encryption.uppercase],
-      specialChars: [this.configService.config.encryption.specialChars],
-      numbers: [this.configService.config.encryption.numbers],
-      idleTime: [this.configService.config.idleSeconds, Validators.compose([Validators.required, Validators.min(60)])],
-      lockOnSystemLock: [this.configService.config.lockOnSystemLock]
-    });
+    this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
+      this.encryptionForm = this.formBuilder.group({
+        passwordLength: new FormControl(
+          config.encryption.passwordLength, {
+          validators: Validators.compose([Validators.required, Validators.min(6), Validators.max(32)]),
+        }),
+        lowercase: [config.encryption.lowercase],
+        uppercase: [config.encryption.uppercase],
+        specialChars: [config.encryption.specialChars],
+        numbers: [config.encryption.numbers],
+        idleTime: [config.idleSeconds, Validators.compose([Validators.required, Validators.min(60)])],
+        lockOnSystemLock: [config.lockOnSystemLock]
+      });
 
-    this.encryptionForm.valueChanges
+      this.encryptionForm.valueChanges
       .pipe(
         debounceTime(this.debounceTimeMs),
         distinctUntilChanged(),
@@ -57,9 +60,10 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
             lockOnSystemLock: form.lockOnSystemLock
           } as Partial<IProduct>;
 
-          this.electronService.ipcRenderer.send(IpcChannel.ChangeEncryptionSettings, configPartial);
-          this.configService.config = { ...this.configService.config, ...configPartial };
+          this.communicationService.ipcRenderer.send(IpcChannel.ChangeEncryptionSettings, configPartial);
+          this.configService.setConfig(configPartial);
         }
+      });
     });
   }
 

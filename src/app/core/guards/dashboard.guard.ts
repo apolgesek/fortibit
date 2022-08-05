@@ -1,21 +1,22 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { IpcChannel } from '@shared-renderer/index';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '../models';
 
 @Injectable()
 export class DashboardGuard implements CanActivate {
   constructor(
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly storageService: StorageService,
     private readonly router: Router
   ) {}
 
   canActivate(): Observable<boolean> {
-    return from(this.electronService.ipcRenderer.invoke(IpcChannel.CheckOpenMode))
+    return from(this.communicationService.ipcRenderer.invoke(IpcChannel.CheckOpenMode))
       .pipe(
         map((filePath: string) => {
           if (filePath) {

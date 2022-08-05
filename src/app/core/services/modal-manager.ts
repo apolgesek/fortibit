@@ -5,10 +5,10 @@ import {
   Injectable,
   Renderer2,
   RendererFactory2,
-  Type
+  Type,
 } from '@angular/core';
 import { IAdditionalData, IModal } from '@app/shared';
-import { ModalFactory } from '@app/core/services/modal-factory';
+import { AppViewContainer } from './app-view-container';
 
 @Injectable({ providedIn: 'root' })
 export class ModalManager {
@@ -18,7 +18,7 @@ export class ModalManager {
   constructor(
     private readonly appRef: ApplicationRef,
     private readonly rendererFactory: RendererFactory2,
-    private readonly modalFactoryService: ModalFactory,
+    private readonly appViewContainer: AppViewContainer
   ) {
     this.renderer = this.rendererFactory.createRenderer(null, null);
   }
@@ -28,9 +28,13 @@ export class ModalManager {
   }
 
   open<T extends IModal>(component: Type<T>, additionalData?: IAdditionalData) {
-    const componentRef = this.modalFactoryService.create(component, additionalData);
+    const componentRef = this.appViewContainer.getRootViewContainer().createComponent(component);
+    const componentInstance = componentRef.instance as T;
 
-    this.appRef.attachView(componentRef.hostView);
+    // set component properties
+    componentInstance.ref = componentRef;
+    componentInstance.additionalData = additionalData;
+
     const modal = (componentRef.hostView as EmbeddedViewRef<T>).rootNodes[0] as HTMLElement;
     const root = (this.appRef.components[0].hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement;
     this.renderer.appendChild(root, modal);

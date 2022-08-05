@@ -26,6 +26,8 @@ import { SortByDirective } from './directives/sort-by.directive';
 import { TextEmphasizeDirective } from './directives/text-emphasize.directive';
 import { MainRoutingModule } from './main-routing.module';
 import { MainComponent } from './main.component';
+import { EntryIconDirective } from './directives/entry-icon.directive';
+import { ViewTabComponent } from './components/dialogs/settings-dialog/view-tab/view-tab.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +52,9 @@ import { MainComponent } from './main.component';
     ImportDatabaseMetadataComponent,
     PasswordChangeTabComponent,
     CheckExposedPasswordsComponent,
-    EncryptionTabComponent
+    EncryptionTabComponent,
+    EntryIconDirective,
+    ViewTabComponent
   ],
   imports: [
     CommonModule,

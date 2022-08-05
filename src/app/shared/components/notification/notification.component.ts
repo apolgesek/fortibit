@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ComponentRef, ElementRef, HostBinding, HostListener, OnDestroy } from '@angular/core';
-import { IToastModel } from '@app/core/models';
 import { NotificationService } from '@app/core/services/notification.service';
+import { IToastModel } from '@app/core/models';
 
 @Component({
   selector: 'app-notification',

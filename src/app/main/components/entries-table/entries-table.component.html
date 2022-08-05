@@ -14,21 +14,30 @@
 			*ngIf="passwordList.length > 0; else noPasswordsTemplate"
 			itemSize="32"
 			role="rowgroup"
+			#tableViewport
+			(focusout)="onFocusOut($event, tableViewport)"
 			class="table-viewport">
 			<ng-container *cdkVirtualFor="let item of passwordList; let i = index; trackBy: trackEntryById; templateCacheSize: 0">
+				<!-- focus event handler is needed when user navigates between elements using keyboard -->
 				<div
 					#rowEntry
 					data-prevent-entry-deselect
 					[appContextMenuItem]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
 					(click)="selectEntry($event, item)"
+					(focus)="focusFirstElement(i)"
+					(mousedown)="onMouseDown(i)"
 					(contextmenu)="showEntryContextMenu($event, item)"
 					[attr.draggable]="entriesDragEnabled"
 					role="row"
+					[attr.data-id]="item.id"
 					tabindex="0"
 					(dragstart)="startDrag($event, item)"
 					(dragend)="endDrag()"
 					[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
 					class="row-entry">
+					<div *ngIf="iconsEnabled" class="column-icon">
+						<img [appEntryIcon]="item" width="16" height="16"/>
+					</div>
 					<div
 						[appTextEmphasize]="searchPhrase$ | async"
 						(dblclick)="copyToClipboard(item, 'title')"

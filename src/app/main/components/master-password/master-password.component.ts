@@ -2,8 +2,9 @@ import { DOCUMENT } from '@angular/common';
 import { Component, OnInit, NgZone, OnDestroy, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ActivatedRoute  } from '@angular/router';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '@app/core/models';
 import { ConfigService } from '@app/core/services/config.service';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { TreeNode } from '@circlon/angular-tree-component';
 import { IpcChannel } from '@shared-renderer/index';
@@ -20,13 +21,10 @@ import { IAppConfig } from '../../../../../app-config';
 export class MasterPasswordComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;
   public isInvalidPassword = false;
+  public config: IAppConfig;
 
   private readonly destroyed$: Subject<void> = new Subject();
   private onDecryptedContent: (_: IpcRendererEvent, { decrypted }: { decrypted: string }) => void;
-
-  get config(): IAppConfig {
-    return this.configService.config as IAppConfig;
-  }
 
   get filePath(): string {
     return this.storageService.file?.filePath ?? '';
@@ -42,7 +40,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly configService: ConfigService,
     private readonly storageService: StorageService,
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     @Inject(DOCUMENT) private readonly document: Document
   ) { 
     this.loginForm = this.fb.group({
@@ -63,8 +61,11 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.electronService.ipcRenderer.on(IpcChannel.DecryptedContent, this.onDecryptedContent);
+    this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed$)).subscribe(config => {
+      this.config = config;
+    });
 
+    this.communicationService.ipcRenderer.on(IpcChannel.DecryptedContent, this.onDecryptedContent);
     this.storageService.loadedDatabase$
       .pipe(
         switchMap(() => from(this.storageService.selectGroup({ node: { data: { id: 1 }} as TreeNode}))),
@@ -78,7 +79,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   ngAfterViewInit() {
     if (this.route.snapshot.queryParams.minimize === 'true') {
       setTimeout(() => {
-        this.electronService.ipcRenderer.send(IpcChannel.Minimize);
+        this.communicationService.ipcRenderer.send(IpcChannel.Minimize);
       });
     }
   }
@@ -90,7 +91,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     this.destroyed$.next();
     this.destroyed$.complete();
 
-    this.electronService.ipcRenderer.off(IpcChannel.DecryptedContent, this.onDecryptedContent);
+    this.communicationService.ipcRenderer.off(IpcChannel.DecryptedContent, this.onDecryptedContent);
   }
 
   async onLoginSubmit() {
@@ -104,7 +105,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.electronService.ipcRenderer.send(IpcChannel.DecryptDatabase, this.loginForm.value.password);
+    this.communicationService.ipcRenderer.send(IpcChannel.DecryptDatabase, this.loginForm.value.password);
   }
 
   animate(selector: string, animationClass: string, duration = 500) {

@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Inject, Injectable, NgZone } from '@angular/core';
 import { AboutDialogComponent } from '@app/main/components/dialogs/about-dialog/about-dialog.component';
 import { ConfirmExitDialogComponent } from '@app/main/components/dialogs/confirm-exit-dialog/confirm-exit-dialog.component';
 import { DeleteEntryDialogComponent } from '@app/main/components/dialogs/delete-entry-dialog/delete-entry-dialog.component';
@@ -9,10 +9,11 @@ import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/mast
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
 import { IpcChannel } from '@shared-renderer/index';
 import { EventType } from '../enums';
-import { ElectronService } from '@app/core/services/electron/electron.service';
 import { StorageService } from '@app/core/services/storage.service';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { CheckExposedPasswordsComponent } from '@app/main/components/dialogs/check-exposed-passwords/check-exposed-passwords.component';
+import { CommunicationService } from '@app/app.module';
+import { ICommunicationService } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -25,10 +26,10 @@ export class ModalService {
   constructor(
     private readonly zone: NgZone,
     private readonly modalManager: ModalManager,
-    private readonly electronService: ElectronService,
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly storageService: StorageService,
   ) {
-    this.electronService.ipcRenderer.on(
+    this.communicationService.ipcRenderer.on(
       IpcChannel.OpenCloseConfirmationWindow,
       (_, event: EventType, payload: unknown) => {
         this.zone.run(() => {
@@ -53,7 +54,7 @@ export class ModalService {
   async openEntryWindow() {
     let decryptedPassword;
     if (this.storageService.editedEntry) {
-      decryptedPassword = await this.electronService.ipcRenderer
+      decryptedPassword = await this.communicationService.ipcRenderer
         .invoke(IpcChannel.DecryptPassword, this.storageService.editedEntry.password);
     }
 
