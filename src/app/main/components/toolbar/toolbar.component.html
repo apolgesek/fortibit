@@ -3,7 +3,8 @@
 		<button
 			data-prevent-entry-deselect
 			type="button"
-			class="add-entry"
+			[disabled]="!isAddPossible"
+			class="button-secondary add-entry"
 			id="add-entry"
 			(click)="openAddEntryWindow()">
 			<span class="pi pi-plus-circle"></span>

@@ -1,9 +1,9 @@
 import { Component, ComponentRef } from '@angular/core';
-import { ModalManager } from '@app/core/services/modal-manager';
+import { ModalRef } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
 import { IAdditionalData, IModal } from '@app/shared';
-import { IAppConfig } from '../../../../../../app-config';
 import { take } from 'rxjs';
+import { IAppConfig } from '../../../../../../app-config';
 
 @Component({
   selector: 'app-about-dialog',
@@ -16,8 +16,8 @@ export class AboutDialogComponent implements IModal {
   public config: IAppConfig;
 
   constructor(
-    private readonly modalManager: ModalManager,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly modalRef: ModalRef
   ) {}
 
   ngOnInit() {
@@ -27,6 +27,6 @@ export class AboutDialogComponent implements IModal {
   }
 
   close() {
-    this.modalManager.close(this.ref);
+    this.modalRef.close();
   }
 }

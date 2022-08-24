@@ -1,5 +1,6 @@
 import { IpcMainEvent } from 'electron';
 import { createServiceDecorator } from '../../dependency-injection';
+import { IWindow } from '../window/window-model';
 
 export const IDatabaseService = createServiceDecorator<IDatabaseService>('databaseService');
 
@@ -10,6 +11,6 @@ export interface IDatabaseService {
   setFilePath(windowId: number, filePath: string);
   saveDatabase(event: IpcMainEvent, database: JSON, newPassword: string, config: any): void;
   openDatabase(event: IpcMainEvent): void;
-  decryptDatabase(event: IpcMainEvent, password: string): void;
+  decryptDatabase(event: IpcMainEvent, password: string): Promise<void>;
   clear(): void;
 }

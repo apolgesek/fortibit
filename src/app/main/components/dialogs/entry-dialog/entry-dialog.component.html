@@ -7,18 +7,20 @@
       role="button"
       aria-label="Close"
       class="close-dialog"
-      (click)="close()">&times;
+      (click)="close(); false">&times;
     </a>
   </div>
-  <form
+  <div
+    #entryForm
     id="entry-form"
-    (submit)="addNewEntry()"
+    style="position: relative; max-height: 100%; overflow: auto; padding-right: 1rem;"
     [formGroup]="newEntryForm">
     <div>
-      <div class="inputgroup">
+      <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
         <span class="inputgroup-addon"><i class="pi pi-bookmark"></i></span>
         <input
           type="text"
+          [readonly]="isReadOnly"
           id="entry-title"
           appAutofocus
           formControlName="title"
@@ -26,34 +28,39 @@
       </div>
       <div
         class="inputgroup required"
-        [ngClass]="{'ng-invalid': isControlInvalid(newEntryForm.get('username'))}">
+        [ngClass]="{'ng-invalid': isControlInvalid(newEntryForm.get('username')), 'readonly': isReadOnly}">
         <span class="inputgroup-addon"><i class="pi pi-user"></i></span>
         <input
           type="text"
+          [readonly]="isReadOnly"
           id="entry-username"
           formControlName="username"
-          placeholder="Username (required)">         
+          placeholder="Username">         
       </div>
       <ng-container formGroupName="passwords">
         <div
           class="inputgroup required"
-          [ngClass]="{'ng-invalid': isControlInvalid(passwordsGroup.get('password'))}">
+          [ngClass]="{'ng-invalid': isControlInvalid(passwordsGroup.get('password')), 'readonly': isReadOnly}">
           <span class="inputgroup-addon"><i class="pi pi-key"></i></span>
           <input
             #passwordInput
             type="password"
+            [readonly]="isReadOnly"
             id="entry-password"
             class="password"
             formControlName="password"
             placeholder="Password (required)"
             (input)="onPasswordChange($event)">
-            <div class="password-strength">
-            <div
-              [ngClass]="{'active': passwordLength > 0}"
-              [class]="passwordScore >= 0 ? 'text s-' + passwordScore : 'text'">
-              {{ textDescription }}
+            <div *ngIf="!isReadOnly; else readonly" class="password-strength">
+              <div
+                [ngClass]="{'active': passwordLength > 0}"
+                [class]="passwordScore >= 0 ? 'text s-' + passwordScore : 'text'">
+                {{ textDescription }}
+              </div>
             </div>
-          </div> 
+            <ng-template #readonly>
+              <a href="#" (click)="copyPassword(); false" class="copy-password">Copy</a>
+            </ng-template>
         </div>
         <div
           *ngIf="isControlInvalid(passwordsGroup.get('password'))"
@@ -61,10 +68,11 @@
           Password is required
         </div>
         <div
-          class="inputgroup required">
-          <span class="inputgroup-addon"><i class="pi pi-replay"></i></span>
+          class="inputgroup required" [ngClass]="{'readonly': isReadOnly}">
+          <span class="inputgroup-addon"><i class="pi pi-key"></i></span>
           <input
             #passwordInput
+            [readonly]="isReadOnly"
             type="password"
             id="entry-password-r"
             formControlName="repeatPassword"
@@ -76,32 +84,67 @@
           Passwords must match
         </div>
       </ng-container>
-      <div class="inputgroup">
+      <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
         <div class="inputgroup-addon"><i class="pi pi-globe"></i></div>
         <input
           type="text"
+          [readonly]="isReadOnly"
           id="entry-website"
           formControlName="url"
           placeholder="Website">      
       </div>
-      <div class="inputgroup">
+      <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
         <div class="inputgroup-addon"><i class="pi pi-info-circle"></i></div>
         <textarea
           formControlName="notes"
+          [readonly]="isReadOnly"
           id="entry-note"
           placeholder="Note"
           rows="5">
         </textarea>     
       </div>
+      <div>
+        <button type="button" class="expandable-section" (click)="isVisible = !isVisible">
+          <i class="pi" [ngClass]="isVisible ? 'pi-angle-up' : 'pi-angle-right'"></i>
+          Advanced options
+        </button>
+        <div *ngIf="isVisible" class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
+          <div class="inputgroup-addon"><i class="pi pi-code"></i></div>
+          <input
+            formControlName="autotypeExp"
+            [readonly]="isReadOnly"
+            type="text"
+            id="entry-autotype-exp"
+            placeholder="Autotype expression (regex)" />  
+        </div>
+      </div>
     </div>
-    <div class="footer-container">
+  </div>
+  <div class="footer-container">
+    <button
+      *ngIf="isReadOnly"
+      type="button"
+      (click)="restore(); false"
+      class="text-btn restore">
+      <i class="pi pi-replay"></i>
+      Restore
+    </button>
+    <button
+      *ngIf="!isReadOnly; else closeBtn"
+      [disabled]="saveLocked"
+      (click)="addNewEntry()"
+      id="restore"
+      class="primary-btn">
+      Confirm
+    </button>
+    <ng-template #closeBtn>
       <button
-        [disabled]="saveLocked"
-        type="submit"
-        id="entry-submit"
+        type="button"
+        (click)="closeReadOnly()"
+        id="close"
         class="primary-btn">
-        Confirm
-      </button>
-    </div>
-  </form>
+      Close
+    </button>
+    </ng-template>
+  </div>
 </app-modal>

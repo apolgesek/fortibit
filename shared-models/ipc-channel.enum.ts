@@ -33,5 +33,6 @@ export enum IpcChannel {
   TryGetIcon = 'tryGetIcon',
   TryReplaceIcon = 'tryReplaceIcon',
   RemoveIcon = 'removeIcon',
-  UpdateIcon = 'updateIcon'
+  UpdateIcon = 'updateIcon',
+  CreateNew = 'createNew'
 }

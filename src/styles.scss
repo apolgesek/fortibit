@@ -6,13 +6,13 @@
 
 html,
 body {
+	@include font-regular;
 	margin: 0;
 	padding: 0;
 	height: 100%;
 	overflow: hidden;
 	background-color: $white;
 	color: $pickled-bluewood;
-	@include font-regular;
 }
 
 input,
@@ -67,7 +67,15 @@ a {
 .footer-container {
 	display: flex;
 	justify-content: flex-end;
-	margin: 1rem 0;
+	align-items: center;
+	background: #fff;
+	z-index: 999;
+	gap: 1rem;
+	padding-top: 1rem;
+
+	button {
+		margin-bottom: 0.25rem;
+	}
 }
 
 .dialog-message {
@@ -183,7 +191,7 @@ a {
 		flex-direction: column;
 		background: $white;
 		min-width: 600px;
-		max-height: calc(100% - 4rem);
+		max-height: calc(100% - 10rem);
 		padding: 2rem;
 		position: absolute;
 		top: 50%;
@@ -284,7 +292,7 @@ input[type='number'] {
 	border: 0;
 	background-color: transparent;
 	color: $pickled-bluewood;
-	z-index: 0;
+	z-index: 2;
 }
 
 .handle {
@@ -332,10 +340,6 @@ input[type='number'] {
 	opacity: 0.5;
 }
 
-.settings-modal {
-	height: 460px;
-}
-
 @keyframes active-sidebar {
   0% {
     background-color: transparent;
@@ -367,7 +371,7 @@ app-root, app-dashboard {
 	height: 100%;
 }
 
-form .primary-btn {
+form [class*="-btn"] {
 	margin-top: 1.625rem;
 }
 
@@ -448,4 +452,41 @@ code {
 	padding: 0.2rem;
 	margin: 1rem 0;
 	word-wrap: break-word;
+}
+
+.expandable-section {
+	border: 0;
+	background: none;
+	width: 100%;
+	padding: 0.5rem;
+	text-align: left;
+	border-radius: 3px;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	font-size: 1rem;
+	@include font-medium;
+	color: $pickled-bluewood;
+
+	.pi {
+		margin-right: 0.5rem;
+	}
+
+	&:hover, &:focus-visible {
+		background: $silver;
+	}
+}
+
+.settings-modal {
+	min-height: 460px;
+}
+
+.readonly {
+	background: $white;
+	box-shadow: none;
+	border: 1px solid $silver;
+
+	input:read-only, textarea:read-only {
+		background: $white;
+	}
 }

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { HotkeyHandler } from '@app/app.module';
 import { ModalService } from '@app/core/services/modal.service';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { MenuItem } from '@app/shared';
 import { ClipboardService } from '.';
 import { IHotkeyHandler } from '../models';
@@ -44,6 +44,19 @@ export class ContextMenuBuilderService {
         command: () => this.modalService.openDeleteGroupWindow(),
       },
     ];
+
+    return this;
+  }
+
+  buildEmptyRecycleBinContextMenuItem(): this {
+    this.contextMenuItems.push({
+      label: this.hotkeyHandler.configuration.emptyBinLabel,
+      icon: 'pi pi-fw pi-trash',
+      command: () => {
+        this.storageService.selectedPasswords = [...this.storageService.passwordEntries];
+        this.modalService.openDeleteEntryWindow();
+      }
+    });
 
     return this;
   }
@@ -93,8 +106,7 @@ export class ContextMenuBuilderService {
       label: 'Edit (E)',
       icon: 'pi pi-fw pi-pencil',
       command: () => {
-        this.storageService.editedEntry = this.storageService.selectedPasswords[0];
-        this.modalService.openEntryWindow();
+        this.modalService.openEditEntryWindow();
       }
     });
 

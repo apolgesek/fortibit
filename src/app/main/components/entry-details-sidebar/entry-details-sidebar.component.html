@@ -5,12 +5,23 @@
 	<ng-container *ngIf="isEntrySelected; else databaseDetails">
 		<div class="header">Entry details</div>
 		<div class="content">
-			<div class="section quick-actions">
-				<button #toggleStarBtn class="action-btn" [ngClass]="{ active: entry?.isStarred }" (click)="toggleStarred(entry)">
+			<div *ngIf="shouldDisplayToolbar" class="section quick-actions">
+				<button
+					#toggleStarBtn
+					[attr.aria-label]="entry?.isStarred ? 'Remove from favourites' : 'Add to favourites'" 
+					class="action-btn"
+					[ngClass]="{ active: entry?.isStarred }"
+					(click)="toggleStarred(entry)">
 					<span class="pi pi-star"></span>
 				</button>
-				<button (click)="revealInGroup()" class="action-btn">
-					<span class="pi pi-home"></span>
+				<button aria-label="Entry history" (click)="openEntryHistory()" class="action-btn">
+					<span class="pi pi-book"></span>
+				</button>
+				<button aria-label="Open URL" *ngIf="entry.url" (click)="openUrl(entry.url)" class="action-btn">
+					<span class="pi pi-link"></span>
+				</button>
+				<button aria-label="Find in group" (click)="revealInGroup()" class="action-btn">
+					<span class="pi pi-compass"></span>
 				</button>
 			</div>
 	

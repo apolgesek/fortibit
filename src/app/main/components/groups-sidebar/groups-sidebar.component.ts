@@ -1,8 +1,9 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, QueryList, Renderer2, ViewChild, ViewChildren } from '@angular/core';
+import { GroupIds } from '@app/core/enums';
 import { IPasswordGroup } from '@app/core/models';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
 import { SearchService } from '@app/core/services/search.service';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { MenuItem } from '@app/shared';
 import { DomUtils } from '@app/utils';
 import { IActionMapping, ITreeOptions, KEYS, TreeComponent, TreeModel, TreeNode, TREE_ACTIONS } from '@circlon/angular-tree-component';
@@ -24,13 +25,23 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
   public readonly actionMapping: IActionMapping = {
     keys: {
       [KEYS.DOWN]: (tree, node, $event) => {
+        if (!this.isTreeFocused()) {
+          return;
+        }
+
         TREE_ACTIONS.NEXT_NODE(tree, node, $event);
+
         setTimeout(() => {
           this.focusSelectedNode();
         });
       },
       [KEYS.UP]: (tree, node, $event) => {
+        if (!this.isTreeFocused()) {
+          return;
+        }
+
         TREE_ACTIONS.PREVIOUS_NODE(tree, node, $event);
+      
         setTimeout(() => {
           this.focusSelectedNode();
         });
@@ -39,12 +50,6 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     mouse: {
       dragOver: (_: TreeModel, node: TreeNode, $event: TreeNodeExtendedEvent) => {
         const treeNodeContentWrapperClassList = this.getTreeNodeContentWrapper($event.event)?.classList;
-
-        if (node.data.id === Number.MAX_SAFE_INTEGER) {
-          treeNodeContentWrapperClassList?.add(DomUtils.constants.unknownElementDraggingClass);
-          
-          return false;
-        }
 
         this.storageService.draggedEntries.length === 0 && !$event.element
           ? treeNodeContentWrapperClassList?.add(DomUtils.constants.unknownElementDraggingClass)
@@ -57,7 +62,7 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
         this.getTreeNodeContentWrapper($event)?.classList
           .remove(DomUtils.constants.unknownElementDraggingClass);
 
-        if (node.data.id === this.starredEntriesId) {
+        if (from.data.id === this.groupIds.Starred || from.data.id === this.groupIds.RecycleBin) {
           return;
         }
     
@@ -100,9 +105,11 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
   };
 
   public readonly treeFocusedClass = 'tree-focused';
+  public readonly groupIds = GroupIds;
 
   public groupContextMenuItems: MenuItem[] = [];
   public groupContextMenuRoot: MenuItem[] = [];
+  public groupContextMenuBin: MenuItem[] = [];
   public treeRootElement: HTMLElement | undefined;
 
   private readonly destroyed: Subject<void> = new Subject();
@@ -154,10 +161,6 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     return this.tree.treeModel.getFirstRoot().data.id;
   }
 
-  get starredEntriesId(): number {
-    return Number.MAX_SAFE_INTEGER;
-  }
-
   async ngOnInit() {
     this.groupContextMenuRoot = this.contextMenuBuilderService
       .buildGroupContextMenuItems({ isRoot: true })
@@ -165,6 +168,10 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
 
     this.groupContextMenuItems = this.contextMenuBuilderService
       .buildGroupContextMenuItems()
+      .getResult();
+
+    this.groupContextMenuBin = this.contextMenuBuilderService
+      .buildEmptyRecycleBinContextMenuItem()
       .getResult();
 
     this.storageService.revealInGroup$.pipe(takeUntil(this.destroyed)).subscribe((entry) => {
@@ -177,6 +184,14 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit() {
+    const appGroups = [1, GroupIds.Starred, GroupIds.RecycleBin];
+
+    appGroups.forEach(id => {
+      const group: TreeNode = this.tree.treeModel.getNodeById(id);
+
+      group.allowDrag = () => false;
+    });
+
     const node: TreeNode = this.tree.treeModel.getNodeById(1);
 
     if (!this.storageService.file) {
@@ -189,14 +204,14 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     // run change detection to prevent expression changed error
     // the only way to make it work due to tree component API
     this.cdRef.detectChanges();
-    this.unfocusTree();
+    this.blurTree();
 
     // can't be handled in tree component key binding map, keydown event is needed for focus handling
     fromEvent(this.treeRootElement, 'keydown')
     .pipe(takeUntil(this.destroyed))
     .subscribe((event: KeyboardEvent) => {
       if (event.key === 'Tab') {
-        this.unfocusTree();
+        this.blurTree();
         this.treeItems.forEach(x => x.nativeElement.setAttribute('tabindex', '-1'));
         this.treeRootElement.setAttribute('tabindex', '-1');
 
@@ -207,9 +222,9 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     });
 
-    this.treeRootElement.onblur = () => {
-      this.unfocusTree();
-    }
+    this.treeRootElement.addEventListener('focusout', () => {
+      this.blurTree();
+    });
   }
 
   ngOnDestroy() {
@@ -221,7 +236,9 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     this.searchService.isGlobalSearchMode = false;
     this.storageService.selectGroup(event, reveal);
 
-    this.focusTree();
+    if (!reveal) {
+      this.focusTree();
+    }
   }
 
   collapseGroup(event: { node: TreeNode }) {
@@ -234,8 +251,10 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     switch (node.data.id) {
       case 1:
         return this.groupContextMenuRoot;
-      case Number.MAX_SAFE_INTEGER:
+      case GroupIds.Starred:
         return;
+      case GroupIds.RecycleBin:
+        return this.groupContextMenuBin;
       default:
         return this.groupContextMenuItems;
     }
@@ -278,7 +297,7 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  unfocusTree() {
+  blurTree() {
     this.tree.treeModel.setFocus(false);
 
     if (this.treeRootElement) {
@@ -292,6 +311,10 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
       .find(x => (x.nativeElement as HTMLElement).classList.contains('node-selected'))
       .nativeElement
       .focus();
+  }
+
+  private isTreeFocused(): boolean {
+    return document.activeElement.closest('tree-root') !== null;
   }
 
   private getTreeNodeContentWrapper(event: DragEvent): HTMLElement | null {

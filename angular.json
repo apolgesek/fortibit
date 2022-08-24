@@ -25,7 +25,9 @@
             "tsConfig": "src/tsconfig.json",
             "polyfills": "src/polyfills.ts",
             "assets": [
-              "src/assets"
+              "src/assets",
+              "src/manifest.json",
+              "src/content-script.js"
             ],
             "styles": [
               "node_modules/primeicons/primeicons.css",

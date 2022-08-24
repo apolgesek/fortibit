@@ -100,7 +100,7 @@ export class WindowService implements IWindowService {
       width: 960,
       height: 600,
       minHeight: 520,
-      minWidth: 840,
+      minWidth: 800,
       resizable: true,
       title: this._configService.appConfig.name,
       backgroundColor: '#fff',

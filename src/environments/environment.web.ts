@@ -1,5 +1,5 @@
 export const AppConfig = {
-  production: false,
+  production: true,
   environment: 'WEB',
   mocks: false,
   urls: {

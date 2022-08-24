@@ -1,0 +1,41 @@
+<app-modal>
+	<div class="dialog-header">
+		<h2>Entry history</h2>
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
+      class="close-dialog"
+      (click)="close(); false">&times;
+    </a>
+	</div>
+	<div>
+    <div class="table" *ngIf="history?.length > 0; else emptyHistory">
+			<div class="table-header">
+				<div class="cell index">#</div>
+				<div class="cell">Title</div>
+				<div class="cell">Username</div>
+				<div class="cell">Modification date</div>
+				<div class="cell text-right">Action</div>
+			</div>
+			<div class="history-entry row" *ngFor="let item of history; let i = index">
+				<div class="cell index">#{{ i + 1 }}</div>
+				<div class="cell">{{ item.entry.title }}</div>
+				<div class="cell">{{ item.entry.username }}</div>
+				<div class="cell">{{ item.entry.lastModificationDate | date: "dd/MM/yy HH:mm" }}</div>
+				<div class="cell text-right"><a href="#" (click)="openEntry(item.entry); false">View</a></div>
+			</div>
+		</div>
+		<ng-template #emptyHistory>
+			History is empty.
+		</ng-template>
+	</div>
+	<div class="footer-container">
+    <button
+			type="button"
+			class="text-btn"
+			(click)="close()">
+			Close
+		</button>
+	</div>
+</app-modal>

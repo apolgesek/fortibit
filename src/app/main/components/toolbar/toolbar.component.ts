@@ -1,7 +1,7 @@
 import { Component, ElementRef, Inject, NgZone, ViewChild } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { IpcChannel, UpdateState } from '@shared-renderer/index';
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { scan, startWith, takeUntil, tap } from 'rxjs/operators';
@@ -35,6 +35,10 @@ export class ToolbarComponent {
 
   get isDatabaseInSync(): boolean {
     return !!this.storageService.dateSaved;
+  }
+
+  get isAddPossible(): boolean {
+    return this.storageService.isAddPossible;
   }
 
   get isAnyEntry(): boolean {
@@ -106,12 +110,11 @@ export class ToolbarComponent {
   }
 
   openAddEntryWindow() {
-    this.modalService.openEntryWindow();
+    this.modalService.openNewEntryWindow();
   }
 
   openEditEntryWindow() {
-    this.storageService.editedEntry = this.storageService.selectedPasswords[0];
-    this.modalService.openEntryWindow();
+    this.modalService.openEditEntryWindow();
   }
 
   openDeleteEntryWindow() {
@@ -121,7 +124,7 @@ export class ToolbarComponent {
   trySaveDatabase() {
     !this.storageService.file
       ? this.modalService.openMasterPasswordWindow()
-      : this.storageService.saveDatabase(null, { notify: true });
+      : this.storageService.saveDatabase(null);
   }
 
   toggleSearchMode() {

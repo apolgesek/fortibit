@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { DbContext } from '../database/db-context';
+import { GroupIds } from '../enums';
 import { IEntryRepository } from './index';
 
 type PredicateFn = (entry: IPasswordEntry) => boolean;
@@ -79,6 +80,12 @@ export class EntryRepository implements IEntryRepository {
   moveEntries(ids: number[], targetGroupId: number): Promise<number[]> {
     return this.db.transaction('rw', this.db.entries, () => {
       return Promise.all(ids.map(id => this.db.entries.update(id, { groupId: targetGroupId })));
+    });
+  }
+
+  softDelete(ids: number[]): Promise<number[]> {
+    return this.db.transaction('rw', this.db.entries, () => {
+      return Promise.all(ids.map(id => this.db.entries.update(id, { groupId: GroupIds.RecycleBin, isStarred: false })));
     });
   }
 

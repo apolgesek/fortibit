@@ -1,5 +1,5 @@
 <div class="password-table">
-	<div id="table-header" data-prevent-entry-deselect>
+	<div id="table-header" [ngClass]="{'icon-offset': iconsEnabled}" data-prevent-entry-deselect>
 		<div tabindex="0" appSortBy="title">Title</div>
 		<div tabindex="0" appSortBy="username">Username</div>
 		<div>Password</div>
@@ -14,22 +14,20 @@
 			*ngIf="passwordList.length > 0; else noPasswordsTemplate"
 			itemSize="32"
 			role="rowgroup"
-			#tableViewport
-			(focusout)="onFocusOut($event, tableViewport)"
+			appFocusableList
+			(focused)="selectEntry($event.ev, $event.item)"
+			[selected]="selectedEntries"
 			class="table-viewport">
-			<ng-container *cdkVirtualFor="let item of passwordList; let i = index; trackBy: trackEntryById; templateCacheSize: 0">
+			<ng-container *cdkVirtualFor="let item of passwordList; let i = index; trackBy: trackingTag; templateCacheSize: 0">
 				<!-- focus event handler is needed when user navigates between elements using keyboard -->
 				<div
-					#rowEntry
 					data-prevent-entry-deselect
+					[appFocusableListItem]="item"
 					[appContextMenuItem]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
 					(click)="selectEntry($event, item)"
-					(focus)="focusFirstElement(i)"
-					(mousedown)="onMouseDown(i)"
 					(contextmenu)="showEntryContextMenu($event, item)"
 					[attr.draggable]="entriesDragEnabled"
 					role="row"
-					[attr.data-id]="item.id"
 					tabindex="0"
 					(dragstart)="startDrag($event, item)"
 					(dragend)="endDrag()"
@@ -62,7 +60,7 @@
 				</ng-container>
 				<ng-template #noEntriesTemplate>
 					<p class="no-entries">There are no entries in this group</p>
-					<button class="outline-btn" (click)="addNewEntry(); false">Add entry</button>
+					<button *ngIf="isAddPossible" class="outline-btn" (click)="addNewEntry(); false">Add entry</button>
 				</ng-template>
 			</div>
 		</ng-template>

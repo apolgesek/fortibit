@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { app, globalShortcut, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron';
 import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
-import { basename } from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { basename, join } from 'path';
 import { IpcChannel } from '../shared-models';
 import { SingleInstanceServices } from './dependency-injection';
 import { ProcessArgument } from './process-argument.enum';
 import { IConfigService } from './services/config';
-import { IPerformanceService } from './services/performance/performance-service.model';
-import { IIconService } from './services/icon';
-import { INativeApiService } from './services/native';
 import { IDatabaseService } from './services/database';
-import { IWindowService } from './services/window';
 import { IEncryptionProcessService, MessageEventType } from './services/encryption';
+import { INativeApiService } from './services/native';
+import { IPerformanceService } from './services/performance/performance-service.model';
 import { IUpdateService } from './services/update';
+import { IWindowService } from './services/window';
 
 class MainProcess {
   private readonly _fileArg: string;
@@ -47,10 +47,6 @@ class MainProcess {
     return this._services.get(IConfigService);
   }
 
-  private get _iconService(): IIconService {
-    return this._services.get(IIconService);
-  }
-
   constructor() {
     this._services = new SingleInstanceServices();
     this._fileArg = process.argv.find(x => x.endsWith(this._services.get(IConfigService).appConfig.fileExtension));
@@ -68,11 +64,7 @@ class MainProcess {
       });
 
       const filePath = argv.find(x => x.endsWith(this._configService.appConfig.fileExtension));
-
-      if (filePath) {
-        this._databaseService.setFilePath(windowRef.webContents.id, filePath);
-        this._windowService.setTitle(windowRef.id, basename(filePath));
-      }
+      this.setFile(windowRef, filePath);
 
       windowRef.once('closed', () => {
         this._windowService.removeWindow(windowRef);
@@ -105,9 +97,21 @@ class MainProcess {
       this._windowService.removeWindow(windowRef);
     });
 
-    if (this._fileArg) {
-      this._databaseService.setFilePath(windowRef.webContents.id, this._fileArg);
-      this._windowService.setTitle(windowRef.id, basename(this._fileArg));
+    this.setFile(windowRef, this._fileArg);
+  }
+
+  private setFile(windowRef: BrowserWindow, filePath: string) {
+    if (filePath) {
+      this._databaseService.setFilePath(windowRef.webContents.id, filePath);
+      this._windowService.setTitle(windowRef.id, basename(filePath));
+    } else {
+      const workspace = readFileSync(join(global['__basedir'], 'workspaces.json'), 'utf-8');
+      const path = JSON.parse(workspace);
+
+      if (path.workspace && existsSync(path.workspace)) {
+        this._databaseService.setFilePath(windowRef.webContents.id, path.workspace);
+        this._windowService.setTitle(windowRef.id, basename(path.workspace));
+      }
     }
   }
 

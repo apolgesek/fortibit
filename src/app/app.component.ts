@@ -2,7 +2,7 @@ import { animate, query, style, transition, trigger } from '@angular/animations'
 import { DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { ChildrenOutletContexts, NavigationStart, Router } from '@angular/router';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { fromEvent, Observable } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { AppConfig } from '../environments/environment';

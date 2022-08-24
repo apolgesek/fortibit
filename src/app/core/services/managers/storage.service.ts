@@ -1,19 +1,19 @@
 import { Inject, Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommunicationService } from '@app/app.module';
 import { markDirty } from '@app/core/decorators/mark-dirty.decorator';
 import { ICommunicationService, IPasswordGroup } from '@app/core/models';
-import { EntryRepository, GroupRepository, ReportRepository } from '@app/core/repositories';
+import { EntryRepository, GroupRepository, HistoryRepository, ReportRepository } from '@app/core/repositories';
 import { SearchService } from '@app/core/services/search.service';
 import { TreeNode } from '@circlon/angular-tree-component';
-import { IPasswordEntry, IpcChannel, IReport } from '@shared-renderer/index';
+import { IHistoryEntry, IPasswordEntry, IpcChannel, IReport } from '@shared-renderer/index';
+import { exportDB, importInto } from "dexie-export-import";
 import { AppConfig } from 'environments/environment';
 import { BehaviorSubject, combineLatest, from, Observable, of, Subject } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
-import { DbContext, initialEntries } from '../database';
-import { EventType, Sort } from '../enums';
-import { NotificationService } from './notification.service';
-import { exportDB, importInto } from "dexie-export-import";
-import { CommunicationService } from '@app/app.module';
+import { DbContext, initialEntries } from '../../database';
+import { EventType, GroupIds } from '../../enums';
+import { NotificationService } from '../notification.service';
 
 interface SearchResultsModel {
   passwords: IPasswordEntry[],
@@ -44,6 +44,7 @@ export class StorageService {
 
   public passwordEntries: IPasswordEntry[] = [];
   public selectedPasswords: IPasswordEntry[] = [];
+  public entryHistory: IHistoryEntry[];
   
   private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
   private readonly reloadedEntriesSource: Subject<void> = new Subject();
@@ -65,6 +66,13 @@ export class StorageService {
     return this.file?.filename ?? 'New db (unsaved)';
   }
 
+  get isAddPossible(): boolean {
+    const selectedCategoryId = this.selectedCategory?.data.id;
+
+    return selectedCategoryId !== GroupIds.RecycleBin
+      && selectedCategoryId !== GroupIds.Starred;
+  }
+
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly router: Router,
@@ -73,6 +81,7 @@ export class StorageService {
     private readonly notificationService: NotificationService,
     private readonly entryRepository: EntryRepository,
     private readonly groupRepository: GroupRepository,
+    private readonly historyRepository: HistoryRepository,
     private readonly reportRepository: ReportRepository,
     private readonly dbContext: DbContext,
   ) {
@@ -137,6 +146,14 @@ export class StorageService {
       } else {
         this.getIconPath(id, entry);
       }
+
+      const historyEntry: IHistoryEntry = {
+        entry: editedEntry,
+        entryId: editedEntry.id
+      };
+
+      await this.historyRepository.add(historyEntry);
+      this.entryHistory = await this.getEntryHistory(entry.id);
     } else {
       id = await this.entryRepository.add(entry);
       this.passwordEntries = await this.getEntries();
@@ -149,7 +166,7 @@ export class StorageService {
   }
 
   private async getEntries(): Promise<IPasswordEntry[]> {
-    if (this.selectedCategory.data.id === Number.MAX_SAFE_INTEGER) {
+    if (this.selectedCategory.data.id === GroupIds.Starred) {
       return this.entryRepository.getAllByPredicate(x => x.isStarred);
     } else {
       return this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
@@ -170,10 +187,15 @@ export class StorageService {
 
   @markDirty()
   async deleteEntry() {
-    await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id) as number[]);
+    if (this.selectedCategory.data.id === GroupIds.RecycleBin) {
+      await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id));
+      await this.historyRepository.bulkDelete(this.selectedPasswords.map(x => x.id));
 
-    for (const entry of this.selectedPasswords) {
-      this.removeIconPath(entry);
+      for (const entry of this.selectedPasswords) {
+        this.removeIconPath(entry);
+      }
+    } else {
+      await this.entryRepository.softDelete(this.selectedPasswords.map(p => p.id) as number[]);
     }
 
     this.passwordEntries = await this.entryRepository.getAllByGroup(this.selectedCategory.data.id as number);
@@ -310,7 +332,7 @@ export class StorageService {
       this.selectedPasswords = [];
     }
 
-    if (this.selectedCategory.data.id === Number.MAX_SAFE_INTEGER) {
+    if (this.selectedCategory.data.id === GroupIds.Starred) {
       this.passwordEntries = await this.entryRepository.getAllByPredicate((x) => x.isStarred);
     } else {
       this.passwordEntries = await this.entryRepository.getAllByGroup(groupId);
@@ -337,7 +359,22 @@ export class StorageService {
     await this.dbContext.resetDb();
 
     this.communicationService.ipcRenderer.send(IpcChannel.Lock);
-    this.router.navigate(['/home'], { queryParams: { minimize } });
+    this.router.navigate(['/pass'], { queryParams: { minimize } });
+  }
+
+  async createNew(): Promise<void> {
+    this.selectedCategory = null;
+    this.entryHistory = null;
+    this.file = null;
+    this.editedEntry = null;
+    this.dateSaved = null;
+
+    this.selectedPasswords = [];
+    this.passwordEntries = [];
+    this.groups = [];    
+    
+    await this.dbContext.resetDb();
+    await this.setupDatabase();
   }
 
   unlock(): void {
@@ -346,13 +383,13 @@ export class StorageService {
     this.communicationService.ipcRenderer.send(IpcChannel.Unlock);
   }
 
-  async saveDatabase(newPassword?: string, config?: { forceNew?: boolean, notify?: boolean }): Promise<true | Error> {
+  async saveDatabase(newPassword?: string, config?: { forceNew?: boolean }): Promise<true | Error> {
     const blob = await exportDB(this.dbContext);
 
     const fileReader = new FileReader();
     fileReader.readAsText(blob);
     fileReader.onloadend = () => {
-      this.communicationService.ipcRenderer.send(IpcChannel.SaveFile, { database: fileReader.result , newPassword, config });
+      this.communicationService.ipcRenderer.send(IpcChannel.SaveFile, { database: fileReader.result, newPassword, config });
     };
 
     return true;
@@ -427,7 +464,7 @@ export class StorageService {
     this.passwordListSource$.next([...this.passwordEntries as IPasswordEntry[]]);
   }
 
-  async saveNewDatabase(newPassword: string, config: { forceNew?: boolean, notify?: boolean }): Promise<true | Error> {
+  async saveNewDatabase(newPassword: string, config: { forceNew?: boolean }): Promise<true | Error> {
     return this.saveDatabase(newPassword, config);
   }
 
@@ -440,30 +477,29 @@ export class StorageService {
   }
 
   selectEntry(entry: IPasswordEntry) {
+    this.getEntryHistory(entry.id).then(history => {
+      this.entryHistory = history;
+    });
+
     this.entrySelectedSource.next(entry);
+  }
+
+  async getEntryHistory(id: number): Promise<IHistoryEntry[]> {
+    const history = await this.historyRepository.get(id);
+    history.sort((a, b) => b.id - a.id);
+
+    return history;
   }
 
   async setupDatabase() {
     await this.groupRepository.bulkAdd(initialEntries);
 
-    this.groups[0] = {
-      id: 1,
-      name: 'Database',
-      expanded: true,
-      children: initialEntries.filter(x => x.parent === 1)
-    };
-
-    this.groups[1] = {
-      id: Number.MAX_SAFE_INTEGER,
-      name: 'Starred entries',
-      expanded: true,
-      children: []
-    };
-
     if (AppConfig.mocks) {
       // eslint-disable-next-line
       await this.entryRepository.bulkAdd(require('assets/data/mock_data.json'));
     }
+
+    this.groups = await this.getGroupsTree();
 
     this.setDateSaved();
     this.setDatabaseLoaded();
@@ -520,9 +556,11 @@ export class StorageService {
 
   private async getGroupsTree(): Promise<IPasswordGroup[]> {
     const allGroups = await this.groupRepository.getAll();
-    this.groups[0] = allGroups.find(g => g.id === 1) as IPasswordGroup;
-    this.groups[0].expanded = true;
+    this.groups[0] = allGroups.find(g => g.id === 1);
+    this.groups[1] = allGroups.find(g => g.id === GroupIds.Starred);
+    this.groups[2] = allGroups.find(g => g.id === GroupIds.RecycleBin);
 
+    this.groups[0].expanded = true;
     this.buildGroupsTree(this.groups[0], allGroups);
 
     return this.groups;
@@ -566,37 +604,26 @@ export class StorageService {
   }
 
   private isEntryMatching(entry: IPasswordEntry, title: string): boolean {
-    if (entry.notes?.length) {
-      const autoTypeKey = 'auto_type';
-      const autoTypePatternStart = entry.notes.toLowerCase().indexOf(autoTypeKey);
-
-      if (autoTypePatternStart >= 0) {
-        const pattern = entry.notes
-          .substr(autoTypePatternStart + autoTypeKey.length + 1)
-          .split('/[\n\r]/')[0];
-
-        return new RegExp(pattern).test(title.toLowerCase());
-      }
+    if (entry.autotypeExp) {
+      return new RegExp(entry.autotypeExp).test(title.toLowerCase());
     }
 
     return title.toLowerCase().includes((entry.title as string).toLowerCase());
   }
 
   private handleDatabaseSaved() {
-    this.communicationService.ipcRenderer.on(IpcChannel.GetSaveStatus, (_, { status, message, file, notify }) => {
+    this.communicationService.ipcRenderer.on(IpcChannel.GetSaveStatus, (_, { status, message, file }) => {
       this.zone.run(() => {
         if (status) {
           this.file = { filePath: file, filename: file.split('\\').splice(-1)[0] };
 
-          if (notify) {
-            this.setDateSaved();
+          this.setDateSaved();
 
-            this.notificationService.add({
-              message: 'Database saved',
-              alive: 5000,
-              type: 'success'
-            });
-          }
+          this.notificationService.add({
+            message: 'Database saved',
+            alive: 5000,
+            type: 'error'
+          });
         } else if (message) {
           this.notificationService.add({
             type: 'error',

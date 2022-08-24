@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { valueMatchValidator } from '@app/shared/validators';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 

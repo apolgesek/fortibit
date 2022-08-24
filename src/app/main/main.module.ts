@@ -28,6 +28,7 @@ import { MainRoutingModule } from './main-routing.module';
 import { MainComponent } from './main.component';
 import { EntryIconDirective } from './directives/entry-icon.directive';
 import { ViewTabComponent } from './components/dialogs/settings-dialog/view-tab/view-tab.component';
+import { EntryHistoryComponent } from './components/dialogs/entry-history/entry-history.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import { ViewTabComponent } from './components/dialogs/settings-dialog/view-tab/
     CheckExposedPasswordsComponent,
     EncryptionTabComponent,
     EntryIconDirective,
-    ViewTabComponent
+    ViewTabComponent,
+    EntryHistoryComponent,
   ],
   imports: [
     CommonModule,

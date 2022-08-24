@@ -37,7 +37,7 @@
     }
   
     tree-viewport {
-      margin-top: 1rem;
+      margin-top: 0.625rem;
       margin-left: 1rem;
       display: flex;
       height: 100%;
@@ -51,7 +51,7 @@
         outline: none;
       }
 
-      &.tree-focused .tree-node .node-content-wrapper-focused {
+      &.tree-focused:focus-within .tree-node .node-content-wrapper-focused {
         border: 1px solid $picton-blue;
       }
   

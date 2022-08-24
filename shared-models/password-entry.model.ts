@@ -11,5 +11,7 @@ export interface IPasswordEntry {
 	title?: string;
 	url?: string;
 	notes?: string;
+	autotypeExp?: string;
 	iconPath?: string;
+	history?: IPasswordEntry[];
 }

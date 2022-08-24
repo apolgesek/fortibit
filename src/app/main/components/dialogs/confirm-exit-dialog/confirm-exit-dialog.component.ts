@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ComponentRef, Inject } from '@angular/core';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { IpcChannel } from '@shared-renderer/index';
 import { MasterPasswordDialogComponent } from '../master-password-dialog/master-password-dialog.component';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -7,6 +7,7 @@ import { EventType } from '@app/core/enums';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
+import { ModalRef } from '@app/core/services';
 
 @Component({
   selector: 'app-confirm-exit-dialog',
@@ -22,6 +23,7 @@ export class ConfirmExitDialogComponent implements IModal {
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly storageService: StorageService,
     private readonly modalManager: ModalManager,
+    private readonly modalRef: ModalRef
   ) { }
 
   async saveChanges() {
@@ -46,6 +48,6 @@ export class ConfirmExitDialogComponent implements IModal {
   }
 
   close() {
-    this.modalManager.close(this.ref);
+    this.modalRef.close()
   }
 }

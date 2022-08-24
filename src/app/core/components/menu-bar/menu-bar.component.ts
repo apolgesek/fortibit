@@ -1,7 +1,7 @@
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
 import { EventType } from '@app/core/enums';
 import { ModalService } from '@app/core/services/modal.service';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { DatabaseType, IpcChannel } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
 import { CommunicationService } from '@app/app.module';
@@ -99,7 +99,7 @@ export class MenuBarComponent implements OnInit {
   save() {  
     !this.storageService.file
       ? this.modalService.openMasterPasswordWindow()
-      : this.storageService.saveDatabase(null, { notify: true });
+      : this.storageService.saveDatabase(null);
   }
 
   saveAs() {

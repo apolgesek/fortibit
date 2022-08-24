@@ -78,7 +78,7 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
 
     progress = Math.min(progress, 1);
 
-    element.style.transform = `translateY(${(start - (distance * progress)).toFixed(2)}px)`;
+    element.style.transform = `translateX(50%) translateY(${(start - (distance * progress)).toFixed(2)}px)`;
 
     if (runtime < duration) {
       requestAnimationFrame((timestamp) => {

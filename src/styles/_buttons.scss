@@ -105,24 +105,23 @@ button {
 .text-btn {
 	@include font-medium;
 	color: $curious-blue;
-	margin: 0 0.5rem;
-	padding: 0.5rem 1rem;
+	padding: 0.875rem 1.625rem;
 	border: 1px solid transparent;
-	font-size: 1rem;
+	font-size: 0.875rem;
 	border-radius: 0.25rem;
 	transition: background-color 50ms;
-	background-color: $white;
+	background-color: $porcelain;
 	cursor: pointer;
 	text-transform: uppercase;
 	-webkit-font-smoothing: antialiased;
 
 	&:hover {
-		background-color: $porcelain;
+		background-color: darken($porcelain, 5);
 	}
 
 	&:focus {
 		color: $curious-blue;
-		background-color: $porcelain;
+		background-color: darken($porcelain, 5);
 		outline: 2px solid #aedaff !important;
 		outline-offset: 3px !important;
 	}

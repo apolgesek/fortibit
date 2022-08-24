@@ -1,4 +1,5 @@
-import { AfterViewInit, Component, ComponentRef, ElementRef, Input, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
+import { ModalRef } from '@app/core/services';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { IAdditionalData } from '@app/shared';
 import * as focusTrap from 'focus-trap';
@@ -9,11 +10,13 @@ import { takeUntil } from 'rxjs/operators';
   selector: 'app-modal',
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
 })
 export class ModalComponent implements AfterViewInit, OnDestroy {
   @Input() public options!: IAdditionalData;
   @Input() public bodyClass!: string;
+
+  public showBackdrop: boolean;
 
   @ViewChild('backdrop') public backdrop!: ElementRef;
 
@@ -23,28 +26,23 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
   constructor(
     private readonly el: ElementRef,
     private readonly modalManager: ModalManager,
-  ) {}
+    private readonly modalRef: ModalRef
+  ) {
+    this.showBackdrop = this.modalRef.showBackdrop;
+  }
 
   ngAfterViewInit(): void {
     if (this.options?.closeOnBackdropClick) {
       fromEvent(this.backdrop.nativeElement, 'click')
         .pipe(takeUntil(this.destroyed))
         .subscribe(() => {
-          this.modalManager.close(this.modalManager.openedModals.pop() as ComponentRef<unknown>);
+          this.modalManager.close(this.modalRef.ref);
         });
     }
 
-    fromEvent(window, 'keydown')
-      .pipe(takeUntil(this.destroyed))
-      .subscribe((event: Event) => {
-        if ((event as KeyboardEvent).key === 'Escape') {
-          this.modalManager.close(this.modalManager.openedModals.pop() as ComponentRef<unknown>);
-        }
-      });
-
-      // outside click must be enabled for any outer elements,, e.g. notification
-      this.focusTrap = focusTrap.createFocusTrap(this.el.nativeElement, { allowOutsideClick: true });
-      this.focusTrap.activate();
+    // outside click must be enabled for any outer elements,, e.g. notification
+    this.focusTrap = focusTrap.createFocusTrap(this.el.nativeElement, { allowOutsideClick: true });
+    this.focusTrap.activate();
   }
 
   ngOnDestroy(): void {

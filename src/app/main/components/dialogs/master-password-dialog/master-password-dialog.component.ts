@@ -1,11 +1,11 @@
 import { Component, ComponentRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { ModalManager } from '@app/core/services/modal-manager';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { IpcChannel } from '@shared-renderer/index';
 import { IAdditionalData, IModal } from '@app/shared';
 import { EventType } from '@app/core/enums';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
+import { ModalRef } from '@app/core/services';
 
 @Component({
   selector: 'app-master-password-dialog',
@@ -22,7 +22,7 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal 
     private readonly zone: NgZone,
     private readonly storageService: StorageService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly modalManager: ModalManager
+    private readonly modalRef: ModalRef
   ) { 
     this.onGetSaveStatus = (_, { status })  => {
       this.zone.run(() => {
@@ -46,6 +46,6 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal 
   }
 
   close() {
-    this.modalManager.close(this.ref);
+    this.modalRef.close()
   }
 }

@@ -5,7 +5,7 @@ import { ActivatedRoute  } from '@angular/router';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
 import { ConfigService } from '@app/core/services/config.service';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { TreeNode } from '@circlon/angular-tree-component';
 import { IpcChannel } from '@shared-renderer/index';
 import { IpcRendererEvent } from 'electron/main';
@@ -20,8 +20,8 @@ import { IAppConfig } from '../../../../../app-config';
 })
 export class MasterPasswordComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;
-  public isInvalidPassword = false;
   public config: IAppConfig;
+  public passwordVisible = false;
 
   private readonly destroyed$: Subject<void> = new Subject();
   private onDecryptedContent: (_: IpcRendererEvent, { decrypted }: { decrypted: string }) => void;
@@ -53,7 +53,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
           this.storageService.setDateSaved();
           this.storageService.loadDatabase(decrypted);
         } else {
-          this.isInvalidPassword = true;
+          this.loginForm.get('password').setErrors({ invalidPassword: true });
           this.animate('.brand .brand-logo', 'animate-invalid', 500);
         }
       });
@@ -86,12 +86,21 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.loginForm.reset();
-    this.isInvalidPassword = false;
 
     this.destroyed$.next();
     this.destroyed$.complete();
 
     this.communicationService.ipcRenderer.off(IpcChannel.DecryptedContent, this.onDecryptedContent);
+  }
+
+  togglePasswordVisibility() {
+    this.passwordVisible = !this.passwordVisible;
+  }
+
+  createNew() {
+    this.communicationService.ipcRenderer.invoke(IpcChannel.CreateNew).then(() => {
+      this.storageService.createNew();
+    });
   }
 
   async onLoginSubmit() {

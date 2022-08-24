@@ -55,3 +55,16 @@
 textarea {
   resize: none;
 }
+
+#entry-form {
+  @include scrollbar;
+}
+
+a.copy-password {
+  color: $pickled-bluewood;
+  margin-right: 1rem;
+}
+
+.restore {
+  margin-right: 1rem;
+}

@@ -7,13 +7,13 @@
       role="button"
       aria-label="Close"
       class="close-dialog"
-      (click)="close()">&times;
+      (click)="close(); false">&times;
     </a>
   </div>
   <div
     class="dialog-message">
     <ng-container *ngIf="selectedRowsCount === 1; else bulkRemove">
-      Are you sure you want to remove this entry?
+      Are you sure you want to <strong *ngIf="isInRecycleBin">permanently</strong> remove this entry?
     </ng-container>
     <ng-template #bulkRemove>
       Are you sure you want to remove <strong>{{ selectedRowsCount }}</strong> entries?

@@ -1,6 +1,6 @@
 import { IHotkeyConfiguration } from '@app/core/models';
 import { ModalService } from '@app/core/services/modal.service';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { IHotkeyHandler } from '../../models/hotkey-handler.model';
 import { ClipboardService } from '../clipboard.service';
 
@@ -11,7 +11,8 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
     copyUsernameLabel: 'Copy username (Ctrol + Shift + U)',
     removeGroupLabel: 'Delete (Del)',
     renameGroupLabel: 'Rename (Ctrl + E)',
-    addGroupLabel: 'Add subgroup (Ctrl + O)'
+    addGroupLabel: 'Add subgroup (Ctrl + O)',
+    emptyBinLabel: 'Empty recycle bin'
   };
 
   constructor(
@@ -49,7 +50,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
       if (!this.storageService.file) {
         this.modalService.openMasterPasswordWindow()
       } else if (!this.storageService.dateSaved) {
-        this.storageService.saveDatabase(null, { notify: true });
+        this.storageService.saveDatabase(null);
       }
 
       event.preventDefault();
@@ -79,8 +80,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   
   public registerEditEntry(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'e' && this.storageService.selectedPasswords.length === 1) {
-      this.storageService.editedEntry = this.storageService.selectedPasswords[0];
-      this.modalService.openEntryWindow();
+      this.modalService.openEditEntryWindow();
       event.preventDefault();
     }
   }
@@ -100,8 +100,8 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
   
   public registerAddEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'i' && event.ctrlKey && !event.shiftKey) {
-      this.modalService.openEntryWindow();
+    if (event.key.toLowerCase() === 'i' && event.ctrlKey && !event.shiftKey && this.storageService.isAddPossible) {
+      this.modalService.openNewEntryWindow();
       event.preventDefault();
     }
   }

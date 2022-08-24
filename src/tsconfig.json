@@ -18,10 +18,10 @@
   },
   "files": [
     "main.ts",
-    "polyfills.ts"
+    "polyfills.ts",
   ],
   "include": [
-    "**/*.d.ts"
+    "**/*.d.ts",
   ],
   "exclude": [
     "**/*.spec.ts",

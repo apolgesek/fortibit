@@ -1,6 +1,7 @@
 import { app } from 'electron';
 import { writeFileSync } from 'fs-extra';
 import * as os from 'os';
+import { join } from 'path';
 import { IAppConfig } from '../../../app-config';
 import { IProduct } from '../../../product';
 import { IConfigService } from './index';
@@ -10,7 +11,11 @@ export class ConfigService implements IConfigService {
     return this._appConfig;
   }
 
-  private readonly _productPath = `${global['__basedir']}\\product.json`;
+  public get productPath(): string {
+    return this._productPath;
+  }
+
+  private readonly _productPath = join(global['__basedir'], 'product.json');
   private _appConfig: IAppConfig;
 
   constructor() {

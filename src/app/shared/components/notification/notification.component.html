@@ -1,4 +1,7 @@
 <div class="toast-body">
-  <div class="message">{{ model.message }}</div>
+  <div class="message">
+    <i class="pi pi-check-circle"></i>
+    {{ model.message }}
+  </div>
   <div *ngIf="model.showCount && timeLeft > 0" class="seconds-left">{{ timeLeft }}</div>
 </div>

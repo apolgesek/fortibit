@@ -1,9 +1,10 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { CommunicationService } from '@app/app.module';
+import { GroupIds } from '@app/core/enums';
 import { ICommunicationService, IPasswordGroup } from '@app/core/models';
-import { NotificationService } from '@app/core/services';
+import { ModalService, NotificationService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { TreeNode } from '@circlon/angular-tree-component';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
@@ -19,6 +20,7 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
   @ViewChild('toggleStarBtn') public readonly toggleStarBtn: ElementRef;
   public group: IPasswordGroup;
   public config: IAppConfig;
+  public shouldDisplayToolbar = true;
   private readonly destroyed: Subject<void> = new Subject();
 
   get entry(): IPasswordEntry {
@@ -43,6 +45,7 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly storageService: StorageService,
+    private readonly modalService: ModalService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly configService: ConfigService,
     private readonly notificationService: NotificationService,
@@ -55,7 +58,8 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
     });
 
     this.storageService.selectEntry$.pipe(takeUntil(this.destroyed)).subscribe(entry => {
-      this.group = this.findGroup(this.storageService.groups[0], entry.groupId);
+      this.group = this.findGroup(this.storageService.groups, entry.groupId);
+      this.shouldDisplayToolbar = this.group.id !== GroupIds.RecycleBin;
     });
   }
 
@@ -63,6 +67,10 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
     if (url) {
       this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, url);
     }
+  }
+
+  openEntryHistory() {
+    this.modalService.openEntryHistoryWindow(this.entry.id);
   }
 
   ngOnDestroy(): void {
@@ -92,20 +100,20 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
     this.storageService.revealInGroup(this.entry);
   }
 
-    private findGroup(group: IPasswordGroup, id: number): IPasswordGroup | undefined {
-    if (group.id === id) {
-      return group;
-    }
-
-    if (!group.children?.length) {
-      return;
-    }
-
-    for (const child of group.children) {
-      const group = this.findGroup(child, id);
-
-      if (group) {
+  private findGroup(groups: IPasswordGroup[], id: number): IPasswordGroup | undefined {
+    for (const group of groups) {
+      if (group.id === id) {
         return group;
+      }
+  
+      if (!group.children?.length) {
+        continue;
+      }
+  
+      const found = this.findGroup(group.children, id);
+      
+      if (found) {
+        return found;
       }
     }
 

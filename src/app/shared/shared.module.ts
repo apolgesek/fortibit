@@ -52,7 +52,9 @@ import { FocusableListItemDirective } from './directives/focusable-list-item.dir
     MenuDirective,
     MasterPasswordSetupComponent,
     TabsetComponent,
-    TabComponent
+    TabComponent,
+    FocusableListDirective,
+    FocusableListItemDirective
   ],
 })
 export class SharedModule {}

@@ -1,11 +1,11 @@
 import { Component, ComponentRef, Inject } from '@angular/core';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
-import { ModalManager } from '@app/core/services/modal-manager';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { IAdditionalData, IModal } from '@app/shared';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { combineLatest, from, take, timer } from 'rxjs';
+import { ModalRef } from '@app/core/services';
 
 @Component({
   selector: 'app-check-exposed-passwords',
@@ -24,13 +24,13 @@ export class CheckExposedPasswordsComponent implements IModal {
   showDetails = false;
   
   constructor(
-    private readonly modalManager: ModalManager,
+    private readonly modalRef: ModalRef,
     private readonly storageService: StorageService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService
   ) { }
 
   close() {
-    this.modalManager.close(this.ref);
+    this.modalRef.close();
   }
 
   async scan() {

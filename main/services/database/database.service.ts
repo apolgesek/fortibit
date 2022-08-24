@@ -1,6 +1,6 @@
 import { app, dialog, FileFilter, ipcMain, IpcMainEvent, powerMonitor, safeStorage } from 'electron';
 import { XMLParser } from 'fast-xml-parser';
-import { existsSync, readFileSync, rmSync, writeFile } from 'fs-extra';
+import { existsSync, readFileSync, rmSync, writeFile, writeFileSync } from 'fs-extra';
 import { basename, join } from 'path';
 import { IProduct } from '../../../product';
 import { IpcChannel } from '../../../shared-models';
@@ -15,7 +15,6 @@ interface ISaveFilePayload {
   newPassword: string;
   config: {
     forceNew: boolean;
-    notify: boolean;
   };
 }
 
@@ -84,6 +83,13 @@ export class DatabaseService implements IDatabaseService {
       return await this.getLeaks(event, database);
     });
 
+    ipcMain.handle(IpcChannel.CreateNew, async (event: IpcMainEvent) => {
+      this._fileMap.delete(event.sender.id);
+      this.dbPassword = null;
+
+      return true;
+    });
+
     ipcMain.on(IpcChannel.Lock, (_: IpcMainEvent) => {
       this.clear();
       this.dbPassword = null;
@@ -108,13 +114,15 @@ export class DatabaseService implements IDatabaseService {
 
   public setFilePath(windowId: number, filePath: string) {
     this._fileMap.set(windowId, filePath);
+
+    writeFileSync(join(global['__basedir'], 'workspaces.json'), JSON.stringify({ workspace: filePath }));  
   }
 
   public getFilePath(windowId: number): string {
     return this._fileMap.get(windowId);
   }
 
-  public async saveDatabase(event: IpcMainEvent, database: JSON, newPassword: string, config: { forceNew: boolean, notify: boolean }): Promise<void> {    
+  public async saveDatabase(event: IpcMainEvent, database: JSON, newPassword: string, config: { forceNew: boolean }): Promise<void> {    
     let savePath: Electron.SaveDialogReturnValue = { filePath: this._fileMap.get(event.sender.id), canceled: false };
     const window = this._windowService.getWindowByWebContentsId(event.sender.id);
 
@@ -144,10 +152,10 @@ export class DatabaseService implements IDatabaseService {
 
     try {
       writeFile(finalFilePath, payload.encrypted, { encoding: 'base64' }, () => {
-        this._fileMap.set(event.sender.id, finalFilePath);
+        this.setFilePath(event.sender.id, finalFilePath);
         this._windowService.setTitle(event.sender.id, basename(finalFilePath));
 
-        event.reply(IpcChannel.GetSaveStatus, { status: true, file: this._fileMap.get(event.sender.id), notify: config?.notify });
+        event.reply(IpcChannel.GetSaveStatus, { status: true, file: this._fileMap.get(event.sender.id) });
       });
     } catch (err) {
       event.reply(IpcChannel.GetSaveStatus, { status: false, message: err });
@@ -162,7 +170,7 @@ export class DatabaseService implements IDatabaseService {
     });
 
     if (!fileObj.canceled) {
-      this._fileMap.set(event.sender.id, fileObj.filePaths[0]);
+      this.setFilePath(event.sender.id, fileObj.filePaths[0]);
       event.reply(IpcChannel.ProvidePassword, this._fileMap.get(event.sender.id));
     }
   }
@@ -181,8 +189,10 @@ export class DatabaseService implements IDatabaseService {
 
     const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { error: string, decrypted: string };
     
-    this._iconService.getIcons(window.browserWindow.id, payload.decrypted);
-    this._windowService.setIdleTimer(event.sender.id);
+    if (!payload.error) {
+      this._iconService.getIcons(window.browserWindow.id, payload.decrypted);
+      this._windowService.setIdleTimer(event.sender.id);
+    }
 
     event.reply(IpcChannel.DecryptedContent, {
       decrypted: !payload.error && payload.decrypted,

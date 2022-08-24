@@ -1,0 +1,36 @@
+@import 'variables';
+
+.text-right {
+  text-align: right;
+}
+
+.table-header {
+  display: flex;
+}
+
+.row {
+  display: flex;
+  border-top: 1px solid $silver;
+
+  &:last-child {
+    border-bottom: 1px solid $silver;
+  }
+}
+
+.cell {
+  flex: 1;
+  padding: 0.5rem;
+
+  &.index {
+    flex: none;
+    width: 3rem;
+  }
+}
+
+.table {
+  font-size: 0.875rem;
+}
+
+.footer-container {
+  margin-top: 2rem;
+}

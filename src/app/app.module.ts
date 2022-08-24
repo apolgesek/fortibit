@@ -1,3 +1,4 @@
+import { HttpClientModule } from '@angular/common/http';
 import { InjectionToken, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -12,7 +13,7 @@ import { ElectronService } from './core/services/electron/electron.service';
 import { WebService } from './core/services/electron/web.service';
 import { WindowsHotkeyHandler } from './core/services/hotkey/windows-hotkey-handler';
 import { ModalService } from './core/services/modal.service';
-import { StorageService } from './core/services/storage.service';
+import { StorageService } from './core/services/managers/storage.service';
 import { MainModule } from './main/main.module';
 import { SharedModule } from './shared/shared.module';
 
@@ -24,6 +25,7 @@ export const CommunicationService = new InjectionToken<ICommunicationService>('c
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    HttpClientModule,
     SharedModule,
     CoreModule,
     MainModule,
@@ -43,12 +45,12 @@ export const CommunicationService = new InjectionToken<ICommunicationService>('c
     {
       provide: HotkeyHandler,
       useFactory: (
-        electronService: ICommunicationService,
+        communicationService: ICommunicationService,
         storageService: StorageService,
         modalService: ModalService,
         clipboardService: ClipboardService
       ) => {
-        switch (electronService.os.platform()) {
+        switch (communicationService.os.platform()) {
           case 'win32':
           case 'web':
             return new WindowsHotkeyHandler(storageService, modalService, clipboardService);

@@ -12,7 +12,6 @@
 		tabindex="0"
 		[nodes]="groups"
 		[options]="treeOptions"
-		[focused]="false"
 		(focus)="selectGroup($event)">
 	  <ng-template #treeNodeTemplate let-node let-index="index">
 			<ng-container *ngIf="(isGroupRenamed$ | async) && selectedGroup?.data.id === node.data.id; else groupName">
@@ -37,7 +36,8 @@
 					[appContextMenuItem]="getContextMenu(node)"
 					class="node-group">
 					<span *ngIf="node.data.isImported" class="pi pi-download"></span>
-					<span *ngIf="node.data.id === starredEntriesId" class="pi pi-star"></span>
+					<span *ngIf="node.data.id === groupIds.Starred" class="pi pi-star"></span>
+					<span *ngIf="node.data.id === groupIds.RecycleBin" class="pi pi-trash"></span>
 					{{ node.data.name }}
 				</div>
 			</ng-template>

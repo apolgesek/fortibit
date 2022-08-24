@@ -7,7 +7,7 @@ import { DashboardGuard } from '../core/guards/dashboard.guard';
 
 const routes: Routes = [
   {
-    path: 'home',
+    path: 'pass',
     component: MasterPasswordComponent,
     data: { animation: 'masterPasswordPage' }
   },

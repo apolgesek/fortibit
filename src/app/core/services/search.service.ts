@@ -16,7 +16,7 @@ export class SearchService implements ISearchService {
   public searchInputSource: Subject<string> = new Subject();
   public searchPhrase$: Observable<string>;
   public searchPhraseValue = '';
-  public sortProp: keyof IPasswordEntry = 'creationDate';
+  public sortProp: 'title' | 'username';
   public sortOrder: Sort = Sort.Desc;
   public isSearching = false;
   public wasSearched = false;
@@ -55,7 +55,7 @@ export class SearchService implements ISearchService {
     this.updateSearchResults();
   }
 
-  public setSort(state: Sort, prop: keyof IPasswordEntry) {
+  public setSort(state: Sort, prop: 'title' | 'username') {
     this.sortOrder = state;
     this.sortProp = prop;
     this.updateSearchResults();
@@ -95,10 +95,12 @@ export class SearchService implements ISearchService {
     const secondProp = b[this.sortProp];
 
     if (firstProp && secondProp) {
-      return firstProp > secondProp ? -1 : 1;
+      return firstProp.localeCompare(secondProp);
+    } else if (firstProp && !secondProp) {
+      return -1;
+    }  else {
+      return 1;
     }
-
-    return 0;
   }
 
   public compareDescending(a: IPasswordEntry, b: IPasswordEntry) {
@@ -106,10 +108,12 @@ export class SearchService implements ISearchService {
     const secondProp = b[this.sortProp];
 
     if (firstProp && secondProp) {
-      return firstProp > secondProp ? 1 : -1;
+      return secondProp.localeCompare(firstProp);
+    } else if (!firstProp && secondProp) {
+      return -1;
+    }  else {
+      return 1;
     }
-
-    return 0;
   }
 
   private updateSearchResults() {

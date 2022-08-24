@@ -34,6 +34,8 @@ $sidePanelOutDuration: 250ms;
 	.row-entry {
 		font-size: 0.875rem;
 		cursor: pointer;
+		box-sizing: border-box;
+		border: 1px solid transparent;
 		@include default-table-row;
 
 		&:focus,
@@ -50,6 +52,7 @@ $sidePanelOutDuration: 250ms;
 
 		&:focus {
 			background-color: darken($curious-blue-light, 2);
+			border: 1px solid $picton-blue;
 		}
 
 		&:hover:not(:focus) {
@@ -64,7 +67,7 @@ $sidePanelOutDuration: 250ms;
 			padding-left: 1rem;
 
 			&-icon {
-				width: 32px;
+				min-width: 2rem;
 				display: flex;
 				justify-content: center;
 				align-items: center;
@@ -79,7 +82,6 @@ $sidePanelOutDuration: 250ms;
 
 	#table-header {
 		display: flex;
-		width: 100%;
 		background-color: $white;
 		user-select: none;
 		font-size: 0.875rem;
@@ -87,6 +89,10 @@ $sidePanelOutDuration: 250ms;
 		min-height: 2rem;
 		position: relative;
 		z-index: 1;
+
+		&.icon-offset {
+			padding-left: 2rem;
+		}
 
 		div {
 			display: flex;

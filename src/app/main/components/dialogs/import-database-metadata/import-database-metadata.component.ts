@@ -1,12 +1,11 @@
 import { Component, ComponentRef, Inject } from '@angular/core';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
-import { ModalManager } from '@app/core/services/modal-manager';
 import { NotificationService } from '@app/core/services/notification.service';
-import { StorageService } from '@app/core/services/storage.service';
+import { StorageService } from '@app/core/services/managers/storage.service';
 import { IAdditionalData, IModal } from '@app/shared';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
-import * as path from 'path';
+import { ModalRef } from '@app/core/services';
 
 @Component({
   selector: 'app-import-database-metadata',
@@ -19,7 +18,7 @@ export class ImportDatabaseMetadataComponent implements IModal {
   isConfirmButtonLocked = false;
 
   constructor(
-    private readonly modalManager: ModalManager,
+    private readonly modalRef: ModalRef,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly storageService: StorageService,
     private readonly notificationService: NotificationService
@@ -34,7 +33,7 @@ export class ImportDatabaseMetadataComponent implements IModal {
       deserializedEntries = deserializedEntries.map(x => ({...x, groupId: this.storageService.selectedCategory?.data.id}));
 
       const filePath = this.additionalData?.payload.filePath;
-      await this.storageService.importDatabase(path.basename(filePath, path.extname(filePath)), deserializedEntries);
+      await this.storageService.importDatabase(this.communicationService.path.parse(filePath).name, deserializedEntries);
 
       this.notificationService.add({ type: 'success', message: 'Passwords imported successfully', alive: 5000 });
       this.close();
@@ -44,6 +43,6 @@ export class ImportDatabaseMetadataComponent implements IModal {
   }
 
   close() {
-    this.modalManager.close(this.ref);
+    this.modalRef.close()
   }
 }

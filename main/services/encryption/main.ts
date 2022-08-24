@@ -59,12 +59,20 @@ class Main {
 
     const parsedDb = JSON.parse(database);
     const stores = parsedDb.data.data;
-    const entriesStore = stores.find(x => x.tableName === 'entries');
 
-    entriesStore.rows = entriesStore.rows.map(e => ({
-      ...e,
-      password: this._inMemoryEncryptionService.decryptString(e.password, memoryKey)
+    const entriesStore = stores.find(x => x.tableName === 'entries');
+    const historyStore = stores.find(x => x.tableName === 'history');
+
+    entriesStore.rows = entriesStore.rows.map(entry => ({
+      ...entry,
+      password: this._inMemoryEncryptionService.decryptString(entry.password, memoryKey)
     }));
+
+    historyStore.rows = historyStore.rows.map(item => {
+      item.entry.password = this._inMemoryEncryptionService.decryptString(item.entry.password, memoryKey);
+
+      return item;
+    });
     
     const databaseJSON = JSON.stringify(parsedDb);
 
@@ -77,12 +85,20 @@ class Main {
     try {
       const decryptedDb = JSON.parse(this._encryptionService.decryptString(fileData, password));
       const stores = decryptedDb.data.data;
+
       const entriesStore = stores.find(x => x.tableName === 'entries');
+      const historyStore = stores.find(x => x.tableName === 'history');
 
       entriesStore.rows = entriesStore.rows.map(entry => ({
         ...entry,
         password: this._inMemoryEncryptionService.encryptString(entry.password, memoryKey)
       }));
+
+      historyStore.rows = historyStore.rows.map(item => {
+        item.entry.password = this._inMemoryEncryptionService.encryptString(item.entry.password, memoryKey);
+
+        return item;
+      });
 
       process.send({ decrypted: JSON.stringify(decryptedDb) });
     } catch (err) {
