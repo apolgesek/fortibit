@@ -19,7 +19,6 @@
 			[selected]="selectedEntries"
 			class="table-viewport">
 			<ng-container *cdkVirtualFor="let item of passwordList; let i = index; trackBy: trackingTag; templateCacheSize: 0">
-				<!-- focus event handler is needed when user navigates between elements using keyboard -->
 				<div
 					data-prevent-entry-deselect
 					[appFocusableListItem]="item"
@@ -32,7 +31,7 @@
 					(dragstart)="startDrag($event, item)"
 					(dragend)="endDrag()"
 					[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
-					class="row-entry">
+					class="row-entry {{ item.expirationStatus ?? '' }}">
 					<div *ngIf="iconsEnabled" class="column-icon">
 						<img [appEntryIcon]="item" width="16" height="16"/>
 					</div>
@@ -48,7 +47,7 @@
 					</div>
 					<div
 						(dblclick)="copyToClipboard(item, 'password')"
-						class="column">******
+						class="column password">****** <i *ngIf="item.expirationStatus" class="pi pi-clock"></i>
 					</div>
 				</div>
 			</ng-container>
@@ -60,7 +59,7 @@
 				</ng-container>
 				<ng-template #noEntriesTemplate>
 					<p class="no-entries">There are no entries in this group</p>
-					<button *ngIf="isAddPossible" class="outline-btn" (click)="addNewEntry(); false">Add entry</button>
+					<button *ngIf="isAddPossible" class="outline-btn" id="add-entry-list" (click)="addNewEntry(); false">Add entry</button>
 				</ng-template>
 			</div>
 		</ng-template>

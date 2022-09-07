@@ -1,0 +1,65 @@
+.dropdown-content {
+	right: 0;
+  background-color: $white;
+  z-index: 999;
+	width: 200px;	
+	padding-top: 4px;
+	padding-bottom: 4px;
+	position: absolute;
+	// Box shadow changes anchor color inside for some reason
+	filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.12));
+
+	&.left {
+		left: 0;
+	}
+
+	&.right {
+		right: 0;
+	}
+
+	.divider {
+		padding: 4px;
+
+		hr {
+			margin: 0;
+			border: 0;
+			border-top: 1px solid $silver;
+		}
+	}
+
+	.disabled {
+		color: $grey-80;
+		cursor: default;
+
+		&:hover {
+			background-color: $white;
+		}
+	}
+
+	a {
+		color: $pickled-bluewood;
+		padding: 0.5rem;
+		text-decoration: none;
+		display: block;
+		font-size: 0.875rem;
+
+		&.focused {
+			background: $porcelain;
+		}
+	}
+}
+
+.dropdown {
+  position: relative;
+  display: block;
+
+	a:focus {
+		outline: none;
+	}
+
+	&.open {
+		button, a {
+			border-bottom-right-radius: 0;
+		}
+	}
+}

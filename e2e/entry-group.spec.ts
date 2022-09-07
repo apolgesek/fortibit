@@ -30,14 +30,18 @@ test.describe('Entry/group', async () => {
     await general.click({ button: 'right' });
     const addGroup = await firstWindow.locator('.context-menu li:first-child');
     await addGroup.click();
-    await firstWindow.locator('.rename-group').waitFor({ state: 'visible' });
+    await firstWindow.locator('.rename-group').waitFor({ state: 'attached' });
     await firstWindow.keyboard.press('Enter');
   }
 
   test.beforeEach(async () => {
     app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`] });
     firstWindow = await app.firstWindow();
+    
     await firstWindow.waitForLoadState('domcontentloaded');
+
+    const createNew = await firstWindow.locator('.create-new');
+    await createNew.click();
   });
 
   test.afterEach(async () => {
@@ -79,7 +83,7 @@ test.describe('Entry/group', async () => {
   test('Check entry modal opened', async () => {
     const addEntryBtn = await firstWindow.locator('#add-entry');
     await addEntryBtn.click();
-    const modal = await firstWindow.waitForSelector('app-modal', { state: 'visible' });
+    const modal = await firstWindow.waitForSelector('.modal-body', { state: 'attached' });
   
     expect(modal).toBeDefined();
   });
@@ -87,7 +91,7 @@ test.describe('Entry/group', async () => {
   test('Check entry added', async () => {
     await addEntry();
 
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
     const entryListCount = await firstWindow.locator('.row-entry').count();
   
     expect(entryListCount).toBe(1);
@@ -95,21 +99,22 @@ test.describe('Entry/group', async () => {
 
   test('Check entry edited', async () => {
     await addEntry();
+    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+
     const newEntry = await firstWindow.locator('.row-entry');
 
     await newEntry.click();
     await firstWindow.keyboard.press('E');
 
-    const modal = await firstWindow.locator('app-modal');
-    await modal.waitFor({ state: 'attached' });
+    const modal = await firstWindow.locator('.modal-body');
+    await modal.waitFor({ state: 'visible' });
 
-    expect(modal).toBeVisible();
     expect(await firstWindow.locator('#entry-title').inputValue()).toBe('Title');
     expect(await firstWindow.locator('#entry-username').inputValue()).toBe('Username');
   });
 
   test('Check entry modal closed', async () => {
-    let modal = await firstWindow.locator('app-modal');
+    let modal = await firstWindow.locator('.modal-body');
     await firstWindow.keyboard.press('Escape');
 
     await modal.waitFor({ state: 'detached'  });
@@ -125,7 +130,7 @@ test.describe('Entry/group', async () => {
 
     await firstWindow.keyboard.press('Delete');
 
-    const modal = await firstWindow.locator('app-modal');
+    const modal = await firstWindow.locator('.modal-body');
     const removeBtn = await firstWindow.locator('#entry-remove');
   
     await removeBtn.click();
@@ -150,9 +155,8 @@ test.describe('Entry/group', async () => {
     await secondEntry.click({ modifiers: ['Control'] });
 
     await firstWindow.keyboard.press('Delete');
+
     const modal = await firstWindow.locator('app-modal');
-  
-    await modal.waitFor({ state: 'attached' });
 
     const removeBtn = await firstWindow.locator('#entry-remove');
     await removeBtn.click();
@@ -166,8 +170,11 @@ test.describe('Entry/group', async () => {
   test('Check entry moved', async () => {
     await addEntry();
     await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
-    await firstWindow.dragAndDrop('.row-entry', '.node-group:has-text("General")');
-    await firstWindow.locator('.node-group:has-text("General")').first().click();
+
+    await firstWindow.dragAndDrop('.row-entry', '#group-3');
+
+    await firstWindow.locator('#group-3').click();
+    await firstWindow.locator('.row-entry').waitFor({ state: 'visible' });
     const entriesCount = await firstWindow.locator('.row-entry').count();
 
     expect(entriesCount).toBe(1);
@@ -175,24 +182,22 @@ test.describe('Entry/group', async () => {
 
   test('Check entries moved', async () => {
     await addEntry();
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
     await addEntry();
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
 
     const rowEntries = await firstWindow.locator('.row-entry');
     await rowEntries.nth(0).click();
 
     const boundingBoxSource = await rowEntries.nth(1).boundingBox();
-    await firstWindow.mouse.move(boundingBoxSource.x + boundingBoxSource.width / 2, boundingBoxSource.y + boundingBoxSource.height / 2);
+
+    await firstWindow.mouse.move(boundingBoxSource.x + boundingBoxSource.width / 2, boundingBoxSource.y + boundingBoxSource.height / 2, { steps: 5 });
     await firstWindow.keyboard.down('Control');
     await firstWindow.mouse.down();
     await firstWindow.mouse.up();
-    await firstWindow.mouse.down();
     await firstWindow.keyboard.up('Control');
 
-    const boundingBoxTarget = await firstWindow.locator('.node-group:has-text("Email")').boundingBox();
-    await firstWindow.mouse.move(boundingBoxTarget.x + boundingBoxTarget.width / 2, boundingBoxTarget.y + boundingBoxTarget.height / 2, { steps: 5 });
-    await firstWindow.mouse.up();
+    await firstWindow.dragAndDrop('.row-entry', '#group-3');
 
     const entriesCount = await firstWindow.locator('.row-entry').count();
 
@@ -201,7 +206,7 @@ test.describe('Entry/group', async () => {
 
   test('Check entry password copied', async () => {
     await addEntry();
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
 
     const entryPassword = await firstWindow.locator('.row-entry .column:last-child');
     await entryPassword.dblclick();
@@ -233,11 +238,14 @@ test.describe('Entry/group', async () => {
   });
 
   test('Check group moved', async () => {
-    await firstWindow.dragAndDrop('.node-group:has-text("Email")', '.node-group:has-text("Work")');
+    await firstWindow.waitForSelector('#group-3', { state: 'visible' });
+    await firstWindow.waitForSelector('#group-4', { state: 'visible' });
+
+    await firstWindow.dragAndDrop('#group-3', '#group-4', { timeout: 0 });
     const expander = await firstWindow.locator('.tree-node-level-2 .toggle-children-wrapper-collapsed');
     await expander.click();
 
-    const workGroup = await firstWindow.locator('.node-group:has-text("Email")');
+    const workGroup = await firstWindow.locator('#group-3');
     const level = await workGroup.getAttribute('aria-level');
     expect(level).toBe("3");
   });
@@ -250,7 +258,7 @@ test.describe('Entry/group', async () => {
     await group.click({ button: 'right' });
     const deleteOption = await firstWindow.locator('.context-menu li:last-child');
     await deleteOption.click();
-    const modal = await firstWindow.locator('app-modal');
+    const modal = await firstWindow.locator('.modal-body');
     const confirmDelete = await modal.locator('.primary-btn');
     await confirmDelete.click();
 
@@ -260,12 +268,55 @@ test.describe('Entry/group', async () => {
     expect(groupCountAfter).toEqual(groupCountBefore - 1);
   });
 
+  test('Check grouped cannot be moved', async () => {
+    const trashSelector = `#group-${Number.MIN_SAFE_INTEGER}`
+    const starredSelector = `#group-${Number.MIN_SAFE_INTEGER + 1}`;
+
+    await firstWindow.waitForSelector(trashSelector, { state: 'visible' });
+    await firstWindow.waitForSelector(starredSelector, { state: 'visible' });
+
+    await firstWindow.dragAndDrop(trashSelector, '#group-2', { timeout: 0 });
+    await firstWindow.dragAndDrop(starredSelector, '#group-2', { timeout: 0 });
+
+    const trashGroup = firstWindow.locator(trashSelector);
+    const starredGroup = firstWindow.locator(starredSelector);
+
+    const trashGroupLevel = await trashGroup.getAttribute('aria-level');
+    const starredGroupLevel = await starredGroup.getAttribute('aria-level');
+
+    expect(trashGroupLevel).toBe("1");
+    expect(starredGroupLevel).toBe("1");
+  });
+
+  test('Check add entry button disabled/hidden when built-in group active', async () => {
+    const trashSelector = `#group-${Number.MIN_SAFE_INTEGER}`
+    const starredSelector = `#group-${Number.MIN_SAFE_INTEGER + 1}`;
+
+    const trashGroup = firstWindow.locator(trashSelector);
+    const starredGroup = firstWindow.locator(starredSelector);
+
+    await trashGroup.click();
+    let addNewButton = firstWindow.locator('#add-entry-list');
+    let toolbarAddNewButtonDisabled = await firstWindow.locator('#add-entry').getAttribute('disabled');
+    
+    expect(await addNewButton.count()).toBe(0);
+    expect(toolbarAddNewButtonDisabled).toBe('');
+
+    await starredGroup.click();
+
+    addNewButton = firstWindow.locator('#add-entry-list');
+    toolbarAddNewButtonDisabled = await firstWindow.locator('#add-entry').getAttribute('disabled');
+
+    expect(await addNewButton.count()).toBe(0);
+    expect(toolbarAddNewButtonDisabled).toBe('');
+  });
+
   test('Check entry local search', async () => {
     await addEntry();
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
 
     await addEntry({ title: 'Aaaa', username: 'Bbbb' });
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
 
     const searchInput = await firstWindow.locator('.search');
     const searchPhrase = 'User';
@@ -283,7 +334,7 @@ test.describe('Entry/group', async () => {
 
   test('Check entry global search', async () => {
     await addEntry();
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
 
     const group = await firstWindow.locator('.node-group:has-text("Email")');
     await group.click();
@@ -306,7 +357,7 @@ test.describe('Entry/group', async () => {
 
   test('Check entry details', async () => {
     await addEntry();
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
     const row = await firstWindow.locator('.row-entry');
     await row.click();
     const details = await firstWindow.locator('.details-container');

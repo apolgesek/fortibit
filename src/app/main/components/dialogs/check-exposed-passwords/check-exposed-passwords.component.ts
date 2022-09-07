@@ -1,11 +1,10 @@
 import { Component, ComponentRef, Inject } from '@angular/core';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { IAdditionalData, IModal } from '@app/shared';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { combineLatest, from, take, timer } from 'rxjs';
-import { ModalRef } from '@app/core/services';
+import { ModalRef, ReportService } from '@app/core/services';
 
 @Component({
   selector: 'app-check-exposed-passwords',
@@ -25,7 +24,7 @@ export class CheckExposedPasswordsComponent implements IModal {
   
   constructor(
     private readonly modalRef: ModalRef,
-    private readonly storageService: StorageService,
+    private readonly reportService: ReportService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService
   ) { }
 
@@ -38,12 +37,12 @@ export class CheckExposedPasswordsComponent implements IModal {
     const t0 = performance.now();
 
     combineLatest([
-      from(this.storageService.scanLeaks()),
+      from(this.reportService.scanLeaks()),
       timer(1000).pipe(take(1))
     ]).subscribe(async ([result]) => {
       const t1 = performance.now();
 
-      const reportId = await this.storageService.addReport({
+      const reportId = await this.reportService.addReport({
         creationDate: new Date(),
         generationTime: t1 - t0,
         type: 1,
@@ -68,7 +67,7 @@ export class CheckExposedPasswordsComponent implements IModal {
   }
 
   private async getLastReport() {
-    const exposedPasswords = await this.storageService.getExposedPasswords();
+    const exposedPasswords = await this.reportService.getExposedPasswords();
 
     if (exposedPasswords) {
       this.lastReport = exposedPasswords.report;

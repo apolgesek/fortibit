@@ -3,10 +3,10 @@ import { Component, OnInit, NgZone, OnDestroy, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ActivatedRoute  } from '@angular/router';
 import { CommunicationService } from '@app/app.module';
+import { GroupIds } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
+import { EntryManager, GroupManager, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
-import { StorageService } from '@app/core/services/managers/storage.service';
-import { TreeNode } from '@circlon/angular-tree-component';
 import { IpcChannel } from '@shared-renderer/index';
 import { IpcRendererEvent } from 'electron/main';
 import { from, Subject } from 'rxjs';
@@ -22,24 +22,23 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;
   public config: IAppConfig;
   public passwordVisible = false;
+  public filePath: string = '';
 
   private readonly destroyed$: Subject<void> = new Subject();
   private onDecryptedContent: (_: IpcRendererEvent, { decrypted }: { decrypted: string }) => void;
-
-  get filePath(): string {
-    return this.storageService.file?.filePath ?? '';
-  }
 
   get passwordControl(): FormControl {
     return this.loginForm.get('password') as FormControl;
   }
 
   constructor(
+    private readonly workspaceService: WorkspaceService,
+    private readonly groupManager: GroupManager,
+    private readonly entryManager: EntryManager,
     private readonly fb: FormBuilder,
     private readonly zone: NgZone,
     private readonly route: ActivatedRoute,
     private readonly configService: ConfigService,
-    private readonly storageService: StorageService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     @Inject(DOCUMENT) private readonly document: Document
   ) { 
@@ -50,8 +49,8 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     this.onDecryptedContent = (_: IpcRendererEvent, { decrypted }: { decrypted: string }) => {
       this.zone.run(() => {
         if (decrypted) {
-          this.storageService.setDateSaved();
-          this.storageService.loadDatabase(decrypted);
+          this.workspaceService.setDateSaved();
+          this.workspaceService.loadDatabase(decrypted);
         } else {
           this.loginForm.get('password').setErrors({ invalidPassword: true });
           this.animate('.brand .brand-logo', 'animate-invalid', 500);
@@ -61,18 +60,27 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.filePath = this.workspaceService.file?.filePath ?? '';
+
     this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed$)).subscribe(config => {
       this.config = config;
     });
 
     this.communicationService.ipcRenderer.on(IpcChannel.DecryptedContent, this.onDecryptedContent);
-    this.storageService.loadedDatabase$
-      .pipe(
-        switchMap(() => from(this.storageService.selectGroup({ node: { data: { id: 1 }} as TreeNode}))),
-        takeUntil(this.destroyed$)
-      ).subscribe(() => {
-        this.storageService.unlock();
-      });
+
+    this.workspaceService.loadedDatabase$
+    .pipe(
+      switchMap(() => from(this.selectDefaultGroup())),
+      takeUntil(this.destroyed$)
+    ).subscribe(() => {
+      this.workspaceService.unlock();
+    });
+  }
+
+  async selectDefaultGroup() {
+    this.groupManager.selectGroup(GroupIds.Root);
+    this.entryManager.setByGroup(GroupIds.Root);
+    this.entryManager.updateEntries();
   }
 
   // make sure window preview displays password entry page
@@ -99,12 +107,12 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 
   createNew() {
     this.communicationService.ipcRenderer.invoke(IpcChannel.CreateNew).then(() => {
-      this.storageService.createNew();
+      this.workspaceService.createNew();
     });
   }
 
   async onLoginSubmit() {
-    await this.storageService.clearDatabase();
+    await this.workspaceService.clearDatabase();
 
     Object.values(this.loginForm.controls).forEach(control => {
       control.markAsDirty();

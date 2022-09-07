@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { MasterPasswordComponent } from './components/master-password/master-password.component';
 import { DashboardGuard } from '../core/guards/dashboard.guard';
 
@@ -12,9 +12,9 @@ const routes: Routes = [
     data: { animation: 'masterPasswordPage' }
   },
   {
-    path: 'dashboard',
-    component: DashboardComponent,
-    data: { animation:  'dashboardPage' },
+    path: 'workspace',
+    component: WorkspaceComponent,
+    data: { animation:  'workspacePage' },
     canActivate: [DashboardGuard]
   }
 ];

@@ -37,22 +37,21 @@
     }
   
     tree-viewport {
-      margin-top: 0.625rem;
-      margin-left: 1rem;
       display: flex;
+      padding: 0 1rem;
       height: 100%;
       @include scrollbar;
     }
   
     tree-root {
-      flex: 1;
+      height: calc(100vh - 2rem - 5rem - 2rem - 2rem);
 
       &:focus {
         outline: none;
       }
 
       &.tree-focused:focus-within .tree-node .node-content-wrapper-focused {
-        border: 1px solid $picton-blue;
+        outline: 1px solid $picton-blue;
       }
   
       .tree-node {
@@ -65,24 +64,24 @@
 
         .node-content-wrapper {
           min-width: 10rem;
-          padding: 2px 0;
-          margin: 0;
+          padding: 0;
+          margin: 2px 1px 2px 0;
           box-shadow: none;
           transition: background-color 50ms;
-          border: 1px solid $white;
+          border: 0;
           border-radius: 0.25rem;
+          position: relative;
           
           &:hover:not(.node-content-wrapper-focused) {
             background-color: $porcelain;
           }
 
-          &-active, &-focused {
-            box-shadow: none;
+          &-focused {
             background-color: $curious-blue-light;
           }
 
           .node-group {
-            padding: 0.25rem;
+            padding: 6px;
 
             &:focus {
               outline: none;
@@ -90,12 +89,6 @@
           }
         }
       }
-    }
-  }
-
-  &:hover {
-    .handle {
-      background: $porcelain;
     }
   }
 }
@@ -114,7 +107,7 @@
       background-color: $curious-blue-light;
 
       .quick-actions {
-        display: block;
+        display: flex;
 
         button {
           background-color: $curious-blue-light;
@@ -131,6 +124,7 @@
     }
 
     .quick-actions {
+      margin-top: 0.25rem;
       display: none;
 
       button {
@@ -158,7 +152,6 @@
 
   &:hover {
     .header .quick-actions {
-      margin-top: 0.25rem;
       display: flex;
     }
   }
@@ -169,6 +162,7 @@
     background-color: $white;
     border-top: 1px solid $silver;
     position: sticky;
+    box-sizing: border-box;
     bottom: 0;
     display: flex;
     align-items: center;
@@ -200,7 +194,7 @@
     background: $curious-blue-light;
     width: 9.5rem;
     border: none;
-    padding: 0.25rem;
+    padding: 6px;
     font-size: 0.875rem;
     color: $pickled-bluewood;
   }

@@ -1,9 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
 import { HotkeyHandler } from '@app/app.module';
 import { ModalService } from '@app/core/services/modal.service';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { MenuItem } from '@app/shared';
-import { ClipboardService } from '.';
+import { ClipboardService, EntryManager, GroupManager } from '.';
 import { IHotkeyHandler } from '../models';
 
 @Injectable({
@@ -13,9 +12,10 @@ export class ContextMenuBuilderService {
   private contextMenuItems: MenuItem[] = [];
 
   constructor(
-    private readonly storageService: StorageService,
     private readonly modalService: ModalService,
     private readonly clipboardService: ClipboardService,
+    private readonly entryManager: EntryManager,
+    private readonly groupManager: GroupManager,
     @Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler
   ) {}
 
@@ -24,7 +24,7 @@ export class ContextMenuBuilderService {
       {
         label: this.hotkeyHandler.configuration.addGroupLabel,
         icon: 'pi pi-fw pi-plus',
-        command: () => this.storageService.addGroup(),
+        command: () => this.groupManager.addGroup(),
       },
       {
         separator: true,
@@ -34,7 +34,7 @@ export class ContextMenuBuilderService {
         disabled: configuration.isRoot,
         icon: 'pi pi-fw pi-pencil',
         command: () => {
-          this.storageService.renameGroup(true);
+          this.groupManager.renameGroup(true);
         }
       },
       {
@@ -53,7 +53,7 @@ export class ContextMenuBuilderService {
       label: this.hotkeyHandler.configuration.emptyBinLabel,
       icon: 'pi pi-fw pi-trash',
       command: () => {
-        this.storageService.selectedPasswords = [...this.storageService.passwordEntries];
+        this.entryManager.selectedPasswords = [...this.entryManager.passwordEntries];
         this.modalService.openDeleteEntryWindow();
       }
     });
@@ -78,7 +78,7 @@ export class ContextMenuBuilderService {
       label: this.hotkeyHandler.configuration.copyUsernameLabel,
       command: () => {
         this.clipboardService.copyToClipboard(
-          this.storageService.selectedPasswords[0],
+          this.entryManager.selectedPasswords[0],
           'username'
         );
       }
@@ -92,7 +92,7 @@ export class ContextMenuBuilderService {
       label: this.hotkeyHandler.configuration.copyPasswordLabel,
       command: () => {
         this.clipboardService.copyToClipboard(
-          this.storageService.selectedPasswords[0],
+          this.entryManager.selectedPasswords[0],
           'password'
         );
       }

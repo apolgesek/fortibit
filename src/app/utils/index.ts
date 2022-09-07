@@ -1,2 +1,2 @@
-export * from './dom-utils';
-export * from './form-utils';
+export * from './dom-util';
+export * from './form-util';

@@ -11,10 +11,12 @@ $sidePanelOutDuration: 250ms;
 	overflow-y: hidden;
 	position: relative;
 
+	// horizontal scrollbar
 	@include scrollbar;
 
 	.table-viewport {
-		height: 100%;
+		height: calc(100vh - 5rem - 2rem - 2rem);
+		// vertical scrollbar inside the table viewport
 		@include scrollbar;
 	}
 
@@ -34,7 +36,6 @@ $sidePanelOutDuration: 250ms;
 	.row-entry {
 		font-size: 0.875rem;
 		cursor: pointer;
-		box-sizing: border-box;
 		border: 1px solid transparent;
 		@include default-table-row;
 
@@ -47,6 +48,27 @@ $sidePanelOutDuration: 250ms;
 			background-color: darken($curious-blue-light, 2);
 			&:hover {
 				background-color: darken($curious-blue-light, 2);
+			}
+		}
+
+		.column.password {
+			display: flex;
+			align-items: center;
+
+			.pi {
+				margin-left: 2rem;
+			}
+		}
+
+		&.expired {
+			.column.password {
+				color: $red-orange;
+			}
+		}
+
+		&.due-expiration {
+			.column.password {
+				color: $tulip-tree;
 			}
 		}
 
@@ -86,6 +108,7 @@ $sidePanelOutDuration: 250ms;
 		user-select: none;
 		font-size: 0.875rem;
 		border-bottom: 1px solid $silver;
+		box-sizing: border-box;
 		min-height: 2rem;
 		position: relative;
 		z-index: 1;
@@ -169,4 +192,9 @@ $sidePanelOutDuration: 250ms;
 	font-size: 0.75rem;
 	padding: 0.5rem 1rem;
 	z-index: 0;
+}
+
+.pi-sort-alpha-down-alt::before,
+.pi-sort-alpha-up-alt::before {
+	color: $curious-blue;
 }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { TreeModule } from '@circlon/angular-tree-component';
 import { SharedModule } from '../shared/shared.module';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { AboutDialogComponent } from './components/dialogs/about-dialog/about-dialog.component';
 import { CheckExposedPasswordsComponent } from './components/dialogs/check-exposed-passwords/check-exposed-passwords.component';
 import { ConfirmExitDialogComponent } from './components/dialogs/confirm-exit-dialog/confirm-exit-dialog.component';
@@ -29,11 +29,12 @@ import { MainComponent } from './main.component';
 import { EntryIconDirective } from './directives/entry-icon.directive';
 import { ViewTabComponent } from './components/dialogs/settings-dialog/view-tab/view-tab.component';
 import { EntryHistoryComponent } from './components/dialogs/entry-history/entry-history.component';
+import { TreeNodeDirective } from './directives/tree-node.directive';
 
 @NgModule({
   declarations: [
     MainComponent,
-    DashboardComponent,
+    WorkspaceComponent,
     EntriesTableComponent,
     TextEmphasizeDirective,
     BlurEnterDirective,
@@ -57,6 +58,7 @@ import { EntryHistoryComponent } from './components/dialogs/entry-history/entry-
     EntryIconDirective,
     ViewTabComponent,
     EntryHistoryComponent,
+    TreeNodeDirective,
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,87 @@
+.handle-container {
+	&:hover {
+		.handle {
+			background: $porcelain;
+		}
+	}
+}
+
+.handle {
+  position: absolute;
+  top: 0;
+	right: 0;
+  min-width: $handle-width;
+  display: flex;
+  height: 100%;
+  z-index: 990;
+	justify-content: flex-end;
+	transition: background-color 50ms;
+	cursor: w-resize;
+
+	&.left {
+		left: 0;
+		right: auto;
+
+		@media (-webkit-min-device-pixel-ratio: 1.25) {
+			&::after {
+				margin-right: 3.25px;
+			}
+		}
+	
+		@media (-webkit-min-device-pixel-ratio: 1.5) {
+			&::after {
+				margin-right: 3.333px;
+			}
+		}
+		
+		@media (-webkit-min-device-pixel-ratio: 2) {
+			&::after {
+				margin-right: 3.5px;
+			}
+		}
+	}
+
+	&::after {
+		content: '';
+		width: 1px;
+		background-color: $silver;
+		opacity: 1;
+	}
+
+	@media (-webkit-min-device-pixel-ratio: 1.25) {
+		&::after {
+			width: 0.75px;
+		}
+	}
+
+	@media (-webkit-min-device-pixel-ratio: 1.5) {
+		&::after {
+			width: 0.666px;
+		}
+	}
+	
+	@media (-webkit-min-device-pixel-ratio: 2) {
+		&::after {
+			width: 0.5px;
+		}
+	}
+
+	&.active {
+		background-color: $silver !important;
+    width: $handle-width;
+
+		&::after {
+			display: none;
+		}
+	}
+}
+
+@keyframes active-sidebar {
+  0% {
+    background-color: transparent;
+  }
+  100% {
+    background-color: $curious-blue;
+    width: $handle-width;
+  }
+}

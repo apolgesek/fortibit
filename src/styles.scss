@@ -1,8 +1,11 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import "variables";
 @import "mixins";
+
+@import "input";
 @import "buttons";
+@import "components";
+
+@import "exports";
 
 html,
 body {
@@ -12,12 +15,6 @@ body {
 	height: 100%;
 	overflow: hidden;
 	background-color: $white;
-	color: $pickled-bluewood;
-}
-
-input,
-textarea {
-	@include font-regular;
 	color: $pickled-bluewood;
 }
 
@@ -55,6 +52,7 @@ a {
 	white-space: nowrap;
 	overflow: hidden;
 	min-height: 2rem;
+	box-sizing: border-box;
 	user-select: none;
 	border-bottom: 1px solid $silver;
 }
@@ -64,153 +62,16 @@ a {
 	font-size: 0.875rem;
 }
 
-.footer-container {
-	display: flex;
-	justify-content: flex-end;
-	align-items: center;
-	background: #fff;
-	z-index: 999;
-	gap: 1rem;
-	padding-top: 1rem;
-
-	button {
-		margin-bottom: 0.25rem;
-	}
-}
-
-.dialog-message {
-	@include scrollbar;
-	padding: 0.5rem 0;
-	font-size: 0.875rem;
-	flex: 1;
-	overflow: auto;
-}
-
-.dialog-header {
-	display: flex;
-	margin: 0;
-	padding: 0;
-	user-select: none;
-	margin-bottom: 1.5rem;
-
-	h2 {
-		@include font-medium;
-		margin: 0;
-		font-size: 1.375rem;
-		color: $pickled-bluewood;
-		flex: 1;
-	}
-
-	.close-dialog {
-		color: $gumbo;
-		font-size: 2rem;
-		line-height: 1rem;
-		font-weight: bold;
-		cursor: pointer;
-		transition: color 100ms;
-
-		&:hover {
-			color: $pickled-bluewood;
-		}
-	}
-}
-
 .d-none {
 	display: none;
-}
-
-.entry-contextmenu {
-	width: 10rem;
 }
 
 .label {
 	user-select: none;
 }
 
-.dropdown {
-  position: relative;
-  display: block;
-
-	a:focus {
-		outline: none;
-	}
-
-	&.open {
-		button, a {
-			border-bottom-right-radius: 0;
-		}
-	}
-}
-
-.dropdown-content {
-  position: relative;
-	right: 0;
-  background-color: $white;
-  width: 5rem;
-  z-index: 999;
-	// Box shadow changes anchor color inside for some reason
-	filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.12));
-
-	.divider {
-		padding: 4px;
-
-		hr {
-			margin: 0;
-			border: 0;
-			border-top: 1px solid $silver;
-		}
-	}
-
-	a {
-		color: $pickled-bluewood;
-		padding: 0.5rem;
-		text-decoration: none;
-		display: block;
-		font-size: 0.875rem;
-
-		&.focused {
-			background: $porcelain;
-		}
-	}
-}
-
 .show {
-	display:block;
-}
-
-.modal {
-	top: 0;
-	left: 0;
-	margin: 0;
-	width: 100%;
-	height: 100%;
-	overflow: auto;
-
-	.modal-body {
-		display: flex;
-		flex-direction: column;
-		background: $white;
-		min-width: 600px;
-		max-height: calc(100% - 10rem);
-		padding: 2rem;
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translateY(-50%) translateX(-50%);
-		z-index: 991;
-		border-radius: 0.5rem;
-	}
-}
-	
-.modal-background {
-	position: fixed;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	background-color: rgba(0, 0, 0, 0.6);
-	backdrop-filter: url('#blur-shadow');
-	z-index: 990;
+	display: block;
 }
 
 .node-content-wrapper-active:not(.node-content-wrapper-focused):not(:hover) {
@@ -221,133 +82,8 @@ a {
 	background: $white !important;
 }
 
-.dropdown-content {
-	width: 200px;	
-	padding-top: 4px;
-	padding-bottom: 4px;
-	position: absolute;
-
-	&.left {
-		left: 0;
-	}
-
-	&.right {
-		right: 0;
-	}
-
-	.disabled {
-		color: $grey-80;
-		cursor: default;
-
-		&:hover {
-			background-color: $white;
-		}
-	}
-}
-
-.inputgroup {
-	background-color: $porcelain;
-	box-shadow: inset 0px 0.25rem 0px 0px darken($porcelain, 1);
-	border: 0;
-	border-radius: 0.25rem;
-	margin: 0.5rem 0;
-	display: flex;
-	padding: 0.5rem;
-	box-sizing: border-box;
-	position: relative;
-
-	&.checkbox {
-		align-items: center;
-	}
-
-	input[type='text'],
-	input[type='password'],
-	input[type='number'],
-	textarea {
-		border: 0;
-		border-radius: 0.25rem;
-		width: 100%;
-		background: transparent;
-		z-index: 1;
-		outline: none;
-	}
-
-	.inputgroup-addon {
-		& + input, & + textarea {
-			padding-left: 1.5rem;
-		}
-	}
-}
-
-input[type='number'] {
-	&::-webkit-outer-spin-button,
-	&::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-	}
-}
-
-.inputgroup-addon {
-	position: absolute;
-	border: 0;
-	background-color: transparent;
-	color: $pickled-bluewood;
-	z-index: 2;
-}
-
-.handle {
-  position: absolute;
-  top: 0;
-	right: 0;
-  min-width: $sidebar-width;
-  display: flex;
-  height: 100%;
-  z-index: 990;
-	justify-content: flex-end;
-	transition: background-color 50ms;
-	cursor: w-resize;
-
-	&::after {
-		content: '';
-		width: 0.75px;
-		background-color: $silver;
-		opacity: 1;
-	}
-
-	&:hover {
-		animation-name: active-sidebar;
-    animation-delay: 600ms;
-    animation-timing-function: ease-in-out 100ms;
-    animation-fill-mode: forwards; 
-
-		&::after {
-			opacity: 0;
-			transition-delay: 600ms;
-		}
-	}
-
-	&.active {
-		background-color: $curious-blue;
-    width: 4px;
-
-		&::after {
-			display: none;
-		}
-	}
-}
-
 .is-dragging {
 	opacity: 0.5;
-}
-
-@keyframes active-sidebar {
-  0% {
-    background-color: transparent;
-  }
-  100% {
-    background-color: $curious-blue;
-    width: 4px;
-  }
 }
 
 .sr-only {
@@ -365,7 +101,7 @@ input[type='number'] {
 	color: $picton-blue;
 }
 
-app-root, app-dashboard {
+app-root, app-workspace {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -375,6 +111,7 @@ form [class*="-btn"] {
 	margin-top: 1.625rem;
 }
 
+// overwritten tree component class
 .is-dragging-over {
 	background-color: $porcelain !important;
 }
@@ -384,67 +121,6 @@ form [class*="-btn"] {
   padding-bottom: 0.5rem;
 }
 
-.pi-sort-alpha-down-alt::before,
-.pi-sort-alpha-up-alt::before {
-	color: $curious-blue;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 28px;
-  margin-left: 2rem;
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 0.25rem;
-  background-color: $silver;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 20px;
-  left: 4px;
-  bottom: 5px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-  border-radius: 0.25rem;
-}
-
-input:checked + .slider {
-  background-color: $curious-blue;
-}
-
-input:focus + .slider:before, input:focus:active + .slider:before {
-  box-shadow: 0px 0px 0px 2px $picton-blue;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(22px);
-  -ms-transform: translateX(22px);
-  transform: translateX(22px);
-}
-
 code {
 	@include font-regular;
 	background-color: $porcelain;
@@ -452,41 +128,4 @@ code {
 	padding: 0.2rem;
 	margin: 1rem 0;
 	word-wrap: break-word;
-}
-
-.expandable-section {
-	border: 0;
-	background: none;
-	width: 100%;
-	padding: 0.5rem;
-	text-align: left;
-	border-radius: 3px;
-	display: flex;
-	align-items: center;
-	cursor: pointer;
-	font-size: 1rem;
-	@include font-medium;
-	color: $pickled-bluewood;
-
-	.pi {
-		margin-right: 0.5rem;
-	}
-
-	&:hover, &:focus-visible {
-		background: $silver;
-	}
-}
-
-.settings-modal {
-	min-height: 460px;
-}
-
-.readonly {
-	background: $white;
-	box-shadow: none;
-	border: 1px solid $silver;
-
-	input:read-only, textarea:read-only {
-		background: $white;
-	}
 }

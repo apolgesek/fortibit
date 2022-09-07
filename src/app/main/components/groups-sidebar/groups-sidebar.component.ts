@@ -1,16 +1,13 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, QueryList, Renderer2, ViewChild, ViewChildren } from '@angular/core';
 import { GroupIds } from '@app/core/enums';
 import { IPasswordGroup } from '@app/core/models';
+import { WorkspaceService, EntryManager, GroupManager } from '@app/core/services';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
 import { SearchService } from '@app/core/services/search.service';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { MenuItem } from '@app/shared';
-import { DomUtils } from '@app/utils';
 import { IActionMapping, ITreeOptions, KEYS, TreeComponent, TreeModel, TreeNode, TREE_ACTIONS } from '@circlon/angular-tree-component';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { fromEvent, Observable, Subject, takeUntil } from 'rxjs';
-
-type TreeNodeExtendedEvent = { event: DragEvent, element: HTMLElement };
 
 @Component({
   selector: 'app-groups-sidebar',
@@ -48,50 +45,27 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
       },
     },
     mouse: {
-      dragOver: (_: TreeModel, node: TreeNode, $event: TreeNodeExtendedEvent) => {
-        const treeNodeContentWrapperClassList = this.getTreeNodeContentWrapper($event.event)?.classList;
-
-        this.storageService.draggedEntries.length === 0 && !$event.element
-          ? treeNodeContentWrapperClassList?.add(DomUtils.constants.unknownElementDraggingClass)
-          : treeNodeContentWrapperClassList?.remove(DomUtils.constants.unknownElementDraggingClass);
-      },
-      dragLeave: (_: TreeModel, __: TreeNode, $event: TreeNodeExtendedEvent) => {
-        this.getTreeNodeContentWrapper($event.event)?.classList.remove(DomUtils.constants.unknownElementDraggingClass);
-      },
       drop: (tree: TreeModel, node: TreeNode, $event: DragEvent, { from, to }) => {
-        this.getTreeNodeContentWrapper($event)?.classList
-          .remove(DomUtils.constants.unknownElementDraggingClass);
-
-        if (from.data.id === this.groupIds.Starred || from.data.id === this.groupIds.RecycleBin) {
-          return;
-        }
-    
-        if (this.storageService.draggedEntries.length) {
-          this.storageService.moveEntry(node.data.id);
-          this.storageService.draggedEntries = [];
-          this.storageService.selectedPasswords = [];
+        if (this.entryManager.draggedEntries.length) {
+          this.entryManager.moveEntry(node.data.id);
+          this.entryManager.draggedEntries = [];
+          this.entryManager.selectedPasswords = [];
         } else {
-          // if dragged element is neither an entry nor group (it could be a file from outside of app)
-          if (!from) {
+          // from is null: if dragged element is neither an entry nor group (it could be a file from outside of app)
+          // else: if dragging a group to recycle bin or starred items (not allowed)
+          if (!from || from.data.id === this.groupIds.Starred || from.data.id === this.groupIds.RecycleBin) {
             return;
           }
 
           if (from.data.id !== to.parent.data.id) {
-            this.storageService.moveGroup(from, to);
+            this.groupManager.moveGroup(from.data.id, to.parent.data.id);
           }
           
           TREE_ACTIONS.MOVE_NODE(tree, node, $event, { from, to });
         }
       },
-      dragStart: (tree: TreeModel, node: TreeNode, $event: DragEvent) => {
-        DomUtils.setDragGhost($event);
-        this.getTreeNodeContentWrapper($event)?.classList.add('is-dragging');
-      },
-      dragEnd: (_, __, $event) => {
-        this.treeRootElement.getElementsByClassName('is-dragging')[0].classList.remove('is-dragging');
-      },
       contextMenu: (_: TreeModel, node: TreeNode) => {
-        this.selectGroup({ node });
+        this.selectGroup(node);
         node.focus(false);
       }     
     }
@@ -115,7 +89,9 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
   private readonly destroyed: Subject<void> = new Subject();
 
   constructor(
-    private readonly storageService: StorageService,
+    private readonly workspaceService: WorkspaceService,
+    private readonly entryManager: EntryManager,
+    private readonly groupManager: GroupManager,
     private readonly searchService: SearchService,
     private readonly contextMenuBuilderService: ContextMenuBuilderService,
     private readonly renderer: Renderer2,
@@ -123,38 +99,42 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     private readonly cdRef: ChangeDetectorRef
   ) {
     this.sidebar = this.el.nativeElement;
+
+    this.groupManager.removedGroupSource.subscribe(() => {
+      this.onGroupRemoved();
+    });
+
+    this.groupManager.addedGroupSource.subscribe(group => {
+      this.onGroupAdded(group);
+    });
   }
 
-  get selectedGroup(): TreeNode | undefined {
-    return this.storageService.selectedCategory;
+  get selectedGroup(): number {
+    return this.groupManager.selectedGroup;
   }
 
   get fileName(): string {
-    return this.storageService.databaseFileName;
+    return this.workspaceService.databaseFileName;
   }
 
   get passwordEntries(): IPasswordEntry[] {
-    return this.storageService.passwordEntries ?? [];
+    return this.entryManager.passwordEntries ?? [];
   }
 
   get selectedEntries(): IPasswordEntry[] {
-    return this.storageService.selectedPasswords;
+    return this.entryManager.selectedPasswords;
   }
 
   get groups(): IPasswordGroup[] {
-    return this.storageService.groups;
+    return this.groupManager.groups;
   }
 
-  get contextSelectedCategory(): TreeNode | undefined {
-    return this.storageService.contextSelectedCategory;
-  }
-
-  get selectedGroupLabel(): string {
-    return this.contextSelectedCategory?.data.name;
+  get selectedGroupName(): string {
+    return this.groupManager.selectedGroupName;
   }
 
   get isGroupRenamed$(): Observable<boolean> {
-    return this.storageService.renamedGroup$;
+    return this.groupManager.renamedGroup$;
   }
 
   get rootNodeId(): number {
@@ -174,17 +154,17 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
       .buildEmptyRecycleBinContextMenuItem()
       .getResult();
 
-    this.storageService.revealInGroup$.pipe(takeUntil(this.destroyed)).subscribe((entry) => {
-      this.storageService.selectedPasswords = [ this.storageService.passwordEntries.find(x => x.id === entry.id) ];
+    this.entryManager.revealInGroup$.pipe(takeUntil(this.destroyed)).subscribe((entry) => {
+      this.entryManager.selectedPasswords = [ this.entryManager.passwordEntries.find(x => x.id === entry.id) ];
       const node: TreeNode = this.tree.treeModel.getNodeById(entry.groupId);
 
-      this.selectGroup({ node }, true);
+      this.selectGroup(node, true);
       node.setActiveAndVisible();
     });
   }
 
   ngAfterViewInit() {
-    const appGroups = [1, GroupIds.Starred, GroupIds.RecycleBin];
+    const appGroups = [GroupIds.Root, GroupIds.Starred, GroupIds.RecycleBin];
 
     appGroups.forEach(id => {
       const group: TreeNode = this.tree.treeModel.getNodeById(id);
@@ -192,10 +172,10 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
       group.allowDrag = () => false;
     });
 
-    const node: TreeNode = this.tree.treeModel.getNodeById(1);
+    const node: TreeNode = this.tree.treeModel.getNodeById(GroupIds.Root);
 
-    if (!this.storageService.file) {
-      this.storageService.selectGroup({ node });
+    if (!this.workspaceService.file) {
+      this.selectGroup(node);
     }
   
     node.focus(false);
@@ -232,24 +212,79 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     this.destroyed.complete();
   }
 
-  selectGroup(event: { node: TreeNode }, reveal = false) {
-    this.searchService.isGlobalSearchMode = false;
-    this.storageService.selectGroup(event, reveal);
+  async selectGroup(node: TreeNode, reveal = false): Promise<number> {
+    if (!node) {
+      return;
+    }
+
+    if (this.groupManager.selectedGroup === node.data.id) {
+      return node.data.id;
+    }
+
+    await this.groupManager.selectGroup(node.data.id);
 
     if (!reveal) {
+      this.entryManager.selectedPasswords = [];
       this.focusTree();
     }
+
+    if (this.groupManager.selectedGroup === GroupIds.Starred) {
+      await this.entryManager.setByPredicate((x) => x.isStarred);
+    } else {
+      await this.entryManager.setByGroup(node.data.id);
+    }
+  
+    this.searchService.reset();
+    this.entryManager.updateEntries();
+    this.entryManager.reloadEntries();
+
+    return node.data.id;
   }
 
   collapseGroup(event: { node: TreeNode }) {
-    if (event.node.data.name === 'Database') {
+    if (event.node.data.id === GroupIds.Root) {
       event.node.data.expanded = true;
     }
   }
 
+  onGroupAdded(group: any) {
+    const newGroupNode = {
+      id: group.id,
+      name: group.name,
+      isImported: group.isImported
+    };
+
+    const node = this.tree.treeModel.getNodeById(this.selectedGroup);
+
+    if (!node.data.children) {
+      node.data.children = [];
+    }
+
+    node.data.children.push(newGroupNode);
+
+    this.tree.treeModel.update();
+    this.tree.treeModel.getNodeById(newGroupNode.id).ensureVisible();
+    this.tree.treeModel.getNodeById(newGroupNode.id).focus();
+
+    this.groupManager.selectedGroup = newGroupNode.id;
+  }
+
+  onGroupRemoved() {
+    const selectedNode: TreeNode = this.tree.treeModel.getNodeById(this.selectedGroup);
+    this.getGroupsRecursive(selectedNode, [this.selectedGroup]);
+
+    selectedNode.parent.data.children.splice(selectedNode.parent.data.children.indexOf(selectedNode.data), 1);
+    this.tree.treeModel.update();
+    this.tree.treeModel.getNodeById(GroupIds.Root).focus();
+  }
+
+  async moveGroup(from: TreeNode, to: TreeNode){
+    this.groupManager.moveGroup(from.data.id, to.parent.data.id);
+  }
+
   getContextMenu(node: TreeNode): MenuItem[] | undefined {
     switch (node.data.id) {
-      case 1:
+      case GroupIds.Root:
         return this.groupContextMenuRoot;
       case GroupIds.Starred:
         return;
@@ -261,13 +296,13 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   setContextMenuGroup(event: { node: TreeNode }) {
-    this.storageService.contextSelectedCategory = event.node;
-    this.storageService.selectedCategory = event.node;
-    this.storageService.updateEntries();
+    this.groupManager.contextSelectedGroup = event.node.id;
+    this.groupManager.selectedGroup = event.node.data.id;
+    this.entryManager.updateEntries();
   }
 
   addGroup() {
-    this.storageService.addGroup();
+    this.groupManager.addGroup();
   }
 
   collapseAll() {
@@ -283,8 +318,8 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
       node.data.name = 'New group';
     }
 
-    this.storageService.updateGroup(node.data);
-    this.storageService.renameGroup(false);
+    this.groupManager.updateGroup(node.data);
+    this.groupManager.renameGroup(false);
 
     this.focusTree();
   }
@@ -317,7 +352,17 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     return document.activeElement.closest('tree-root') !== null;
   }
 
-  private getTreeNodeContentWrapper(event: DragEvent): HTMLElement | null {
-    return (event.target as HTMLElement).closest('.node-content-wrapper');
+  private getGroupsRecursive(node: TreeNode, groups: number[]): number[] {
+    if (!node.children?.length) {
+      return [];
+    }
+
+    groups.push(...node.children.map(c => c.id));
+    node.children.forEach((child) => {
+      const a = this.getGroupsRecursive(child, groups);
+      groups.push(...a);
+    });
+
+    return [];
   }
 }

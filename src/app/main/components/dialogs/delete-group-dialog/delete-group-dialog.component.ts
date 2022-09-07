@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, ComponentRef } from '@angular/core';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { IAdditionalData, IModal } from '@app/shared';
-import { ModalRef } from '@app/core/services';
+import { GroupManager, ModalRef } from '@app/core/services';
 @Component({
   selector: 'app-delete-group-dialog',
   templateUrl: './delete-group-dialog.component.html',
@@ -13,12 +12,12 @@ export class DeleteGroupDialogComponent implements IModal {
   public readonly additionalData!: IAdditionalData;
 
   constructor(
-    private readonly storageService: StorageService,
+    private readonly groupManager: GroupManager,
     private readonly modalRef: ModalRef
   ) { }
 
   removeGroup() {
-    this.storageService.removeGroup();
+    this.groupManager.removeGroup();
     this.close();
   }
 

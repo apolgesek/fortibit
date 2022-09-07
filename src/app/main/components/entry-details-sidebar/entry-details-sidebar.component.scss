@@ -5,8 +5,8 @@
 	position: relative;
 	display: flex;
 	width: 16rem;
+	height: calc(100vh - 2rem - 5rem);
 	background-color: $white;
-	border-left: 1px solid $silver;
 	font-size: 0.875rem;
 	z-index: 0;
 }

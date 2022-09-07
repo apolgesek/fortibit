@@ -17,6 +17,7 @@ import { TabsetComponent } from './components/tabset/tabset.component';
 import { TabComponent } from './components/tab/tab.component';
 import { FocusableListDirective } from './directives/focusable-list.directive';
 import { FocusableListItemDirective } from './directives/focusable-list-item.directive';
+import { DateMaskDirective } from './directives/date-mask.directive';
 
 @NgModule({
   declarations: [
@@ -35,6 +36,7 @@ import { FocusableListItemDirective } from './directives/focusable-list-item.dir
     TabComponent,
     FocusableListDirective,
     FocusableListItemDirective,
+    DateMaskDirective,
   ],
   imports: [BrowserAnimationsModule, CommonModule, ReactiveFormsModule],
   exports: [
@@ -54,7 +56,8 @@ import { FocusableListItemDirective } from './directives/focusable-list-item.dir
     TabsetComponent,
     TabComponent,
     FocusableListDirective,
-    FocusableListItemDirective
+    FocusableListItemDirective,
+    DateMaskDirective
   ],
 })
 export class SharedModule {}

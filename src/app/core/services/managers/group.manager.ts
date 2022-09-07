@@ -1,74 +1,72 @@
 import { Injectable } from "@angular/core";
-import { markDirty } from "@app/core/decorators/mark-dirty.decorator";
+import { initialEntries } from "@app/core/database";
 import { GroupIds } from "@app/core/enums";
 import { IPasswordGroup } from "@app/core/models";
 import { GroupRepository } from "@app/core/repositories";
-import { TreeNode } from "@circlon/angular-tree-component";
 import { Observable, Subject, shareReplay } from "rxjs";
 
 @Injectable({ providedIn: 'root' })
-export class GroupsManager {
+export class GroupManager {
   public groups: IPasswordGroup[] = [];
-  public selectedCategory?: TreeNode;
-  public contextSelectedCategory?: TreeNode;
+  public selectedGroup?: number;
+  public selectedGroupName?: string;
+  public contextSelectedGroup?: number;
+  public isGroupDragged?: boolean;
+
+  public markDirtySource: Subject<void>;
+  public removedGroupSource: Subject<void> = new Subject();
+  public addedGroupSource: Subject<any> = new Subject();
+
   public readonly renamedGroup$: Observable<boolean>;
 
   private readonly renamedGroupSource: Subject<boolean> = new Subject();
 
   get isAddPossible(): boolean {
-    const selectedCategoryId = this.selectedCategory?.data.id;
+    const selectedCategoryId = this.selectedGroup;
 
     return selectedCategoryId !== GroupIds.RecycleBin
       && selectedCategoryId !== GroupIds.Starred;
   }
 
-
   constructor(private readonly groupRepository: GroupRepository) {
     this.renamedGroup$ = this.renamedGroupSource.asObservable().pipe(shareReplay());
   }
 
-  @markDirty({ updateEntries: false })
   async removeGroup() {
-    if (!this.selectedCategory) {
+    if (!this.selectedGroup) {
       this.throwCategoryNotSelectedError();
     }
 
-    const groupsToDelete = [this.selectedCategory.data.id] as number[];
-    this.getGroupsRecursive(this.selectedCategory, groupsToDelete);
-
+    const groupsToDelete = [this.selectedGroup] as number[];
     await this.groupRepository.bulkDelete(groupsToDelete);
-    const node = this.selectedCategory;
-    node.parent.data.children.splice(node.parent.data.children.indexOf(node.data), 1);
-    this.selectedCategory.treeModel.update();
-    this.selectedCategory.treeModel.getNodeById(1).focus();
+
+    this.removedGroupSource.next();
   }
 
-  @markDirty({ updateEntries: false })
   async updateGroup(group: IPasswordGroup) {
     await this.groupRepository.update({
       id: group.id,
       name: group.name,
     });
+
+    this.markDirty();
   }
 
-  @markDirty({ updateEntries: false })
-  async moveGroup(from: TreeNode, to: TreeNode){
-    this.groupRepository.update({ ...from.data, parent: to.parent.data.id });
+  async moveGroup(from: number, to: number) {
+    const group = await this.groupRepository.get(from);
+    await this.groupRepository.update({ ...group, parent: to });
+
+    this.markDirty();
   }
 
-  @markDirty({ updateEntries: false })
   async addGroup(model?: Partial<IPasswordGroup>): Promise<number> {
-    if (!this.selectedCategory) {
+    if (!this.selectedGroup) {
       this.throwCategoryNotSelectedError();
-    }
-
-    if (!this.selectedCategory.data.children) {
-      this.selectedCategory.data.children = [];
     }
   
     const newGroup: IPasswordGroup = {
       name: model?.name ?? 'New group',
-      parent: this.selectedCategory.data.id,
+      parent: this.selectedGroup,
     };
 
     if (model?.isImported) {
@@ -78,31 +76,45 @@ export class GroupsManager {
     const groupId = await this.groupRepository.add(newGroup);
 
     if (groupId > 0) {
-      const newGroupNode = {
-        id: groupId,
-        name: newGroup.name,
-        isImported: newGroup.isImported
-      };
-
-      this.selectedCategory.data.children.push(newGroupNode);
-
-      this.selectedCategory.treeModel.update();
-      this.selectedCategory.treeModel.getNodeById(newGroupNode.id).ensureVisible();
-      this.selectedCategory.treeModel.getNodeById(newGroupNode.id).focus();
-      this.selectedCategory = this.selectedCategory.treeModel.getNodeById(newGroupNode.id);
+      this.addedGroupSource.next({ id: groupId, name: newGroup.name, isImported: newGroup.isImported });
 
       if (!model?.name) {
         this.renameGroup(true);
       }
     }
 
+    this.markDirty();
+
     return groupId;
+  }
+
+  async selectGroup(id: number) {
+    this.selectedGroup = id;
+    this.selectedGroupName = (await this.groupRepository.get(id)).name;
   }
 
   renameGroup(isRenamed: boolean) {
     this.renamedGroupSource.next(isRenamed);
   }
 
+  async setupGroups() {
+    await this.groupRepository.bulkAdd(initialEntries);
+
+    this.groups = await this.getGroupsTree();
+  }
+
+  async getGroupsTree(): Promise<IPasswordGroup[]> {
+    const allGroups = await this.groupRepository.getAll();
+  
+    this.groups[0] = allGroups.find(g => g.id === GroupIds.Root);
+    this.groups[1] = allGroups.find(g => g.id === GroupIds.Starred);
+    this.groups[2] = allGroups.find(g => g.id === GroupIds.RecycleBin);
+
+    this.groups[0].expanded = true;
+    this.buildGroupsTree(this.groups[0], allGroups);
+
+    return this.groups;
+  }
 
   private buildGroupsTree(group: IPasswordGroup, groups: IPasswordGroup[]) {
     const children = groups.filter(g => g.parent === group.id);
@@ -121,17 +133,7 @@ export class GroupsManager {
     throw new Error('No category has been selected.');
   }
 
-  private getGroupsRecursive(node: TreeNode, groups: number[]): number[] {
-    if (!node.children?.length) {
-      return [];
-    }
-
-    groups.push(...node.children.map(c => c.id));
-    node.children.forEach((child) => {
-      const a = this.getGroupsRecursive(child, groups);
-      groups.push(...a);
-    });
-
-    return [];
+  private markDirty() {
+    this.markDirtySource.next();
   }
 }

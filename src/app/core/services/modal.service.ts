@@ -11,10 +11,10 @@ import { EntryHistoryComponent } from '@app/main/components/dialogs/entry-histor
 import { ImportDatabaseMetadataComponent } from '@app/main/components/dialogs/import-database-metadata/import-database-metadata.component';
 import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/master-password-dialog/master-password-dialog.component';
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
-import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { EventType } from '../enums';
 import { ICommunicationService } from '../models';
-import { StorageService } from './managers/storage.service';
+import { EntryManager } from './managers/entry.manager';
 
 @Injectable({
   providedIn: 'root'
@@ -27,8 +27,8 @@ export class ModalService {
   constructor(
     private readonly zone: NgZone,
     private readonly modalManager: ModalManager,
+    private readonly entryManager: EntryManager,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly storageService: StorageService,
   ) {
     this.communicationService.ipcRenderer.on(
       IpcChannel.OpenCloseConfirmationWindow,
@@ -53,22 +53,22 @@ export class ModalService {
   }
 
   async openNewEntryWindow() {
-    this.storageService.editedEntry = null;
+    this.entryManager.editedEntry = null;
     await this.openEntryWindow();
   }
 
   async openEditEntryWindow() {
-    this.storageService.editedEntry = this.storageService.selectedPasswords[0];
+    this.entryManager.editedEntry = this.entryManager.selectedPasswords[0];
     this.openEntryWindow();
   }
 
-  async openHistoryEntryWindow(entry: IPasswordEntry, config?: { readonly: boolean }) {
-    this.storageService.editedEntry = entry;
+  async openHistoryEntryWindow(entry: IHistoryEntry, config?: { readonly: boolean }) {
+    this.entryManager.editedEntry = entry.entry;
   
     const decryptedPassword = await this.communicationService.ipcRenderer
-      .invoke(IpcChannel.DecryptPassword, this.storageService.editedEntry.password);
+      .invoke(IpcChannel.DecryptPassword, this.entryManager.editedEntry.password);
 
-    this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword, config }});
+    return this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword, config, historyEntry: entry }});
   }
 
   openMasterPasswordWindow(config?: { forceNew?: boolean }) {
@@ -92,7 +92,7 @@ export class ModalService {
   }
 
   openEntryHistoryWindow(id: number) {
-    this.storageService.editedEntry = this.storageService.selectedPasswords[0];
+    this.entryManager.editedEntry = this.entryManager.selectedPasswords[0];
     this.modalManager.open(EntryHistoryComponent, { payload: { id } });
   }
 
@@ -103,9 +103,9 @@ export class ModalService {
   private async openEntryWindow() {
     let decryptedPassword;
 
-    if (this.storageService.editedEntry) {
+    if (this.entryManager.editedEntry) {
       decryptedPassword = await this.communicationService.ipcRenderer
-        .invoke(IpcChannel.DecryptPassword, this.storageService.editedEntry.password);
+        .invoke(IpcChannel.DecryptPassword, this.entryManager.editedEntry.password);
     }
 
     this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword } });

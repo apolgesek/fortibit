@@ -4,15 +4,13 @@ import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { HotkeyHandler } from '@app/app.module';
 import { GroupIds } from '@app/core/enums';
 import { IHotkeyHandler } from '@app/core/models';
-import { ConfigService } from '@app/core/services';
+import { WorkspaceService, ConfigService, EntryManager, GroupManager } from '@app/core/services';
 import { ClipboardService } from '@app/core/services/clipboard.service';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { MenuItem } from '@app/shared';
-import { DomUtils } from '@app/utils';
-import { TreeNode } from '@circlon/angular-tree-component';
+import { DomUtil } from '@app/utils';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -46,7 +44,9 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   private readonly destroyed$: Subject<void> = new Subject();
 
   constructor(
-    private readonly storageService: StorageService,
+    private readonly workspaceService: WorkspaceService,
+    private readonly entryManager: EntryManager,
+    private readonly groupManager: GroupManager,
     private readonly searchService: SearchService,
     private readonly configService: ConfigService,
     private readonly clipboardService: ClipboardService,
@@ -54,24 +54,20 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     private readonly modalService: ModalService,
     @Inject(HotkeyHandler) private readonly hotkeyService: IHotkeyHandler,
   ) { 
-    this.passwordList$ = this.storageService.entries$;
+    this.passwordList$ = this.entryManager.entries$;
     this.searchPhrase$ = this.searchService.searchPhrase$;
   }
 
   get selectedEntries(): IPasswordEntry[] {
-    return this.storageService.selectedPasswords;
+    return this.entryManager.selectedPasswords;
   }
 
   get passwordEntries(): IPasswordEntry[] {
-    return this.storageService.passwordEntries ?? [];
+    return this.entryManager.passwordEntries ?? [];
   }
 
   get fileName(): string {
-    return this.storageService.databaseFileName;
-  }
-
-  set selectedGroup(treeNode: TreeNode) {
-    this.storageService.selectedCategory = treeNode;
+    return this.workspaceService.databaseFileName;
   }
 
   get searchPhrase(): string {
@@ -79,7 +75,7 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   }
 
   get entriesFound$(): Observable<number> {
-    return this.storageService.entries$.pipe(map((entries) => entries.length));
+    return this.entryManager.entries$.pipe(map((entries) => entries.length));
   }
 
   get isSearching(): boolean {
@@ -91,11 +87,11 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   }
 
   get entriesDragEnabled(): boolean {
-    return this.storageService.selectedCategory?.data?.id !== GroupIds.Starred;
+    return this.groupManager.selectedGroup !== GroupIds.Starred;
   }
 
   get isAddPossible(): boolean {
-    return this.storageService.isAddPossible;
+    return this.groupManager.isAddPossible;
   }
 
   ngOnInit() {
@@ -138,8 +134,8 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   
       this.selectedEntries.push(entry);
     } else {
-      this.storageService.selectedPasswords = [entry];
-      this.storageService.selectEntry(entry);;
+      this.entryManager.selectedPasswords = [entry];
+      this.entryManager.selectEntry(entry);
     }
   }
 
@@ -156,7 +152,7 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   }
 
   isEntryDragged(entry: IPasswordEntry): boolean {
-    return Boolean(this.storageService.draggedEntries.find(e => e === entry?.id));
+    return Boolean(this.entryManager.draggedEntries.find(e => e === entry?.id));
   }
 
   addNewEntry() {
@@ -165,18 +161,18 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
 
   startDrag(event: DragEvent, item: IPasswordEntry) {
     this.selectedEntries.length > 0
-      ? this.storageService.draggedEntries = this.selectedEntries.map(e => e.id)
-      : this.storageService.draggedEntries = [ item.id ];
+      ? this.entryManager.draggedEntries = this.selectedEntries.map(e => e.id)
+      : this.entryManager.draggedEntries = [ item.id ];
 
-    DomUtils.setDragGhost(event);
+    DomUtil.setDragGhost(event);
   }
 
   endDrag() {
-    this.storageService.draggedEntries = [];
+    this.entryManager.draggedEntries = [];
   }
 
   private handleEntriesReload() {
-    this.storageService.reloadedEntries$
+    this.entryManager.reloadedEntries$
       .pipe(takeUntil(this.destroyed$))
       .subscribe(() => {
         this.scrollViewport?.scrollTo({ top: 0 });

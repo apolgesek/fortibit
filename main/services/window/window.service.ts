@@ -169,8 +169,8 @@ export class WindowService implements IWindowService {
     return loadedWindow;
   }
 
-  // to do: create a class which distributes events for all windows and handles the result
-  registerWindowsAutotypeHandler(activeWindowTitle: string) {
+  // TODO: create a class which distributes events for all windows and handles the result
+  registerAutotypeHandler(activeWindowTitle: string) {
     const windowsListeners = [];
     this._windows.forEach((win) => {
       const listener = async (_, channel: string, entry) => {
@@ -184,8 +184,12 @@ export class WindowService implements IWindowService {
           const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent, win.key) as { decrypted: string };
 
           await this._sendInputService.sleep(200);
-          await this._sendInputService.typeWord(entry.username);
-          await this._sendInputService.pressKey(Keys.Tab);
+
+          if (entry.username) {
+            await this._sendInputService.typeWord(entry.username);
+            await this._sendInputService.pressKey(Keys.Tab);
+          }
+
           await this._sendInputService.typeWord(payload.decrypted);
           await this._sendInputService.pressKey(Keys.Enter);
   

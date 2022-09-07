@@ -8,12 +8,13 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { ICommunicationService, IHotkeyHandler } from './core/models';
+import { WorkspaceService, EntryManager, GroupManager } from './core/services';
 import { ClipboardService } from './core/services/clipboard.service';
 import { ElectronService } from './core/services/electron/electron.service';
 import { WebService } from './core/services/electron/web.service';
 import { WindowsHotkeyHandler } from './core/services/hotkey/windows-hotkey-handler';
+import { DarwinHotkeyHandler } from './core/services/hotkey/darwin-hotkey-handler';
 import { ModalService } from './core/services/modal.service';
-import { StorageService } from './core/services/managers/storage.service';
 import { MainModule } from './main/main.module';
 import { SharedModule } from './shared/shared.module';
 
@@ -46,21 +47,27 @@ export const CommunicationService = new InjectionToken<ICommunicationService>('c
       provide: HotkeyHandler,
       useFactory: (
         communicationService: ICommunicationService,
-        storageService: StorageService,
+        appController: WorkspaceService,
+        entriesManager: EntryManager,
+        groupsManager: GroupManager,
         modalService: ModalService,
         clipboardService: ClipboardService
       ) => {
         switch (communicationService.os.platform()) {
           case 'win32':
           case 'web':
-            return new WindowsHotkeyHandler(storageService, modalService, clipboardService);
+            return new WindowsHotkeyHandler(modalService, clipboardService, appController, entriesManager, groupsManager);
+          case 'darwin':
+            return new DarwinHotkeyHandler(modalService, clipboardService, appController, entriesManager, groupsManager);
           default:
             throw new Error('HotkeyHandler: Unsupported platform');
         }
       },
       deps: [
         CommunicationService,
-        StorageService,
+        WorkspaceService,
+        EntryManager,
+        GroupManager,
         ModalService,
         ClipboardService
       ]

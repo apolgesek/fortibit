@@ -15,7 +15,7 @@ button {
 	border-radius: 0.25rem;
 	font-size: 0.875rem;
 	color: $white;
-	background: linear-gradient(270deg, $picton-blue, $curious-blue);
+	background: $curious-blue;
 	width: auto;
 	min-width: 100px;
 	position: relative;
@@ -25,28 +25,12 @@ button {
 	text-transform: uppercase;
 	-webkit-font-smoothing: antialiased;
 
-	&::before {
-		background: $curious-blue;
-		content: "";
-		display: block;
-		height: 100%;
-		position: absolute;
-		top: 0; left: 0;
-		opacity: 0;
-		border-radius: 0.25rem;
-		width: 100%;
-		z-index: -100;
-		transition: opacity 200ms;
-	}
-
 	&:hover {
-		&:before {
-			opacity: 1;
-		}
+		background-color: darken($curious-blue, 7);
 	}
 
 	&:focus {
-		background-color: darken($curious-blue, 5);
+		background-color: darken($curious-blue, 7);
 		outline: 2px solid #aedaff !important;
 		outline-offset: 3px !important;
 	}
@@ -133,6 +117,10 @@ button {
     &:hover {
       background-color: transparent;
     }
+	}
+
+	.pi {
+		margin-right: 0.5rem;
 	}
 }
 

@@ -12,39 +12,54 @@
 		tabindex="0"
 		[nodes]="groups"
 		[options]="treeOptions"
-		(focus)="selectGroup($event)">
-	  <ng-template #treeNodeTemplate let-node let-index="index">
-			<ng-container *ngIf="(isGroupRenamed$ | async) && selectedGroup?.data.id === node.data.id; else groupName">
-				<input
-					type="text"
-					appAutofocus
-					appBlurEnter
-					[(ngModel)]="node.data.name"
-					[ngModelOptions]="{'updateOn': 'blur'}"
-					(blur)="setGroupRenameModeOff(node)"
-					maxlength="20"
-					class="rename-group"/>
-			</ng-container>
-			<ng-template #groupName>
-				<div
-					#treeItem
-					role="treeitem"
-					tabindex="0"
-					(focus)="focusTree()"
-					[ngClass]="{'node-selected': selectedGroup?.data.id === node.data.id }"
-					[attr.aria-level]="node.level"
-					[appContextMenuItem]="getContextMenu(node)"
-					class="node-group">
-					<span *ngIf="node.data.isImported" class="pi pi-download"></span>
-					<span *ngIf="node.data.id === groupIds.Starred" class="pi pi-star"></span>
-					<span *ngIf="node.data.id === groupIds.RecycleBin" class="pi pi-trash"></span>
-					{{ node.data.name }}
+		(focus)="selectGroup($event.node)">
+		<ng-template #treeNodeWrapperTemplate let-node let-index="index">
+			<div class="node-wrapper" [style.padding-left]="node.getNodePadding()" [style.margin-top]="node.data.id === groupIds.Root ? '0.75rem' : 0">
+				<tree-node-expander [node]="node"></tree-node-expander>
+				<div class="node-content-wrapper"
+					appTreeNode
+        	[class.node-content-wrapper-focused]="node.isFocused"
+					(click)="node.mouseAction('click', $event)"
+					(dblclick)="node.mouseAction('dblClick', $event)"
+					(contextmenu)="node.mouseAction('contextMenu', $event)"
+					(treeDrop)="node.onDrop($event)"
+					[treeAllowDrop]="node.allowDrop"
+					[treeDrag]="node"
+					[treeDragEnabled]="node.allowDrag()">
+					<ng-container *ngIf="(isGroupRenamed$ | async) && selectedGroup === node.data.id; else groupName">
+						<input
+							type="text"
+							appAutofocus
+							appBlurEnter
+							[(ngModel)]="node.data.name"
+							[ngModelOptions]="{'updateOn': 'blur'}"
+							(blur)="setGroupRenameModeOff(node)"
+							maxlength="20"
+							class="rename-group"/>
+					</ng-container>
+					<ng-template #groupName>
+						<div
+							#treeItem
+							role="treeitem"
+							tabindex="0"
+							(focus)="focusTree()"
+							[ngClass]="{'node-selected': selectedGroup === node.data.id }"
+							[attr.aria-level]="node.level"
+							[appContextMenuItem]="getContextMenu(node)"
+							[id]="'group-' + node.data.id"
+							class="node-group">
+							<span *ngIf="node.data.isImported" class="pi pi-download"></span>
+							<span *ngIf="node.data.id === groupIds.Starred" class="pi pi-star"></span>
+							<span *ngIf="node.data.id === groupIds.RecycleBin" class="pi pi-trash"></span>
+							{{ node.data.name }}
+						</div>
+					</ng-template>
 				</div>
-			</ng-template>
+			</div>
 		</ng-template>
 	</tree-root>
 	<div *ngIf="selectedGroup" class="blur-groups group-info">
-		<div class="group-name">{{ selectedGroup.data.name }}</div>
+		<div class="group-name">{{ selectedGroupName }}</div>
 		<div>S: {{ selectedEntries.length }}</div>
 		<div>T: {{ passwordEntries.length }}</div>
 	</div>

@@ -108,19 +108,55 @@
           <i class="pi" [ngClass]="isVisible ? 'pi-angle-up' : 'pi-angle-right'"></i>
           Advanced options
         </button>
-        <div *ngIf="isVisible" class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
-          <div class="inputgroup-addon"><i class="pi pi-code"></i></div>
-          <input
-            formControlName="autotypeExp"
-            [readonly]="isReadOnly"
-            type="text"
-            id="entry-autotype-exp"
-            placeholder="Autotype expression (regex)" />  
-        </div>
+        <ng-container *ngIf="isVisible">
+          <div class="section">
+            <label class="label" for="entry-expiration-date">Expiration date:</label>
+            <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
+              <div class="inputgroup-addon"><i class="pi pi-calendar"></i></div>
+              <input
+                appDateMask
+                formControlName="expirationDate"
+                [readonly]="isReadOnly"
+                type="text"
+                id="entry-expiration-date"
+                placeholder="Expiration date" />  
+            </div>
+            <div
+              *ngIf="isControlInvalid(expirationDate)"
+              class="validation-error">
+              <ng-container *ngIf="expirationDate.hasError('invalidDate')">
+                Date is invalid.
+              </ng-container>
+              <ng-container *ngIf="expirationDate.hasError('pastDate')">
+                Date cannot be in the past.
+              </ng-container>
+            </div>
+          </div>
+          <div class="section">
+            <label class="label" for="entry-autotype-exp">Autotype expression:</label>
+            <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
+            <div class="inputgroup-addon"><i class="pi pi-code"></i></div>
+              <input
+                formControlName="autotypeExp"
+                [readonly]="isReadOnly"
+                type="text"
+                id="entry-autotype-exp"
+                placeholder="Regular expression" />  
+            </div>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>
   <div class="footer-container">
+    <button
+      *ngIf="isReadOnly"
+      type="button"
+      (click)="delete(); false"
+      class="text-btn delete">
+      <i class="pi pi-trash"></i>
+      Delete
+    </button>
     <button
       *ngIf="isReadOnly"
       type="button"
@@ -133,7 +169,7 @@
       *ngIf="!isReadOnly; else closeBtn"
       [disabled]="saveLocked"
       (click)="addNewEntry()"
-      id="restore"
+      id="entry-submit"
       class="primary-btn">
       Confirm
     </button>

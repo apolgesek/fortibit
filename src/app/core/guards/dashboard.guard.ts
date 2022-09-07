@@ -3,15 +3,15 @@ import { CanActivate, Router } from '@angular/router';
 import { IpcChannel } from '@shared-renderer/index';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '../models';
+import { WorkspaceService } from '../services';
 
 @Injectable()
 export class DashboardGuard implements CanActivate {
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly storageService: StorageService,
+    private readonly workspaceService: WorkspaceService,
     private readonly router: Router
   ) {}
 
@@ -20,9 +20,9 @@ export class DashboardGuard implements CanActivate {
       .pipe(
         map((filePath: string) => {
           if (filePath) {
-            this.storageService.file = { filePath: filePath, filename: filePath.split('\\').slice(-1)[0] };
+            this.workspaceService.file = { filePath: filePath, filename: filePath.split('\\').slice(-1)[0] };
             
-            if (this.storageService.isLocked) {
+            if (this.workspaceService.isLocked) {
               this.router.navigate(['/pass']);
 
               return false;
@@ -31,7 +31,7 @@ export class DashboardGuard implements CanActivate {
             }
           }
 
-          this.storageService.isLocked = false;
+          this.workspaceService.isLocked = false;
 
           return true;
       }));

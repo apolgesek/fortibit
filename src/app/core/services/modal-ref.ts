@@ -1,4 +1,4 @@
-import { ComponentRef, Injectable } from '@angular/core';
+import { ComponentRef, EventEmitter, Injectable } from '@angular/core';
 import { ModalManager } from './modal-manager';
 
 @Injectable({
@@ -7,10 +7,12 @@ import { ModalManager } from './modal-manager';
 export class ModalRef {
   public showBackdrop = true;
   public ref: ComponentRef<any>;
+  public onClose: EventEmitter<void>;
 
   constructor(private readonly modalManager: ModalManager) { }
 
   close() {
+    this.onClose.emit();
     this.modalManager.close(this.ref);
   }
 }

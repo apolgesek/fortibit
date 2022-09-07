@@ -1,4 +1,4 @@
-<ng-container *ngIf="(isDatabaseLoaded | async) && fontsLoaded">
+<ng-container *ngIf="isDatabaseLoaded && fontsLoaded">
   <app-menu-bar *ngIf="isElectron"></app-menu-bar>
 
   <div [@routeAnimations]="getRouteAnimationData()" style="flex: 1">

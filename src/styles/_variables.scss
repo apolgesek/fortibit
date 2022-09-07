@@ -1,3 +1,5 @@
+$handle-width-px: 4;
+
 // COLORS
 $pickled-bluewood: hsl(207, 29%, 30%);
 $curious-blue: hsl(207, 78%, 41%);
@@ -20,4 +22,4 @@ $barberry: #eccc14;
 $tulip-tree: #f0a544;
 
 // OTHER
-$sidebar-width: 0.25rem;
+$handle-width: unquote($handle-width-px + 'px');

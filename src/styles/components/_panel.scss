@@ -1,0 +1,24 @@
+.expandable-section {
+	border: 0;
+	background: none;
+	width: 100%;
+	padding: 0.5rem;
+	text-align: left;
+	border-radius: 3px;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	font-size: 1rem;
+	@include font-medium;
+	color: $pickled-bluewood;
+	background-color: $porcelain;
+	transition: background-color 150ms;
+
+	.pi {
+		margin-right: 0.5rem;
+	}
+
+	&:hover, &:focus-visible {
+		background-color: darken($porcelain, 5);
+	}
+}

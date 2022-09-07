@@ -2,6 +2,7 @@ import {
   ApplicationRef,
   ComponentRef,
   EmbeddedViewRef,
+  EventEmitter,
   Injectable,
   Injector,
   Renderer2,
@@ -41,7 +42,7 @@ export class ModalManager {
     return this.openedModals.length > 0;
   }
 
-  open<T extends IModal>(component: Type<T>, additionalData?: IAdditionalData) {
+  open<T extends IModal>(component: Type<T>, additionalData?: IAdditionalData) : ModalRef {
     const injector: Injector = Injector.create({ providers: [{ provide: ModalRef }], parent: this.appRef.injector });
     const modalRef = injector.get(ModalRef);
 
@@ -55,6 +56,7 @@ export class ModalManager {
     const componentInstance = componentRef.instance as T;
 
     modalRef.ref = componentRef;
+    modalRef.onClose = new EventEmitter<void>();
     // set component properties
     componentInstance.additionalData = additionalData;
 
@@ -63,6 +65,8 @@ export class ModalManager {
     this.renderer.appendChild(root, modal);
 
     this.openedModals.push(componentRef);
+
+    return modalRef;
   }
 
   close<T>(componentRef: ComponentRef<T>) {  

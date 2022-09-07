@@ -1,12 +1,12 @@
 import { Component, ElementRef, Inject, NgZone, ViewChild } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { IpcChannel, UpdateState } from '@shared-renderer/index';
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { scan, startWith, takeUntil, tap } from 'rxjs/operators';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
+import { WorkspaceService, EntryManager, GroupManager } from '@app/core/services';
 
 interface INotification {
   type: 'update';
@@ -34,27 +34,27 @@ export class ToolbarComponent {
   private updateListener: (event: Electron.IpcRendererEvent, state: UpdateState, version: string) => void;
 
   get isDatabaseInSync(): boolean {
-    return !!this.storageService.dateSaved;
+    return !!this.workspaceService.dateSaved;
   }
 
   get isAddPossible(): boolean {
-    return this.storageService.isAddPossible;
+    return this.groupManager.isAddPossible;
   }
 
   get isAnyEntry(): boolean {
-    return this.storageService.passwordEntries?.length > 0;
+    return this.entryManager.passwordEntries?.length > 0;
   }
 
   get isOneEntrySelected(): boolean {
-    return this.storageService.selectedPasswords.length === 1;
+    return this.entryManager.selectedPasswords.length === 1;
   }
 
   get isAnyEntrySelected(): boolean {
-    return this.storageService.selectedPasswords.length > 0;
+    return this.entryManager.selectedPasswords.length > 0;
   }
 
   get selectedPasswordsCount(): number {
-    return this.storageService.selectedPasswords.length;
+    return this.entryManager.selectedPasswords.length;
   }
 
   get searchPhrase(): string {
@@ -74,7 +74,9 @@ export class ToolbarComponent {
   }
 
   constructor(
-    private readonly storageService: StorageService,
+    private readonly workspaceService: WorkspaceService,
+    private readonly entryManager: EntryManager,
+    private readonly groupManager: GroupManager,
     private readonly searchService: SearchService,
     private readonly modalService: ModalService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
@@ -122,14 +124,14 @@ export class ToolbarComponent {
   }
 
   trySaveDatabase() {
-    !this.storageService.file
+    !this.workspaceService.file
       ? this.modalService.openMasterPasswordWindow()
-      : this.storageService.saveDatabase(null);
+      : this.workspaceService.saveDatabase(null);
   }
 
   toggleSearchMode() {
     this.isGlobalSearchMode = !this.isGlobalSearchMode;
-    this.storageService.updateEntries();
+    this.entryManager.updateEntries();
   }
 
   updateAndRelaunch() {

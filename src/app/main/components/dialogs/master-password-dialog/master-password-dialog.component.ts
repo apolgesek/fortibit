@@ -1,11 +1,10 @@
 import { Component, ComponentRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { IpcChannel } from '@shared-renderer/index';
 import { IAdditionalData, IModal } from '@app/shared';
 import { EventType } from '@app/core/enums';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
-import { ModalRef } from '@app/core/services';
+import { WorkspaceService, ModalRef } from '@app/core/services';
 
 @Component({
   selector: 'app-master-password-dialog',
@@ -20,7 +19,7 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal 
 
   constructor(
     private readonly zone: NgZone,
-    private readonly storageService: StorageService,
+    private readonly workspaceService: WorkspaceService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly modalRef: ModalRef
   ) { 
@@ -28,7 +27,7 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal 
       this.zone.run(() => {
         if (status) {
           if (typeof this.additionalData?.event !== 'undefined' && this.additionalData?.event !== null) {
-            this.storageService.execute(this.additionalData.event as EventType, this.additionalData.payload);
+            this.workspaceService.execute(this.additionalData.event as EventType, this.additionalData.payload);
           }
           
           this.close();

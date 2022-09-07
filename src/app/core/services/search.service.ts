@@ -52,6 +52,7 @@ export class SearchService implements ISearchService {
 
   public reset() {
     this.searchPhraseValue = '';
+    this.isGlobalSearchMode = false;
     this.updateSearchResults();
   }
 

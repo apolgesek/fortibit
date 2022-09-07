@@ -14,4 +14,6 @@ export interface IPasswordEntry {
 	autotypeExp?: string;
 	iconPath?: string;
 	history?: IPasswordEntry[];
+	expirationDate?: Date;
+	expirationStatus?: 'expired' | 'due-expiration';
 }

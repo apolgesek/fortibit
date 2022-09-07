@@ -2,10 +2,9 @@ import { Component, ComponentRef, Inject } from '@angular/core';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
 import { NotificationService } from '@app/core/services/notification.service';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { IAdditionalData, IModal } from '@app/shared';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
-import { ModalRef } from '@app/core/services';
+import { WorkspaceService, GroupManager, ModalRef } from '@app/core/services';
 
 @Component({
   selector: 'app-import-database-metadata',
@@ -18,9 +17,10 @@ export class ImportDatabaseMetadataComponent implements IModal {
   isConfirmButtonLocked = false;
 
   constructor(
+    private readonly workspaceService: WorkspaceService,
+    private readonly groupManager: GroupManager,
     private readonly modalRef: ModalRef,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly storageService: StorageService,
     private readonly notificationService: NotificationService
   ) {}
 
@@ -30,10 +30,10 @@ export class ImportDatabaseMetadataComponent implements IModal {
       const entries: string = await this.communicationService.ipcRenderer.invoke(IpcChannel.Import, this.additionalData?.payload.filePath, this.additionalData?.payload.type);
       let deserializedEntries: IPasswordEntry[] = JSON.parse(entries);
 
-      deserializedEntries = deserializedEntries.map(x => ({...x, groupId: this.storageService.selectedCategory?.data.id}));
+      deserializedEntries = deserializedEntries.map(x => ({...x, groupId: this.groupManager.selectedGroup}));
 
       const filePath = this.additionalData?.payload.filePath;
-      await this.storageService.importDatabase(this.communicationService.path.parse(filePath).name, deserializedEntries);
+      await this.workspaceService.importDatabase(this.communicationService.path.parse(filePath).name, deserializedEntries);
 
       this.notificationService.add({ type: 'success', message: 'Passwords imported successfully', alive: 5000 });
       this.close();

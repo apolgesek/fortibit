@@ -1,0 +1,123 @@
+input,
+textarea {
+	@include font-regular;
+	color: $pickled-bluewood;
+}
+
+.inputgroup {
+	background-color: $porcelain;
+	box-shadow: inset 0px 0.25rem 0px 0px darken($porcelain, 1);
+	border: 0;
+	border-radius: 0.25rem;
+	margin: 0.5rem 0;
+	display: flex;
+	padding: 0.5rem;
+	box-sizing: border-box;
+	position: relative;
+
+	&.checkbox {
+		align-items: center;
+	}
+
+	input[type='text'],
+	input[type='password'],
+	input[type='number'],
+	textarea {
+		border: 0;
+		border-radius: 0.25rem;
+		width: 100%;
+		background: transparent;
+		z-index: 1;
+		outline: none;
+		font-size: 0.875rem;
+	}
+
+	.inputgroup-addon {
+		& + input, & + textarea {
+			padding-left: 1.5rem;
+		}
+	}
+}
+
+input[type='number'] {
+	&::-webkit-outer-spin-button,
+	&::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+	}
+}
+
+.inputgroup-addon {
+	position: absolute;
+	border: 0;
+	background-color: transparent;
+	color: $pickled-bluewood;
+	z-index: 2;
+}
+
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  margin-left: 2rem;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0.25rem;
+  background-color: $silver;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 20px;
+  left: 4px;
+  bottom: 5px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 0.25rem;
+}
+
+input:checked + .slider {
+  background-color: $curious-blue;
+}
+
+input:focus + .slider:before, input:focus:active + .slider:before {
+  box-shadow: 0px 0px 0px 2px $picton-blue;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(22px);
+  -ms-transform: translateX(22px);
+  transform: translateX(22px);
+}
+
+.readonly {
+	background: $white;
+	box-shadow: none;
+	border: 1px solid $silver;
+
+	input:read-only, textarea:read-only {
+		background: $white;
+	}
+}

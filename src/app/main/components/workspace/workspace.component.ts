@@ -4,11 +4,11 @@ import { IHotkeyHandler } from '@app/core/models';
 import { fromEvent, Subject, takeUntil, tap } from 'rxjs';
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  selector: 'app-workspace',
+  templateUrl: './workspace.component.html',
+  styleUrls: ['./workspace.component.scss']
 })
-export class DashboardComponent implements AfterViewInit, OnDestroy {
+export class WorkspaceComponent implements AfterViewInit, OnDestroy {
   private readonly destroyed: Subject<void> = new Subject();
   constructor(@Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler) {}
 

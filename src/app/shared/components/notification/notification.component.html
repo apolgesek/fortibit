@@ -1,4 +1,4 @@
-<div class="toast-body">
+<div class="toast-body" [ngClass]="{'countdown': model.showCount}">
   <div class="message">
     <i class="pi pi-check-circle"></i>
     {{ model.message }}

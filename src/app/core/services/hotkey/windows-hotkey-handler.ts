@@ -1,8 +1,11 @@
 import { IHotkeyConfiguration } from '@app/core/models';
 import { ModalService } from '@app/core/services/modal.service';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { IHotkeyHandler } from '../../models/hotkey-handler.model';
 import { ClipboardService } from '../clipboard.service';
+import { WorkspaceService } from '../workspace.service';
+import { EntryManager } from '../managers/entry.manager';
+import { GroupManager } from '../managers/group.manager';
+import { GroupIds } from '@app/core/enums';
 
 export class WindowsHotkeyHandler implements IHotkeyHandler {
   public configuration: IHotkeyConfiguration = {
@@ -16,9 +19,11 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   };
 
   constructor(
-    private readonly storageService: StorageService,
     private readonly modalService: ModalService,
-    private readonly clipboardService: ClipboardService
+    private readonly clipboardService: ClipboardService,
+    private readonly workspaceService: WorkspaceService,
+    private readonly entryManager: EntryManager,
+    private readonly groupManager: GroupManager
   ) {}
 
   isMultiselectionKeyDown(event: MouseEvent): boolean {
@@ -47,10 +52,10 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   
   public registerSaveDatabase(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 's' && event.ctrlKey) {
-      if (!this.storageService.file) {
+      if (!this.workspaceService.file) {
         this.modalService.openMasterPasswordWindow()
-      } else if (!this.storageService.dateSaved) {
-        this.storageService.saveDatabase(null);
+      } else if (!this.workspaceService.dateSaved) {
+        this.workspaceService.saveDatabase(null);
       }
 
       event.preventDefault();
@@ -58,49 +63,58 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
   
   public registerDeleteEntry(event: KeyboardEvent) {
-    if (event.key === 'Delete' && this.storageService.selectedPasswords.length) {
+    if (event.key === 'Delete' && this.entryManager.selectedPasswords.length) {
       this.modalService.openDeleteEntryWindow();
       event.preventDefault();
     }
   }
 
   public registerDeleteGroup(event: KeyboardEvent) {
-    if (event.key === 'Delete' && this.storageService.selectedCategory && this.storageService.selectedCategory.id !== 1 && document.querySelector('.tree-focused')) {
+    if (event.key === 'Delete'
+      && this.groupManager.selectedGroup
+      && this.groupManager.selectedGroup !== GroupIds.Root
+      && document.querySelector('.tree-focused')) {
       this.modalService.openDeleteGroupWindow();
       event.preventDefault();
     }
   }
 
   public registerRenameGroup(event: KeyboardEvent) {
-    if (event.key === 'e' && event.ctrlKey && this.storageService.selectedCategory && this.storageService.selectedCategory.id !== 1 && document.querySelector('.tree-focused')) {
-      this.storageService.renameGroup(true);
+    if (event.key === 'e'
+      && event.ctrlKey
+      && this.groupManager.selectedGroup
+      && this.groupManager.selectedGroup !== GroupIds.Root && document.querySelector('.tree-focused')) {
+      this.groupManager.renameGroup(true);
       event.preventDefault();
     }
   }
   
   public registerEditEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'e' && this.storageService.selectedPasswords.length === 1) {
+    if (event.key.toLowerCase() === 'e' && this.entryManager.selectedPasswords.length === 1) {
       this.modalService.openEditEntryWindow();
       event.preventDefault();
     }
   }
 
   public registerCopyPassword(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'c' && event.ctrlKey && event.shiftKey && this.storageService.selectedPasswords.length === 1) {
-      this.clipboardService.copyToClipboard(this.storageService.selectedPasswords[0], 'password');
+    if (event.key.toLowerCase() === 'c'
+      && event.ctrlKey
+      && event.shiftKey
+      && this.entryManager.selectedPasswords.length === 1) {
+      this.clipboardService.copyToClipboard(this.entryManager.selectedPasswords[0], 'password');
       event.preventDefault();
     }
   }
 
   public registerCopyUsername(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'u' && event.ctrlKey && event.shiftKey && this.storageService.selectedPasswords.length === 1) {
-      this.clipboardService.copyToClipboard(this.storageService.selectedPasswords[0], 'username');
+    if (event.key.toLowerCase() === 'u' && event.ctrlKey && event.shiftKey && this.entryManager.selectedPasswords.length === 1) {
+      this.clipboardService.copyToClipboard(this.entryManager.selectedPasswords[0], 'username');
       event.preventDefault();
     }
   }
   
   public registerAddEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'i' && event.ctrlKey && !event.shiftKey && this.storageService.isAddPossible) {
+    if (event.key.toLowerCase() === 'i' && event.ctrlKey && !event.shiftKey && this.groupManager.isAddPossible) {
       this.modalService.openNewEntryWindow();
       event.preventDefault();
     }
@@ -108,22 +122,22 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
 
   public registerAddGroup(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'o' && event.ctrlKey) {
-      this.storageService.addGroup();
+      this.groupManager.addGroup();
       event.preventDefault();
     }
   }
   
   public registerSelectAllEntries(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'a' && event.ctrlKey && this.storageService.selectedPasswords.length) {
-      this.storageService.selectedPasswords = [];
-      this.storageService.selectedPasswords.push(...this.storageService.passwordEntries);
+    if (event.key.toLowerCase() === 'a' && event.ctrlKey && this.entryManager.selectedPasswords.length) {
+      this.entryManager.selectedPasswords = [];
+      this.entryManager.selectedPasswords.push(...this.entryManager.passwordEntries);
       event.preventDefault();
     }
   }
 
   public registerFindEntries(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'f' && event.ctrlKey) {
-      this.storageService.isGlobalSearch = false;
+      this.entryManager.isGlobalSearch = false;
       (document.querySelector('.search') as HTMLInputElement).focus();
       event.preventDefault();
     }
@@ -131,15 +145,15 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
 
   public registerFindGlobalEntries(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'f' && event.ctrlKey && event.shiftKey) {
-      this.storageService.isGlobalSearch = true;
+      this.entryManager.isGlobalSearch = true;
       (document.querySelector('.search') as HTMLInputElement).focus();
       event.preventDefault();
     }
   }
 
   public registerLockDatabase(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'l' && event.ctrlKey && this.storageService.file) {
-      this.storageService.lock({ minimize: true });
+    if (event.key.toLowerCase() === 'l' && event.ctrlKey && this.workspaceService.file) {
+      this.workspaceService.lock({ minimize: true });
       event.preventDefault();
     }
   }

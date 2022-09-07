@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, ComponentRef, Inject } from '@angular/core';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { IpcChannel } from '@shared-renderer/index';
 import { MasterPasswordDialogComponent } from '../master-password-dialog/master-password-dialog.component';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -7,7 +6,7 @@ import { EventType } from '@app/core/enums';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
-import { ModalRef } from '@app/core/services';
+import { WorkspaceService, ModalRef } from '@app/core/services';
 
 @Component({
   selector: 'app-confirm-exit-dialog',
@@ -21,13 +20,13 @@ export class ConfirmExitDialogComponent implements IModal {
 
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly storageService: StorageService,
     private readonly modalManager: ModalManager,
+    private readonly workspaceService: WorkspaceService,
     private readonly modalRef: ModalRef
   ) { }
 
   async saveChanges() {
-    if (!this.storageService.file) {
+    if (!this.workspaceService.file) {
       this.modalManager.open(MasterPasswordDialogComponent, { event: this.additionalData.event });
       this.close();
 
@@ -38,13 +37,13 @@ export class ConfirmExitDialogComponent implements IModal {
         }, 500);
       });
 
-      await this.storageService.saveDatabase();
+      await this.workspaceService.saveDatabase();
     }
   }
 
   executeTask() {
     this.close();
-    this.storageService.execute(this.additionalData.event as EventType, this.additionalData.payload);
+    this.workspaceService.execute(this.additionalData.event as EventType, this.additionalData.payload);
   }
 
   close() {

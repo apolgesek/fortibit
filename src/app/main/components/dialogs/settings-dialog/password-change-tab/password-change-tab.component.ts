@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
-import { ConfigService, ModalService, NotificationService, StorageService } from '@app/core/services';
+import { WorkspaceService, ConfigService, ModalService, NotificationService } from '@app/core/services';
 import { valueMatchValidator } from '@app/shared/validators';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
@@ -23,7 +23,7 @@ export class PasswordChangeTabComponent {
   }
 
   get passwordFormEnabled(): boolean {
-    if (!this.storageService.file) {
+    if (!this.workspaceService.file) {
       if (this.passwordForm.enabled) {
         this.passwordForm.disable();
       }
@@ -40,12 +40,11 @@ export class PasswordChangeTabComponent {
 
   constructor(
     private readonly formBuilder: FormBuilder,
-    private readonly storageService: StorageService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly modalService: ModalService,
     private readonly notificationService: NotificationService,
-    private readonly configService: ConfigService
-  ) {
+    private readonly configService: ConfigService,
+    private readonly workspaceService: WorkspaceService  ) {
     this.passwordForm = this.formBuilder.group({
       currentPassword: [null, { validators: [Validators.required], asyncValidators: [this.passwordValidator()], updateOn: 'blur' }],
       newPasswords: this.formBuilder.group({
@@ -62,7 +61,7 @@ export class PasswordChangeTabComponent {
       return;
     }
 
-    const success = await this.storageService.saveNewDatabase(this.passwordForm.value.newPasswords.password, { forceNew: false });
+    const success = await this.workspaceService.saveNewDatabase(this.passwordForm.value.newPasswords.password, { forceNew: false });
     if (success) {
       this.passwordForm.reset();
     }

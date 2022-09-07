@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { StorageService } from '@app/core/services/managers/storage.service';
+import { WorkspaceService } from '@app/core/services';
 import { valueMatchValidator } from '@app/shared/validators';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 
@@ -16,8 +16,8 @@ export class MasterPasswordSetupComponent {
   public masterPasswordForm: FormGroup;
 
   constructor(
+    private readonly workspaceService: WorkspaceService,
     private readonly fb: FormBuilder,
-    private readonly storageService: StorageService,
   ) {
     this.masterPasswordForm = this.fb.group({
       newPassword: [null, Validators.compose([Validators.required, Validators.minLength(this.minPasswordLength)])],
@@ -32,7 +32,7 @@ export class MasterPasswordSetupComponent {
       return;
     }
 
-    const success = await this.storageService.saveNewDatabase(this.masterPasswordForm.get('newPassword')?.value, {
+    const success = await this.workspaceService.saveNewDatabase(this.masterPasswordForm.get('newPassword')?.value, {
       forceNew: true
     });
 

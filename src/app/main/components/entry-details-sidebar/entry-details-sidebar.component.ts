@@ -2,10 +2,8 @@ import { Component, ElementRef, Inject, OnDestroy, OnInit, Renderer2, ViewChild 
 import { CommunicationService } from '@app/app.module';
 import { GroupIds } from '@app/core/enums';
 import { ICommunicationService, IPasswordGroup } from '@app/core/models';
-import { ModalService, NotificationService } from '@app/core/services';
+import { WorkspaceService, EntryManager, GroupManager, ModalService, NotificationService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
-import { StorageService } from '@app/core/services/managers/storage.service';
-import { TreeNode } from '@circlon/angular-tree-component';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
 import { Subject, takeUntil } from 'rxjs';
@@ -25,26 +23,28 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
 
   get entry(): IPasswordEntry {
     if (this.isEntrySelected) {
-      return this.storageService.selectedPasswords[0];
+      return this.entryManager.selectedPasswords[0];
     }
   }
 
   get isEntrySelected(): boolean {
-    return this.storageService.selectedPasswords.length === 1;
+    return this.entryManager.selectedPasswords.length === 1;
   }
 
   get databaseInformation(): { name: string } {
     return {
-      name: this.storageService.databaseFileName
+      name: this.workspaceService.databaseFileName
     };
   }
 
-  get selectedGroup(): TreeNode {
-    return this.storageService.selectedCategory;
+  get selectedGroup(): number {
+    return this.groupManager.selectedGroup;
   }
 
   constructor(
-    private readonly storageService: StorageService,
+    private readonly workspaceService: WorkspaceService,
+    private readonly entryManager: EntryManager,
+    private readonly groupManager: GroupManager,
     private readonly modalService: ModalService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly configService: ConfigService,
@@ -57,8 +57,8 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
       this.config = config;
     });
 
-    this.storageService.selectEntry$.pipe(takeUntil(this.destroyed)).subscribe(entry => {
-      this.group = this.findGroup(this.storageService.groups, entry.groupId);
+    this.entryManager.selectEntry$.pipe(takeUntil(this.destroyed)).subscribe(entry => {
+      this.group = this.findGroup(this.groupManager.groups, entry.groupId);
       this.shouldDisplayToolbar = this.group.id !== GroupIds.RecycleBin;
     });
   }
@@ -85,7 +85,7 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
   toggleStarred(entry: IPasswordEntry) {
     const starredClass = 'starred';
 
-    this.storageService.addOrUpdateEntry({ ...entry, isStarred: !entry.isStarred});
+    this.entryManager.addOrUpdateEntry({ ...entry, isStarred: !entry.isStarred});
 
     if (!entry.isStarred) {
       this.notificationService.add({ message: 'Added to starred entries', type: 'success', alive: 5000 });
@@ -97,7 +97,7 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
   }
 
   revealInGroup() {
-    this.storageService.revealInGroup(this.entry);
+    this.entryManager.revealInGroup(this.entry);
   }
 
   private findGroup(groups: IPasswordGroup[], id: number): IPasswordGroup | undefined {

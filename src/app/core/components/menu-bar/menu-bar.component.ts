@@ -1,11 +1,11 @@
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
 import { EventType } from '@app/core/enums';
 import { ModalService } from '@app/core/services/modal.service';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { DatabaseType, IpcChannel } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
+import { WorkspaceService } from '@app/core/services';
 
 @Component({
   selector: 'app-menu-bar',
@@ -58,21 +58,21 @@ export class MenuBarComponent implements OnInit {
   }
 
   get isDatabasePristine(): boolean {
-    return !!this.storageService.dateSaved;
+    return !!this.workspaceService.dateSaved;
   }
 
   get isLockingEnabled(): boolean {
-    return this.storageService.file && !this.isLocked;
+    return this.workspaceService.file && !this.isLocked;
   }
 
   get isLocked(): boolean {
-    return this.storageService.isLocked;
+    return this.workspaceService.isLocked;
   }
 
   constructor(
     private readonly zone: NgZone,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly storageService: StorageService,
+    private readonly workspaceService: WorkspaceService,
     private readonly modalService: ModalService
   ) {}
 
@@ -93,13 +93,13 @@ export class MenuBarComponent implements OnInit {
   }
 
   openFile() {
-    this.storageService.checkFileSaved(EventType.OpenFile);
+    this.workspaceService.checkFileSaved(EventType.OpenFile);
   }
 
   save() {  
-    !this.storageService.file
+    !this.workspaceService.file
       ? this.modalService.openMasterPasswordWindow()
-      : this.storageService.saveDatabase(null);
+      : this.workspaceService.saveDatabase(null);
   }
 
   saveAs() {
@@ -112,7 +112,7 @@ export class MenuBarComponent implements OnInit {
   }
 
   lock() {
-    this.storageService.checkFileSaved(EventType.Lock);
+    this.workspaceService.checkFileSaved(EventType.Lock);
   }
 
   openKeyboardShortcuts() {

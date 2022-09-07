@@ -2,7 +2,7 @@
 
 import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron';
 import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { basename, join } from 'path';
 import { IpcChannel } from '../shared-models';
 import { SingleInstanceServices } from './dependency-injection';
@@ -105,7 +105,13 @@ class MainProcess {
       this._databaseService.setFilePath(windowRef.webContents.id, filePath);
       this._windowService.setTitle(windowRef.id, basename(filePath));
     } else {
-      const workspace = readFileSync(join(global['__basedir'], 'workspaces.json'), 'utf-8');
+      const workspaceConfigPath = join(global['__basedir'], 'workspaces.json');
+
+      if (!existsSync(workspaceConfigPath)) {
+        writeFileSync(workspaceConfigPath, '{}', { encoding: 'utf-8' });
+      }
+
+      const workspace = readFileSync(workspaceConfigPath, 'utf-8');
       const path = JSON.parse(workspace);
 
       if (path.workspace && existsSync(path.workspace)) {
@@ -118,7 +124,7 @@ class MainProcess {
   private registerAutocompleteHandler() {
     this._configService.appConfig.autocompleteRegistered = globalShortcut.register(this._configService.appConfig.autocompleteShortcut, () => {
       const activeWindowTitle = this._nativeApiService.getActiveWindowTitle();
-      this._windowService.registerWindowsAutotypeHandler(activeWindowTitle);
+      this._windowService.registerAutotypeHandler(activeWindowTitle);
     });
   }
   

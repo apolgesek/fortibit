@@ -106,7 +106,10 @@
 			position: relative;
 
 			&::-webkit-input-placeholder {
-				color: $gumbo;
+				@include font-medium;
+				font-size: 0.875rem;
+				color: lighten($gumbo, 15);
+				text-transform: uppercase;
 			}
 		}
 	
@@ -124,7 +127,7 @@
 
 				&:hover {
 					color: $pickled-bluewood;
-					background: linear-gradient(90deg, $curious-blue-light, $white);
+					background: $curious-blue-light;
 				}
 			}
 

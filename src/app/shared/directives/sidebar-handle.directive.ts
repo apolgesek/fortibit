@@ -1,31 +1,52 @@
 import { DOCUMENT } from '@angular/common';
-import { Directive, ElementRef, HostBinding, HostListener, Inject, Input, Renderer2, SkipSelf } from '@angular/core';
-
+import { AfterViewInit, Directive, ElementRef, HostBinding, Inject, Input, NgZone, OnDestroy, Renderer2, SkipSelf } from '@angular/core';
+import { UiEventService } from '@app/core/services';
 @Directive({
   selector: '[appSidebarHandle]',
-  host: { 'class': 'handle' }
+  host: { 'class': 'handle' },
 })
-export class SidebarHandleDirective {
+export class SidebarHandleDirective implements AfterViewInit, OnDestroy {
   @Input() public readonly position: 'left' | 'right' = 'left';
+  public isDragged = false;
 
   private readonly minWidth = 210;
-  private start = false;
+  private maxWidth = 600;
+  private unlisteners: (() => void)[] = [];
 
   constructor(
     private readonly renderer: Renderer2,
     @SkipSelf() private readonly el: ElementRef,
     @Inject(DOCUMENT) private readonly document: Document,
-  ) {}
+    private readonly uiEventService: UiEventService,
+    private readonly zone: NgZone
+  ) {
+    this.uiEventService.registerSidebarHandle(this);
+  }
+
+  ngAfterViewInit() {
+    this.zone.runOutsideAngular(() => {
+      const mouseDown = this.renderer.listen(this.el.nativeElement, 'mousedown', this.onMouseDown.bind(this));
+      const mouseUp = this.renderer.listen(this.document, 'mouseup', this.onMouseUp.bind(this));
+      const mouseMove = this.renderer.listen(this.document, 'mousemove', this.onMouseMove.bind(this));
+
+      this.unlisteners = [mouseDown, mouseUp, mouseMove];
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.unlisteners.forEach(u => u());
+    this.unlisteners = [];
+  }
 
   @HostBinding('class.active')
   get active(): boolean {
-    if (this.start) {
+    if (this.isDragged) {
       this.document.body.style.cursor = 'w-resize';
     } else {
       this.document.body.style.cursor = 'default';
     }
 
-    return this.start;
+    return this.isDragged;
   }
 
   @HostBinding('class.right')
@@ -38,21 +59,18 @@ export class SidebarHandleDirective {
     return this.position === 'left';
   }
 
-  @HostListener('mousedown', ['$event'])
   private onMouseDown() {
-    this.start = true;
+    this.isDragged = true;
   }
 
-  @HostListener('document:mouseup', ['$event'])
   private onMouseUp() {
-    if (this.start) {
-      this.start = false;
+    if (this.isDragged) {
+      this.isDragged = false;
     }
   }
 
-  @HostListener('document:mousemove', ['$event'])
   private onMouseMove(event: MouseEvent) {
-    if (!this.start) {
+    if (!this.isDragged) {
       return;
     }
 
@@ -65,7 +83,6 @@ export class SidebarHandleDirective {
     }
   
     let newWidth = this.el.nativeElement.offsetWidth;
-
     const sidebarCurrentWidth = this.el.nativeElement.offsetWidth;
 
     if (mousePosition === sidebarCurrentWidth) {
@@ -82,6 +99,10 @@ export class SidebarHandleDirective {
       newWidth = this.minWidth;
     }
 
-    this.renderer.setStyle(this.el.nativeElement, 'width', newWidth + 'px');
+    if (newWidth >= this.maxWidth) {
+      newWidth = this.maxWidth
+    }
+
+    this.renderer.setStyle(this.el.nativeElement, 'width', Math.round(newWidth) + 'px');
   }
 }

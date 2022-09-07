@@ -23,7 +23,7 @@
 				<div class="cell">{{ item.entry.title }}</div>
 				<div class="cell">{{ item.entry.username }}</div>
 				<div class="cell">{{ item.entry.lastModificationDate | date: "dd/MM/yy HH:mm" }}</div>
-				<div class="cell text-right"><a href="#" (click)="openEntry(item.entry); false">View</a></div>
+				<div class="cell text-right"><a href="#" (click)="openEntry(item); false">View</a></div>
 			</div>
 		</div>
 		<ng-template #emptyHistory>

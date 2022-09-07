@@ -33,6 +33,9 @@ test.describe('Hotkeys', async () => {
     app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`] });
     firstWindow = await app.firstWindow();
     await firstWindow.waitForLoadState('domcontentloaded');
+
+    const createNew = await firstWindow.locator('.create-new');
+    await createNew.click();
   });
 
   test('Launch electron app', async () => {
@@ -62,9 +65,9 @@ test.describe('Hotkeys', async () => {
   });
 
   test('Check open new entry modal', async () => {
-    await firstWindow.waitForSelector('app-dashboard', { state: 'visible' });
+    await firstWindow.waitForSelector('app-workspace', { state: 'visible' });
     await firstWindow.keyboard.press('Control+I');
-    const modal = await firstWindow.waitForSelector('app-modal', { state: 'visible' });
+    const modal = await firstWindow.waitForSelector('app-modal', { state: 'attached' });
     const header = await firstWindow.locator('.dialog-header h2').innerText();
 
     expect(modal).toBeDefined();

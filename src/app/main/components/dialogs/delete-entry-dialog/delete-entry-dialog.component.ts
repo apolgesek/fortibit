@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, ComponentRef, OnInit } from '@angular/core';
 import { GroupIds } from '@app/core/enums';
-import { StorageService } from '@app/core/services/managers/storage.service';
 import { IAdditionalData, IModal } from '@app/shared';
-import { ModalRef } from '@app/core/services';
+import { EntryManager, GroupManager, ModalRef } from '@app/core/services';
 @Component({
   selector: 'app-delete-entry-dialog',
   templateUrl: './delete-entry-dialog.component.html',
@@ -15,20 +14,22 @@ export class DeleteEntryDialogComponent implements IModal, OnInit {
   public isInRecycleBin = false;
 
   get selectedRowsCount(): number {
-    return this.storageService.selectedPasswords.length;
+    return this.entryManager.selectedPasswords.length;
   }
 
   constructor(
-    private readonly storageService: StorageService,
+    private readonly groupManager: GroupManager,
+    private readonly entryManager: EntryManager,
     private readonly modalRef: ModalRef
   ) { }
 
   ngOnInit() {
-    this.isInRecycleBin = this.storageService.selectedCategory.data.id === GroupIds.RecycleBin;
+    this.isInRecycleBin = this.groupManager.selectedGroup === GroupIds.RecycleBin;
   }
 
-  deleteEntry() {
-    this.storageService.deleteEntry();
+  async deleteEntry() {
+    await this.entryManager.deleteEntry();
+
     this.close();
   }
 

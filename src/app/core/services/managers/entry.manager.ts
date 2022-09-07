@@ -1,6 +1,5 @@
 import { Inject, Injectable, NgZone } from "@angular/core";
 import { CommunicationService } from "@app/app.module";
-import { markDirty } from "@app/core/decorators/mark-dirty.decorator";
 import { GroupIds } from "@app/core/enums";
 import { ICommunicationService } from "@app/core/models";
 import { EntryRepository, HistoryRepository } from "@app/core/repositories";
@@ -9,7 +8,7 @@ import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
 import { IPasswordEntry } from "@shared-renderer/password-entry.model";
 import { BehaviorSubject, combineLatest, from, map, Observable, of, shareReplay, Subject, switchMap } from "rxjs";
 import { SearchService } from "../search.service";
-import { GroupsManager } from "./groups.manager";
+import { GroupManager } from "./group.manager";
 
 interface SearchResultsModel {
   passwords: IPasswordEntry[],
@@ -20,7 +19,7 @@ interface SearchResultsModel {
 type GetSearchResultsModel = [passwords: IPasswordEntry[], searchPhrase: string];
 
 @Injectable({ providedIn: 'root' })
-export class EntriesManager {
+export class EntryManager {
   public readonly entries$: Observable<IPasswordEntry[]>;
   public readonly reloadedEntries$: Observable<void>;
   public readonly revealInGroup$: Observable<IPasswordEntry>;
@@ -31,6 +30,7 @@ export class EntriesManager {
   public passwordEntries: IPasswordEntry[] = [];
   public selectedPasswords: IPasswordEntry[] = [];
   public entryHistory: IHistoryEntry[];
+  public markDirtySource: Subject<void>;
 
   private readonly reloadedEntriesSource: Subject<void> = new Subject();
   private readonly revealedInGroupSource: Subject<IPasswordEntry> = new Subject();
@@ -52,7 +52,7 @@ export class EntriesManager {
     private readonly searchService: SearchService,
     private readonly entryRepository: EntryRepository,
     private readonly historyRepository: HistoryRepository,
-    private readonly groupsManager: GroupsManager,
+    private readonly groupManager: GroupManager,
   ) {
     this.entries$ = combineLatest([
       this.passwordListSource$,
@@ -67,7 +67,7 @@ export class EntriesManager {
     this.revealInGroup$ = this.revealedInGroupSource.asObservable();
     this.selectEntry$ = this.entrySelectedSource.asObservable();
 
-    this.handleFoundAutotypeEntry();
+    this.handleEntryAutotype();
 
     this.communicationService.ipcRenderer.on(IpcChannel.UpdateIcon, (_, id: number, iconPath: string) => {
       this.zone.run(() => {
@@ -87,7 +87,6 @@ export class EntriesManager {
     });
   }
 
-  @markDirty()
   async addOrUpdateEntry(entry: Partial<IPasswordEntry>): Promise<number> {
     let id: number;
 
@@ -119,32 +118,50 @@ export class EntriesManager {
       this.getIconPath(id, entry);
     }
 
+    this.markDirty();
+
     return id;
   }
 
-  private async getEntries(): Promise<IPasswordEntry[]> {
-    if (this.groupsManager.selectedCategory.data.id === GroupIds.Starred) {
-      return this.entryRepository.getAllByPredicate(x => x.isStarred);
-    } else {
-      return this.entryRepository.getAllByGroup(this.groupsManager.selectedCategory.data.id as number);
-    }
+  async setByPredicate(fn: (entry: IPasswordEntry) => boolean) {
+    this.passwordEntries = await this.entryRepository.getAllByPredicate(fn);
   }
 
-  @markDirty()
+  async setByGroup(id: number) {
+    this.passwordEntries = await this.entryRepository.getAllByGroup(id);
+  }
+
+  private async getEntries(): Promise<IPasswordEntry[]> {
+    let entries = [];
+
+    if (this.groupManager.selectedGroup === GroupIds.Starred) {
+      entries = await this.entryRepository.getAllByPredicate(x => x.isStarred);
+    } else {
+      entries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup as number);
+    }
+
+    for (const entry of entries) {
+      this.setExpiration(entry);
+    }
+
+    return entries;
+  }
+
   async bulkAddEntries(entries: IPasswordEntry[]): Promise<number> {
     const addedEntries = await this.entryRepository.bulkAdd(entries);
 
-    if (entries.some(x => x.groupId === this.groupsManager.selectedCategory?.data.id)) {
-      this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupsManager.selectedCategory?.data.id as number);
+    if (entries.some(x => x.groupId === this.groupManager.selectedGroup)) {
+      this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup as number);
       this.updateEntries();
     }
+
+    this.markDirty();
 
     return addedEntries;
   }
 
-  @markDirty()
   async deleteEntry() {
-    if (this.groupsManager.selectedCategory.data.id === GroupIds.RecycleBin) {
+    if (this.groupManager.selectedGroup === GroupIds.RecycleBin) {
       await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id));
       await this.historyRepository.bulkDelete(this.selectedPasswords.map(x => x.id));
 
@@ -155,18 +172,21 @@ export class EntriesManager {
       await this.entryRepository.softDelete(this.selectedPasswords.map(p => p.id) as number[]);
     }
 
-    this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupsManager.selectedCategory.data.id as number);
+    this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup as number);
     this.selectedPasswords = [];
+
+    this.markDirty();
   }
 
-  @markDirty()
   async moveEntry(targetGroupId: number) {
     this.passwordEntries = this.passwordEntries.filter(e => !this.draggedEntries.includes(e.id as number));
     this.updateEntries();
 
     const draggedEntries = [...this.draggedEntries];
     await this.entryRepository.moveEntries(draggedEntries, targetGroupId);
-    this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupsManager.selectedCategory.data.id as number);
+    this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup as number);
+
+    this.markDirty();
   }
 
   selectEntry(entry: IPasswordEntry) {
@@ -181,11 +201,48 @@ export class EntriesManager {
     const history = await this.historyRepository.get(id);
     history.sort((a, b) => b.id - a.id);
 
-    return history;
+    this.entryHistory = history;
+
+    return this.entryHistory;
+  }
+
+  async deleteEntryHistory(entryId: number, entry: IPasswordEntry): Promise<void> {
+    await this.historyRepository.delete(entryId);
+    await this.getEntryHistory(entry.id);
   }
 
   updateEntries() {
     this.passwordListSource$.next([...this.passwordEntries as IPasswordEntry[]]);
+  }
+
+  reloadEntries() {
+    this.reloadedEntriesSource.next();
+  }
+
+  revealInGroup(entry: IPasswordEntry) {
+    this.revealedInGroupSource.next(entry);
+  }
+
+  private setExpiration(entry: IPasswordEntry): void {
+    if (!entry.expirationDate) {
+      return;
+    }
+
+    const daysDue = 3;
+    const date = new Date();
+
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+
+    date.setDate(date.getDate() + daysDue);
+
+    if (entry.expirationDate < new Date()) {
+      entry.expirationStatus = 'expired';
+    } else if (entry.expirationDate > new Date() && entry.expirationDate <= date) {
+      entry.expirationStatus = 'due-expiration';
+    }
   }
 
   private getSearchResults$([passwords, searchPhrase]: GetSearchResultsModel): Observable<SearchResultsModel> {
@@ -201,18 +258,18 @@ export class EntriesManager {
     return of({ passwords, searchPhrase, searchResults: []});
   }
 
-  private handleFoundAutotypeEntry() {
+  private handleEntryAutotype() {
     this.communicationService.ipcRenderer.on(IpcChannel.GetAutotypeFoundEntry, (_, title: string) => {
       this.zone.run(async () => {
         const entries = await this.entryRepository.getAll();
-        const entry = entries.find(e => this.isEntryMatching(e, title));
+        const entry = entries.find(e => this.isEntryMatchingRegex(e, title));
 
         this.communicationService.ipcRenderer.send(IpcChannel.AutocompleteEntry, entry);
       });
     });
   }
 
-  private isEntryMatching(entry: IPasswordEntry, title: string): boolean {
+  private isEntryMatchingRegex(entry: IPasswordEntry, title: string): boolean {
     if (entry.autotypeExp) {
       return new RegExp(entry.autotypeExp).test(title.toLowerCase());
     }
@@ -232,5 +289,11 @@ export class EntriesManager {
 
   private removeIconPath(entry: Partial<IPasswordEntry>): void {
     this.communicationService.ipcRenderer.send(IpcChannel.RemoveIcon, entry);
+  }
+
+  private markDirty() {
+    this.updateEntries();
+
+    this.markDirtySource.next();
   }
 }
