@@ -40,7 +40,11 @@
   "mac": {
     "target": [
       "dmg"
-    ]
+    ],
+    "fileAssociations": {
+      "ext": "fbit",
+      "icon": "build/icon.icns"
+    }
   },
   "linux": {
     "icon": "dist",
