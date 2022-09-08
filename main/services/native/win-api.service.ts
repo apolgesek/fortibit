@@ -19,10 +19,6 @@ export class WinApiService implements INativeApiService {
     return this._instance.getActiveWindowTitle();
   }
 
-  getLastActive(): any {
-    return this._instance.getLastInputInfo();
-  }
-
   setLivePreviewBitmap(handle: Buffer, path: string): number {
     return this._instance.setLivePreviewBitmap(handle, path);
   }

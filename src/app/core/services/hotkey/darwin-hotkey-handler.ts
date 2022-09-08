@@ -5,15 +5,16 @@ import { ClipboardService } from '../clipboard.service';
 import { WorkspaceService } from '../workspace.service';
 import { EntryManager } from '../managers/entry.manager';
 import { GroupManager } from '../managers/group.manager';
+import { GroupIds } from '@app/core/enums';
 
 export class DarwinHotkeyHandler implements IHotkeyHandler {
   public configuration: IHotkeyConfiguration = {
-    deleteLabel: 'Delete (Del)',
-    copyPasswordLabel: 'Copy password (Ctrl + Shift + C)',
-    copyUsernameLabel: 'Copy username (Ctrol + Shift + U)',
-    removeGroupLabel: 'Delete (Del)',
-    renameGroupLabel: 'Rename (Ctrl + E)',
-    addGroupLabel: 'Add subgroup (Ctrl + O)',
+    deleteLabel: 'Delete (⌘ + Backspace)',
+    copyPasswordLabel: 'Copy password (⌘ + Shift + C)',
+    copyUsernameLabel: 'Copy username (⌘ + Shift + U)',
+    removeGroupLabel: 'Delete (⌘ + Backspace)',
+    renameGroupLabel: 'Rename (⌘ + E)',
+    addGroupLabel: 'Add subgroup (⌘ + O)',
     emptyBinLabel: 'Empty recycle bin'
   };
 
@@ -33,19 +34,127 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
     if (this.modalService.isAnyModalOpen) {
       return;
     }
+
+    this.registerSaveDatabase(event);
+    this.registerDeleteEntry(event);
+    this.registerDeleteGroup(event);
+    this.registerEditEntry(event);
+    this.registerCopyPassword(event);
+    this.registerCopyUsername(event);
+    this.registerAddEntry(event);
+    this.registerSelectAllEntries(event);
+    this.registerFindEntries(event);
+    this.registerFindGlobalEntries(event);
+    this.registerLockDatabase(event)
+    this.registerRenameGroup(event);
+    this.registerAddGroup(event);
   }
 
-  registerSaveDatabase: (event: KeyboardEvent) => void;
-  registerDeleteEntry: (event: KeyboardEvent) => void;
-  registerDeleteGroup: (event: KeyboardEvent) => void;
-  registerRenameGroup: (event: KeyboardEvent) => void;
-  registerEditEntry: (event: KeyboardEvent) => void;
-  registerAddEntry: (event: KeyboardEvent) => void;
-  registerCopyPassword: (event: KeyboardEvent) => void;
-  registerCopyUsername: (event: KeyboardEvent) => void;
-  registerSelectAllEntries: (event: KeyboardEvent) => void;
-  registerFindEntries: (event: KeyboardEvent) => void;
-  registerFindGlobalEntries: (event: KeyboardEvent) => void;
-  registerLockDatabase: (event: KeyboardEvent) => void;
-  registerAddGroup: (event: KeyboardEvent) => void;
+  public registerSaveDatabase(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 's' && event.metaKey) {
+      if (!this.workspaceService.file) {
+        this.modalService.openMasterPasswordWindow()
+      } else if (!this.workspaceService.dateSaved) {
+        this.workspaceService.saveDatabase(null);
+      }
+
+      event.preventDefault();
+    }
+  }
+  
+  public registerDeleteEntry(event: KeyboardEvent) {
+    if (event.metaKey && event.key === 'Backspace' && this.entryManager.selectedPasswords.length) {
+      this.modalService.openDeleteEntryWindow();
+      event.preventDefault();
+    }
+  }
+
+  public registerDeleteGroup(event: KeyboardEvent) {
+    if (event.metaKey && event.key === 'Backspace'
+      && this.groupManager.selectedGroup
+      && this.groupManager.selectedGroup !== GroupIds.Root
+      && document.querySelector('.tree-focused')) {
+      this.modalService.openDeleteGroupWindow();
+      event.preventDefault();
+    }
+  }
+
+  public registerRenameGroup(event: KeyboardEvent) {
+    if (event.key === 'e'
+      && event.metaKey
+      && this.groupManager.selectedGroup
+      && this.groupManager.selectedGroup !== GroupIds.Root && document.querySelector('.tree-focused')) {
+      this.groupManager.renameGroup(true);
+      event.preventDefault();
+    }
+  }
+  
+  public registerEditEntry(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'e' && this.entryManager.selectedPasswords.length === 1) {
+      this.modalService.openEditEntryWindow();
+      event.preventDefault();
+    }
+  }
+
+  public registerCopyPassword(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'c'
+      && event.metaKey
+      && event.shiftKey
+      && this.entryManager.selectedPasswords.length === 1) {
+      this.clipboardService.copyToClipboard(this.entryManager.selectedPasswords[0], 'password');
+      event.preventDefault();
+    }
+  }
+
+  public registerCopyUsername(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'u' && event.metaKey && event.shiftKey && this.entryManager.selectedPasswords.length === 1) {
+      this.clipboardService.copyToClipboard(this.entryManager.selectedPasswords[0], 'username');
+      event.preventDefault();
+    }
+  }
+  
+  public registerAddEntry(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'i' && event.metaKey && this.groupManager.isAddPossible) {
+      this.modalService.openNewEntryWindow();
+      event.preventDefault();
+    }
+  }
+
+  public registerAddGroup(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'o' && event.metaKey) {
+      this.groupManager.addGroup();
+      event.preventDefault();
+    }
+  }
+  
+  public registerSelectAllEntries(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'a' && event.metaKey && this.entryManager.selectedPasswords.length) {
+      this.entryManager.selectedPasswords = [];
+      this.entryManager.selectedPasswords.push(...this.entryManager.passwordEntries);
+      event.preventDefault();
+    }
+  }
+
+  public registerFindEntries(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'f' && event.ctrlKey && !event.shiftKey) {
+      this.entryManager.isGlobalSearch = false;
+      (document.querySelector('.search') as HTMLInputElement).focus();
+      event.preventDefault();
+    }
+  }
+
+  public registerFindGlobalEntries(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'f' && event.ctrlKey && event.shiftKey) {
+      this.entryManager.isGlobalSearch = true;
+      (document.querySelector('.search') as HTMLInputElement).focus();
+      event.preventDefault();
+    }
+  }
+
+  public registerLockDatabase(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'l' && event.metaKey && this.workspaceService.file) {
+      this.workspaceService.lock({ minimize: true });
+      event.preventDefault();
+    }
+  }
 }

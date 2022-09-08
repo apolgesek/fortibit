@@ -25,6 +25,7 @@
     "!.editorconfig",
     "product.json",
     "build/*.ico",
+    "*.scpt",
     "assets"
   ],
   "extraResources": [

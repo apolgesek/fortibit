@@ -37,7 +37,7 @@ export class ConfigService implements IConfigService {
       compressionEnabled: productInformation.compressionEnabled,
       fileExtension: 'fbit',
       autocompleteRegistered: false,
-      autocompleteShortcut: 'Alt+F',
+      autocompleteShortcut: process.platform === 'win32' ? 'Alt+F' : 'Option+F',
       clipboardClearTimeMs: 15000,
       encryption: {
         lowercase: productInformation.encryption.lowercase ?? true,

@@ -5,10 +5,10 @@ import { DatabaseService, IDatabaseService } from '../services/database';
 import { EncryptionProcessService, IEncryptionProcessService } from '../services/encryption';
 import { FileService, IFileService } from '../services/file';
 import { IconService, IIconService } from '../services/icon';
-import { INativeApiService, WinApiService } from '../services/native';
+import { DarwinApiService, INativeApiService, WinApiService } from '../services/native';
 import { IPerformanceService } from '../services/performance/performance-service.model';
 import { PerformanceService } from '../services/performance/performance.service';
-import { ISendInputService, SendInputService } from '../services/send-input';
+import { DarwinSendInputService, ISendInputService, WinSendInputService } from '../services/send-input';
 import { IUpdateService, Win32UpdateService } from '../services/update';
 import { IWindowService, WindowService } from '../services/window';
 import { ServiceCollection } from './index';
@@ -22,12 +22,12 @@ export class SingleInstanceServices extends ServiceCollection {
   configureServices() {
     this.set(IConfigService, new ConfigService());
     this.set(IEncryptionProcessService, new EncryptionProcessService());
-    this.set(INativeApiService, new WinApiService());
     this.set(IPerformanceService, new PerformanceService());
     this.set(IFileService, new FileService());
-
     this.set(IClipboardService, new ClipboardService(this.get(IConfigService)));
-    this.set(ISendInputService, new SendInputService(this.get(INativeApiService)));
+
+    this.set(INativeApiService, this.getNativeApiService());
+    this.set(ISendInputService, this.getSendInputService());
   
     this.set(IWindowService, new WindowService(
       this.get(IConfigService),
@@ -55,5 +55,21 @@ export class SingleInstanceServices extends ServiceCollection {
       this.get(IWindowService),
       this.get(IIconService)
     ));
+  }
+
+  getNativeApiService(): INativeApiService {
+    if (process.platform === 'win32') {
+      return new WinApiService();
+    } else if (process.platform === 'darwin') {
+      return new DarwinApiService();
+    }
+  }
+
+  getSendInputService(): ISendInputService {
+    if (process.platform === 'win32') {
+      return new WinSendInputService(this.get(INativeApiService));
+    } else if (process.platform === 'darwin') {
+      return new DarwinSendInputService(this.get(INativeApiService));
+    }
   }
 }

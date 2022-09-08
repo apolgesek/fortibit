@@ -170,6 +170,10 @@ export class WorkspaceService {
     this.dateSaved = new Date();
   }
 
+  getFileName(path: string): string {
+    return path.split(this.communicationService.os.platform() === 'win32' ? '\\' : '/').splice(-1)[0];
+  }
+
   private exitApp() {
     window.onbeforeunload = null;
 
@@ -181,7 +185,7 @@ export class WorkspaceService {
   private handleDatabaseLock() {
     this.communicationService.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
       this.zone.run(() => {
-        this.file = { filePath: filePath, filename: filePath.split('\\').slice(-1)[0] };
+        this.file = { filePath: filePath, filename: this.getFileName(filePath) };
         this.lock({ minimize: false });
       });
     });
@@ -191,7 +195,7 @@ export class WorkspaceService {
     this.communicationService.ipcRenderer.on(IpcChannel.GetSaveStatus, (_, { status, message, file }) => {
       this.zone.run(() => {
         if (status) {
-          this.file = { filePath: file, filename: file.split('\\').splice(-1)[0] };
+          this.file = { filePath: file, filename: this.getFileName(file) };
 
           this.setDateSaved();
 

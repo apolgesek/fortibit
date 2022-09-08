@@ -1,21 +1,13 @@
 import { INativeApiService } from '../native';
 import { ISendInputService } from './send-input.model';
 
-export enum Keys {
-  Tab = 9,
-  Enter = 13
-}
-
-export class SendInputService implements ISendInputService {
+export class DarwinSendInputService implements ISendInputService {
   private readonly _keypressDelayMs = 0;
 
   constructor(@INativeApiService private readonly _nativeApiService: INativeApiService) {}
 
   async typeWord(word: string) {
-    for (const char of word.split('')) {
-      this._nativeApiService.pressPhraseKey(char);
-      await this.sleep(this._keypressDelayMs);
-    }
+    this._nativeApiService.pressPhraseKey(word);
   }
 
   pressKey(key: number) {

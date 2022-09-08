@@ -266,7 +266,7 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     this.tree.treeModel.getNodeById(newGroupNode.id).ensureVisible();
     this.tree.treeModel.getNodeById(newGroupNode.id).focus();
 
-    this.groupManager.selectedGroup = newGroupNode.id;
+    this.groupManager.selectGroup(newGroupNode.id);
   }
 
   onGroupRemoved() {
@@ -320,6 +320,7 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
 
     this.groupManager.updateGroup(node.data);
     this.groupManager.renameGroup(false);
+    this.groupManager.selectGroup(node.data.id);
 
     this.focusTree();
   }

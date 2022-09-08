@@ -273,8 +273,12 @@ export class EntryManager {
     if (entry.autotypeExp) {
       return new RegExp(entry.autotypeExp).test(title.toLowerCase());
     }
+    
+    if (entry.title) {
+      return title.toLowerCase().includes((entry.title as string).toLowerCase());
+    }
 
-    return title.toLowerCase().includes((entry.title as string).toLowerCase());
+    return false;
   }
 
   private getIconPath(id: number, entry: Partial<IPasswordEntry>): void {

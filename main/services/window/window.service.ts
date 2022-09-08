@@ -10,7 +10,7 @@ import { IConfigService } from '../config';
 import { IEncryptionProcessService, MessageEventType } from '../encryption';
 import { INativeApiService } from '../native';
 import { IPerformanceService } from '../performance/performance-service.model';
-import { ISendInputService, Keys } from '../send-input';
+import { ISendInputService, KeyCode } from '../send-input';
 import { IWindowService } from './';
 import { IWindow } from './window-model';
 
@@ -53,10 +53,9 @@ export class WindowService implements IWindowService {
     ipcMain.on(IpcChannel.Unlock, (event: IpcMainEvent) => {
       const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
 
-      win.browserWindow.setOverlayIcon(null, '');
-      win.browserWindow.unhookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP);
-      win.browserWindow.unhookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP);
-      this._nativeApiService.unsetIconicBitmap(win.browserWindow.getNativeWindowHandle());
+      if (process.platform === 'win32') {
+        this.enablePreviewFeatures(win);
+      }
     });
 
     ipcMain.on(IpcChannel.Minimize, (event: IpcMainEvent) => {
@@ -187,11 +186,11 @@ export class WindowService implements IWindowService {
 
           if (entry.username) {
             await this._sendInputService.typeWord(entry.username);
-            await this._sendInputService.pressKey(Keys.Tab);
+            await this._sendInputService.pressKey(KeyCode.TAB);
           }
 
           await this._sendInputService.typeWord(payload.decrypted);
-          await this._sendInputService.pressKey(Keys.Enter);
+          await this._sendInputService.pressKey(KeyCode.ENTER);
   
           windowsListeners.forEach((l, i) => this._windows[i].browserWindow.webContents.off('ipc-message', l));
         }
@@ -222,6 +221,21 @@ export class WindowService implements IWindowService {
   }
 
   private onLock(windowId: number) {
+    if (process.platform === 'win32') {
+      this.disablePreviewFeatures(windowId);
+    }
+
+    clearInterval(this._idleTimer);
+  }
+
+  private enablePreviewFeatures(win: IWindow): void {
+    win.browserWindow.setOverlayIcon(null, '');
+    win.browserWindow.unhookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP);
+    win.browserWindow.unhookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP);
+    this._nativeApiService.unsetIconicBitmap(win.browserWindow.getNativeWindowHandle());
+  }
+
+  private disablePreviewFeatures(windowId: number): void {
     const win = this._windows.find(x => x.browserWindow.webContents.id === windowId);
     const appIcon = nativeImage.createFromPath(join(global['__basedir'], 'assets', 'forbidden.png'));
     win.browserWindow.setOverlayIcon(appIcon, 'Database locked');
@@ -239,7 +253,5 @@ export class WindowService implements IWindowService {
     win.browserWindow.hookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP, () => {
       this._nativeApiService.setLivePreviewBitmap(windowHandle, iconPath);
     });
-
-    clearInterval(this._idleTimer);
   }
 }

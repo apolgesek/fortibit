@@ -20,7 +20,7 @@ export class DashboardGuard implements CanActivate {
       .pipe(
         map((filePath: string) => {
           if (filePath) {
-            this.workspaceService.file = { filePath: filePath, filename: filePath.split('\\').slice(-1)[0] };
+            this.workspaceService.file = { filePath: filePath, filename: this.workspaceService.getFileName(filePath) };
             
             if (this.workspaceService.isLocked) {
               this.router.navigate(['/pass']);

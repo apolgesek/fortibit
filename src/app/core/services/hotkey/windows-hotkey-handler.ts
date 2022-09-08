@@ -11,7 +11,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   public configuration: IHotkeyConfiguration = {
     deleteLabel: 'Delete (Del)',
     copyPasswordLabel: 'Copy password (Ctrl + Shift + C)',
-    copyUsernameLabel: 'Copy username (Ctrol + Shift + U)',
+    copyUsernameLabel: 'Copy username (Ctrl + Shift + U)',
     removeGroupLabel: 'Delete (Del)',
     renameGroupLabel: 'Rename (Ctrl + E)',
     addGroupLabel: 'Add subgroup (Ctrl + O)',
@@ -114,7 +114,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
   
   public registerAddEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'i' && event.ctrlKey && !event.shiftKey && this.groupManager.isAddPossible) {
+    if (event.key.toLowerCase() === 'i' && event.ctrlKey && this.groupManager.isAddPossible) {
       this.modalService.openNewEntryWindow();
       event.preventDefault();
     }
@@ -136,7 +136,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
 
   public registerFindEntries(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'f' && event.ctrlKey) {
+    if (event.key.toLowerCase() === 'f' && event.ctrlKey && !event.shiftKey) {
       this.entryManager.isGlobalSearch = false;
       (document.querySelector('.search') as HTMLInputElement).focus();
       event.preventDefault();
