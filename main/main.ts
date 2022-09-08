@@ -16,8 +16,8 @@ import { IUpdateService } from './services/update';
 import { IWindowService } from './services/window';
 
 class MainProcess {
-  private readonly _fileArg: string;
   private readonly _services: SingleInstanceServices;
+  private _fileArg: string;
 
   private get _nativeApiService(): INativeApiService {
     return this._services.get(INativeApiService);
@@ -64,11 +64,17 @@ class MainProcess {
       });
 
       const filePath = argv.find(x => x.endsWith(this._configService.appConfig.fileExtension));
+
       this.setFile(windowRef, filePath);
 
       windowRef.once('closed', () => {
         this._windowService.removeWindow(windowRef);
       });
+    });
+
+    app.on('open-file', (event, path) => {
+      event.preventDefault();
+      this._fileArg = path;
     });
 
     app.once('ready', () => this.onReady());
