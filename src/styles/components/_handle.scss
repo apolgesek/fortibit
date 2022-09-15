@@ -1,22 +1,14 @@
-.handle-container {
-	&:hover {
-		.handle {
-			background: $porcelain;
-		}
-	}
-}
-
 .handle {
   position: absolute;
   top: 0;
 	right: 0;
   min-width: $handle-width;
-  display: flex;
   height: 100%;
   z-index: 990;
 	justify-content: flex-end;
 	transition: background-color 50ms;
 	cursor: w-resize;
+	display: flex;
 
 	&.left {
 		left: 0;

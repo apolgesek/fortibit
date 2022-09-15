@@ -108,7 +108,10 @@ export class MenuBarComponent implements OnInit {
 
   async import(): Promise<void> {
     const payload = await this.communicationService.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, DatabaseType.Keepass);
-    this.modalService.openImportedDbMetadataWindow(payload);
+    
+    if (payload) {
+      this.modalService.openImportedDbMetadataWindow(payload);
+    }
   }
 
   lock() {

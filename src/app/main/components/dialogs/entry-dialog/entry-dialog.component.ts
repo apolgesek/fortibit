@@ -1,6 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ComponentRef, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControlOptions, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CommunicationService } from '@app/app.module';
+import { GroupId } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -48,7 +49,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   ) {
     this.newEntryForm = this.fb.group({
       id: [null],
-      title: [null],
+      title: [null, Validators.required],
       username: [null],
       passwords: this.fb.group({
         password: [null, Validators.required],
@@ -102,6 +103,10 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   get passwordsGroup(): FormGroup {
     return this.newEntryForm.get('passwords') as FormGroup;
+  }
+
+  get title(): FormControl {
+    return this.newEntryForm.get('title') as FormControl;
   }
 
   get expirationDate(): FormControl {
@@ -249,7 +254,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
         password: encryptedPassword,
         creationDate: date,
         lastModificationDate: date,
-        groupId: this.groupManager.selectedGroup,
+        groupId: this.getGroup(),
         isStarred: false,
         expirationDate: formData.expirationDate
       };
@@ -258,6 +263,14 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     }
 
     this.close();
+  }
+
+  private getGroup(): number {
+    if (this.groupManager.selectedGroup === GroupId.AllItems) {
+      return 1;
+    } else {
+      return this.groupManager.selectedGroup;
+    }
   }
 
   async close() {

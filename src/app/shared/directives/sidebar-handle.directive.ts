@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Directive, ElementRef, HostBinding, Inject, Input, NgZone, OnDestroy, Renderer2, SkipSelf } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, HostBinding, Inject, Input, NgZone, OnDestroy, Renderer2 } from '@angular/core';
 import { UiEventService } from '@app/core/services';
 @Directive({
   selector: '[appSidebarHandle]',
@@ -7,15 +7,15 @@ import { UiEventService } from '@app/core/services';
 })
 export class SidebarHandleDirective implements AfterViewInit, OnDestroy {
   @Input() public readonly position: 'left' | 'right' = 'left';
-  public isDragged = false;
+  @Input() readonly minWidth = 210;
 
-  private readonly minWidth = 210;
-  private maxWidth = 600;
+  public isDragged = false;
   private unlisteners: (() => void)[] = [];
+  private maxWidth = 600;
 
   constructor(
     private readonly renderer: Renderer2,
-    @SkipSelf() private readonly el: ElementRef,
+    private readonly el: ElementRef,
     @Inject(DOCUMENT) private readonly document: Document,
     private readonly uiEventService: UiEventService,
     private readonly zone: NgZone
@@ -28,25 +28,15 @@ export class SidebarHandleDirective implements AfterViewInit, OnDestroy {
       const mouseDown = this.renderer.listen(this.el.nativeElement, 'mousedown', this.onMouseDown.bind(this));
       const mouseUp = this.renderer.listen(this.document, 'mouseup', this.onMouseUp.bind(this));
       const mouseMove = this.renderer.listen(this.document, 'mousemove', this.onMouseMove.bind(this));
+      const resize = this.renderer.listen(window, 'resize', this.onWindowResize.bind(this));
 
-      this.unlisteners = [mouseDown, mouseUp, mouseMove];
+      this.unlisteners = [mouseDown, mouseUp, mouseMove, resize];
     });
   }
 
   ngOnDestroy(): void {
     this.unlisteners.forEach(u => u());
     this.unlisteners = [];
-  }
-
-  @HostBinding('class.active')
-  get active(): boolean {
-    if (this.isDragged) {
-      this.document.body.style.cursor = 'w-resize';
-    } else {
-      this.document.body.style.cursor = 'default';
-    }
-
-    return this.isDragged;
   }
 
   @HostBinding('class.right')
@@ -60,12 +50,27 @@ export class SidebarHandleDirective implements AfterViewInit, OnDestroy {
   }
 
   private onMouseDown() {
+    this.renderer.addClass(this.el.nativeElement, 'active');
+    this.document.body.style.cursor = 'w-resize';
+    
     this.isDragged = true;
   }
 
   private onMouseUp() {
     if (this.isDragged) {
+      this.renderer.removeClass(this.el.nativeElement, 'active');
+      this.document.body.style.cursor = 'default';
+
       this.isDragged = false;
+    }
+  }
+
+  private onWindowResize() {
+    if (this.isRightSidebar) {
+      this.maxWidth = this.document.body.clientWidth - (40 * 16);
+      this.renderer.setStyle(this.el.nativeElement.parentElement, 'width', this.maxWidth + 'px');
+    } else {
+      this.maxWidth = 600;
     }
   }
 
@@ -81,18 +86,20 @@ export class SidebarHandleDirective implements AfterViewInit, OnDestroy {
     if (this.position === 'left') {
       mousePosition = this.document.body.clientWidth - event.pageX;
     }
+
+    const parent = this.el.nativeElement.parentElement;
   
-    let newWidth = this.el.nativeElement.offsetWidth;
-    const sidebarCurrentWidth = this.el.nativeElement.offsetWidth;
+    let newWidth = parent.offsetWidth;
+    const sidebarCurrentWidth = parent.offsetWidth;
 
     if (mousePosition === sidebarCurrentWidth) {
       return;
     } else if (mousePosition > sidebarCurrentWidth) {
       const difference = mousePosition - sidebarCurrentWidth;
-      newWidth = this.el.nativeElement.offsetWidth + difference;
+      newWidth = parent.offsetWidth + difference;
     } else {
       const difference = sidebarCurrentWidth - mousePosition;
-      newWidth = this.el.nativeElement.offsetWidth - difference;
+      newWidth = parent.offsetWidth - difference;
     }
 
     if (newWidth < this.minWidth) {
@@ -100,9 +107,9 @@ export class SidebarHandleDirective implements AfterViewInit, OnDestroy {
     }
 
     if (newWidth >= this.maxWidth) {
-      newWidth = this.maxWidth
+      newWidth = this.maxWidth;
     }
 
-    this.renderer.setStyle(this.el.nativeElement, 'width', Math.round(newWidth) + 'px');
+    this.renderer.setStyle(parent, 'width', Math.round(newWidth) + 'px');
   }
 }

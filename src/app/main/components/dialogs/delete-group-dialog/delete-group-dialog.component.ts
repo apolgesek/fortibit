@@ -16,8 +16,9 @@ export class DeleteGroupDialogComponent implements IModal {
     private readonly modalRef: ModalRef
   ) { }
 
-  removeGroup() {
-    this.groupManager.removeGroup();
+  async removeGroup() {
+    await this.groupManager.removeGroup();
+
     this.close();
   }
 

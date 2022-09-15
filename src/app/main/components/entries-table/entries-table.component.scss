@@ -5,8 +5,8 @@ $sidePanelInDuration: 300ms;
 $sidePanelOutDuration: 250ms;
 
 :host {
-	flex: 1;
 	display: flex;
+	flex: 1;
 	overflow: auto;
 	overflow-y: hidden;
 	position: relative;
@@ -28,8 +28,8 @@ $sidePanelOutDuration: 250ms;
 }
 
 .password-table {
-	min-width: 25rem;
 	width: 100%;
+	min-width: 20rem;
 
 	@include font-regular;
 
@@ -37,6 +37,8 @@ $sidePanelOutDuration: 250ms;
 		font-size: 0.875rem;
 		cursor: pointer;
 		border: 1px solid transparent;
+		box-sizing: border-box;
+		border-bottom: 1px solid $porcelain;
 		@include default-table-row;
 
 		&:focus,
@@ -72,21 +74,25 @@ $sidePanelOutDuration: 250ms;
 			}
 		}
 
-		&:focus {
+		&.selected:focus {
 			background-color: darken($curious-blue-light, 2);
 			border: 1px solid $picton-blue;
 		}
 
-		&:hover:not(:focus) {
+		&:hover:not(.selected) {
 			background-color: $porcelain;
 		}
 
 		.column {
-			width: calc((100% / 3) - 0.25rem);
-			overflow: hidden;
-			text-overflow: ellipsis;
+			width: calc((100% / 2) - 0.25rem);
 			white-space: nowrap;
 			padding-left: 1rem;
+
+			.row {
+				&:first-child {
+					margin-bottom: 0.25rem;
+				}
+			}
 
 			&-icon {
 				min-width: 2rem;
@@ -109,23 +115,22 @@ $sidePanelOutDuration: 250ms;
 		font-size: 0.875rem;
 		border-bottom: 1px solid $silver;
 		box-sizing: border-box;
-		min-height: 2rem;
+		min-height: 2.5rem;
 		position: relative;
 		z-index: 1;
-
-		&.icon-offset {
-			padding-left: 2rem;
-		}
+		padding-left: 1rem;
 
 		div {
 			display: flex;
 			color: $pickled-bluewood;
-			width: calc((100% / 3) - 0.25rem);
 			align-items: center;
 			text-align: left;
 			cursor: pointer;
 			outline: none;
-			padding-left: 1rem;
+
+			span {
+				margin: 0 1rem;
+			}
 
 			i {
 				display: none;
@@ -147,7 +152,8 @@ $sidePanelOutDuration: 250ms;
 			}
 
 			&:last-child {
-				cursor: default;
+				display: block;
+				margin-top: 2px;
 			}
 		}
 	}
@@ -197,4 +203,51 @@ $sidePanelOutDuration: 250ms;
 .pi-sort-alpha-down-alt::before,
 .pi-sort-alpha-up-alt::before {
 	color: $curious-blue;
+}
+
+.filters {
+	position: relative;
+	margin-left: auto;
+	margin-right: 1rem;
+	border-radius: 0.25rem;
+	padding: 0.5rem;
+	color: $curious-blue;
+
+	.pi {
+		font-size: 1rem;
+	}
+}
+
+.filter-option {
+	display: flex;
+	width: 120px;
+	background-color: $white;
+	border: 1px solid $silver;
+	color: $pickled-bluewood;
+	border-radius: 0.25rem !important;
+	padding: 0.5rem;
+
+	.pi {
+		margin: 0 0 0 auto !important;
+	}
+}
+
+.expanded {
+	border-bottom: 1px solid transparent !important;
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+}
+
+.option-item {
+	list-style-type: none;
+	padding: 0.5rem;
+
+	&:hover, &.selected {
+		background-color: $porcelain;
+	}
+}
+
+.group-data {
+	flex: 1;
+	width: auto;
 }

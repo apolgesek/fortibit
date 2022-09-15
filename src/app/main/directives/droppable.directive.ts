@@ -3,15 +3,15 @@ import { EntryManager, GroupManager } from '@app/core/services';
 import { DomUtil } from '@app/utils';
 
 @Directive({
-  selector: '[appTreeNode]'
+  selector: '[appDroppable]'
 })
-export class TreeNodeDirective {
-
+export class DroppableDirective {
   @HostListener('dragover', ['$event'])
   public onDragOver() {
     if (this.entryManager.draggedEntries.length === 0 && !this.groupManager.isGroupDragged) {
       this.el.nativeElement.classList.add(DomUtil.constants.unknownElementDraggingClass);
     } else {
+      this.el.nativeElement.classList.add(DomUtil.constants.isDraggingOverClass);
       this.el.nativeElement.classList.remove(DomUtil.constants.unknownElementDraggingClass);
     }
   }
@@ -20,19 +20,7 @@ export class TreeNodeDirective {
   @HostListener('drop')
   public onDragLeave() {
     this.el.nativeElement.classList.remove(DomUtil.constants.unknownElementDraggingClass);
-  }
-
-  @HostListener('dragstart', ['$event'])
-  public onDragStart(event: DragEvent) {
-    this.groupManager.isGroupDragged = true;
-    DomUtil.setDragGhost(event);
-    this.el.nativeElement.classList.add(DomUtil.constants.isDraggingClass);
-  }
-
-  @HostListener('dragend')
-  public onDragEnd() {
-    this.groupManager.isGroupDragged = false;
-    this.el.nativeElement.classList.remove(DomUtil.constants.isDraggingClass);
+    this.el.nativeElement.classList.remove(DomUtil.constants.isDraggingOverClass);
   }
 
   constructor(

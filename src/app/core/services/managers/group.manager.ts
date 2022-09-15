@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { initialEntries } from "@app/core/database";
-import { GroupIds } from "@app/core/enums";
+import { GroupId } from "@app/core/enums";
 import { IPasswordGroup } from "@app/core/models";
 import { GroupRepository } from "@app/core/repositories";
-import { Observable, Subject, shareReplay } from "rxjs";
+import { Subject } from "rxjs";
 
 @Injectable({ providedIn: 'root' })
 export class GroupManager {
@@ -12,35 +12,24 @@ export class GroupManager {
   public selectedGroupName?: string;
   public contextSelectedGroup?: number;
   public isGroupDragged?: boolean;
-
   public markDirtySource: Subject<void>;
-  public removedGroupSource: Subject<void> = new Subject();
-  public addedGroupSource: Subject<any> = new Subject();
 
-  public readonly renamedGroup$: Observable<boolean>;
-
-  private readonly renamedGroupSource: Subject<boolean> = new Subject();
-
-  get isAddPossible(): boolean {
+  get isAddAllowed(): boolean {
     const selectedCategoryId = this.selectedGroup;
 
-    return selectedCategoryId !== GroupIds.RecycleBin
-      && selectedCategoryId !== GroupIds.Starred;
+    return selectedCategoryId !== GroupId.RecycleBin
+      && selectedCategoryId !== GroupId.Starred;
   }
 
-  constructor(private readonly groupRepository: GroupRepository) {
-    this.renamedGroup$ = this.renamedGroupSource.asObservable().pipe(shareReplay());
-  }
+  constructor(private readonly groupRepository: GroupRepository) {}
 
   async removeGroup() {
     if (!this.selectedGroup) {
       this.throwCategoryNotSelectedError();
     }
 
-    const groupsToDelete = [this.selectedGroup] as number[];
-    await this.groupRepository.bulkDelete(groupsToDelete);
-
-    this.removedGroupSource.next();
+    await this.groupRepository.bulkDelete([this.selectedGroup]);
+    await this.getGroupsTree();
   }
 
   async updateGroup(group: IPasswordGroup) {
@@ -49,6 +38,7 @@ export class GroupManager {
       name: group.name,
     });
 
+    this.getGroupsTree();
     this.markDirty();
   }
 
@@ -60,13 +50,9 @@ export class GroupManager {
   }
 
   async addGroup(model?: Partial<IPasswordGroup>): Promise<number> {
-    if (!this.selectedGroup) {
-      this.throwCategoryNotSelectedError();
-    }
-  
     const newGroup: IPasswordGroup = {
       name: model?.name ?? 'New group',
-      parent: this.selectedGroup,
+      parent: null,
     };
 
     if (model?.isImported) {
@@ -76,11 +62,7 @@ export class GroupManager {
     const groupId = await this.groupRepository.add(newGroup);
 
     if (groupId > 0) {
-      this.addedGroupSource.next({ id: groupId, name: newGroup.name, isImported: newGroup.isImported });
-
-      if (!model?.name) {
-        this.renameGroup(true);
-      }
+      this.getGroupsTree();
     }
 
     this.markDirty();
@@ -93,10 +75,6 @@ export class GroupManager {
     this.selectedGroupName = (await this.groupRepository.get(id)).name;
   }
 
-  renameGroup(isRenamed: boolean) {
-    this.renamedGroupSource.next(isRenamed);
-  }
-
   async setupGroups() {
     await this.groupRepository.bulkAdd(initialEntries);
 
@@ -104,29 +82,19 @@ export class GroupManager {
   }
 
   async getGroupsTree(): Promise<IPasswordGroup[]> {
+    const builtInGroups = [GroupId.Root, GroupId.AllItems, GroupId.Starred, GroupId.RecycleBin];
     const allGroups = await this.groupRepository.getAll();
-  
-    this.groups[0] = allGroups.find(g => g.id === GroupIds.Root);
-    this.groups[1] = allGroups.find(g => g.id === GroupIds.Starred);
-    this.groups[2] = allGroups.find(g => g.id === GroupIds.RecycleBin);
 
-    this.groups[0].expanded = true;
-    this.buildGroupsTree(this.groups[0], allGroups);
+    this.groups = [];
+    this.groups[0] = allGroups.find(g => g.id === GroupId.Root);
 
-    return this.groups;
-  }
+    const rootGroups = allGroups.filter(x => !x.parent && !builtInGroups.includes(x.id)).sort((a, b) => a.name.localeCompare(b.name));
 
-  private buildGroupsTree(group: IPasswordGroup, groups: IPasswordGroup[]) {
-    const children = groups.filter(g => g.parent === group.id);
-
-    if (!children.length) {
-      return;
+    for (let index = 0; index < rootGroups.length; index++){
+      this.groups[index + 1] = rootGroups[index];
     }
 
-    group.children = children;
-    group.children.forEach(child => {
-      this.buildGroupsTree(child, groups);
-    });
+    return this.groups;
   }
 
   private throwCategoryNotSelectedError(): never {

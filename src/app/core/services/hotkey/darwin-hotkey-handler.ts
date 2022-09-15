@@ -5,7 +5,7 @@ import { ClipboardService } from '../clipboard.service';
 import { WorkspaceService } from '../workspace.service';
 import { EntryManager } from '../managers/entry.manager';
 import { GroupManager } from '../managers/group.manager';
-import { GroupIds } from '@app/core/enums';
+import { GroupId } from '@app/core/enums';
 
 export class DarwinHotkeyHandler implements IHotkeyHandler {
   public configuration: IHotkeyConfiguration = {
@@ -14,7 +14,6 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
     copyUsernameLabel: 'Copy username (⌘ + Shift + U)',
     removeGroupLabel: 'Delete (⌘ + Backspace)',
     renameGroupLabel: 'Rename (⌘ + E)',
-    addGroupLabel: 'Add subgroup (⌘ + O)',
     emptyBinLabel: 'Empty recycle bin'
   };
 
@@ -72,7 +71,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
   public registerDeleteGroup(event: KeyboardEvent) {
     if (event.metaKey && event.key === 'Backspace'
       && this.groupManager.selectedGroup
-      && this.groupManager.selectedGroup !== GroupIds.Root
+      && this.groupManager.selectedGroup !== GroupId.Root
       && document.querySelector('.tree-focused')) {
       this.modalService.openDeleteGroupWindow();
       event.preventDefault();
@@ -83,8 +82,8 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
     if (event.key === 'e'
       && event.metaKey
       && this.groupManager.selectedGroup
-      && this.groupManager.selectedGroup !== GroupIds.Root && document.querySelector('.tree-focused')) {
-      this.groupManager.renameGroup(true);
+      && this.groupManager.selectedGroup !== GroupId.Root && document.querySelector('.tree-focused')) {
+      this.modalService.openGroupWindow('edit');
       event.preventDefault();
     }
   }
@@ -114,7 +113,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
   }
   
   public registerAddEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'i' && event.metaKey && this.groupManager.isAddPossible) {
+    if (event.key.toLowerCase() === 'i' && event.metaKey && this.groupManager.isAddAllowed) {
       this.modalService.openNewEntryWindow();
       event.preventDefault();
     }
@@ -122,7 +121,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
 
   public registerAddGroup(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'o' && event.metaKey) {
-      this.groupManager.addGroup();
+      this.modalService.openGroupWindow();
       event.preventDefault();
     }
   }

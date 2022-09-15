@@ -1,6 +1,6 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { CommunicationService } from '@app/app.module';
-import { GroupIds } from '@app/core/enums';
+import { GroupId } from '@app/core/enums';
 import { ICommunicationService, IPasswordGroup } from '@app/core/models';
 import { WorkspaceService, EntryManager, GroupManager, ModalService, NotificationService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
@@ -59,7 +59,7 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
 
     this.entryManager.selectEntry$.pipe(takeUntil(this.destroyed)).subscribe(entry => {
       this.group = this.findGroup(this.groupManager.groups, entry.groupId);
-      this.shouldDisplayToolbar = this.group.id !== GroupIds.RecycleBin;
+      this.shouldDisplayToolbar = this.group.id !== GroupId.RecycleBin;
     });
   }
 
@@ -88,11 +88,11 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
     this.entryManager.addOrUpdateEntry({ ...entry, isStarred: !entry.isStarred});
 
     if (!entry.isStarred) {
-      this.notificationService.add({ message: 'Added to starred entries', type: 'success', alive: 5000 });
+      this.notificationService.add({ message: 'Added to favourites', type: 'success', alive: 5000 });
       this.renderer.addClass(this.toggleStarBtn.nativeElement, starredClass);
     } else {
       this.renderer.removeClass(this.toggleStarBtn.nativeElement, starredClass);
-      this.notificationService.add({ message: 'Removed from starred entries', type: 'success', alive: 5000 });
+      this.notificationService.add({ message: 'Removed from favourites', type: 'success', alive: 5000 });
     }
   }
 

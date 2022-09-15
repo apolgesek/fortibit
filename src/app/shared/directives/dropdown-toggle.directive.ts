@@ -26,6 +26,7 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
   ) {}
 
   @HostBinding('attr.aria-expanded')
+  @HostBinding('class.expanded')
   public get isExpanded(): boolean {
     return this.dropdownState.isOpen;
   }

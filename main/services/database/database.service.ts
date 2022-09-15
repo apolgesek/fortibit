@@ -72,7 +72,13 @@ export class DatabaseService implements IDatabaseService {
     });
 
     ipcMain.handle(IpcChannel.GetImportedDatabaseMetadata, async () => {
-      return await this.getKeepassDatabaseInfo();
+      try {
+        const payload = await this.getKeepassDatabaseInfo();
+
+        return payload;
+      } catch (error) {
+        return undefined;
+      }
     });
 
     ipcMain.handle(IpcChannel.Import, async (event: IpcMainEvent, filePath: string) => {
@@ -235,6 +241,8 @@ export class DatabaseService implements IDatabaseService {
         };
   
         resolve(payload);
+
+        return;
       }
   
       reject();

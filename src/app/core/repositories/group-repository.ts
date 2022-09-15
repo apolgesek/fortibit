@@ -46,6 +46,7 @@ export class GroupRepository implements IGroupRepository {
   bulkDelete(ids: number[]): Promise<void> {
     return this.db.transaction('rw', this.db.groups, this.db.entries, async () => {
       await Promise.all(ids.map(id => this.db.entries.where('groupId').equals(id).delete()));
+      
       return this.db.groups.bulkDelete(ids);
     });
   }

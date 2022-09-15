@@ -17,6 +17,7 @@ import { DarwinHotkeyHandler } from './core/services/hotkey/darwin-hotkey-handle
 import { ModalService } from './core/services/modal.service';
 import { MainModule } from './main/main.module';
 import { SharedModule } from './shared/shared.module';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 export const HotkeyHandler = new InjectionToken<IHotkeyHandler>('hotkeyHandler');
 export const CommunicationService = new InjectionToken<ICommunicationService>('communicationService');
@@ -30,7 +31,7 @@ export const CommunicationService = new InjectionToken<ICommunicationService>('c
     SharedModule,
     CoreModule,
     MainModule,
-    AppRoutingModule,
+    AppRoutingModule
   ],
   providers: [
     {

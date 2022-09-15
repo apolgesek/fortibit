@@ -1,67 +1,46 @@
 <div class="sidebar">
-	<div class="header blur-groups" tabindex="0">
+	<div class="header blur-groups">
 		<div class="file">{{ fileName }}</div>
-		<div class="quick-actions">
-			<button (click)="addGroup(); false"><span class="pi pi-plus"></span></button>
-			<button (click)="collapseAll(); false"><span class="pi pi-angle-double-up"></span></button>
-		</div>
 	</div>
-	<tree-root
-		role="tree"
-		aria-label="Groups"
-		tabindex="0"
-		[nodes]="groups"
-		[options]="treeOptions"
-		(focus)="selectGroup($event.node)">
-		<ng-template #treeNodeWrapperTemplate let-node let-index="index">
-			<div class="node-wrapper" [style.padding-left]="node.getNodePadding()" [style.margin-top]="node.data.id === groupIds.Root ? '0.75rem' : 0">
-				<tree-node-expander [node]="node"></tree-node-expander>
-				<div class="node-content-wrapper"
-					appTreeNode
-        	[class.node-content-wrapper-focused]="node.isFocused"
-					(click)="node.mouseAction('click', $event)"
-					(dblclick)="node.mouseAction('dblClick', $event)"
-					(contextmenu)="node.mouseAction('contextMenu', $event)"
-					(treeDrop)="node.onDrop($event)"
-					[treeAllowDrop]="node.allowDrop"
-					[treeDrag]="node"
-					[treeDragEnabled]="node.allowDrag()">
-					<ng-container *ngIf="(isGroupRenamed$ | async) && selectedGroup === node.data.id; else groupName">
-						<input
-							type="text"
-							appAutofocus
-							appBlurEnter
-							[(ngModel)]="node.data.name"
-							[ngModelOptions]="{'updateOn': 'blur'}"
-							(blur)="setGroupRenameModeOff(node)"
-							maxlength="20"
-							class="rename-group"/>
-					</ng-container>
-					<ng-template #groupName>
-						<div
-							#treeItem
-							role="treeitem"
-							tabindex="0"
-							(focus)="focusTree()"
-							[ngClass]="{'node-selected': selectedGroup === node.data.id }"
-							[attr.aria-level]="node.level"
-							[appContextMenuItem]="getContextMenu(node)"
-							[id]="'group-' + node.data.id"
-							class="node-group">
-							<span *ngIf="node.data.isImported" class="pi pi-download"></span>
-							<span *ngIf="node.data.id === groupIds.Starred" class="pi pi-star"></span>
-							<span *ngIf="node.data.id === groupIds.RecycleBin" class="pi pi-trash"></span>
-							{{ node.data.name }}
-						</div>
-					</ng-template>
-				</div>
+	<div class="scroll-viewport" cdkVirtualScrollingElement>
+		<div class="default-groups">
+			<div
+				tabindex="0"
+				[appContextMenuItem]="getContextMenu(group.id)"
+				class="group-item"
+				[ngClass]="{'active': group.id === this.selectedGroup}"
+				(focus)="selectGroup(group.id)"
+				*ngFor="let group of builtInGroups; trackBy: groupTrackFn">
+					 <i class="pi pi-{{ group.icon }}"></i> {{ group.name }}
 			</div>
-		</ng-template>
-	</tree-root>
-	<div *ngIf="selectedGroup" class="blur-groups group-info">
-		<div class="group-name">{{ selectedGroupName }}</div>
-		<div>S: {{ selectedEntries.length }}</div>
-		<div>T: {{ passwordEntries.length }}</div>
+		</div>
+		<div tabindex="0" class="divider">
+			<div>Folders</div>
+			<div class="quick-actions">
+				<button
+					(click)="addGroup(); false"
+					[disabled]="selectedGroup === groupIds.Starred || selectedGroup === groupIds.RecycleBin">
+					<span class="pi pi-plus"></span>
+				</button>
+			</div>
+		</div>
+		<cdk-virtual-scroll-viewport
+			class="group-viewport"
+			itemSize="34"
+			role="rowgroup">
+			<ng-container *cdkVirtualFor="let group of groups; let i = index; trackBy: groupTrackFn; templateCacheSize: 0">
+				<div
+					tabindex="0"
+					appDroppable
+					[appContextMenuItem]="getContextMenu(group.id)"
+					class="group-item"
+					[ngClass]="{'active': group.id === this.selectedGroup}"
+					(focus)="selectGroup(group.id)"
+					(drop)="onEntryDrop(group.id)">
+					<i class="pi" [ngClass]="group.isImported ? 'pi-download' : 'pi-folder'"></i> {{ group.name }}
+				</div>
+			</ng-container>
+		</cdk-virtual-scroll-viewport>
 	</div>
 </div>
 

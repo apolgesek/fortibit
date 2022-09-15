@@ -38,7 +38,7 @@ export class ToolbarComponent {
   }
 
   get isAddPossible(): boolean {
-    return this.groupManager.isAddPossible;
+    return this.groupManager.isAddAllowed;
   }
 
   get isAnyEntry(): boolean {

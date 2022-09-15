@@ -14,6 +14,8 @@ export class MenuItemDirective {
     this._isDisabled = value;
   }
 
+  @Input() public closeOnSelect: boolean = false;
+
   private _isDisabled = false;
 
   constructor(
@@ -52,6 +54,11 @@ export class MenuItemDirective {
     }
 
     this.activate.emit();
+
+    if (this.closeOnSelect) {
+      this.dropdownState.close();
+    }
+
     event.preventDefault();
   }
 

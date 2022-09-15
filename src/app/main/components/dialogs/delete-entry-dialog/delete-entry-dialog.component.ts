@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ComponentRef, OnInit } from '@angular/core';
-import { GroupIds } from '@app/core/enums';
+import { GroupId } from '@app/core/enums';
 import { IAdditionalData, IModal } from '@app/shared';
 import { EntryManager, GroupManager, ModalRef } from '@app/core/services';
 @Component({
@@ -24,7 +24,7 @@ export class DeleteEntryDialogComponent implements IModal, OnInit {
   ) { }
 
   ngOnInit() {
-    this.isInRecycleBin = this.groupManager.selectedGroup === GroupIds.RecycleBin;
+    this.isInRecycleBin = this.groupManager.selectedGroup === GroupId.RecycleBin;
   }
 
   async deleteEntry() {

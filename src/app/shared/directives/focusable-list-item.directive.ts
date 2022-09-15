@@ -17,7 +17,7 @@ export class FocusableListItemDirective {
   ) { }
 
   // detect whether entry gets focused by explicit mouse click - do not focus the first list element in that case 
-  // used the fact that mousedown event takes precedence over focus event
+  // used the fact that mousedown event is fired before focus event
   @HostListener('mousedown')
   public onMouseDown() {
     this.listStateService.lastFocused = this.item;

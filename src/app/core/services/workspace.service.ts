@@ -23,7 +23,7 @@ export class WorkspaceService {
   private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
 
   get databaseFileName(): string {
-    return this.file?.filename ?? 'New db (unsaved)';
+    return this.file?.filename ?? 'Database (new)';
   }
 
   constructor(
@@ -138,8 +138,8 @@ export class WorkspaceService {
     const blob = new Blob([jsonString]);
 
     await importInto(this.dbContext, blob);
+    await this.groupManager.getGroupsTree();
 
-    this.groupManager.groups = await this.groupManager.getGroupsTree();
     this.setDatabaseLoaded();
   }
 

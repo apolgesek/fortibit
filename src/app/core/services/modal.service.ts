@@ -8,10 +8,11 @@ import { DeleteEntryDialogComponent } from '@app/main/components/dialogs/delete-
 import { DeleteGroupDialogComponent } from '@app/main/components/dialogs/delete-group-dialog/delete-group-dialog.component';
 import { EntryDialogComponent } from '@app/main/components/dialogs/entry-dialog/entry-dialog.component';
 import { EntryHistoryComponent } from '@app/main/components/dialogs/entry-history/entry-history.component';
+import { GroupDialogComponent } from '@app/main/components/dialogs/group-dialog/group-dialog.component';
 import { ImportDatabaseMetadataComponent } from '@app/main/components/dialogs/import-database-metadata/import-database-metadata.component';
 import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/master-password-dialog/master-password-dialog.component';
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
-import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { IHistoryEntry, IpcChannel } from '@shared-renderer/index';
 import { EventType } from '../enums';
 import { ICommunicationService } from '../models';
 import { EntryManager } from './managers/entry.manager';
@@ -73,6 +74,10 @@ export class ModalService {
 
   openMasterPasswordWindow(config?: { forceNew?: boolean }) {
     this.modalManager.open(MasterPasswordDialogComponent, { payload: config });
+  }
+
+  openGroupWindow(mode: 'new' | 'edit' = 'new') {
+    this.modalManager.open(GroupDialogComponent, { payload: { mode } });
   }
 
   openAboutWindow() {

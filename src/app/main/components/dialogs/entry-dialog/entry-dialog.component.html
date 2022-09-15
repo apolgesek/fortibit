@@ -27,6 +27,11 @@
           placeholder="Title">   
       </div>
       <div
+        *ngIf="isControlInvalid(title)"
+        class="validation-error">
+        Title is required
+      </div>
+      <div
         class="inputgroup required"
         [ngClass]="{'ng-invalid': isControlInvalid(newEntryForm.get('username')), 'readonly': isReadOnly}">
         <span class="inputgroup-addon"><i class="pi pi-user"></i></span>

@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { HotkeyHandler } from '@app/app.module';
 import { ModalService } from '@app/core/services/modal.service';
 import { MenuItem } from '@app/shared';
-import { ClipboardService, EntryManager, GroupManager } from '.';
+import { ClipboardService, EntryManager } from '.';
 import { IHotkeyHandler } from '../models';
 
 @Injectable({
@@ -15,26 +15,17 @@ export class ContextMenuBuilderService {
     private readonly modalService: ModalService,
     private readonly clipboardService: ClipboardService,
     private readonly entryManager: EntryManager,
-    private readonly groupManager: GroupManager,
     @Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler
   ) {}
 
   buildGroupContextMenuItems(configuration: { isRoot: boolean } = { isRoot: false }): this {
     this.contextMenuItems = [
       {
-        label: this.hotkeyHandler.configuration.addGroupLabel,
-        icon: 'pi pi-fw pi-plus',
-        command: () => this.groupManager.addGroup(),
-      },
-      {
-        separator: true,
-      },
-      {
         label: this.hotkeyHandler.configuration.renameGroupLabel,
         disabled: configuration.isRoot,
         icon: 'pi pi-fw pi-pencil',
         command: () => {
-          this.groupManager.renameGroup(true);
+          this.modalService.openGroupWindow('edit');
         }
       },
       {

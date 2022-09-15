@@ -4,11 +4,11 @@
 :host {
 	position: relative;
 	display: flex;
-	width: 16rem;
 	height: calc(100vh - 2rem - 5rem);
 	background-color: $white;
 	font-size: 0.875rem;
 	z-index: 0;
+	width: calc(100vw - 15rem - 20rem - 1rem);
 }
 
 .action-btn {
@@ -69,10 +69,17 @@
 		margin-left: 0.25rem;
 	}
 
-	> div:not(.header) {
+	.content {
+		height: 100%;
+		border-color: rgba(0,0,0,0);
+		transition: border-color 150ms;
 		padding: 0 1rem;
 		overflow: auto;
-		@include scrollbar;
+		@include scrollbar-hover;
+	
+		&:hover {
+			border-color: rgba(0,0,0,0.2);
+		}
 
 		.section {
 			margin: 1rem 0;

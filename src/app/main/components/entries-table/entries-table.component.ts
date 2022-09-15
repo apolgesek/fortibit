@@ -2,7 +2,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { HotkeyHandler } from '@app/app.module';
-import { GroupIds } from '@app/core/enums';
+import { GroupId, Sort } from '@app/core/enums';
 import { IHotkeyHandler } from '@app/core/models';
 import { WorkspaceService, ConfigService, EntryManager, GroupManager } from '@app/core/services';
 import { ClipboardService } from '@app/core/services/clipboard.service';
@@ -34,6 +34,14 @@ import { map, takeUntil } from 'rxjs/operators';
 })
 export class EntriesTableComponent implements OnInit, OnDestroy {
   @ViewChild(CdkVirtualScrollViewport) public readonly scrollViewport: CdkVirtualScrollViewport | undefined;
+  public readonly sortOptions = [
+    { name: 'Title A-Z', prop: 'title', state: Sort.Asc },
+    { name: 'Title Z-A', prop: 'title', state: Sort.Desc },
+    { name: 'User A-Z', prop: 'username', state: Sort.Asc },
+    { name: 'User Z-A', prop: 'username', state: Sort.Desc }
+  ];
+
+  public selectedSortOption = this.sortOptions[0];
 
   public passwordList$: Observable<IPasswordEntry[]>;
   public searchPhrase$: Observable<string>;
@@ -87,11 +95,11 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   }
 
   get entriesDragEnabled(): boolean {
-    return this.groupManager.selectedGroup !== GroupIds.Starred;
+    return this.groupManager.selectedGroup !== GroupId.Starred;
   }
 
   get isAddPossible(): boolean {
-    return this.groupManager.isAddPossible;
+    return this.groupManager.isAddAllowed;
   }
 
   ngOnInit() {
@@ -169,6 +177,11 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
 
   endDrag() {
     this.entryManager.draggedEntries = [];
+  }
+
+  setSort(option: any) {
+    this.selectedSortOption = option;
+    this.searchService.setSort(option.state, option.prop);
   }
 
   private handleEntriesReload() {

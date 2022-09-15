@@ -1,7 +1,6 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { TreeModule } from '@circlon/angular-tree-component';
 import { SharedModule } from '../shared/shared.module';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { AboutDialogComponent } from './components/dialogs/about-dialog/about-dialog.component';
@@ -29,7 +28,8 @@ import { MainComponent } from './main.component';
 import { EntryIconDirective } from './directives/entry-icon.directive';
 import { ViewTabComponent } from './components/dialogs/settings-dialog/view-tab/view-tab.component';
 import { EntryHistoryComponent } from './components/dialogs/entry-history/entry-history.component';
-import { TreeNodeDirective } from './directives/tree-node.directive';
+import { DroppableDirective } from './directives/droppable.directive';
+import { GroupDialogComponent } from './components/dialogs/group-dialog/group-dialog.component';
 
 @NgModule({
   declarations: [
@@ -58,14 +58,14 @@ import { TreeNodeDirective } from './directives/tree-node.directive';
     EntryIconDirective,
     ViewTabComponent,
     EntryHistoryComponent,
-    TreeNodeDirective,
+    DroppableDirective,
+    GroupDialogComponent,
   ],
   imports: [
     CommonModule,
     SharedModule,
     MainRoutingModule,
     ScrollingModule,
-    TreeModule
   ],
   entryComponents: [
     DeleteEntryDialogComponent,

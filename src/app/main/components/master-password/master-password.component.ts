@@ -3,7 +3,7 @@ import { Component, OnInit, NgZone, OnDestroy, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ActivatedRoute  } from '@angular/router';
 import { CommunicationService } from '@app/app.module';
-import { GroupIds } from '@app/core/enums';
+import { GroupId } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { EntryManager, GroupManager, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
@@ -78,8 +78,8 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   }
 
   async selectDefaultGroup() {
-    this.groupManager.selectGroup(GroupIds.Root);
-    this.entryManager.setByGroup(GroupIds.Root);
+    this.groupManager.selectGroup(GroupId.Root);
+    this.entryManager.setByGroup(GroupId.Root);
     this.entryManager.updateEntries();
   }
 

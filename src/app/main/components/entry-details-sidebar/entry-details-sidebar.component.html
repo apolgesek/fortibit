@@ -65,7 +65,7 @@
 
 <ng-template #databaseDetails>
 	<div class="header">Database details</div>
-	<ng-container *ngIf="config">
+	<div class="content" *ngIf="config">
 		<div class="section">
 			<p class="label">File name</p>
 			<p>{{ databaseInformation.name }}</p>
@@ -86,7 +86,7 @@
 				<i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
 			</p>
 		</div>
-	</ng-container>
+	</div>
 </ng-template>
 
 <div

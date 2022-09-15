@@ -1,7 +1,8 @@
 export class DomUtil {
   public static readonly constants = {
     unknownElementDraggingClass: 'is-unknown-element-dragging',
-    isDraggingClass: 'is-dragging'
+    isDraggingClass: 'is-dragging',
+    isDraggingOverClass: 'is-dragging-over'
   };
 
   public static setDragGhost(event: DragEvent) {

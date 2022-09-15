@@ -1,6 +1,6 @@
 import { Inject, Injectable, NgZone } from "@angular/core";
 import { CommunicationService } from "@app/app.module";
-import { GroupIds } from "@app/core/enums";
+import { GroupId } from "@app/core/enums";
 import { ICommunicationService } from "@app/core/models";
 import { EntryRepository, HistoryRepository } from "@app/core/repositories";
 import { IHistoryEntry } from "@shared-renderer/history-entry.model";
@@ -35,7 +35,6 @@ export class EntryManager {
   private readonly reloadedEntriesSource: Subject<void> = new Subject();
   private readonly revealedInGroupSource: Subject<IPasswordEntry> = new Subject();
   private readonly entrySelectedSource: Subject<IPasswordEntry> = new Subject();
-
   private readonly passwordListSource$: BehaviorSubject<IPasswordEntry[]> = new BehaviorSubject<IPasswordEntry[]>([]);
 
   get isGlobalSearch(): boolean {
@@ -123,21 +122,25 @@ export class EntryManager {
     return id;
   }
 
-  async setByPredicate(fn: (entry: IPasswordEntry) => boolean) {
-    this.passwordEntries = await this.entryRepository.getAllByPredicate(fn);
-  }
-
   async setByGroup(id: number) {
-    this.passwordEntries = await this.entryRepository.getAllByGroup(id);
+    if (id === GroupId.Starred) {
+      this.passwordEntries = await this.entryRepository.getAllByPredicate(x => x.isStarred);
+    } else if (id === GroupId.AllItems) {
+      this.passwordEntries = await this.entryRepository.getAll();
+    } else {
+      this.passwordEntries = await this.entryRepository.getAllByGroup(id);
+    }
   }
 
   private async getEntries(): Promise<IPasswordEntry[]> {
     let entries = [];
 
-    if (this.groupManager.selectedGroup === GroupIds.Starred) {
+    if (this.groupManager.selectedGroup === GroupId.Starred) {
       entries = await this.entryRepository.getAllByPredicate(x => x.isStarred);
+    } else if (this.groupManager.selectedGroup === GroupId.AllItems) {
+      entries = await this.entryRepository.getAll();
     } else {
-      entries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup as number);
+      entries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup);
     }
 
     for (const entry of entries) {
@@ -161,7 +164,7 @@ export class EntryManager {
   }
 
   async deleteEntry() {
-    if (this.groupManager.selectedGroup === GroupIds.RecycleBin) {
+    if (this.groupManager.selectedGroup === GroupId.RecycleBin) {
       await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id));
       await this.historyRepository.bulkDelete(this.selectedPasswords.map(x => x.id));
 
@@ -185,6 +188,9 @@ export class EntryManager {
     const draggedEntries = [...this.draggedEntries];
     await this.entryRepository.moveEntries(draggedEntries, targetGroupId);
     this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup as number);
+    
+    this.draggedEntries = [];
+    this.selectedPasswords = [];
 
     this.markDirty();
   }

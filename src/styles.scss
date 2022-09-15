@@ -51,7 +51,7 @@ a {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
-	min-height: 2rem;
+	min-height: 2.5rem;
 	box-sizing: border-box;
 	user-select: none;
 	border-bottom: 1px solid $silver;
@@ -72,10 +72,6 @@ a {
 
 .show {
 	display: block;
-}
-
-.node-content-wrapper-active:not(.node-content-wrapper-focused):not(:hover) {
-	background: $white !important;
 }
 
 .is-unknown-element-dragging {
@@ -109,11 +105,6 @@ app-root, app-workspace {
 
 form [class*="-btn"] {
 	margin-top: 1.625rem;
-}
-
-// overwritten tree component class
-.is-dragging-over {
-	background-color: $porcelain !important;
 }
 
 .section-header {
