@@ -1,14 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectionStrategy, Component, ComponentRef, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AbstractControlOptions, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CommunicationService } from '@app/app.module';
+import { AbstractControlOptions, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
-import { IAdditionalData, IModal } from '@app/shared';
+import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
+import { DateMaskDirective } from '@app/shared/directives/date-mask.directive';
 import { valueMatchValidator } from '@app/shared/validators';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { generate } from 'generate-password';
+import { CommunicationService } from 'injection-tokens';
 import { fromEvent, Subject } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
 import { IAppConfig } from '../../../../../../app-config';
@@ -17,6 +20,14 @@ import { IAppConfig } from '../../../../../../app-config';
   selector: 'app-entry-dialog',
   templateUrl: './entry-dialog.component.html',
   styleUrls: ['./entry-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AutofocusDirective,
+    ModalComponent,
+    DateMaskDirective
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDestroy {

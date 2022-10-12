@@ -1,9 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
-import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
 import { ModalService } from '@app/core/services';
+import { DropdownDirective, DropdownMenuDirective, DropdownToggleDirective } from '@app/shared';
+import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
+import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { UpdateState } from '@shared-renderer/update-state.model';
+import { CommunicationService } from 'injection-tokens';
 import { Observable, scan, startWith, Subject, takeUntil } from 'rxjs';
 
 interface INotification {
@@ -14,7 +18,16 @@ interface INotification {
 @Component({
   selector: 'app-settings-button',
   templateUrl: './settings-button.component.html',
-  styleUrls: ['./settings-button.component.scss']
+  styleUrls: ['./settings-button.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MenuDirective,
+    DropdownDirective,
+    DropdownToggleDirective,
+    DropdownMenuDirective,
+    MenuItemDirective
+  ]
 })
 export class SettingsButtonComponent implements OnInit {
   public readonly notifications$: Observable<INotification[]>;
@@ -67,5 +80,4 @@ export class SettingsButtonComponent implements OnInit {
     this.destroyed.next();
     this.destroyed.complete();
   }
-
 }

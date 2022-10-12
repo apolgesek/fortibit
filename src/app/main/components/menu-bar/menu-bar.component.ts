@@ -3,16 +3,27 @@ import { EventType } from '@app/core/enums';
 import { ModalService } from '@app/core/services/modal.service';
 import { ImportHandler, IpcChannel } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
-import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
 import { NotificationService, WorkspaceService } from '@app/core/services';
 import { exportDB } from 'dexie-export-import';
 import { DbContext } from '@app/core/database';
+import { MenuDirective } from '@app/shared/directives/menu.directive';
+import { DropdownDirective, DropdownMenuDirective, DropdownToggleDirective } from '@app/shared';
+import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
+import { CommunicationService } from 'injection-tokens';
 
 @Component({
   selector: 'app-menu-bar',
   templateUrl: './menu-bar.component.html',
   styleUrls: ['./menu-bar.component.scss'],
+  standalone: true,
+  imports: [
+    MenuDirective,
+    DropdownDirective,
+    DropdownToggleDirective,
+    DropdownMenuDirective,
+    MenuItemDirective
+  ]
 })
 export class MenuBarComponent implements OnInit {
   private maximizeIconPath: 'max-k' | 'restore-k' = 'max-k';

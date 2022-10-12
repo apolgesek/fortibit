@@ -1,15 +1,21 @@
 import { Component, ComponentRef, Inject } from '@angular/core';
-import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
 import { NotificationService } from '@app/core/services/notification.service';
-import { IAdditionalData, IModal } from '@app/shared';
+import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
-import { WorkspaceService, GroupManager, ModalRef, ElectronService } from '@app/core/services';
+import { WorkspaceService, ModalRef, ElectronService } from '@app/core/services';
+import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+import { CommunicationService } from 'injection-tokens';
 
 @Component({
   selector: 'app-import-database-metadata',
   templateUrl: './import-database-metadata.component.html',
-  styleUrls: ['./import-database-metadata.component.scss']
+  styleUrls: ['./import-database-metadata.component.scss'],
+  standalone: true,
+  imports: [
+    AutofocusDirective,
+    ModalComponent
+  ]
 })
 export class ImportDatabaseMetadataComponent implements IModal {
   ref!: ComponentRef<unknown>;

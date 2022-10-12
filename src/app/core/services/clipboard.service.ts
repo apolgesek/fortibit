@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { NotificationService } from '@app/core/services/notification.service';
-import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '../models';
+import { CommunicationService } from 'injection-tokens';
 @Injectable({
   providedIn: 'root'
 })

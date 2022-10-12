@@ -1,18 +1,24 @@
 import { Component, Inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { CommunicationService } from '@app/app.module';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ICommunicationService } from '@app/core/models';
 import { WorkspaceService, ConfigService, ModalService, NotificationService } from '@app/core/services';
+import { MasterPasswordSetupComponent } from '@app/main/components/master-password-setup/master-password-setup.component';
 import { valueMatchValidator } from '@app/shared/validators';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { CommunicationService } from 'injection-tokens';
 import { delay, from, map, Observable, tap } from 'rxjs';
 import { IProduct } from '../../../../../../../product';
 
 @Component({
   selector: 'app-password-change-tab',
   templateUrl: './password-change-tab.component.html',
-  styleUrls: ['./password-change-tab.component.scss']
+  styleUrls: ['./password-change-tab.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    MasterPasswordSetupComponent
+  ]
 })
 export class PasswordChangeTabComponent {
   public readonly isControlInvalid = isControlInvalid;

@@ -9,7 +9,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       useExisting: forwardRef(() => DateMaskDirective),
       multi: true
     }
-  ]
+  ],
+  standalone: true
 })
 export class DateMaskDirective implements ControlValueAccessor {
   @Input() disabled = false;

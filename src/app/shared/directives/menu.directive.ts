@@ -7,7 +7,8 @@ import { DropdownDirective } from './dropdown.directive';
   providers: [MenuService],
   host: {
     role: 'menubar'
-  }
+  },
+  standalone: true
 })
 export class MenuDirective {
   @ContentChildren(DropdownDirective) items: QueryList<DropdownDirective>;

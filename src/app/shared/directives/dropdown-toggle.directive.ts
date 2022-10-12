@@ -11,7 +11,8 @@ enum TriggerType {
   host: {
     'class': 'dropbtn',
     'aria-haspopup': 'true',
-  }
+  },
+  standalone: true
 })
 export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
   @Input() public trigger: TriggerType = TriggerType.Click;

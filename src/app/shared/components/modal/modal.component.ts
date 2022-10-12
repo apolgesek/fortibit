@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ModalRef } from '@app/core/services';
 import { ModalManager } from '@app/core/services/modal-manager';
@@ -10,6 +11,8 @@ import { takeUntil } from 'rxjs/operators';
   selector: 'app-modal',
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.scss'],
+  standalone: true,
+  imports: [CommonModule],
   encapsulation: ViewEncapsulation.None,
 })
 export class ModalComponent implements AfterViewInit, OnDestroy {

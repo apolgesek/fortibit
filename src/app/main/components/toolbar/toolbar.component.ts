@@ -1,17 +1,31 @@
-import { AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
-import { IpcChannel } from '@shared-renderer/index';
 import { fromEvent, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
-import { CommunicationService } from '@app/app.module';
-import { ICommunicationService } from '@app/core/models';
 import { WorkspaceService, EntryManager, GroupManager } from '@app/core/services';
+import { DropdownDirective, DropdownToggleDirective, DropdownMenuDirective } from '@app/shared';
+import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
+import { MenuDirective } from '@app/shared/directives/menu.directive';
+import { SettingsButtonComponent } from '../settings-button/settings-button.component';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MenuDirective,
+    DropdownDirective,
+    DropdownToggleDirective,
+    DropdownMenuDirective,
+    MenuItemDirective,
+    SettingsButtonComponent
+  ]
 })
 export class ToolbarComponent implements AfterViewInit, OnDestroy {
   @ViewChild('searchbox') public searchBox!: ElementRef; 
@@ -69,9 +83,7 @@ export class ToolbarComponent implements AfterViewInit, OnDestroy {
     private readonly groupManager: GroupManager,
     private readonly searchService: SearchService,
     private readonly modalService: ModalService,
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-  ) {
-  }
+  ) {}
 
   ngAfterViewInit(): void {
     this.registerFocusEvent(this.searchBox.nativeElement, 'shadow');

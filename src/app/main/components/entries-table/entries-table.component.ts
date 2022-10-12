@@ -1,17 +1,25 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
+import { CommonModule } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { HotkeyHandler } from '@app/app.module';
 import { GroupId, Sort } from '@app/core/enums';
 import { IHotkeyHandler } from '@app/core/models';
-import { WorkspaceService, ConfigService, EntryManager, GroupManager } from '@app/core/services';
+import { ConfigService, EntryManager, GroupManager, WorkspaceService } from '@app/core/services';
 import { ClipboardService } from '@app/core/services/clipboard.service';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
-import { MenuItem } from '@app/shared';
+import { EntryIconDirective } from '@app/main/directives/entry-icon.directive';
+import { TextEmphasizeDirective } from '@app/main/directives/text-emphasize.directive';
+import { DropdownDirective, DropdownMenuDirective, DropdownToggleDirective, MenuItem } from '@app/shared';
+import { ContextMenuItemDirective } from '@app/shared/directives/context-menu-item.directive';
+import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
+import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
+import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
+import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { DomUtil } from '@app/utils';
 import { IPasswordEntry } from '@shared-renderer/index';
+import { HotkeyHandler } from 'injection-tokens';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
@@ -30,6 +38,21 @@ import { map, takeUntil } from 'rxjs/operators';
         animate('150ms ease-out', style({ transform: 'translateY(-100%)' }))
       ])
     ])
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    MenuDirective,
+    DropdownDirective,
+    DropdownToggleDirective,
+    DropdownMenuDirective,
+    MenuItemDirective,
+    ScrollingModule,
+    TextEmphasizeDirective,
+    EntryIconDirective,
+    FocusableListDirective,
+    FocusableListItemDirective,
+    ContextMenuItemDirective
   ]
 })
 export class EntriesTableComponent implements OnInit, OnDestroy {

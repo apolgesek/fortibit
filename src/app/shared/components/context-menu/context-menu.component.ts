@@ -1,11 +1,13 @@
-import { DOCUMENT } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, ElementRef, Inject } from '@angular/core';
 import { MenuItem } from '@app/shared';
 
 @Component({
   selector: 'app-context-menu',
   templateUrl: './context-menu.component.html',
-  styleUrls: ['./context-menu.component.scss']
+  styleUrls: ['./context-menu.component.scss'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class ContextMenuComponent {
   public readonly model!: MenuItem[];

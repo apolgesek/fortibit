@@ -7,6 +7,7 @@ import { DropdownStateService } from '../services/dropdown-state.service';
     'role': 'menuitem',
     'aria-hidden': 'true'
   },
+  standalone: true
 })
 export class MenuItemDirective {
   @Output() activate = new EventEmitter();

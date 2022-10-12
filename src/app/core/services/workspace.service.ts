@@ -1,12 +1,12 @@
 import { Inject, Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
-import { CommunicationService } from "@app/app.module";
 import { DbContext } from "@app/core/database";
 import { EventType } from "@app/core/enums";
 import { ICommunicationService } from "@app/core/models";
 import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
 import { IPasswordEntry } from "@shared-renderer/password-entry.model";
 import { exportDB, importInto } from "dexie-export-import";
+import { CommunicationService } from "injection-tokens";
 import { combineLatest, Observable, skip, startWith, Subject } from "rxjs";
 import { EntryRepository } from "../repositories";
 import { EntryManager } from "./managers/entry.manager";

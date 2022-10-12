@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
-import { HotkeyHandler } from '@app/app.module';
 import { ModalService } from '@app/core/services/modal.service';
 import { MenuItem } from '@app/shared';
+import { HotkeyHandler } from 'injection-tokens';
 import { ClipboardService, EntryManager } from '.';
 import { IHotkeyHandler } from '../models';
 

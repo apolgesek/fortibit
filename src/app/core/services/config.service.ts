@@ -1,8 +1,8 @@
 import { Inject, Injectable, NgZone } from '@angular/core';
 import { IpcChannel } from '@shared-renderer/index';
+import { CommunicationService } from 'injection-tokens';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { IAppConfig } from '../../../../app-config';
-import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '../models';
 
 @Injectable({

@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { IpcChannel } from '@shared-renderer/index';
+import { CommunicationService } from 'injection-tokens';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '../models';
 import { WorkspaceService } from '../services';
 

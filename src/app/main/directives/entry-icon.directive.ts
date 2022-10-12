@@ -1,10 +1,11 @@
-import { AfterViewInit, Directive, ElementRef, Inject, Input, OnDestroy } from '@angular/core';
-import { CommunicationService } from '@app/app.module';
+import { AfterViewInit, Directive, ElementRef, Inject, Input } from '@angular/core';
 import { ICommunicationService } from '@app/core/models';
+import { CommunicationService } from 'injection-tokens';
 import { IPasswordEntry, IpcChannel } from '../../../../shared-models';
 
 @Directive({
   selector: '[appEntryIcon]',
+  standalone: true
 })
 export class EntryIconDirective implements AfterViewInit {
   private _entry: IPasswordEntry;

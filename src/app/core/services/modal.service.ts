@@ -1,5 +1,4 @@
 import { ComponentRef, Inject, Injectable, NgZone } from '@angular/core';
-import { CommunicationService } from '@app/app.module';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { AboutDialogComponent } from '@app/main/components/dialogs/about-dialog/about-dialog.component';
 import { CheckExposedPasswordsComponent } from '@app/main/components/dialogs/check-exposed-passwords/check-exposed-passwords.component';
@@ -13,6 +12,7 @@ import { ImportDatabaseMetadataComponent } from '@app/main/components/dialogs/im
 import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/master-password-dialog/master-password-dialog.component';
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
 import { IHistoryEntry, IpcChannel } from '@shared-renderer/index';
+import { CommunicationService } from 'injection-tokens';
 import { EventType } from '../enums';
 import { ICommunicationService } from '../models';
 import { EntryManager } from './managers/entry.manager';

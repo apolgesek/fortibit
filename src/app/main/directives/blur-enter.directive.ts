@@ -1,6 +1,7 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
 @Directive({
-  selector: '[appBlurEnter]'
+  selector: '[appBlurEnter]',
+  standalone: true
 })
 export class BlurEnterDirective {
   constructor(

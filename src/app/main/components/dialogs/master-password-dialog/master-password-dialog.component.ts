@@ -1,15 +1,21 @@
 import { Component, ComponentRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { IpcChannel } from '@shared-renderer/index';
-import { IAdditionalData, IModal } from '@app/shared';
+import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
 import { EventType } from '@app/core/enums';
-import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
 import { WorkspaceService, ModalRef } from '@app/core/services';
+import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+import { CommunicationService } from 'injection-tokens';
 
 @Component({
   selector: 'app-master-password-dialog',
   templateUrl: './master-password-dialog.component.html',
   styleUrls: ['./master-password-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    AutofocusDirective,
+    ModalComponent
+  ]
 })
 export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal {
   public onGetSaveStatus: (_: Electron.IpcRendererEvent, { status, message, file }: {status: boolean, message: string, file: unknown}) => void;

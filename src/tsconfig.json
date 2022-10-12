@@ -34,6 +34,6 @@
     "skipTemplateCodegen": false,
     "preserveWhitespaces": true,
     "skipMetadataEmit": false,
-    "disableTypeScriptVersionCheck": true
+    "disableTypeScriptVersionCheck": true,
   }
 }

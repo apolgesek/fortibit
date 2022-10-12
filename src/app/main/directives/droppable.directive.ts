@@ -3,7 +3,8 @@ import { EntryManager, GroupManager } from '@app/core/services';
 import { DomUtil } from '@app/utils';
 
 @Directive({
-  selector: '[appDroppable]'
+  selector: '[appDroppable]',
+  standalone: true
 })
 export class DroppableDirective {
   @HostListener('dragover', ['$event'])

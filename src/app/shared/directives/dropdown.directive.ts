@@ -7,6 +7,7 @@ import { MenuItemDirective } from './menu-item.directive';
 @Directive({
   selector: '[appDropdown]',
   providers: [DropdownStateService],
+  standalone: true
 })
 export class DropdownDirective implements AfterViewInit, OnDestroy {
   @ContentChildren(MenuItemDirective, { descendants: true })

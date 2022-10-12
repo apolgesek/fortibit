@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
-import { CommunicationService } from '@app/app.module';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { IReport } from '@shared-renderer/report.model';
 import { exportDB } from 'dexie-export-import';
+import { CommunicationService } from 'injection-tokens';
 import { DbContext } from '../database';
 import { ICommunicationService } from '../models';
 import { EntryRepository, GroupRepository, ReportRepository } from '../repositories';

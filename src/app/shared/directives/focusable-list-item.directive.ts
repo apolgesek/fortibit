@@ -2,7 +2,8 @@ import { Directive, ElementRef, HostListener, Input } from '@angular/core';
 import { ListStateService } from '../services/list-state.service';
 
 @Directive({
-  selector: '[appFocusableListItem]'
+  selector: '[appFocusableListItem]',
+  standalone: true
 })
 export class FocusableListItemDirective {
   @Input('appFocusableListItem') public item: any;

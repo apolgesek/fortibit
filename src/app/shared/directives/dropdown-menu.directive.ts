@@ -3,6 +3,7 @@ import { DropdownStateService } from '../services/dropdown-state.service';
 
 @Directive({
   selector: '[appDropdownMenu]',
+  standalone: true
 })
 export class DropdownMenuDirective implements OnInit {
   private hasView = false;

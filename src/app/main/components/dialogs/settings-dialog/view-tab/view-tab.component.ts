@@ -1,16 +1,20 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { CommunicationService } from '@app/app.module';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ICommunicationService } from '@app/core/models';
 import { ConfigService } from '@app/core/services';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { CommunicationService } from 'injection-tokens';
 import { Subject, take, takeUntil } from 'rxjs';
 import { IProduct } from '../../../../../../../product';
 
 @Component({
   selector: 'app-view-tab',
   templateUrl: './view-tab.component.html',
-  styleUrls: ['./view-tab.component.scss']
+  styleUrls: ['./view-tab.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule
+  ]
 })
 export class ViewTabComponent implements OnInit {
   public viewForm: FormGroup;

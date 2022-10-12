@@ -7,7 +7,8 @@ import { MenuItem } from '..';
 import { ContextMenuComponent } from '../components/context-menu/context-menu.component';
 
 @Directive({
-  selector: '[appContextMenuItem]'
+  selector: '[appContextMenuItem]',
+  standalone: true
 })
 export class ContextMenuItemDirective {
   @Input('appContextMenuItem') model!: MenuItem[];

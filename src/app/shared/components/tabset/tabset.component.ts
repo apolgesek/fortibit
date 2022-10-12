@@ -6,13 +6,13 @@ import { TabService } from '../../services/tab.service';
   selector: 'app-tabset',
   templateUrl: './tabset.component.html',
   styleUrls: ['./tabset.component.scss'],
+  standalone: true,
   providers: [TabService]
 })
 export class TabsetComponent implements AfterContentInit {
   @ViewChildren('headerButton') headerButtons: QueryList<ElementRef>;
   @ContentChildren(TabComponent) tabs: QueryList<TabComponent>;
-
-  public headers = [];
+  public headers: string[] = [];
 
   public get activeTab(): TabComponent {
     return this.tabService.activeTab;

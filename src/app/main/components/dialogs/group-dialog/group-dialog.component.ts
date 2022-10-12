@@ -1,13 +1,19 @@
 import { Component, ComponentRef, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { GroupManager, ModalRef } from '@app/core/services';
-import { IAdditionalData, IModal } from '@app/shared';
+import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 
 @Component({
   selector: 'app-group-dialog',
   templateUrl: './group-dialog.component.html',
-  styleUrls: ['./group-dialog.component.scss']
+  styleUrls: ['./group-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    AutofocusDirective,
+    ModalComponent
+  ]
 })
 export class GroupDialogComponent implements IModal, OnInit {
   public readonly ref!: ComponentRef<GroupDialogComponent>;

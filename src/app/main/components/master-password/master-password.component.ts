@@ -1,14 +1,15 @@
-import { DOCUMENT } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, OnInit, NgZone, OnDestroy, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute  } from '@angular/router';
-import { CommunicationService } from '@app/app.module';
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { EntryManager, GroupManager, ModalService, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
+import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { IpcChannel } from '@shared-renderer/index';
 import { IpcRendererEvent } from 'electron/main';
+import { CommunicationService } from 'injection-tokens';
 import { from, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
 import { IAppConfig } from '../../../../../app-config';
@@ -16,7 +17,13 @@ import { IAppConfig } from '../../../../../app-config';
 @Component({
   selector: 'app-master-password',
   templateUrl: './master-password.component.html',
-  styleUrls: ['./master-password.component.scss']
+  styleUrls: ['./master-password.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AutofocusDirective
+  ]
 })
 export class MasterPasswordComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;

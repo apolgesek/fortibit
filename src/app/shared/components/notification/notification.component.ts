@@ -1,11 +1,14 @@
 import { AfterViewInit, Component, ComponentRef, ElementRef, HostBinding, HostListener, OnDestroy } from '@angular/core';
 import { NotificationService } from '@app/core/services/notification.service';
 import { IToastModel } from '@app/core/models';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-notification',
   templateUrl: './notification.component.html',
-  styleUrls: ['./notification.component.scss']
+  styleUrls: ['./notification.component.scss'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class NotificationComponent implements AfterViewInit, OnDestroy {
   public model!: IToastModel;

@@ -5,7 +5,8 @@ import { FocusableListItemDirective } from './focusable-list-item.directive';
 
 @Directive({
   selector: '[appFocusableList]',
-  providers: [ListStateService]
+  providers: [ListStateService],
+  standalone: true
 })
 export class FocusableListDirective implements AfterViewInit, OnDestroy {
   @ContentChildren(FocusableListItemDirective) public readonly rowEntries: QueryList<FocusableListItemDirective>;

@@ -1,11 +1,17 @@
 import { ChangeDetectionStrategy, Component, ComponentRef, OnInit } from '@angular/core';
 import { GroupId } from '@app/core/enums';
-import { IAdditionalData, IModal } from '@app/shared';
+import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
 import { EntryManager, GroupManager, ModalRef } from '@app/core/services';
+import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 @Component({
   selector: 'app-delete-entry-dialog',
   templateUrl: './delete-entry-dialog.component.html',
   styleUrls: ['./delete-entry-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    AutofocusDirective,
+    ModalComponent
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DeleteEntryDialogComponent implements IModal, OnInit {

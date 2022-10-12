@@ -1,11 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { CommunicationService } from '@app/app.module';
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService, IPasswordGroup } from '@app/core/models';
 import { WorkspaceService, EntryManager, GroupManager, ModalService, NotificationService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
+import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.directive';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
+import { CommunicationService } from 'injection-tokens';
 import { Subject, takeUntil } from 'rxjs';
 import { IAppConfig } from '../../../../../app-config';
 
@@ -13,6 +15,11 @@ import { IAppConfig } from '../../../../../app-config';
   selector: 'app-entry-details-sidebar',
   templateUrl: './entry-details-sidebar.component.html',
   styleUrls: ['./entry-details-sidebar.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    SidebarHandleDirective
+  ]
 })
 export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
   @ViewChild('toggleStarBtn') public readonly toggleStarBtn: ElementRef;

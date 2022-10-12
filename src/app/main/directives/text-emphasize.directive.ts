@@ -1,6 +1,7 @@
 import { Directive, Input, ElementRef } from '@angular/core';
 @Directive({
-  selector: '[appTextEmphasize]'
+  selector: '[appTextEmphasize]',
+  standalone: true
 })
 export class TextEmphasizeDirective {
   private readonly openingTag = '<strong>';

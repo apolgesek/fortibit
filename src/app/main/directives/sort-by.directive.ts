@@ -6,7 +6,8 @@ import { Subject } from 'rxjs';
   selector: '[appSortBy]',
   host: {
     'role': 'button'
-  }
+  },
+  standalone: true
 })
 
 export class SortByDirective implements AfterViewInit, OnDestroy {

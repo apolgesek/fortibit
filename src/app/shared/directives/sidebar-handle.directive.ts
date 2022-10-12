@@ -4,6 +4,7 @@ import { UiEventService } from '@app/core/services';
 @Directive({
   selector: '[appSidebarHandle]',
   host: { 'class': 'handle' },
+  standalone: true
 })
 export class SidebarHandleDirective implements AfterViewInit, OnDestroy {
   @Input() public readonly position: 'left' | 'right' = 'left';

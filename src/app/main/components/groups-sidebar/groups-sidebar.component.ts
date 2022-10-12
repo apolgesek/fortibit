@@ -1,17 +1,30 @@
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import { IPasswordGroup } from '@app/core/models';
 import { WorkspaceService, EntryManager, GroupManager, ModalService } from '@app/core/services';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
 import { SearchService } from '@app/core/services/search.service';
+import { DroppableDirective } from '@app/main/directives/droppable.directive';
 import { MenuItem } from '@app/shared';
+import { ContextMenuItemDirective } from '@app/shared/directives/context-menu-item.directive';
+import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.directive';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-groups-sidebar',
   templateUrl: './groups-sidebar.component.html',
-  styleUrls: ['./groups-sidebar.component.scss']
+  styleUrls: ['./groups-sidebar.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    ScrollingModule,
+    ContextMenuItemDirective,
+    SidebarHandleDirective,
+    DroppableDirective
+  ]
 })
 export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
   public readonly groupIds = GroupId;

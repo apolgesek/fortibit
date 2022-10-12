@@ -1,7 +1,8 @@
 import { Directive, ElementRef } from '@angular/core';
 
 @Directive({
-  selector: '[appAutofocus]'
+  selector: '[appAutofocus]',
+  standalone: true
 })
 export class AutofocusDirective {
   constructor(

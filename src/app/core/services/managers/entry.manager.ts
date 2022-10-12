@@ -1,11 +1,11 @@
 import { Inject, Injectable, NgZone } from "@angular/core";
-import { CommunicationService } from "@app/app.module";
 import { GroupId } from "@app/core/enums";
 import { ICommunicationService } from "@app/core/models";
 import { EntryRepository, HistoryRepository } from "@app/core/repositories";
 import { IHistoryEntry } from "@shared-renderer/history-entry.model";
 import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
 import { IPasswordEntry } from "@shared-renderer/password-entry.model";
+import { CommunicationService } from "injection-tokens";
 import { BehaviorSubject, combineLatest, from, map, Observable, of, shareReplay, Subject, switchMap } from "rxjs";
 import { SearchService } from "../search.service";
 import { GroupManager } from "./group.manager";

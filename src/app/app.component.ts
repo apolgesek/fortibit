@@ -1,15 +1,16 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
-import { DOCUMENT } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { ChildrenOutletContexts, NavigationStart, Router } from '@angular/router';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { CommunicationService } from 'injection-tokens';
 import { fromEvent } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { AppConfig } from '../environments/environment';
-import { CommunicationService } from './app.module';
 import { EventType } from './core/enums';
 import { ICommunicationService } from './core/models';
-import { WorkspaceService, AppViewContainer, EntryManager, ModalManager, UiEventService } from './core/services';
+import { AppViewContainer, EntryManager, ModalManager, UiEventService, WorkspaceService } from './core/services';
+import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component';
 
 export const routeAnimations = trigger("routeAnimations", [
 	transition("masterPasswordPage => workspacePage", [
@@ -50,6 +51,7 @@ export const routeAnimations = trigger("routeAnimations", [
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
+  standalone: true,
   animations: [
     routeAnimations
   ]

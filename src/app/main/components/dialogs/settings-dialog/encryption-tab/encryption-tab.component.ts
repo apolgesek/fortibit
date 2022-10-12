@@ -1,17 +1,21 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CommunicationService } from '@app/app.module';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ICommunicationService } from '@app/core/models';
 import { ConfigService } from '@app/core/services';
 import { isControlInvalid } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { CommunicationService } from 'injection-tokens';
 import { debounceTime, distinctUntilChanged, Subject, take, takeUntil } from 'rxjs';
 import { IProduct } from '../../../../../../../product';
 
 @Component({
   selector: 'app-encryption-tab',
   templateUrl: './encryption-tab.component.html',
-  styleUrls: ['./encryption-tab.component.scss']
+  styleUrls: ['./encryption-tab.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule
+  ]
 })
 export class EncryptionTabComponent implements OnInit, OnDestroy {
   public encryptionForm: FormGroup;
