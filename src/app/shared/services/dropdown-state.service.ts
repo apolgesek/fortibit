@@ -31,7 +31,6 @@ export class DropdownStateService {
   }
 
   close(notifyChanges = true): void {
-    this.currentItem = null;
     this._stateChangesSource.next({ isOpen: false, notifyChanges });
   }
 
@@ -43,6 +42,14 @@ export class DropdownStateService {
     }
 
     node.close();
+  }
+
+  closeAndFocusFirst(): void {
+    this.close();
+
+    if (this.parent) {
+      this.parent.focusFirstItem();
+    }
   }
 
   focusFirstItem() {

@@ -4,6 +4,8 @@ import { createWriteStream, unlink } from 'fs';
 
 export class FileService implements IFileService {
   download(url: string, path: string, errorCallback: () => void, finishCallback: () => void): Promise<string> {
+    console.log(url, path);
+
     return new Promise((resolve, reject) => {
       const req = request(url, response => {
         if (response.statusCode && (response.statusCode > 400 && response.statusCode < 500)) {

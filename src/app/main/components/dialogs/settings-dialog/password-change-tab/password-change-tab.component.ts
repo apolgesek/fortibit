@@ -23,7 +23,7 @@ export class PasswordChangeTabComponent {
   }
 
   get passwordFormEnabled(): boolean {
-    if (!this.workspaceService.file) {
+    if (!this.isSaved || this.isLocked) {
       if (this.passwordForm.enabled) {
         this.passwordForm.disable();
       }
@@ -36,6 +36,14 @@ export class PasswordChangeTabComponent {
 
       return true;
     }
+  }
+
+  get isLocked(): boolean {
+    return this.workspaceService.isLocked;
+  }
+
+  get isSaved(): boolean {
+    return Boolean(this.workspaceService.file);
   }
 
   constructor(

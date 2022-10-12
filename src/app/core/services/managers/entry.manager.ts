@@ -53,6 +53,8 @@ export class EntryManager {
     private readonly historyRepository: HistoryRepository,
     private readonly groupManager: GroupManager,
   ) {
+    this.markDirtySource = new Subject();
+
     this.entries$ = combineLatest([
       this.passwordListSource$,
       this.searchService.searchPhrase$
@@ -99,7 +101,7 @@ export class EntryManager {
       if (editedEntry.iconPath) {
         this.replaceIconPath(id, editedEntry, entry);
       } else {
-        this.getIconPath(id, entry);
+        this.getIconPath(entry);
       }
 
       const historyEntry: IHistoryEntry = {
@@ -107,14 +109,16 @@ export class EntryManager {
         entryId: editedEntry.id
       };
 
-      await this.historyRepository.add(historyEntry);
-      this.entryHistory = await this.getEntryHistory(entry.id);
+      // undefined when isStarred toggled
+      if (historyEntry?.entryId) {
+        await this.historyRepository.add(historyEntry);
+        this.entryHistory = await this.getEntryHistory(entry.id);
+      }
     } else {
       id = await this.entryRepository.add(entry);
+      this.getIconPath({ ...entry, id });
       this.passwordEntries = await this.getEntries();
       this.searchService.reset();
-
-      this.getIconPath(id, entry);
     }
 
     this.markDirty();
@@ -165,12 +169,12 @@ export class EntryManager {
 
   async deleteEntry() {
     if (this.groupManager.selectedGroup === GroupId.RecycleBin) {
-      await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id));
-      await this.historyRepository.bulkDelete(this.selectedPasswords.map(x => x.id));
-
-      for (const entry of this.selectedPasswords) {
+      for await (const entry of this.selectedPasswords) {
         this.removeIconPath(entry);
       }
+
+      await this.historyRepository.bulkDelete(this.selectedPasswords.map(x => x.id));
+      await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id));
     } else {
       await this.entryRepository.softDelete(this.selectedPasswords.map(p => p.id) as number[]);
     }
@@ -223,6 +227,12 @@ export class EntryManager {
 
   reloadEntries() {
     this.reloadedEntriesSource.next();
+  }
+
+  getIconPath(entry: Partial<IPasswordEntry>): void {
+    if (entry.url) {
+      this.communicationService.ipcRenderer.send(IpcChannel.TryGetIcon, entry.id, entry.url);
+    }
   }
 
   revealInGroup(entry: IPasswordEntry) {
@@ -287,18 +297,12 @@ export class EntryManager {
     return false;
   }
 
-  private getIconPath(id: number, entry: Partial<IPasswordEntry>): void {
-    if (entry.url) {
-      this.communicationService.ipcRenderer.send(IpcChannel.TryGetIcon, id, entry.url);
-    }
-  }
-
   private replaceIconPath(id: number, editedEntry: IPasswordEntry, newEntry: Partial<IPasswordEntry>): void {
     this.communicationService.ipcRenderer.send(IpcChannel.TryReplaceIcon, id, editedEntry.iconPath, newEntry.url);
   }
 
-  private removeIconPath(entry: Partial<IPasswordEntry>): void {
-    this.communicationService.ipcRenderer.send(IpcChannel.RemoveIcon, entry);
+  private removeIconPath(entry: Partial<IPasswordEntry>): Promise<boolean> {
+    return this.communicationService.ipcRenderer.invoke(IpcChannel.RemoveIcon, entry);
   }
 
   private markDirty() {

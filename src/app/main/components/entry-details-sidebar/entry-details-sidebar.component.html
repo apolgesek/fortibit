@@ -10,7 +10,7 @@
 					#toggleStarBtn
 					[attr.aria-label]="entry?.isStarred ? 'Remove from favourites' : 'Add to favourites'" 
 					class="action-btn"
-					[ngClass]="{ active: entry?.isStarred }"
+					[ngClass]="{ 'active': entry?.isStarred }"
 					(click)="toggleStarred(entry)">
 					<span class="pi pi-star"></span>
 				</button>

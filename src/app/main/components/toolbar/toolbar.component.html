@@ -55,20 +55,6 @@
 				</div>
 			</div>
 		</div>
-		<ng-container *ngIf="notifications$ | async as notifications">
-			<div appDropdown class="settings dropdown" [ngClass]="{'new': notifications.length}">
-				<button appDropdownToggle appMenuItem class="icon-btn">
-					<span class="sr-only">Settings</span>
-					<div *ngIf="notifications.length" class="badge">{{ notifications.length }} <span class="sr-only">notifications</span></div>
-					<span class="pi pi-cog"></span>
-				</button>
-				<div *appDropdownMenu class="dropdown-content right">
-					<a *ngIf="updateAvailable" href="#" appMenuItem (click)="updateAndRelaunch()" class="update-btn">
-						Update and restart <span class="version">{{ updateAvailable }}</span>
-					</a>
-					<a href="#" appMenuItem (click)="openSettings(); false">Settings</a>
-				</div>
-			</div>
-		</ng-container>
+		<app-settings-button></app-settings-button>
 	</div>
 </nav>

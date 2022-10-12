@@ -3,9 +3,11 @@ import { IPasswordEntry } from '@shared-renderer/index';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, Observable, Subject, tap } from 'rxjs';
 import { Sort } from '../enums';
 
+type SortableEntryProp = keyof Pick<IPasswordEntry, 'title' | 'username' | 'creationDate'>;
+
 interface ISearchService {
   reset() : void;
-  setSort(state: Sort, prop: keyof IPasswordEntry) : void;
+  setSort(state: Sort, prop: SortableEntryProp) : void;
   filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]) : IPasswordEntry[];
 }
 
@@ -16,7 +18,7 @@ export class SearchService implements ISearchService {
   public searchInputSource: Subject<string> = new Subject();
   public searchPhrase$: Observable<string>;
   public searchPhraseValue = '';
-  public sortProp: 'title' | 'username';
+  public sortProp: SortableEntryProp;
   public sortOrder: Sort = Sort.Desc;
   public isSearching = false;
   public wasSearched = false;
@@ -56,7 +58,7 @@ export class SearchService implements ISearchService {
     this.updateSearchResults();
   }
 
-  public setSort(state: Sort, prop: 'title' | 'username') {
+  public setSort(state: Sort, prop: SortableEntryProp) {
     this.sortOrder = state;
     this.sortProp = prop;
     this.updateSearchResults();
@@ -91,28 +93,42 @@ export class SearchService implements ISearchService {
     }
   }
 
-  public compareAscending(a: IPasswordEntry, b: IPasswordEntry) {
-    const firstProp = a[this.sortProp];
-    const secondProp = b[this.sortProp];
-
-    if (firstProp && secondProp) {
-      return firstProp.localeCompare(secondProp);
-    } else if (firstProp && !secondProp) {
+  public compareAscending(a: IPasswordEntry, b: IPasswordEntry): number {
+    if (a[this.sortProp] && b[this.sortProp]) {
+      if (this.sortProp === 'creationDate') {
+        const firstProp = a[this.sortProp];
+        const secondProp = b[this.sortProp];
+      
+        return firstProp.getTime() - secondProp.getTime();
+      } else if (this.sortProp === 'title' || this.sortProp === 'username') {
+        const firstProp = a[this.sortProp];
+        const secondProp = b[this.sortProp];
+  
+        return firstProp.localeCompare(secondProp);
+      }
+    } else if (a[this.sortProp] && !b[this.sortProp]) {
       return -1;
-    }  else {
+    } else {
       return 1;
     }
   }
 
-  public compareDescending(a: IPasswordEntry, b: IPasswordEntry) {
-    const firstProp = a[this.sortProp];
-    const secondProp = b[this.sortProp];
+  public compareDescending(a: IPasswordEntry, b: IPasswordEntry): number {
+    if (a[this.sortProp] && b[this.sortProp]) {
+      if (this.sortProp === 'creationDate') {
+        const firstProp = a[this.sortProp];
+        const secondProp = b[this.sortProp];
+      
+        return secondProp.getTime() - firstProp.getTime();
+      } else if (this.sortProp === 'title' || this.sortProp === 'username') {
+        const firstProp = a[this.sortProp];
+        const secondProp = b[this.sortProp];
 
-    if (firstProp && secondProp) {
-      return secondProp.localeCompare(firstProp);
-    } else if (!firstProp && secondProp) {
+        return secondProp.localeCompare(firstProp);
+      }
+    } else if (!a[this.sortProp] && b[this.sortProp]) {
       return -1;
-    }  else {
+    } else {
       return 1;
     }
   }

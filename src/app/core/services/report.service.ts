@@ -21,7 +21,7 @@ export class ReportService {
     private readonly groupRepository: GroupRepository,
   ) {}
 
-  async scanLeaks(): Promise<any> {
+  async scanForLeaks(): Promise<any> {
     return new Promise(async (resolve) => {
       const blob = await exportDB(this.dbContext);
 

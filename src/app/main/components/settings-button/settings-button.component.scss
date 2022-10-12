@@ -1,0 +1,82 @@
+@import 'variables';
+
+.settings {
+	margin-left: auto;
+	position: relative;
+	padding-left: 2rem;
+
+	&.new {
+		.dropbtn {
+			padding-left: 0.5rem;
+		}
+
+		.dropbtn .badge {
+			margin-left: -1rem;
+			background-color: $red-orange;
+			height: 1.5rem;
+			width: 1.5rem;
+			z-index: 990;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: $white;
+			font-size: 0.75rem;
+			border-radius: 0.25rem;
+			font-weight: bold;
+			position: relative;
+
+			&::after {
+				content: '';
+				position: absolute;
+				right: -0.25rem;
+				top: 0.5rem;
+				width: 0;
+				height: 0;
+				border-top: 4px solid transparent;
+				border-bottom: 4px solid transparent;
+				border-left: 4px solid $red-orange;
+			}
+		}
+	}
+
+	.dropdown-content {
+		margin-top: 0.5rem;
+		border-radius: 0.25rem;
+
+		.update-btn {
+			color: $curious-blue;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+
+			.version {
+				color: $silver;
+				font-size: 1rem;
+			}
+		}
+	}
+
+	.dropbtn {
+		border-top-left-radius: 3px;
+		border-bottom-left-radius: 3px;
+		padding: 0;
+		transition: padding 100ms;
+		background-color: transparent;
+		transition: color 200ms;
+
+		&:hover {
+			.pi {
+				color: $curious-blue-light;
+			}
+		}
+
+		.pi {
+			font-size: 1.5rem;
+			color: $white;
+
+			&:before {
+				margin-right: 0;
+			}
+		}
+	}
+}

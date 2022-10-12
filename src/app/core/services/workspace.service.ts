@@ -8,6 +8,7 @@ import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
 import { IPasswordEntry } from "@shared-renderer/password-entry.model";
 import { exportDB, importInto } from "dexie-export-import";
 import { combineLatest, Observable, skip, startWith, Subject } from "rxjs";
+import { EntryRepository } from "../repositories";
 import { EntryManager } from "./managers/entry.manager";
 import { GroupManager } from "./managers/group.manager";
 import { NotificationService } from "./notification.service";
@@ -28,6 +29,7 @@ export class WorkspaceService {
 
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    private readonly entryRepository: EntryRepository,
     private readonly entryManager: EntryManager,
     private readonly groupManager: GroupManager,
     private readonly dbContext: DbContext,
@@ -35,9 +37,6 @@ export class WorkspaceService {
     private readonly zone: NgZone,
     private readonly router: Router,
   ) {
-    this.entryManager.markDirtySource = new Subject();
-    this.groupManager.markDirtySource = new Subject();
-
     combineLatest([
       this.entryManager.markDirtySource.pipe(startWith(null)),
       this.groupManager.markDirtySource.pipe(startWith(null))
@@ -143,11 +142,21 @@ export class WorkspaceService {
     this.setDatabaseLoaded();
   }
 
-  async importDatabase(name: string, entries: IPasswordEntry[]): Promise<number> {
-    const groupId = await this.groupManager.addGroup({ name, isImported: true });
-    const updated = entries.map(e => ({ ...e, groupId }));
-
-    return this.entryManager.bulkAddEntries(updated);
+  async importDatabase(name: string, entries: IPasswordEntry[]): Promise<boolean> {
+    try {
+      const groupId = await this.groupManager.addGroup({ name, isImported: true });
+      const updated = entries.map(e => ({ ...e, groupId }));
+      await this.entryManager.bulkAddEntries(updated);
+      const entriesWithIds = await this.entryRepository.getAllByGroup(groupId);
+      
+      for (const entry of entriesWithIds) {
+        this.entryManager.getIconPath(entry);
+      }
+  
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
   async clearDatabase() {
@@ -171,7 +180,7 @@ export class WorkspaceService {
   }
 
   getFileName(path: string): string {
-    return path.split(this.communicationService.os.platform() === 'win32' ? '\\' : '/').splice(-1)[0];
+    return path.split(this.communicationService.getPlatform() === 'win32' ? '\\' : '/').splice(-1)[0];
   }
 
   private exitApp() {

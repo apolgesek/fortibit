@@ -57,19 +57,14 @@ class MainProcess {
   private registerAppEvents() {
     app.on('second-instance', (event: Electron.Event, argv) => {
       const windowRef = this._windowService.createWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve)));
-      const windowLoaded = this._windowService.loadWindow(windowRef);
-
-      windowLoaded.then(() => {
-        this._updateService.checkForUpdates();
-      });
-
       const filePath = argv.find(x => x.endsWith(this._configService.appConfig.fileExtension));
-
       this.setFile(windowRef, filePath);
 
       windowRef.once('closed', () => {
         this._windowService.removeWindow(windowRef);
       });
+
+      this._windowService.loadWindow(windowRef);
     });
 
     app.on('open-file', (event, path) => {
@@ -89,12 +84,6 @@ class MainProcess {
 
   private onReady() {
     const windowRef = this._windowService.createWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));    
-    const windowLoaded = this._windowService.loadWindow(windowRef);
-    
-    windowLoaded.then(() => {
-      this._performanceService.mark('firstWindowLoaded');
-      this._updateService.checkForUpdates();
-    });
 
     this.registerIpcEventListeners();
     this.registerAutocompleteHandler();
@@ -104,6 +93,14 @@ class MainProcess {
     });
 
     this.setFile(windowRef, this._fileArg);
+
+    const windowLoaded = this._windowService.loadWindow(windowRef);
+    
+    windowLoaded.then(() => {
+      this._performanceService.mark('firstWindowLoaded');
+    }).catch(err => {
+      console.log(err);
+    });
   }
 
   private setFile(windowRef: BrowserWindow, filePath: string) {

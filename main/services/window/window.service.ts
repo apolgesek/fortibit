@@ -150,10 +150,7 @@ export class WindowService implements IWindowService {
     let loadedWindow: Promise<void> | undefined;
 
     if (this._isDevMode) {
-      require('electron-reload')(global['__basedir'], {
-        electron: require(`${global['__basedir']}/node_modules/electron`)
-      });
-
+    require('electron-reloader')(module, { ignore: /.*\.json$/ });
       loadedWindow = windowRef.loadURL('http://localhost:4200');
     } else {
       const directory = this._isTestMode ? 'dist' : 'src';
@@ -170,8 +167,11 @@ export class WindowService implements IWindowService {
 
   // TODO: create a class which distributes events for all windows and handles the result
   registerAutotypeHandler(activeWindowTitle: string) {
-    const windowsListeners = [];
     this._windows.forEach((win) => {
+      if (win.autocompleteListener) {
+        return;
+      }
+
       const listener = async (_, channel: string, entry) => {
         if (channel === IpcChannel.AutocompleteEntry && entry) {
           const encryptionEvent = {
@@ -191,12 +191,10 @@ export class WindowService implements IWindowService {
 
           await this._sendInputService.typeWord(payload.decrypted);
           await this._sendInputService.pressKey(KeyCode.ENTER);
-  
-          windowsListeners.forEach((l, i) => this._windows[i].browserWindow.webContents.off('ipc-message', l));
         }
       };
 
-      windowsListeners.push(listener);
+      win.autocompleteListener = listener;
       win.browserWindow.webContents.on('ipc-message', listener);
     });
 

@@ -1,12 +1,13 @@
 import { app, dialog, FileFilter, ipcMain, IpcMainEvent, powerMonitor, safeStorage } from 'electron';
-import { XMLParser } from 'fast-xml-parser';
 import { existsSync, readFileSync, rmSync, writeFile, writeFileSync } from 'fs-extra';
 import { basename, join } from 'path';
 import { IProduct } from '../../../product';
-import { IpcChannel } from '../../../shared-models';
+import { ImportHandler, IPasswordEntry, IpcChannel } from '../../../shared-models';
 import { IConfigService } from '../config';
 import { IEncryptionProcessService, MessageEventType } from '../encryption';
+import { IExportService } from '../export';
 import { IIconService } from '../icon';
+import { IImportService } from '../import';
 import { IWindowService } from '../window';
 import { IDatabaseService } from './database-service.model';
 
@@ -55,7 +56,9 @@ export class DatabaseService implements IDatabaseService {
     @IConfigService private readonly _configService: IConfigService,
     @IEncryptionProcessService private readonly _encryptionProcessService: IEncryptionProcessService,
     @IWindowService private readonly _windowService: IWindowService,
-    @IWindowService private readonly _iconService: IIconService
+    @IWindowService private readonly _iconService: IIconService,
+    @IImportService private readonly _importService: IImportService,
+    @IExportService private readonly _exportService: IExportService
   ) {
     this._fileFilters = {
       filters: [{ name: 'Fortibit database file', extensions: [ this._configService.appConfig.fileExtension ] }]
@@ -71,9 +74,10 @@ export class DatabaseService implements IDatabaseService {
       this.openDatabase(event);
     });
 
-    ipcMain.handle(IpcChannel.GetImportedDatabaseMetadata, async () => {
+    ipcMain.handle(IpcChannel.GetImportedDatabaseMetadata, async (_: IpcMainEvent, type: ImportHandler) => {
       try {
-        const payload = await this.getKeepassDatabaseInfo();
+        this._importService.setHandler(type);
+        const payload = await this._importService.getHandler().getMetadata();
 
         return payload;
       } catch (error) {
@@ -81,8 +85,9 @@ export class DatabaseService implements IDatabaseService {
       }
     });
 
-    ipcMain.handle(IpcChannel.Import, async (event: IpcMainEvent, filePath: string) => {
-      return await this.importKeepassDatabase(event, filePath);
+    ipcMain.handle(IpcChannel.Import, async (event: IpcMainEvent, filePath: string, type: ImportHandler) => {
+      this._importService.setHandler(type);
+      return await this._importService.getHandler().import(event, filePath);
     });
 
     ipcMain.handle(IpcChannel.ScanLeaks, async (event: IpcMainEvent, database: string) => {
@@ -103,6 +108,10 @@ export class DatabaseService implements IDatabaseService {
 
     ipcMain.on(IpcChannel.ChangeEncryptionSettings, (_: IpcMainEvent, form: Partial<IProduct>) => {
       this.changeEncryptionSettings(form);
+    });
+
+    ipcMain.handle(IpcChannel.Export, async (event: IpcMainEvent, database: string) => {
+      return await this._exportService.export(this._windowService.getWindowByWebContentsId(event.sender.id), database);
     });
 
     if (this._configService.appConfig.lockOnSystemLock) {
@@ -196,7 +205,11 @@ export class DatabaseService implements IDatabaseService {
     const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { error: string, decrypted: string };
     
     if (!payload.error) {
-      this._iconService.getIcons(window.browserWindow.id, payload.decrypted);
+      const parsedDb = JSON.parse(payload.decrypted);
+      const stores = parsedDb.data.data;
+      const entriesStore = stores.find(x => x.tableName === 'entries');
+  
+      this._iconService.getIcons(window.browserWindow.id, entriesStore.rows);
       this._windowService.setIdleTimer(event.sender.id);
     }
 
@@ -220,81 +233,11 @@ export class DatabaseService implements IDatabaseService {
     };
   }
 
-  private async getKeepassDatabaseInfo(): Promise<any> {
-    const fileObj = await dialog.showOpenDialog({
-      properties: ['openFile'],
-      filters: [{ name: 'Extensible Markup Language', extensions: ['xml'] }]
-    });
-
-    return new Promise((resolve, reject) => {
-      if (!fileObj.canceled) {
-        const xmlFile = readFileSync(fileObj.filePaths[0]).toString();
-        const parser = new XMLParser();
-        const data = parser.parse(xmlFile);
-  
-        const groups = data.KeePassFile.Root.Group;
-        const output = Array.isArray(groups) ? groups.map(x => this.mapEntries(x)) : this.mapEntries(groups.Entry);
-  
-        const payload = {
-          filePath: fileObj.filePaths[0],
-          size: output.length
-        };
-  
-        resolve(payload);
-
-        return;
-      }
-  
-      reject();
-    });
-  }
-
-  private async importKeepassDatabase(event: IpcMainEvent, filePath: string): Promise<string> {
-    const xmlFile = readFileSync(filePath).toString();
-    const parser = new XMLParser();
-    const data = parser.parse(xmlFile);
-
-    const groups = data.KeePassFile.Root.Group;
-    const output = Array.isArray(groups) ? groups.map(x => this.mapEntries(x)) : this.mapEntries(groups.Entry);
-
-    const encryptedOutput = await Promise.all(output.map(async (e) => {
-      const encryptionEvent = {
-        plain: e.password,
-        type: MessageEventType.EncryptString
-      };
-  
-      const window = this._windowService.getWindowByWebContentsId(event.sender.id);
-      const password = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { encrypted: string };
-
-      return {
-        ...e,
-        password: password.encrypted
-      };
-    }));
-
-    return Promise.resolve(JSON.stringify(encryptedOutput));
-  }
-
-  private mapEntries(entries: any[]) {
-    return entries.map(x => {
-      return {
-        groupId: 1,
-        username: x.String.find(x => x.Key === 'UserName').Value?.toString(),
-        password: x.String.find(x => x.Key === 'Password').Value?.toString(),
-        title: x.String.find(x => x.Key === 'Title').Value?.toString(),
-        url: x.String.find(x => x.Key === 'URL').Value?.toString(),
-        notes: x.String.find(x => x.Key === 'Notes').Value?.toString(),
-        creationDate: new Date(),
-      };
-    });
-  }
-
   private appendExtension(name: string): string {
     return `${name}.${this._configService.appConfig.fileExtension}`;
   }
 
   private changeEncryptionSettings(settings: Partial<IProduct>) {
-  
     if (settings.lockOnSystemLock !== this._configService.appConfig.lockOnSystemLock) {
       if (settings.lockOnSystemLock) {
         powerMonitor.addListener('lock-screen', this._screenLockHandler);

@@ -1,13 +1,12 @@
 import { Injectable } from "@angular/core";
+import { ICommunicationService } from "@app/core/models";
 import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
-import { IAppConfig } from "../../../../../app-config";
 import * as zxcvbn from 'zxcvbn';
+import { IAppConfig } from "../../../../../app-config";
 
 @Injectable()
-export class WebService {
+export class WebService implements ICommunicationService {
   ipcRenderer: any;
-  os: any;
-  zxcvbn: any;
 
   constructor() {
     this.ipcRenderer = {
@@ -23,15 +22,23 @@ export class WebService {
             }
           } as IAppConfig);
         } else if (channel === IpcChannel.EncryptPassword) {
+          // mock
           return Promise.resolve('test123');
         }
 
         return Promise.resolve('')
       },
+
       send: (channel: IpcChannel, ...args) => {},
       on: (channel: IpcChannel, ...args) => {}
     };
-    this.os = { platform: () => 'web' };
-    this.zxcvbn = zxcvbn;
+  }
+
+  getPlatform(): string {
+    return 'web';
+  }
+
+  getPasswordGenerator(): any {
+    return zxcvbn;
   }
 }

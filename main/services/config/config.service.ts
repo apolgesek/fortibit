@@ -55,6 +55,7 @@ export class ConfigService implements IConfigService {
   set(settings: Partial<IAppConfig>) {  
     this._appConfig = { ...this._appConfig, ...settings };
 
+    console.log(this._appConfig, this.productPath);
     writeFileSync(this._productPath, JSON.stringify(this._appConfig));  
   }
 }

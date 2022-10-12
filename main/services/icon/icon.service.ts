@@ -1,6 +1,6 @@
 import { app, ipcMain, IpcMainEvent } from "electron";
 import { existsSync, unlinkSync } from "fs";
-import { join } from "path";
+import { join, resolve } from "path";
 import { IPasswordEntry, IpcChannel } from "../../../shared-models";
 import { IConfigService } from "../config";
 import { IFileService } from "../file";
@@ -35,7 +35,7 @@ export class IconService implements IIconService {
       }).catch(err => {});
     });
 
-    ipcMain.on(IpcChannel.RemoveIcon, (event: IpcMainEvent, entry: IPasswordEntry) => {
+    ipcMain.handle(IpcChannel.RemoveIcon, (event: IpcMainEvent, entry: IPasswordEntry) => {
       this.removeIcon(entry.iconPath).then(() => {
         const window = this._windowService.getWindowByWebContentsId(event.sender.id);
 
@@ -59,14 +59,10 @@ export class IconService implements IIconService {
     }, this.iconDownloadAttemptIntervalSeconds * 1000);
   }
 
-  getIcons(windowId: number, payload: string) {
-    const parsedDb = JSON.parse(payload);
-    const stores = parsedDb.data.data;
-    const entriesStore = stores.find(x => x.tableName === 'entries');
-
-    for (const row of entriesStore.rows as IPasswordEntry[]) {
-      if (row.url && !row.iconPath) {
-        this.addToQueue({ windowId, id: row.id, url: row.url  });
+  getIcons(windowId: number, entries: IPasswordEntry[]) {
+    for (const entry of entries) {
+      if (entry.url && !entry.iconPath) {
+        this.addToQueue({ windowId, id: entry.id, url: entry.url });
       }
     }
   }

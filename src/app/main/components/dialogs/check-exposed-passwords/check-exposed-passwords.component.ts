@@ -37,7 +37,7 @@ export class CheckExposedPasswordsComponent implements IModal {
     const t0 = performance.now();
 
     combineLatest([
-      from(this.reportService.scanLeaks()),
+      from(this.reportService.scanForLeaks()),
       timer(1000).pipe(take(1))
     ]).subscribe(async ([result]) => {
       const t1 = performance.now();

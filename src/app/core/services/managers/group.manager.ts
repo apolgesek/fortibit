@@ -8,11 +8,12 @@ import { Subject } from "rxjs";
 @Injectable({ providedIn: 'root' })
 export class GroupManager {
   public groups: IPasswordGroup[] = [];
+  public builtInGroups: IPasswordGroup[] = [];
+  public markDirtySource: Subject<void>;
   public selectedGroup?: number;
   public selectedGroupName?: string;
   public contextSelectedGroup?: number;
   public isGroupDragged?: boolean;
-  public markDirtySource: Subject<void>;
 
   get isAddAllowed(): boolean {
     const selectedCategoryId = this.selectedGroup;
@@ -21,15 +22,14 @@ export class GroupManager {
       && selectedCategoryId !== GroupId.Starred;
   }
 
-  constructor(private readonly groupRepository: GroupRepository) {}
+  constructor(private readonly groupRepository: GroupRepository) {
+    this.markDirtySource = new Subject();
+  }
 
   async removeGroup() {
-    if (!this.selectedGroup) {
-      this.throwCategoryNotSelectedError();
-    }
-
     await this.groupRepository.bulkDelete([this.selectedGroup]);
     await this.getGroupsTree();
+    this.markDirty();
   }
 
   async updateGroup(group: IPasswordGroup) {
@@ -87,6 +87,7 @@ export class GroupManager {
 
     this.groups = [];
     this.groups[0] = allGroups.find(g => g.id === GroupId.Root);
+    this.builtInGroups = builtInGroups.map(g => initialEntries.find(x => x.id === g));
 
     const rootGroups = allGroups.filter(x => !x.parent && !builtInGroups.includes(x.id)).sort((a, b) => a.name.localeCompare(b.name));
 
@@ -95,10 +96,6 @@ export class GroupManager {
     }
 
     return this.groups;
-  }
-
-  private throwCategoryNotSelectedError(): never {
-    throw new Error('No category has been selected.');
   }
 
   private markDirty() {

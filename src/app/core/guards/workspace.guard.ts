@@ -8,7 +8,7 @@ import { ICommunicationService } from '../models';
 import { WorkspaceService } from '../services';
 
 @Injectable()
-export class DashboardGuard implements CanActivate {
+export class WorkspaceGuard implements CanActivate {
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly workspaceService: WorkspaceService,

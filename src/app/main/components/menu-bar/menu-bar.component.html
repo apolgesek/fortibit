@@ -17,7 +17,16 @@
 						Import <span class="pi pi-angle-right"></span>
 					</a>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<a href="#" aria-hidden="true" appMenuItem (activate)="import()">KeePass (XML)</a>
+						<a href="#" aria-hidden="true" appMenuItem (activate)="import(importHandler.KeePass)">KeePass (.xml)</a>
+						<a href="#" aria-hidden="true" appMenuItem (activate)="import(importHandler.OnePassword)">1Password (.csv)</a>
+					</div>
+				</div>
+				<div appDropdown class="dropdown" style="width: 100%;">
+					<a href="#" appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
+						Export <span class="pi pi-angle-right"></span>
+					</a>
+					<div *appDropdownMenu class="dropdown-content left submenu-container">
+						<a href="#" aria-hidden="true" appMenuItem (activate)="export()">CSV</a>
 					</div>
 				</div>
 				<a href="#" appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">Lock</a>

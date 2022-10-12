@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { WorkspaceComponent } from './components/workspace/workspace.component';
 import { MasterPasswordComponent } from './components/master-password/master-password.component';
-import { DashboardGuard } from '../core/guards/dashboard.guard';
+import { WorkspaceGuard } from '../core/guards/workspace.guard';
 
 const routes: Routes = [
   {
@@ -15,13 +15,13 @@ const routes: Routes = [
     path: 'workspace',
     component: WorkspaceComponent,
     data: { animation:  'workspacePage' },
-    canActivate: [DashboardGuard]
+    canActivate: [WorkspaceGuard]
   }
 ];
 
 @NgModule({
   declarations: [],
-  providers: [DashboardGuard],
+  providers: [WorkspaceGuard],
   imports: [ CommonModule, RouterModule.forChild(routes) ],
   exports: [ RouterModule ]
 })

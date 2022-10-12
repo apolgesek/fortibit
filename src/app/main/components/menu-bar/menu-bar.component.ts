@@ -1,11 +1,13 @@
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
 import { EventType } from '@app/core/enums';
 import { ModalService } from '@app/core/services/modal.service';
-import { DatabaseType, IpcChannel } from '@shared-renderer/index';
+import { ImportHandler, IpcChannel } from '@shared-renderer/index';
 import { AppConfig } from 'environments/environment';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
-import { WorkspaceService } from '@app/core/services';
+import { NotificationService, WorkspaceService } from '@app/core/services';
+import { exportDB } from 'dexie-export-import';
+import { DbContext } from '@app/core/database';
 
 @Component({
   selector: 'app-menu-bar',
@@ -15,17 +17,11 @@ import { WorkspaceService } from '@app/core/services';
 export class MenuBarComponent implements OnInit {
   private maximizeIconPath: 'max-k' | 'restore-k' = 'max-k';
 
+  public readonly importHandler = ImportHandler;
+
   public get closeIcons(): string {
     return [
       'assets/icons/close.png',
-      // 'assets/icons/close-k-12.png 1.25x',
-      // 'assets/icons/close-k-15.png 1.5x',
-      // 'assets/icons/close-k-15.png 1.75x',
-      // 'assets/icons/close-k-20.png 2x',
-      // 'assets/icons/close-k-20.png 2.25x',
-      // 'assets/icons/close-k-24.png 2.5x',
-      // 'assets/icons/close-k-30.png 3x',
-      // 'assets/icons/close-k-30.png 3.5x'
     ].join(',');
   }
 
@@ -73,7 +69,9 @@ export class MenuBarComponent implements OnInit {
     private readonly zone: NgZone,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly workspaceService: WorkspaceService,
-    private readonly modalService: ModalService
+    private readonly modalService: ModalService,
+    private readonly dbContext: DbContext,
+    private readonly notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -106,12 +104,26 @@ export class MenuBarComponent implements OnInit {
     this.modalService.openMasterPasswordWindow({ forceNew: true });
   }
 
-  async import(): Promise<void> {
-    const payload = await this.communicationService.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, DatabaseType.Keepass);
+  async import(handler: ImportHandler): Promise<void> {
+    const payload = await this.communicationService.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, handler);
     
     if (payload) {
       this.modalService.openImportedDbMetadataWindow(payload);
     }
+  }
+
+  async export(): Promise<void> {
+    const blob = await exportDB(this.dbContext);
+
+    const fileReader = new FileReader();
+    fileReader.readAsText(blob);
+    fileReader.onloadend = async () => {
+      const exported = await this.communicationService.ipcRenderer.invoke(IpcChannel.Export, fileReader.result);
+
+      if (exported) {
+        this.notificationService.add({ type: 'success', alive: 5000, message: 'Database exported' });
+      }
+    };
   }
 
   lock() {

@@ -141,7 +141,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     const password = this.newEntryForm.get('passwords.password')?.value;
 
     if (password) {
-      this.passwordScore = this.communicationService.zxcvbn(password).score;
+      this.passwordScore = this.communicationService.getPasswordGenerator()(password).score;
     }
   }
 
@@ -183,7 +183,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   onPasswordChange(event: Event) {
     const password = (event.target as HTMLInputElement).value;
-    this.passwordScore = this.communicationService.zxcvbn(password).score;
+    this.passwordScore = this.communicationService.getPasswordGenerator()(password).score;
   }
 
   ngOnDestroy(): void {
@@ -216,6 +216,9 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     markAllAsDirty(this.newEntryForm);
 
     if (this.newEntryForm.invalid) {
+      const el = (this.entryForm.nativeElement as HTMLElement).querySelector('.ng-invalid');
+      this.entryForm.nativeElement.scrollTo({ top: el.getBoundingClientRect().top });
+
       return;
     }
 

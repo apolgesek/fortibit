@@ -5,7 +5,7 @@ import { ActivatedRoute  } from '@angular/router';
 import { CommunicationService } from '@app/app.module';
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
-import { EntryManager, GroupManager, WorkspaceService } from '@app/core/services';
+import { EntryManager, GroupManager, ModalService, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
 import { IpcChannel } from '@shared-renderer/index';
 import { IpcRendererEvent } from 'electron/main';
@@ -39,6 +39,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     private readonly zone: NgZone,
     private readonly route: ActivatedRoute,
     private readonly configService: ConfigService,
+    private readonly modalService: ModalService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     @Inject(DOCUMENT) private readonly document: Document
   ) { 
@@ -109,6 +110,10 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     this.communicationService.ipcRenderer.invoke(IpcChannel.CreateNew).then(() => {
       this.workspaceService.createNew();
     });
+  }
+
+  openSettingsWindow() {
+    this.modalService.openSettingsWindow();
   }
 
   async onLoginSubmit() {

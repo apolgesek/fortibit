@@ -1,4 +1,4 @@
-import { AfterViewInit, ContentChildren, Directive, ElementRef, HostBinding, OnDestroy, Optional, QueryList, SkipSelf } from '@angular/core';
+import { AfterViewInit, ContentChildren, Directive, ElementRef, HostBinding, Input, OnDestroy, Optional, QueryList, SkipSelf } from '@angular/core';
 import { delay, filter, fromEvent, Subject, takeUntil } from 'rxjs';
 import { DropdownStateService } from '../services/dropdown-state.service';
 import { MenuService } from '../services/menu.service';
@@ -9,9 +9,10 @@ import { MenuItemDirective } from './menu-item.directive';
   providers: [DropdownStateService],
 })
 export class DropdownDirective implements AfterViewInit, OnDestroy {
-  public index: number;
   @ContentChildren(MenuItemDirective, { descendants: true })
   public menuItems: QueryList<MenuItemDirective>;
+  @Input() public select = false;
+  public index: number;
 
   @HostBinding('class.open')
   public get isOpen(): boolean {
@@ -38,6 +39,8 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
     fromEvent(this.el.nativeElement, 'keydown')
     .pipe(takeUntil(this.dropdownClosed))
     .subscribe((event: KeyboardEvent) => {
+      event.stopPropagation();
+
       switch (event.key) {
         case 'ArrowDown':
           this.focusNext();
@@ -52,18 +55,11 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
           this.onLeftArrowDown();
           break;
         case 'Escape':
-          this.dropdownState.close();
-          
-          if (this.dropdownState.parent) {
-            this.dropdownState.parent.currentItem.focus();
-          }
-  
+          this.dropdownState.closeAndFocusFirst();  
           break;
         default:
           break;
       }
-
-      event.stopPropagation();
     });
   }
 
@@ -79,7 +75,12 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
 
     this.dropdownState.stateChanges$.pipe(delay(0), filter(x => x.notifyChanges), takeUntil(this.destroyed)).subscribe(state => {
       if (state.isOpen) {  
-        this.dropdownState.currentItem = this.menuItems.first;
+        if (!this.select) {
+          this.dropdownState.currentItem = this.menuItems.first;
+        } else {
+          this.dropdownState.currentItem = this.menuItems.find(x => x.nativeElement.classList.contains('selected')) ?? this.menuItems.first;
+        }
+
         this.dropdownState.currentItem.focus();
       
         this.enableKeyboardNavigation();

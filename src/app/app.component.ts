@@ -2,6 +2,7 @@ import { animate, query, style, transition, trigger } from '@angular/animations'
 import { DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { ChildrenOutletContexts, NavigationStart, Router } from '@angular/router';
+import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { fromEvent } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { AppConfig } from '../environments/environment';
@@ -76,7 +77,7 @@ export class AppComponent implements OnInit {
     @Inject(DOCUMENT) private document: Document,
   ) {
     console.log('AppConfig', AppConfig);
-    this.isElectron = this.communicationService.os.platform() != 'web';
+    this.isElectron = this.communicationService.getPlatform() != 'web';
     this.appViewContainer.appViewContainerRef = this.viewContainerRef;
   }
 
@@ -92,6 +93,8 @@ export class AppComponent implements OnInit {
     this.preloadFonts().then(() => {
       this.fontsLoaded = true;
     });
+
+    this.communicationService.ipcRenderer.send(IpcChannel.CheckUpdate);
   }
 
   getRouteAnimationData() {
@@ -102,7 +105,6 @@ export class AppComponent implements OnInit {
     const fontsArray = []
     document.fonts.forEach(x => fontsArray.push(x));
 
-    console.log(fontsArray);
     return Promise.all(fontsArray.map(x => x.status === 'unloaded' && x.load()));
   }
 

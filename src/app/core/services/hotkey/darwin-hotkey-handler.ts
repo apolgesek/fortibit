@@ -71,8 +71,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
   public registerDeleteGroup(event: KeyboardEvent) {
     if (event.metaKey && event.key === 'Backspace'
       && this.groupManager.selectedGroup
-      && this.groupManager.selectedGroup !== GroupId.Root
-      && document.querySelector('.tree-focused')) {
+      && this.groupManager.selectedGroup !== GroupId.Root) {
       this.modalService.openDeleteGroupWindow();
       event.preventDefault();
     }
@@ -82,7 +81,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
     if (event.key === 'e'
       && event.metaKey
       && this.groupManager.selectedGroup
-      && this.groupManager.selectedGroup !== GroupId.Root && document.querySelector('.tree-focused')) {
+      && this.groupManager.selectedGroup !== GroupId.Root) {
       this.modalService.openGroupWindow('edit');
       event.preventDefault();
     }

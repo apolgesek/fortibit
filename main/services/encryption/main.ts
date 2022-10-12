@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { IPasswordEntry } from '../../../shared-models';
 import { LeakService } from '../leak/leak.service';
 import { IEncryptionService } from './encryption-service.model';
 import { EncryptionService } from './encryption.service';
@@ -41,6 +42,10 @@ class Main {
 
     case MessageEventType.DecryptString:
       this.decryptString(event);
+      break;
+
+    case MessageEventType.BulkDecryptString:
+      this.bulkDecryptString(event);
       break;
 
     case MessageEventType.GetLeaks:
@@ -145,6 +150,14 @@ class Main {
 
     const decryptedPassword = this._inMemoryEncryptionService.decryptString(encrypted, memoryKey);
     process.send({ decrypted: decryptedPassword });
+  }
+
+  public bulkDecryptString(event: EventPayload) {
+    const { rows, memoryKey } = event;
+
+    let decrypted: IPasswordEntry[] = JSON.parse(rows);
+    decrypted = decrypted.map(x => ({ ...x, password: this._inMemoryEncryptionService.decryptString(x.password, memoryKey) }));
+    process.send({ decrypted });
   }
 }
 

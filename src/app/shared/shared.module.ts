@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ContextMenuComponent } from './components/context-menu/context-menu.component';
-import { MasterPasswordSetupComponent } from './components/master-password-setup/master-password-setup.component';
 import { NotificationComponent } from './components/notification/notification.component';
 import { ContextMenuItemDirective } from './directives/context-menu-item.directive';
 import { DropdownMenuDirective } from './directives/dropdown-menu.directive';
@@ -30,7 +29,6 @@ import { DateMaskDirective } from './directives/date-mask.directive';
     DropdownDirective,
     DropdownMenuDirective,
     MenuItemDirective,
-    MasterPasswordSetupComponent,
     MenuDirective,
     TabsetComponent,
     TabComponent,
@@ -52,12 +50,11 @@ import { DateMaskDirective } from './directives/date-mask.directive';
     DropdownToggleDirective,
     MenuItemDirective,
     MenuDirective,
-    MasterPasswordSetupComponent,
     TabsetComponent,
     TabComponent,
     FocusableListDirective,
     FocusableListItemDirective,
-    DateMaskDirective
+    DateMaskDirective,
   ],
 })
 export class SharedModule {}

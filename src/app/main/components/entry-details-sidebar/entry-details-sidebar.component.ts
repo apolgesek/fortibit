@@ -58,7 +58,7 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
     });
 
     this.entryManager.selectEntry$.pipe(takeUntil(this.destroyed)).subscribe(entry => {
-      this.group = this.findGroup(this.groupManager.groups, entry.groupId);
+      this.group = this.findGroup([...this.groupManager.groups, ...this.groupManager.builtInGroups], entry.groupId);
       this.shouldDisplayToolbar = this.group.id !== GroupId.RecycleBin;
     });
   }
@@ -82,10 +82,10 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
     this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, AppConfig.urls.repositoryUrl + AppConfig.urls.keyboardReference + AppConfig.urls.autotypeShortcut);
   }
 
-  toggleStarred(entry: IPasswordEntry) {
+  async toggleStarred(entry: IPasswordEntry) {
     const starredClass = 'starred';
 
-    this.entryManager.addOrUpdateEntry({ ...entry, isStarred: !entry.isStarred});
+    await this.entryManager.addOrUpdateEntry({ ...entry, isStarred: !entry.isStarred});
 
     if (!entry.isStarred) {
       this.notificationService.add({ message: 'Added to favourites', type: 'success', alive: 5000 });

@@ -1,37 +1,27 @@
-import { Component, ElementRef, Inject, NgZone, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
-import { IpcChannel, UpdateState } from '@shared-renderer/index';
-import { fromEvent, Observable, Subject } from 'rxjs';
-import { scan, startWith, takeUntil, tap } from 'rxjs/operators';
+import { IpcChannel } from '@shared-renderer/index';
+import { fromEvent, Subject } from 'rxjs';
+import { takeUntil, tap } from 'rxjs/operators';
 import { CommunicationService } from '@app/app.module';
 import { ICommunicationService } from '@app/core/models';
 import { WorkspaceService, EntryManager, GroupManager } from '@app/core/services';
-
-interface INotification {
-  type: 'update';
-  content: string;
-}
 
 @Component({
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss'],
 })
-export class ToolbarComponent {
+export class ToolbarComponent implements AfterViewInit, OnDestroy {
   @ViewChild('searchbox') public searchBox!: ElementRef; 
-  public updateAvailable = '';
 
   public searchModes = [
     { label: 'This group', value: false },
     { label: 'All groups', value: true }
   ];
 
-  public readonly notifications$: Observable<INotification[]>;
-  private readonly notificationsSource = new Subject<INotification>();
   private readonly destroyed$ = new Subject<void>();
-
-  private updateListener: (event: Electron.IpcRendererEvent, state: UpdateState, version: string) => void;
 
   get isDatabaseInSync(): boolean {
     return !!this.workspaceService.dateSaved;
@@ -80,24 +70,7 @@ export class ToolbarComponent {
     private readonly searchService: SearchService,
     private readonly modalService: ModalService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly zone: NgZone
   ) {
-    this.notifications$ = this.notificationsSource.asObservable()
-      .pipe(
-        scan((a, c: INotification) => ([...a, c]), [] as INotification[]),
-        startWith([])
-      );
-
-    this.updateListener = (_: Electron.IpcRendererEvent, state: UpdateState, version: string) => {
-      this.zone.run(() => {
-        if (state === UpdateState.Downloaded) {
-          this.updateAvailable = version;
-          this.notificationsSource.next({ type: 'update', content: version });
-        }
-      });
-    };
-
-    this.communicationService.ipcRenderer.on(IpcChannel.UpdateState, this.updateListener);
   }
 
   ngAfterViewInit(): void {
@@ -105,8 +78,6 @@ export class ToolbarComponent {
   }
 
   ngOnDestroy() {
-    this.communicationService.ipcRenderer.off(IpcChannel.UpdateState, this.updateListener);
-
     this.destroyed$.next();
     this.destroyed$.complete();
   }
@@ -132,14 +103,6 @@ export class ToolbarComponent {
   toggleSearchMode() {
     this.isGlobalSearchMode = !this.isGlobalSearchMode;
     this.entryManager.updateEntries();
-  }
-
-  updateAndRelaunch() {
-    this.communicationService.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
-  }
-
-  openSettings() {
-    this.modalService.openSettingsWindow();
   }
 
   private registerFocusEvent(element: HTMLElement, className: string) {

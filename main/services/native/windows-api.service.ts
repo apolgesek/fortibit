@@ -1,6 +1,6 @@
 import { INativeApiService } from './native-api.model';
 
-export class WinApiService implements INativeApiService {
+export class WindowsApiService implements INativeApiService {
   private readonly _instance;
 
   constructor() {

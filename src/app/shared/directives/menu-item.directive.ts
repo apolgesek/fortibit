@@ -27,7 +27,7 @@ export class MenuItemDirective {
     return this.dropdownState;
   }
 
-  private get nativeElement(): HTMLElement {
+  public get nativeElement(): HTMLElement {
     return this.el.nativeElement;
   }
 
@@ -56,7 +56,7 @@ export class MenuItemDirective {
     this.activate.emit();
 
     if (this.closeOnSelect) {
-      this.dropdownState.close();
+      this.dropdownState.closeAndFocusFirst();
     }
 
     event.preventDefault();

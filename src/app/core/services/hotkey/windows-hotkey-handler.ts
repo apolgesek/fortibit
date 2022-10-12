@@ -71,8 +71,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   public registerDeleteGroup(event: KeyboardEvent) {
     if (event.key === 'Delete'
       && this.groupManager.selectedGroup
-      && this.groupManager.selectedGroup !== GroupId.Root
-      && document.querySelector('.tree-focused')) {
+      && this.groupManager.selectedGroup !== GroupId.Root) {
       this.modalService.openDeleteGroupWindow();
       event.preventDefault();
     }
@@ -82,7 +81,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
     if (event.key === 'e'
       && event.ctrlKey
       && this.groupManager.selectedGroup
-      && this.groupManager.selectedGroup !== GroupId.Root && document.querySelector('.tree-focused')) {
+      && this.groupManager.selectedGroup !== GroupId.Root) {
       this.modalService.openGroupWindow('edit');
       event.preventDefault();
     }

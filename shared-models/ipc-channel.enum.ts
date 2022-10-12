@@ -23,7 +23,9 @@ export enum IpcChannel {
   DecryptedContent = 'decryptedContent',
   OpenCloseConfirmationWindow = 'openCloseConfirmationWindow',
   UpdateAndRelaunch = 'updateAndRelaunch',
+  CheckUpdate = 'checkUpdate',
   UpdateState = 'updateState',
+  GetUpdateState = 'getUpdateState',
   ValidatePassword = 'validatePassword',
   ChangePassword = 'changePassword',
   Import = 'import',
@@ -34,5 +36,6 @@ export enum IpcChannel {
   TryReplaceIcon = 'tryReplaceIcon',
   RemoveIcon = 'removeIcon',
   UpdateIcon = 'updateIcon',
-  CreateNew = 'createNew'
+  CreateNew = 'createNew',
+  Export = 'export'
 }

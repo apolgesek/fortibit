@@ -1,7 +1,7 @@
 import { INativeApiService } from '../native';
 import { ISendInputService } from './send-input.model';
 
-export class WinSendInputService implements ISendInputService {
+export class WindowsSendInputService implements ISendInputService {
   private readonly _keypressDelayMs = 0;
 
   constructor(@INativeApiService private readonly _nativeApiService: INativeApiService) {}

@@ -35,6 +35,7 @@ import { map, takeUntil } from 'rxjs/operators';
 export class EntriesTableComponent implements OnInit, OnDestroy {
   @ViewChild(CdkVirtualScrollViewport) public readonly scrollViewport: CdkVirtualScrollViewport | undefined;
   public readonly sortOptions = [
+    { name: 'Date added', prop: 'creationDate', state: Sort.Desc },
     { name: 'Title A-Z', prop: 'title', state: Sort.Asc },
     { name: 'Title Z-A', prop: 'title', state: Sort.Desc },
     { name: 'User A-Z', prop: 'username', state: Sort.Asc },

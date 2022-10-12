@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, ComponentRef } from '@angular/core';
 import { ModalRef } from '@app/core/services';
-import { IAdditionalData, IModal } from '@app/shared';
-import { AboutDialogComponent } from '../about-dialog/about-dialog.component';
+import { IAdditionalData, IModal } from '@app/shared/models/modal.model';
 
 @Component({
   selector: 'app-settings-dialog',
@@ -10,7 +9,7 @@ import { AboutDialogComponent } from '../about-dialog/about-dialog.component';
   styleUrls: ['./settings-dialog.component.scss']
 })
 export class SettingsDialogComponent implements IModal {
-  public readonly ref!: ComponentRef<AboutDialogComponent>;
+  public readonly ref!: ComponentRef<SettingsDialogComponent>;
   public readonly additionalData!: IAdditionalData;
 
   constructor(
