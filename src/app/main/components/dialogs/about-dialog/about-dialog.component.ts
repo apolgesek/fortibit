@@ -2,7 +2,8 @@ import { Component, ComponentRef } from '@angular/core';
 import { ModalRef } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
-import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { take } from 'rxjs';
 import { IAppConfig } from '../../../../../../app-config';
 
@@ -12,8 +13,8 @@ import { IAppConfig } from '../../../../../../app-config';
   styleUrls: ['./about-dialog.component.scss'],
   standalone: true,
   imports: [
+    ModalComponent,
     AutofocusDirective,
-    ModalComponent
   ]
 })
 export class AboutDialogComponent implements IModal {

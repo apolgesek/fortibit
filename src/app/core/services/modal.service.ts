@@ -8,6 +8,7 @@ import { DeleteGroupDialogComponent } from '@app/main/components/dialogs/delete-
 import { EntryDialogComponent } from '@app/main/components/dialogs/entry-dialog/entry-dialog.component';
 import { EntryHistoryComponent } from '@app/main/components/dialogs/entry-history/entry-history.component';
 import { GroupDialogComponent } from '@app/main/components/dialogs/group-dialog/group-dialog.component';
+import { MoveEntryDialogComponent } from '@app/main/components/dialogs/move-entry-dialog/move-entry-dialog.component';
 import { ImportDatabaseMetadataComponent } from '@app/main/components/dialogs/import-database-metadata/import-database-metadata.component';
 import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/master-password-dialog/master-password-dialog.component';
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
@@ -99,6 +100,10 @@ export class ModalService {
   openEntryHistoryWindow(id: number) {
     this.entryManager.editedEntry = this.entryManager.selectedPasswords[0];
     this.modalManager.open(EntryHistoryComponent, { payload: { id } });
+  }
+
+  openMoveEntryWindow(id: number) {
+    this.modalManager.open(MoveEntryDialogComponent, { payload: { id } });
   }
 
   close<T>(ref: ComponentRef<T>) {

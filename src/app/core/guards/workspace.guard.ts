@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { ICommunicationService } from '../models';
 import { WorkspaceService } from '../services';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class WorkspaceGuard implements CanActivate {
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,

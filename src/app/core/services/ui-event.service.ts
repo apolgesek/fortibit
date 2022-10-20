@@ -7,6 +7,10 @@ import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.di
 export class UiEventService {
   handles: SidebarHandleDirective[] = []
 
+  get isIdle(): boolean {
+    return this.handles.every(x => !x.isDragged);
+  }
+
   constructor() { }
 
   registerSidebarHandle(handle: SidebarHandleDirective) {

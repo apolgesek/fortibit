@@ -2,7 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
 import { ICommunicationService } from '@app/core/models';
 import { ModalService } from '@app/core/services';
-import { DropdownDirective, DropdownMenuDirective, DropdownToggleDirective } from '@app/shared';
+import { slideDown } from '@app/shared';
+import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
+import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
+import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
@@ -27,6 +30,9 @@ interface INotification {
     DropdownToggleDirective,
     DropdownMenuDirective,
     MenuItemDirective
+  ],
+  animations: [
+    slideDown
   ]
 })
 export class SettingsButtonComponent implements OnInit {

@@ -3,6 +3,7 @@ import { ModalService } from '@app/core/services/modal.service';
 import { MenuItem } from '@app/shared';
 import { HotkeyHandler } from 'injection-tokens';
 import { ClipboardService, EntryManager } from '.';
+import { GroupId } from '../enums';
 import { IHotkeyHandler } from '../models';
 
 @Injectable({
@@ -98,6 +99,18 @@ export class ContextMenuBuilderService {
       icon: 'pi pi-fw pi-pencil',
       command: () => {
         this.modalService.openEditEntryWindow();
+      }
+    });
+
+    return this;
+  }
+
+  buildMoveEntryContextMenuItem(): this {
+    this.contextMenuItems.push({
+      label: 'Move to... (M)',
+      icon: 'pi pi-fw pi-pencil',
+      command: () => {
+        this.modalService.openMoveEntryWindow(0);
       }
     });
 

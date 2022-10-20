@@ -11,7 +11,8 @@ export interface IWindowService {
   loadWindow(windowRef: BrowserWindow): Promise<void>;
   getWindow(index: number): BrowserWindow;
   removeWindow(windowRef: BrowserWindow): void;
-  registerAutotypeHandler(activeWindowTitle: string): void;
+  findEntry(activeWindowTitle: string): void;
   setIdleTimer(windowId: number): void;
   setTitle(windowId: number, title: string): void;
+  registerAutocompleteShortcut(): void;
 }

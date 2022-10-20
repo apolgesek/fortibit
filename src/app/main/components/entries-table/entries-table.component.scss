@@ -15,7 +15,7 @@ $sidePanelOutDuration: 250ms;
 	@include scrollbar;
 
 	.table-viewport {
-		height: calc(100vh - 5rem - 2rem - 2rem);
+		height: calc(100vh - 5rem - 2rem - 2.5rem);
 		// vertical scrollbar inside the table viewport
 		@include scrollbar;
 	}
@@ -38,7 +38,6 @@ $sidePanelOutDuration: 250ms;
 		cursor: pointer;
 		border: 1px solid transparent;
 		box-sizing: border-box;
-		border-bottom: 1px solid $porcelain;
 		@include default-table-row;
 
 		&:focus,

@@ -12,7 +12,9 @@ import { takeUntil } from 'rxjs/operators';
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule
+  ],
   encapsulation: ViewEncapsulation.None,
 })
 export class ModalComponent implements AfterViewInit, OnDestroy {

@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, ComponentRef, Inject } from '@angular/core';
 import { IpcChannel } from '@shared-renderer/index';
 import { MasterPasswordDialogComponent } from '../master-password-dialog/master-password-dialog.component';
-import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
 import { EventType } from '@app/core/enums';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { ICommunicationService } from '@app/core/models';
 import { WorkspaceService, ModalRef } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { CommunicationService } from 'injection-tokens';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-confirm-exit-dialog',

@@ -45,7 +45,10 @@
 					</a>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
 						<a href="#" aria-hidden="true" appMenuItem (activate)="openExposedPasswordsWindow()">
-							Check exposed passwords
+							Leaked passwords
+						</a>
+						<a href="#" aria-hidden="true" [disabled]="true" appMenuItem>
+							Weak passwords
 						</a>
 					</div>
 				</div>

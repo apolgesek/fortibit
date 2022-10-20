@@ -1,11 +1,13 @@
 import { Component, ComponentRef, Inject } from '@angular/core';
 import { ICommunicationService } from '@app/core/models';
-import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { combineLatest, from, take, timer } from 'rxjs';
 import { ModalRef, ReportService } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { CommunicationService } from 'injection-tokens';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-check-exposed-passwords',
@@ -13,6 +15,7 @@ import { CommunicationService } from 'injection-tokens';
   styleUrls: ['./check-exposed-passwords.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     AutofocusDirective,
     ModalComponent
   ]

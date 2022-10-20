@@ -31,6 +31,8 @@ export class ConfigService {
   }
 
   setConfig(config: Partial<IAppConfig>) {
+    this.communicationService.ipcRenderer.send(IpcChannel.ChangeEncryptionSettings, config);
+
     this.config = {...this.config, ...config};
     this.configLoaded.next(this.config);
   }

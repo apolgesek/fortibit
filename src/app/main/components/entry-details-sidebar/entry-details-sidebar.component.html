@@ -20,9 +20,6 @@
 				<button aria-label="Open URL" *ngIf="entry.url" (click)="openUrl(entry.url)" class="action-btn">
 					<span class="pi pi-link"></span>
 				</button>
-				<button aria-label="Find in group" (click)="revealInGroup()" class="action-btn">
-					<span class="pi pi-compass"></span>
-				</button>
 			</div>
 	
 			<div class="section">
@@ -45,6 +42,11 @@
 				<p><a (click)="openUrl(entry?.url)" href="#">{{ entry?.url }}</a></p>
 			</div>
 
+			<div *ngIf="entry?.notes" class="section">
+				<p class="label">Notes</p>
+				<p>{{ entry?.notes }}</p>
+			</div>
+
 			<div *ngIf="entry?.creationDate" class="section">
 				<p class="label">Creation date</p>
 				<p>{{ entry?.creationDate | date: "dd/MM/yy HH:mm" }}</p>
@@ -53,11 +55,6 @@
 			<div *ngIf="entry?.lastAccessDate" class="section">
 				<p class="label">Last access date</p>
 				<p>{{ entry?.lastAccessDate | date: "dd/MM/yy HH:mm" }}</p>
-			</div>
-
-			<div *ngIf="entry?.notes" class="section">
-				<p class="label">Notes</p>
-				<p>{{ entry?.notes }}</p>
 			</div>
 		</div>
 	</ng-container>
@@ -72,17 +69,13 @@
 		</div>
 		<div class="section">
 			<p class="label">Encryption algorithm</p>
-			<p>AES-256 (Rijndael)</p>
+			<p>AES-256</p>
 		</div>
 		<div class="section">
-			<p class="label">Key derivation function</p>
-			<p>scrypt</p>
-		</div>
-		<div class="section">
-			<p class="label">Global autotype shortcut</p>
+			<p class="label">Autotype shortcut</p>
  			<p>
 				{{ config.autocompleteShortcut }}
-				<span *ngIf="!config.autocompleteRegistered" class="validation-error">(registration failed)</span>
+				<span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
 				<i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
 			</p>
 		</div>

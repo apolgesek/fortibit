@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { randomBytes } from 'crypto';
-import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, powerMonitor, safeStorage } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, IpcMainEvent, nativeImage, powerMonitor, safeStorage } from 'electron';
 import { join } from 'path';
 import { format } from 'url';
+import { IAppConfig } from '../../../app-config';
+import { IProduct } from '../../../product';
 import { IpcChannel } from '../../../shared-models';
 import { EventType } from '../../../src/app/core/enums';
 import { ProcessArgument } from '../../process-argument.enum';
@@ -76,6 +78,10 @@ export class WindowService implements IWindowService {
       }
 
       win.browserWindow.close();
+    });
+
+    ipcMain.on(IpcChannel.ChangeEncryptionSettings, (_, form: Partial<IAppConfig>) => {
+      this.changeEncryptionSettings(form);
     });
   }
 
@@ -165,8 +171,19 @@ export class WindowService implements IWindowService {
     return loadedWindow;
   }
 
+  registerAutocompleteShortcut() {
+    globalShortcut.register(this._configService.appConfig.autocompleteShortcut, () => {
+      const activeWindowTitle = this._nativeApiService.getActiveWindowTitle();
+      this.findEntry(activeWindowTitle);
+    });
+  }
+
+  unregisterAutocompleteShortcut() {
+    globalShortcut.unregister(this._configService.appConfig.autocompleteShortcut);
+  }
+
   // TODO: create a class which distributes events for all windows and handles the result
-  registerAutotypeHandler(activeWindowTitle: string) {
+  findEntry(activeWindowTitle: string) {
     this._windows.forEach((win) => {
       if (win.autocompleteListener) {
         return;
@@ -216,6 +233,18 @@ export class WindowService implements IWindowService {
 
   setTitle(windowId: number, title: string): void {
     this.windows.find(x => x.browserWindow.id === windowId).browserWindow.setTitle(`${title} - Fortibit`);
+  }
+
+  private changeEncryptionSettings(settings: Partial<IProduct>) {
+    if (settings.autoTypeEnabled !== this._configService.appConfig.autoTypeEnabled) {
+      if (settings.autoTypeEnabled) {
+        this.registerAutocompleteShortcut();
+      } else {
+        this.unregisterAutocompleteShortcut();
+      }
+    }
+  
+    this._configService.set(settings);
   }
 
   private onLock(windowId: number) {

@@ -8,7 +8,7 @@
 				<button appDropdownToggle appMenuItem class="filters">
 					<span class="pi pi-sliders-h"></span>
 				</button>
-				<div *appDropdownMenu class="dropdown-content right filter-dropdown">
+				<div *appDropdownMenu class="dropdown-content right filter-dropdown" @slideDown>
 					<div appDropdown [select]="true" class="dropdown">
 						<label for="sort-by">Sort by:</label>
 						<div (click)="$event.stopPropagation()" style="position: relative; width: 120px;">
@@ -51,8 +51,8 @@
 				<div
 					data-prevent-entry-deselect
 					[appFocusableListItem]="item"
-					[appContextMenuItem]="selectedEntries.length === 1 ? entryMenuItems : multiEntryMenuItems"
-					(mousedown)="selectEntry($event, item)"
+					[appContextMenuItem]="getContextMenu(item)"
+					(click)="selectEntry($event, item)"
 					(contextmenu)="showEntryContextMenu($event, item)"
 					[attr.draggable]="entriesDragEnabled"
 					role="row"

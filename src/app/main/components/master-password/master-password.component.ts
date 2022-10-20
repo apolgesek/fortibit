@@ -88,7 +88,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   async selectDefaultGroup() {
     this.groupManager.selectGroup(GroupId.Root);
     this.entryManager.setByGroup(GroupId.Root);
-    this.entryManager.updateEntries();
+    this.entryManager.updateEntriesSource();
   }
 
   // make sure window preview displays password entry page

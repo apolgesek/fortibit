@@ -1,0 +1,41 @@
+@import 'mixins';
+@import 'variables';
+
+.list {
+  margin-top: 1rem;
+}
+
+.list-viewport, .not-found {
+  height: 248px;
+}
+
+.list-viewport {
+  @include scrollbar;
+}
+
+.not-found {
+  padding-top: 1rem;
+  width: 100%;
+  text-align: center;
+}
+
+.list-item {
+  @include font-medium;
+  display: flex;
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  height: 20px;
+  color: $pickled-bluewood;
+  border-radius: 0.25rem;
+
+  &:hover, &:focus {
+    outline: none;
+    background-color: $porcelain;
+  }
+
+  .pi {
+    margin-right: 0.5rem;
+  }
+}

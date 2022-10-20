@@ -50,6 +50,7 @@
 .dialog-message {
 	@include scrollbar;
 	padding: 0.5rem 0;
+	padding-right: 1rem;
 	font-size: 0.875rem;
 	flex: 1;
 	overflow: auto;
@@ -86,4 +87,10 @@
 
 .settings-modal {
 	min-height: 460px;
+}
+
+.move-entry-modal {
+	min-width: auto !important;
+	max-width: auto !important;
+	width: 300px;
 }

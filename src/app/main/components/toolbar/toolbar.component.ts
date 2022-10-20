@@ -1,15 +1,17 @@
-import { AfterViewInit, Component, ElementRef, Inject, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
 import { fromEvent, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import { WorkspaceService, EntryManager, GroupManager } from '@app/core/services';
-import { DropdownDirective, DropdownToggleDirective, DropdownMenuDirective } from '@app/shared';
-import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
-import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { SettingsButtonComponent } from '../settings-button/settings-button.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
+import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
+import { MenuDirective } from '@app/shared/directives/menu.directive';
+import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
+import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 
 @Component({
   selector: 'app-toolbar',
@@ -114,7 +116,7 @@ export class ToolbarComponent implements AfterViewInit, OnDestroy {
 
   toggleSearchMode() {
     this.isGlobalSearchMode = !this.isGlobalSearchMode;
-    this.entryManager.updateEntries();
+    this.entryManager.updateEntriesSource();
   }
 
   private registerFocusEvent(element: HTMLElement, className: string) {

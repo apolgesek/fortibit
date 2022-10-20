@@ -20,7 +20,7 @@ export class DateMaskDirective implements ControlValueAccessor {
 
   private readonly separator = '/';
   private readonly dateRegex = /[0-9]{2}\/[0-9]{2}\/[0-9]{4}/;
-  private readonly mask = `mm${this.separator}dd${this.separator}yyyy`;
+  private readonly mask = `dd${this.separator}mm${this.separator}yyyy`;
   private readonly allowedKeys = ['ArrowLeft', 'ArrowRight', 'Backspace', 'Home', 'End', 'Tab'];
   constructor(private readonly el: ElementRef) { }
 

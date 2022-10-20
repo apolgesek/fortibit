@@ -7,10 +7,12 @@ import { ICommunicationService } from '@app/core/models';
 import { NotificationService, WorkspaceService } from '@app/core/services';
 import { exportDB } from 'dexie-export-import';
 import { DbContext } from '@app/core/database';
-import { MenuDirective } from '@app/shared/directives/menu.directive';
-import { DropdownDirective, DropdownMenuDirective, DropdownToggleDirective } from '@app/shared';
-import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { CommunicationService } from 'injection-tokens';
+import { MenuDirective } from '@app/shared/directives/menu.directive';
+import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
+import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
+import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
+import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 
 @Component({
   selector: 'app-menu-bar',

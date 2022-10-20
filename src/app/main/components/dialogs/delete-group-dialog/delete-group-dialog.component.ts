@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, ComponentRef } from '@angular/core';
-import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
 import { GroupManager, ModalRef } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+
 @Component({
   selector: 'app-delete-group-dialog',
   templateUrl: './delete-group-dialog.component.html',

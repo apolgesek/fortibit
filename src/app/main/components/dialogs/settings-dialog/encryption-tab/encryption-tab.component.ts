@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ICommunicationService } from '@app/core/models';
@@ -14,6 +15,7 @@ import { IProduct } from '../../../../../../../product';
   styleUrls: ['./encryption-tab.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule
   ]
 })
@@ -64,7 +66,6 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
             lockOnSystemLock: form.lockOnSystemLock
           } as Partial<IProduct>;
 
-          this.communicationService.ipcRenderer.send(IpcChannel.ChangeEncryptionSettings, configPartial);
           this.configService.setConfig(configPartial);
         }
       });

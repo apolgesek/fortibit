@@ -22,10 +22,9 @@ type GetSearchResultsModel = [passwords: IPasswordEntry[], searchPhrase: string]
 export class EntryManager {
   public readonly entries$: Observable<IPasswordEntry[]>;
   public readonly reloadedEntries$: Observable<void>;
-  public readonly revealInGroup$: Observable<IPasswordEntry>;
   public readonly selectEntry$: Observable<IPasswordEntry>;
 
-  public draggedEntries: number[] = [];
+  public movedEntries: number[] = [];
   public editedEntry?: IPasswordEntry;
   public passwordEntries: IPasswordEntry[] = [];
   public selectedPasswords: IPasswordEntry[] = [];
@@ -33,7 +32,6 @@ export class EntryManager {
   public markDirtySource: Subject<void>;
 
   private readonly reloadedEntriesSource: Subject<void> = new Subject();
-  private readonly revealedInGroupSource: Subject<IPasswordEntry> = new Subject();
   private readonly entrySelectedSource: Subject<IPasswordEntry> = new Subject();
   private readonly passwordListSource$: BehaviorSubject<IPasswordEntry[]> = new BehaviorSubject<IPasswordEntry[]>([]);
 
@@ -65,7 +63,6 @@ export class EntryManager {
     );
 
     this.reloadedEntries$ = this.reloadedEntriesSource.asObservable();
-    this.revealInGroup$ = this.revealedInGroupSource.asObservable();
     this.selectEntry$ = this.entrySelectedSource.asObservable();
 
     this.handleEntryAutotype();
@@ -82,7 +79,7 @@ export class EntryManager {
           entry.lastModificationDate = new Date();
           entry.iconPath = iconPath;
 
-          this.updateEntries();
+          this.updateEntriesSource();
         });
       });
     });
@@ -126,26 +123,12 @@ export class EntryManager {
     return id;
   }
 
-  async setByGroup(id: number) {
-    if (id === GroupId.Starred) {
-      this.passwordEntries = await this.entryRepository.getAllByPredicate(x => x.isStarred);
-    } else if (id === GroupId.AllItems) {
-      this.passwordEntries = await this.entryRepository.getAll();
-    } else {
-      this.passwordEntries = await this.entryRepository.getAllByGroup(id);
-    }
+  async setByGroup(id: number): Promise<void> {
+    this.passwordEntries = await this.getEntries(id);
   }
 
-  private async getEntries(): Promise<IPasswordEntry[]> {
-    let entries = [];
-
-    if (this.groupManager.selectedGroup === GroupId.Starred) {
-      entries = await this.entryRepository.getAllByPredicate(x => x.isStarred);
-    } else if (this.groupManager.selectedGroup === GroupId.AllItems) {
-      entries = await this.entryRepository.getAll();
-    } else {
-      entries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup);
-    }
+  private async getEntries(id = this.groupManager.selectedGroup): Promise<IPasswordEntry[]> {
+    const entries = await this.getEntriesInternal(id);
 
     for (const entry of entries) {
       this.setExpiration(entry);
@@ -158,8 +141,8 @@ export class EntryManager {
     const addedEntries = await this.entryRepository.bulkAdd(entries);
 
     if (entries.some(x => x.groupId === this.groupManager.selectedGroup)) {
-      this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup as number);
-      this.updateEntries();
+      this.passwordEntries = await this.getEntries();
+      this.updateEntriesSource();
     }
 
     this.markDirty();
@@ -167,7 +150,7 @@ export class EntryManager {
     return addedEntries;
   }
 
-  async deleteEntry() {
+  async deleteEntry(): Promise<void> {
     if (this.groupManager.selectedGroup === GroupId.RecycleBin) {
       for await (const entry of this.selectedPasswords) {
         this.removeIconPath(entry);
@@ -179,21 +162,24 @@ export class EntryManager {
       await this.entryRepository.softDelete(this.selectedPasswords.map(p => p.id) as number[]);
     }
 
-    this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup as number);
-    this.selectedPasswords = [];
+    this.passwordEntries = await this.getEntries();
 
+    this.selectedPasswords = [];
     this.markDirty();
   }
 
-  async moveEntry(targetGroupId: number) {
-    this.passwordEntries = this.passwordEntries.filter(e => !this.draggedEntries.includes(e.id as number));
-    this.updateEntries();
+  async moveEntry(targetGroupId: number): Promise<void> {
+    if (this.groupManager.selectedGroup !== GroupId.AllItems && this.groupManager.selectedGroup !== GroupId.Starred) {
+      this.passwordEntries = this.passwordEntries.filter(e => !this.movedEntries.includes(e.id as number));
+      this.updateEntriesSource();
+    }
 
-    const draggedEntries = [...this.draggedEntries];
+    const draggedEntries = [...this.movedEntries];
     await this.entryRepository.moveEntries(draggedEntries, targetGroupId);
-    this.passwordEntries = await this.entryRepository.getAllByGroup(this.groupManager.selectedGroup as number);
-    
-    this.draggedEntries = [];
+
+    this.passwordEntries = await this.getEntries();
+
+    this.movedEntries = [];
     this.selectedPasswords = [];
 
     this.markDirty();
@@ -221,7 +207,7 @@ export class EntryManager {
     await this.getEntryHistory(entry.id);
   }
 
-  updateEntries() {
+  updateEntriesSource() {
     this.passwordListSource$.next([...this.passwordEntries as IPasswordEntry[]]);
   }
 
@@ -235,8 +221,14 @@ export class EntryManager {
     }
   }
 
-  revealInGroup(entry: IPasswordEntry) {
-    this.revealedInGroupSource.next(entry);
+  private async getEntriesInternal(id: number): Promise<IPasswordEntry[]> {
+    if (id === GroupId.Starred) {
+      return this.entryRepository.getAllByPredicate(x => x.isStarred);
+    } else if (id === GroupId.AllItems) {
+      return this.entryRepository.getAll();
+    } else {
+      return this.entryRepository.getAllByGroup(id);
+    }
   }
 
   private setExpiration(entry: IPasswordEntry): void {
@@ -306,7 +298,7 @@ export class EntryManager {
   }
 
   private markDirty() {
-    this.updateEntries();
+    this.updateEntriesSource();
 
     this.markDirtySource.next();
   }

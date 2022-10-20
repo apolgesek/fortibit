@@ -1,11 +1,12 @@
 import { Component, ComponentRef, Inject } from '@angular/core';
 import { ICommunicationService } from '@app/core/models';
 import { NotificationService } from '@app/core/services/notification.service';
-import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { WorkspaceService, ModalRef, ElectronService } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { CommunicationService } from 'injection-tokens';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-import-database-metadata',

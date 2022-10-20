@@ -1,11 +1,13 @@
 import { Component, ComponentRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { IpcChannel } from '@shared-renderer/index';
-import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
 import { EventType } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { WorkspaceService, ModalRef } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { CommunicationService } from 'injection-tokens';
+import { MasterPasswordSetupComponent } from '../../master-password-setup/master-password-setup.component';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-master-password-dialog',
@@ -13,6 +15,7 @@ import { CommunicationService } from 'injection-tokens';
   styleUrls: ['./master-password-dialog.component.scss'],
   standalone: true,
   imports: [
+    MasterPasswordSetupComponent,
     AutofocusDirective,
     ModalComponent
   ]

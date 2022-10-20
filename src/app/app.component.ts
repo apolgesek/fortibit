@@ -1,7 +1,7 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
-import { ChildrenOutletContexts, NavigationStart, Router } from '@angular/router';
+import { ChildrenOutletContexts, NavigationStart, Router, RouterModule } from '@angular/router';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { CommunicationService } from 'injection-tokens';
 import { fromEvent } from 'rxjs';
@@ -52,6 +52,11 @@ export const routeAnimations = trigger("routeAnimations", [
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: true,
+  imports: [
+    RouterModule,
+    CommonModule,
+    MenuBarComponent
+  ],
   animations: [
     routeAnimations
   ]
@@ -137,7 +142,7 @@ export class AppComponent implements OnInit {
   private handleEntryDeselection() {
     fromEvent(this.document, 'mouseup')
       .pipe(tap((event: MouseEvent) => {
-        if (this.isOutsideClick(event) && !this.uiEventService.handles.some(x => x.isDragged)) {
+        if (this.isOutsideClick(event) && this.uiEventService.isIdle) {
           this.entryManager.selectedPasswords = [];
         }
       })).subscribe();

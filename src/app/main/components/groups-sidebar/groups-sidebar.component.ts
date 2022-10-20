@@ -107,7 +107,7 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     this.entryManager.moveEntry(to);
   }
 
-  async selectGroup(id: number, reveal = false): Promise<number> {
+  async selectGroup(id: number): Promise<number> {
     if (!id) {
       return;
     }
@@ -115,14 +115,10 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     await this.entryManager.setByGroup(id);
   
     this.searchService.reset();
-    this.entryManager.updateEntries();
+    this.entryManager.updateEntriesSource();
     this.entryManager.reloadEntries();
 
     await this.groupManager.selectGroup(id);
-
-    if (!reveal) {
-      this.entryManager.selectedPasswords = [];
-    }
 
     return id;
   }

@@ -1,13 +1,15 @@
-import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ICommunicationService } from '@app/core/models';
 import { WorkspaceService, ConfigService, ModalService, NotificationService } from '@app/core/services';
 import { MasterPasswordSetupComponent } from '@app/main/components/master-password-setup/master-password-setup.component';
-import { valueMatchValidator } from '@app/shared/validators';
+import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { CommunicationService } from 'injection-tokens';
-import { delay, from, map, Observable, tap } from 'rxjs';
+import { debounceTime, delay, distinctUntilChanged, from, map, Observable, Subject, take, takeUntil, tap } from 'rxjs';
+import { IAppConfig } from '../../../../../../../app-config';
 import { IProduct } from '../../../../../../../product';
 
 @Component({
@@ -16,13 +18,17 @@ import { IProduct } from '../../../../../../../product';
   styleUrls: ['./password-change-tab.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     MasterPasswordSetupComponent
   ]
 })
-export class PasswordChangeTabComponent {
+export class PasswordChangeTabComponent implements OnInit, OnDestroy {
   public readonly isControlInvalid = isControlInvalid;
   public passwordForm!: FormGroup;
+
+  private readonly destroyed: Subject<void> = new Subject();
+  private readonly debounceTimeMs = 500;
 
   get passwordsGroup(): FormGroup {
     return this.passwordForm.get('newPasswords') as FormGroup;
@@ -58,14 +64,37 @@ export class PasswordChangeTabComponent {
     private readonly modalService: ModalService,
     private readonly notificationService: NotificationService,
     private readonly configService: ConfigService,
-    private readonly workspaceService: WorkspaceService  ) {
-    this.passwordForm = this.formBuilder.group({
-      currentPassword: [null, { validators: [Validators.required], asyncValidators: [this.passwordValidator()], updateOn: 'blur' }],
-      newPasswords: this.formBuilder.group({
-        password: [null, { validators: Validators.compose([Validators.required, Validators.minLength(6)]) }],
-        repeatPassword: [null]
-      }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
+    private readonly workspaceService: WorkspaceService) {}
+
+  ngOnInit() {
+    this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
+      this.passwordForm = this.formBuilder.group({
+        autoType: [config.autoTypeEnabled],
+        currentPassword: [null, { validators: [Validators.required], asyncValidators: [this.passwordValidator()], updateOn: 'blur' }],
+        newPasswords: this.formBuilder.group({
+          password: [null, { validators: Validators.compose([Validators.required, Validators.minLength(6)]) }],
+          repeatPassword: [null]
+        }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
+      });
+
+      this.passwordForm.get('autoType').valueChanges
+      .pipe(
+        debounceTime(this.debounceTimeMs),
+        distinctUntilChanged(),
+        takeUntil(this.destroyed)
+      ).subscribe((value) => {
+        const configPartial = {
+          autoTypeEnabled: value,
+        } as Partial<IAppConfig>;
+
+        this.configService.setConfig(configPartial);
+      });
     });
+  }
+
+  ngOnDestroy() {
+    this.destroyed.next();
+    this.destroyed.complete();
   }
 
   async savePassword() {
@@ -99,7 +128,6 @@ export class PasswordChangeTabComponent {
       displayIcons: true
     } as Partial<IProduct>;
 
-    this.communicationService.ipcRenderer.send(IpcChannel.ChangeEncryptionSettings, configPartial);
     this.configService.setConfig(configPartial);
 
     this.notificationService.add({

@@ -1,7 +1,7 @@
-import { ApplicationRef, ComponentRef, EmbeddedViewRef, Injectable, Renderer2, RendererFactory2, ViewContainerRef } from '@angular/core';
-import { NotificationComponent } from '@app/shared/components/notification/notification.component';
+import { ApplicationRef, ComponentRef, EmbeddedViewRef, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { IToastModel } from '../models';
 import { AppViewContainer } from './app-view-container';
+import { NotificationComponent } from '../../shared/components/notification/notification.component'
 
 @Injectable({
   providedIn: 'root'

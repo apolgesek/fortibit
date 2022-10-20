@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { AfterViewInit, Directive, ElementRef, HostBinding, Inject, Input, NgZone, OnDestroy, Renderer2 } from '@angular/core';
 import { UiEventService } from '@app/core/services';
+
 @Directive({
   selector: '[appSidebarHandle]',
   host: { 'class': 'handle' },

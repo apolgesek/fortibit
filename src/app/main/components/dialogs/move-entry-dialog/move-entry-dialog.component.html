@@ -1,0 +1,38 @@
+
+<app-modal bodyClass="move-entry-modal" data-prevent-entry-deselect>
+  <div class="dialog-header">
+    <h2>Move entry to:</h2>
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
+      class="close-dialog"
+      (click)="close(); false">&times;
+    </a> 
+  </div>
+  <div>
+    <div class="inputgroup search">
+      <input #searchPhrase appAutofocus type="text" placeholder="Search group..." />
+    </div>
+    <ng-container *ngIf="groups$ | async as groups">
+      <div class="list" *ngIf="groups.length > 0; else notFound">
+        <cdk-virtual-scroll-viewport itemSize="36" class="list-viewport" role="rowgroup">
+          <a
+            href="#"
+            *cdkVirtualFor="let group of groups; let i = index; trackBy: trackingTag; templateCacheSize: 0"
+            class="list-item"
+            role="row"
+            tabindex="0"
+            (click)="moveTo(group); false;">
+            <i class="pi" [ngClass]="group.isImported ? 'pi-download' : 'pi-folder'"></i> {{ group.name }}
+          </a>
+        </cdk-virtual-scroll-viewport>
+      </div>
+      <ng-template #notFound>
+        <div class="not-found">
+          No group found
+        </div>
+      </ng-template>
+    </ng-container>
+  </div>
+</app-modal>

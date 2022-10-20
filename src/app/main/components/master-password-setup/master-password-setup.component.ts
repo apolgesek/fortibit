@@ -1,13 +1,17 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { WorkspaceService } from '@app/core/services';
-import { valueMatchValidator } from '@app/shared/validators';
+import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 
 @Component({
   selector: 'app-master-password-setup',
   templateUrl: './master-password-setup.component.html',
-  styleUrls: ['./master-password-setup.component.scss']
+  styleUrls: ['./master-password-setup.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule
+  ]
 })
 export class MasterPasswordSetupComponent {
   public readonly minPasswordLength = 6;

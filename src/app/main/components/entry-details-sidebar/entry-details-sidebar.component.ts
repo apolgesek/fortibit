@@ -49,11 +49,11 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
   }
 
   constructor(
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly workspaceService: WorkspaceService,
     private readonly entryManager: EntryManager,
     private readonly groupManager: GroupManager,
     private readonly modalService: ModalService,
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly configService: ConfigService,
     private readonly notificationService: NotificationService,
     private readonly renderer: Renderer2,
@@ -101,10 +101,6 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
       this.renderer.removeClass(this.toggleStarBtn.nativeElement, starredClass);
       this.notificationService.add({ message: 'Removed from favourites', type: 'success', alive: 5000 });
     }
-  }
-
-  revealInGroup() {
-    this.entryManager.revealInGroup(this.entry);
   }
 
   private findGroup(groups: IPasswordGroup[], id: number): IPasswordGroup | undefined {

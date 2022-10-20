@@ -2,11 +2,14 @@
 import { Component, ComponentRef } from '@angular/core';
 import { ModalRef } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
-import { ModalComponent } from '@app/shared';
-import { IAdditionalData, IModal } from '@app/shared/models/modal.model';
 import { EncryptionTabComponent } from './encryption-tab/encryption-tab.component';
 import { PasswordChangeTabComponent } from './password-change-tab/password-change-tab.component';
 import { ViewTabComponent } from './view-tab/view-tab.component';
+import { IAdditionalData, IModal } from '@app/shared';
+import { TabComponent } from '@app/shared/components/tab/tab.component';
+import { TabsetComponent } from '@app/shared/components/tabset/tabset.component';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-settings-dialog',
@@ -14,6 +17,9 @@ import { ViewTabComponent } from './view-tab/view-tab.component';
   styleUrls: ['./settings-dialog.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
+    TabsetComponent,
+    TabComponent,
     AutofocusDirective,
     ModalComponent,
     EncryptionTabComponent,

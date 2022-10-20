@@ -1,7 +1,9 @@
+import { CommonModule } from '@angular/common';
 import { Component, ComponentRef, OnDestroy, OnInit } from '@angular/core';
 import { EntryManager, ModalRef, ModalService } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
-import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { IHistoryEntry } from '@shared-renderer/history-entry.model';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -11,6 +13,7 @@ import { Subject, takeUntil } from 'rxjs';
   styleUrls: ['./entry-history.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     AutofocusDirective,
     ModalComponent
   ]

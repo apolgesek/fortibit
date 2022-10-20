@@ -1,9 +1,11 @@
 import { Component, ComponentRef, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupManager, ModalRef } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
-import { IAdditionalData, IModal, ModalComponent } from '@app/shared';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-group-dialog',
@@ -11,6 +13,8 @@ import { isControlInvalid, markAllAsDirty } from '@app/utils';
   styleUrls: ['./group-dialog.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
+    ReactiveFormsModule,
     AutofocusDirective,
     ModalComponent
   ]

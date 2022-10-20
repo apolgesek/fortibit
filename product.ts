@@ -13,4 +13,5 @@ export interface IProduct {
   idleSeconds: number;
   lockOnSystemLock: boolean;
   displayIcons: boolean;
+  autoTypeEnabled: boolean;
 }

@@ -11,17 +11,20 @@ import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
 import { EntryIconDirective } from '@app/main/directives/entry-icon.directive';
 import { TextEmphasizeDirective } from '@app/main/directives/text-emphasize.directive';
-import { DropdownDirective, DropdownMenuDirective, DropdownToggleDirective, MenuItem } from '@app/shared';
-import { ContextMenuItemDirective } from '@app/shared/directives/context-menu-item.directive';
-import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
-import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
+import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
+import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
+import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
+import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
+import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
+import { ContextMenuItemDirective } from '@app/shared/directives/context-menu-item.directive';
 import { DomUtil } from '@app/utils';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { HotkeyHandler } from 'injection-tokens';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { MenuItem, slideDown } from '@app/shared';
 
 @Component({
   selector: 'app-entries-table',
@@ -33,11 +36,11 @@ import { map, takeUntil } from 'rxjs/operators';
         style({ transform: 'translateY(-100%)', height: 'auto' }),
         animate('150ms ease-in', style({ transform: 'translateY(0)' })),
       ]),
-
       transition(':leave', [
         animate('150ms ease-out', style({ transform: 'translateY(-100%)' }))
       ])
-    ])
+    ]),
+    slideDown
   ],
   standalone: true,
   imports: [
@@ -171,12 +174,12 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  showEntryContextMenu(event: MouseEvent, item: IPasswordEntry) {    
+  showEntryContextMenu(event: MouseEvent, item: IPasswordEntry) {
+    event.preventDefault();
+
     if (this.selectedEntries.length === 0 || this.selectedEntries.length === 1) {
       this.selectEntry(event, item);
     }
-
-    event.preventDefault();
   }
 
   isEntrySelected(entry: IPasswordEntry): boolean {
@@ -184,7 +187,7 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   }
 
   isEntryDragged(entry: IPasswordEntry): boolean {
-    return Boolean(this.entryManager.draggedEntries.find(e => e === entry?.id));
+    return Boolean(this.entryManager.movedEntries.find(e => e === entry?.id));
   }
 
   addNewEntry() {
@@ -193,19 +196,27 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
 
   startDrag(event: DragEvent, item: IPasswordEntry) {
     this.selectedEntries.length > 0
-      ? this.entryManager.draggedEntries = this.selectedEntries.map(e => e.id)
-      : this.entryManager.draggedEntries = [ item.id ];
+      ? this.entryManager.movedEntries = this.selectedEntries.map(e => e.id)
+      : this.entryManager.movedEntries = [ item.id ];
 
     DomUtil.setDragGhost(event);
   }
 
   endDrag() {
-    this.entryManager.draggedEntries = [];
+    this.entryManager.movedEntries = [];
   }
 
   setSort(option: any) {
     this.selectedSortOption = option;
     this.searchService.setSort(option.state, option.prop);
+  }
+
+  getContextMenu(entry: IPasswordEntry): MenuItem[] {
+    if (this.selectedEntries.length === 1) {
+      return this.entryMenuItems;
+     } else {
+      return this.multiEntryMenuItems;
+     } 
   }
 
   private handleEntriesReload() {
@@ -222,6 +233,7 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
       .buildCopyPasswordEntryContextMenuItem()
       .buildSeparator()
       .buildEditEntryContextMenuItem()
+      .buildMoveEntryContextMenuItem()
       .buildRemoveEntryContextMenuItem()
       .getResult();
   }
@@ -229,6 +241,7 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   private buildMultiEntryMenuItems(): MenuItem[] {
     return this.contextMenuBuilderService
       .buildRemoveEntryContextMenuItem()
+      .buildMoveEntryContextMenuItem()
       .getResult();
   }
 }

@@ -9,7 +9,7 @@ import { DomUtil } from '@app/utils';
 export class DroppableDirective {
   @HostListener('dragover', ['$event'])
   public onDragOver() {
-    if (this.entryManager.draggedEntries.length === 0 && !this.groupManager.isGroupDragged) {
+    if (this.entryManager.movedEntries.length === 0 && !this.groupManager.isGroupDragged) {
       this.el.nativeElement.classList.add(DomUtil.constants.unknownElementDraggingClass);
     } else {
       this.el.nativeElement.classList.add(DomUtil.constants.isDraggingOverClass);

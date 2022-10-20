@@ -84,9 +84,11 @@ class MainProcess {
 
   private onReady() {
     const windowRef = this._windowService.createWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));    
-
     this.registerIpcEventListeners();
-    this.registerAutocompleteHandler();
+
+    if (this._configService.appConfig.autoTypeEnabled) {
+      this._windowService.registerAutocompleteShortcut();
+    }
 
     windowRef.once('closed', () => {
       this._windowService.removeWindow(windowRef);
@@ -122,13 +124,6 @@ class MainProcess {
         this._windowService.setTitle(windowRef.id, basename(path.workspace));
       }
     }
-  }
-
-  private registerAutocompleteHandler() {
-    this._configService.appConfig.autocompleteRegistered = globalShortcut.register(this._configService.appConfig.autocompleteShortcut, () => {
-      const activeWindowTitle = this._nativeApiService.getActiveWindowTitle();
-      this._windowService.registerAutotypeHandler(activeWindowTitle);
-    });
   }
   
   private registerIpcEventListeners() {

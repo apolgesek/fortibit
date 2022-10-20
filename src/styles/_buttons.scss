@@ -29,7 +29,7 @@ button {
 		background-color: darken($curious-blue, 7);
 	}
 
-	&:focus {
+	&:focus-visible {
 		background-color: darken($curious-blue, 7);
 		outline: 2px solid #aedaff !important;
 		outline-offset: 3px !important;
@@ -65,7 +65,7 @@ button {
 		border: 1px solid $curious-blue !important;
 	}
 
-	&:focus {
+	&:focus-visible {
 		background: $curious-blue;
 		color: $white;
 		border: 1px solid $curious-blue !important;
@@ -103,7 +103,7 @@ button {
 		background-color: darken($porcelain, 5);
 	}
 
-	&:focus {
+	&:focus-visible {
 		color: $curious-blue;
 		background-color: darken($porcelain, 5);
 		outline: 2px solid #aedaff !important;
@@ -154,7 +154,7 @@ button {
 		color: $pickled-bluewood;
 	}
 
-	&:focus {
+	&:focus-visible {
 		color: $pickled-bluewood;
 	
 		&.icon-btn {

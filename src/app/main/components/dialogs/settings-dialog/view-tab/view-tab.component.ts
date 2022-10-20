@@ -41,7 +41,6 @@ export class ViewTabComponent implements OnInit {
             displayIcons: form.displayIcons
           } as Partial<IProduct>;
   
-          this.communicationService.ipcRenderer.send(IpcChannel.ChangeEncryptionSettings, configPartial);
           this.configService.setConfig(configPartial);
         }
       });

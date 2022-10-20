@@ -36,8 +36,7 @@ export class ConfigService implements IConfigService {
       temporaryFileExtension: productInformation.temporaryFileExtension,
       compressionEnabled: productInformation.compressionEnabled,
       fileExtension: 'fbit',
-      autocompleteRegistered: false,
-      autocompleteShortcut: process.platform === 'win32' ? 'Alt+F' : 'Option+F',
+      autocompleteShortcut: process.platform === 'win32' ? 'Alt+\\' : 'Option+\\',
       clipboardClearTimeMs: 15000,
       encryption: {
         lowercase: productInformation.encryption.lowercase ?? true,
@@ -48,14 +47,13 @@ export class ConfigService implements IConfigService {
       },
       idleSeconds: productInformation.idleSeconds ?? 600,
       lockOnSystemLock: productInformation.lockOnSystemLock ?? true,
-      displayIcons: productInformation.displayIcons ?? true
+      displayIcons: productInformation.displayIcons ?? true,
+      autoTypeEnabled: productInformation.autoTypeEnabled ?? true
     };
   }
 
   set(settings: Partial<IAppConfig>) {  
     this._appConfig = { ...this._appConfig, ...settings };
-
-    console.log(this._appConfig, this.productPath);
     writeFileSync(this._productPath, JSON.stringify(this._appConfig));  
   }
 }
