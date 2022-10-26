@@ -86,22 +86,20 @@ export class UpdateService implements IUpdateService {
             commit: updateMetadataArray[3]
           };
 
-          setTimeout(() => {
-            const isUpdateAvailable = updateMetadata.version.localeCompare(app.getVersion()) === 1;
+          const isUpdateAvailable = updateMetadata.version.localeCompare(app.getVersion()) === 1;
 
-            if (isUpdateAvailable) {
-              this.resolveUpdateInformation(updateMetadata);
-              this.setUpdateState(UpdateState.Available);
-      
-              if (!this.validateUpdateFile()) {
-                this.getUpdate();
-              }
-            } else {
-              this.setUpdateState(UpdateState.NotAvailable);
+          if (isUpdateAvailable) {
+            this.resolveUpdateInformation(updateMetadata);
+            this.setUpdateState(UpdateState.Available);
+    
+            if (!this.validateUpdateFile()) {
+              this.getUpdate();
             }
-  
-            resolve(isUpdateAvailable);
-          }, 3000);
+          } else {
+            this.setUpdateState(UpdateState.NotAvailable);
+          }
+
+          resolve(isUpdateAvailable);
         });
       }).on('error', (err) => {
         console.log(err.message);

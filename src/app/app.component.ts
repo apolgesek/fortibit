@@ -140,7 +140,7 @@ export class AppComponent implements OnInit {
   }
 
   private handleEntryDeselection() {
-    fromEvent(this.document, 'mouseup')
+    fromEvent(this.document, 'mousedown')
       .pipe(tap((event: MouseEvent) => {
         if (this.isOutsideClick(event) && this.uiEventService.isIdle) {
           this.entryManager.selectedPasswords = [];

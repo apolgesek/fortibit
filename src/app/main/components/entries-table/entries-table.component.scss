@@ -18,6 +18,11 @@ $sidePanelOutDuration: 250ms;
 		height: calc(100vh - 5rem - 2rem - 2.5rem);
 		// vertical scrollbar inside the table viewport
 		@include scrollbar;
+
+		&::-webkit-scrollbar-track {
+			display: inline;
+			background-color: $porcelain;
+		}
 	}
 
 	::ng-deep {

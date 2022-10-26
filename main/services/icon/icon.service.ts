@@ -1,6 +1,6 @@
 import { app, ipcMain, IpcMainEvent } from "electron";
 import { existsSync, unlinkSync } from "fs";
-import { join, resolve } from "path";
+import { join } from "path";
 import { IPasswordEntry, IpcChannel } from "../../../shared-models";
 import { IConfigService } from "../config";
 import { IFileService } from "../file";
@@ -84,7 +84,6 @@ export class IconService implements IIconService {
   removeIcon(path: string): Promise<boolean> {
     if (path) {
       unlinkSync(path);
-
       return Promise.resolve(true);
     }
 
@@ -94,9 +93,8 @@ export class IconService implements IIconService {
   private async getFile(windowId: number, id: number, url: string): Promise<string> {
     const formattedHostname = await this.getFileName(url);
 
-    const fileUrl = this._configService.appConfig.staticContentUrl + '/icon/' + formattedHostname + '.png';
+    const fileUrl = join(this._configService.appConfig.staticContentUrl, 'icon', formattedHostname + '.png');
     const filePath = join(`${this.iconDirectory}`, `${formattedHostname}.png`);
-
 
     if (existsSync(filePath)) {
       return Promise.resolve(filePath);

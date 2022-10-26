@@ -11,7 +11,7 @@
 				[ngClass]="{'active': group.id === this.selectedGroup}"
 				(focus)="selectGroup(group.id)"
 				*ngFor="let group of builtInGroups; trackBy: groupTrackFn">
-					 <i class="pi pi-{{ group.icon }}"></i> {{ group.name }}
+					<i class="pi pi-{{ group.icon }}"></i> {{ group.name }}
 			</div>
 		</div>
 		<div tabindex="0" class="divider">

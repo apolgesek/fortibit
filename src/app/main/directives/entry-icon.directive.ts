@@ -5,7 +5,7 @@ import { IPasswordEntry, IpcChannel } from '../../../../shared-models';
 
 @Directive({
   selector: '[appEntryIcon]',
-  standalone: true
+  standalone: true,
 })
 export class EntryIconDirective implements AfterViewInit {
   private _entry: IPasswordEntry;
@@ -28,7 +28,10 @@ export class EntryIconDirective implements AfterViewInit {
 
     image.onerror = () => {
       image.src = this.getDefaultIcon(this._entry);
-      this.communicationService.ipcRenderer.send(IpcChannel.TryGetIcon, this._entry.id, this._entry.url);
+
+      if (this._entry.url){
+        this.communicationService.ipcRenderer.send(IpcChannel.TryGetIcon, this._entry.id, this._entry.url);
+      }
     };
 
     this.setIcon(this._entry);
@@ -40,35 +43,39 @@ export class EntryIconDirective implements AfterViewInit {
 
   private setIcon(entry: IPasswordEntry) {
     const image = this.el.nativeElement as HTMLImageElement;
-    image.src = entry.iconPath ?? this.getDefaultIcon(entry);
+    image.src = entry.iconPath ? 'file://' + entry.iconPath : this.getDefaultIcon(entry);
   }
 
   private getDefaultIcon(entry: IPasswordEntry): string {
-    let icon = '\ue981';
+    let iconText = '';
 
-    if (entry.url?.length) {
-      icon = '\ue94f';
+    if (entry.title?.trim().length > 0) {
+      iconText = entry.title.slice(0, 2);
     }
 
-    const canvas = this.createImage(icon);    
-
-    return canvas.toDataURL('image/png', 1)
+    return this.createImage(iconText.toUpperCase()).toDataURL('image/png', 1);
   }
 
-  private createImage(text: string = "\ue81f"): HTMLCanvasElement {
+  private createImage(text: string): HTMLCanvasElement {
+    const ratio = window.devicePixelRatio;
+
     var canvas = document.createElement('canvas');
+
+    canvas.width = 32 * ratio;
+    canvas.height = 32 * ratio;
+    canvas.style.width = canvas.width + 'px';
+    canvas.style.height = canvas.height + 'px';
+
     var context = canvas.getContext('2d');
+    context.scale(ratio, ratio);
 
-    canvas.width = 32;
-    canvas.height = 32;
-    context.font = "26px primeicons";
-    context.textAlign = "center";
-
-    context.fillStyle = "#fff";
+    const font = text.length > 0 ? 'Arial' : 'primeicons';
+    context.font = 'bold 16px ' + font;
+    context.textAlign = 'center';
+    context.fillStyle = 'transparent';
     context.fillRect(0, 0, canvas.width, canvas.height);
-  
-    context.fillStyle = "#65676b";
-    context.fillText(text, 16, 28);
+    context.fillStyle = '#87a5ab';
+    context.fillText(text.length > 0 ? text : '\ue939', 16, 24);
 
     return canvas;
   }

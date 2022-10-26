@@ -7,6 +7,7 @@ import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { CommunicationService } from 'injection-tokens';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-import-database-metadata',
@@ -14,6 +15,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
   styleUrls: ['./import-database-metadata.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     AutofocusDirective,
     ModalComponent
   ]

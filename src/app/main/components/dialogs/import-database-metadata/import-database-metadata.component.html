@@ -10,8 +10,8 @@
     </a>
 	</div>
 	<div class="dialog-message">
-    <p>Database path: {{ additionalData!.payload.filePath }}</p>
-    <p>Total entries found: <strong>{{ additionalData!.payload.size }}</strong></p>
+    <p>Database path: {{ additionalData.payload.filePath }}</p>
+    <p>Total entries found: <strong>{{ additionalData.payload.size }}</strong></p>
 	</div>
 	<div class="footer-container">
     <button
@@ -21,7 +21,7 @@
 			Close
 		</button>
     <button
-			*ngIf="additionalData!.payload.size > 0"
+			*ngIf="additionalData.payload.size > 0"
 			type="button"
 			appAutofocus
 			class="primary-btn"
