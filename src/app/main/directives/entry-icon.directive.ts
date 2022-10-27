@@ -29,7 +29,7 @@ export class EntryIconDirective implements AfterViewInit {
     image.onerror = () => {
       image.src = this.getDefaultIcon(this._entry);
 
-      if (this._entry.url){
+      if (this._entry.url) {
         this.communicationService.ipcRenderer.send(IpcChannel.TryGetIcon, this._entry.id, this._entry.url);
       }
     };
@@ -53,11 +53,12 @@ export class EntryIconDirective implements AfterViewInit {
       iconText = entry.title.slice(0, 2);
     }
 
-    return this.createImage(iconText.toUpperCase()).toDataURL('image/png', 1);
+    return this.createImage(iconText).toDataURL('image/png', 1);
   }
 
   private createImage(text: string): HTMLCanvasElement {
     const ratio = window.devicePixelRatio;
+    const { bgColor, textColor } = this.getBackgroundColor(text);
 
     var canvas = document.createElement('canvas');
 
@@ -69,14 +70,32 @@ export class EntryIconDirective implements AfterViewInit {
     var context = canvas.getContext('2d');
     context.scale(ratio, ratio);
 
+    // draw plane
+    context.fillStyle = bgColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // draw text
     const font = text.length > 0 ? 'Arial' : 'primeicons';
     context.font = 'bold 16px ' + font;
     context.textAlign = 'center';
-    context.fillStyle = 'transparent';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = '#87a5ab';
-    context.fillText(text.length > 0 ? text : '\ue939', 16, 24);
+    context.textBaseline = 'top';
+    context.fillStyle = textColor;
+    context.fillText(text.length > 0 ? text : '\ue939', 16, 10);
 
     return canvas;
+  }
+
+  private getBackgroundColor(text: string): { bgColor: string, textColor: string } {
+    switch (text.charCodeAt(0) % 3) {
+      case 0:
+        // green
+        return { bgColor: '#c7e3d0', textColor: '#376d48' };
+      case 1:
+        // red
+        return { bgColor: '#ff9bab', textColor: '#8f3d49'};
+      case 2:
+        // yellow
+        return { bgColor: '#eae48f', textColor: '#9e961d'};
+    }
   }
 }

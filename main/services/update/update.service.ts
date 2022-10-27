@@ -78,7 +78,8 @@ export class UpdateService implements IUpdateService {
         });
 
         res.on('end', () => {
-          const updateMetadataArray = body.trim().split(',');
+          const idx = process.platform === 'win32' ? 0 : 1;
+          const updateMetadataArray = body.trim().split('\n')[idx].split(',');
           const updateMetadata = {
             productName: updateMetadataArray[0],
             version: updateMetadataArray[1],
