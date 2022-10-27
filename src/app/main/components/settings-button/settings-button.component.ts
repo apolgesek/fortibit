@@ -77,7 +77,9 @@ export class SettingsButtonComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.communicationService.ipcRenderer.send(IpcChannel.GetUpdateState);
+    if (!this.updateAvailable) {
+      this.communicationService.ipcRenderer.send(IpcChannel.GetUpdateState);
+    }
   }
 
   ngOnDestroy() {
