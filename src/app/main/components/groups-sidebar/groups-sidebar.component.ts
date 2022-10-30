@@ -26,7 +26,7 @@ import { Subject } from 'rxjs';
     DroppableDirective
   ]
 })
-export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy {
+export class GroupsSidebarComponent implements OnInit, OnDestroy {
   public readonly groupIds = GroupId;
 
   public readonly builtInGroups = [
@@ -88,10 +88,6 @@ export class GroupsSidebarComponent implements OnInit, AfterViewInit, OnDestroy 
     this.groupContextMenuBin = this.contextMenuBuilderService
       .buildEmptyRecycleBinContextMenuItem()
       .getResult();
-  }
-
-  async ngAfterViewInit() {
-    await this.selectGroup(1);
   }
 
   ngOnDestroy() {

@@ -153,7 +153,6 @@ export class UpdateService implements IUpdateService {
 
     const filePath = this.getExecutablePath(this._updateInformation.fileName);
     this._commandHandler.updateApp(filePath, this.updateDirectory);
-    app.quit();
   }
 
   private async getUpdate(): Promise<string> {

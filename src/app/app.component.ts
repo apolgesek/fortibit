@@ -12,6 +12,8 @@ import { ICommunicationService } from './core/models';
 import { AppViewContainer, EntryManager, ModalManager, UiEventService, WorkspaceService } from './core/services';
 import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component';
 
+const ONE_HOUR = 1000 * 60 * 60;
+
 export const routeAnimations = trigger("routeAnimations", [
 	transition("masterPasswordPage => workspacePage", [
 		query(":enter", [
@@ -102,6 +104,9 @@ export class AppComponent implements OnInit {
     });
 
     this.communicationService.ipcRenderer.send(IpcChannel.CheckUpdate);
+    setInterval(() => {
+      this.communicationService.ipcRenderer.send(IpcChannel.CheckUpdate);
+    }, ONE_HOUR);
   }
 
   getRouteAnimationData() {

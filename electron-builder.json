@@ -46,6 +46,9 @@
       "icon": "build/icon.icns"
     }
   },
+  "dmg": {
+    "title": "${productName}"
+  },
   "linux": {
     "icon": "dist",
     "target": [

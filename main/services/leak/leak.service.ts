@@ -11,16 +11,19 @@ export class LeakService {
   }
 
   public async findLeaks(entries: { id: any, hash: string }[]): Promise<{ id: any, occurrences: number }[]> {
-    const result = await Promise.all(entries.map((e) => this.findLeak(e)));
-
-    return Promise.resolve(result.flat());
+    try {
+      const result = await Promise.all(entries.map((e) => this.findLeak(e)));
+      return Promise.resolve(result.flat());
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   private async findLeak(entry: { id: number, hash: string}): Promise<{ id: number, occurrences: number }> {
     const hashStart = entry.hash.slice(0, 5);
     const hashEnd = entry.hash.slice(5);
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       let body = ''
 
       const req = request(`${this._apiUrl}/${hashStart}`, res => {
@@ -43,7 +46,7 @@ export class LeakService {
           resolve(entryObject);
         })
       }).on('error', (err) => {
-        console.log(err.message);
+        reject(err);
       });
 
       req.end();

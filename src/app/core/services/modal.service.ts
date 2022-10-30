@@ -102,8 +102,8 @@ export class ModalService {
     this.modalManager.open(EntryHistoryComponent, { payload: { id } });
   }
 
-  openMoveEntryWindow(id: number) {
-    this.modalManager.open(MoveEntryDialogComponent, { payload: { id } });
+  openMoveEntryWindow() {
+    this.modalManager.open(MoveEntryDialogComponent);
   }
 
   close<T>(ref: ComponentRef<T>) {

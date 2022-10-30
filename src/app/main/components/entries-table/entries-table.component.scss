@@ -107,7 +107,7 @@ $sidePanelOutDuration: 250ms;
 				justify-content: center;
 				align-items: center;
 				border-radius: 3px;
-				margin-left: 0.5rem;
+				margin-left: 0.875rem;
 
 				img {
 					border-radius: 3px;
@@ -138,11 +138,6 @@ $sidePanelOutDuration: 250ms;
 
 			span {
 				margin: 0 1rem;
-			}
-
-			i {
-				display: none;
-				margin-left: 0.5rem;
 			}
 
 			&:hover, &:focus, &.active {
@@ -250,8 +245,14 @@ $sidePanelOutDuration: 250ms;
 }
 
 .option-item {
+	display: flex;
+	align-items: center;
 	list-style-type: none;
 	padding: 0.5rem;
+
+	i {
+		margin-left: 0.5rem;
+	}
 
 	&:hover, &.focused, &.selected {
 		background-color: $porcelain;

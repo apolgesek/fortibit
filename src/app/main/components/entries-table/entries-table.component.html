@@ -19,12 +19,12 @@
 								<a
 									href="#"
 									*ngFor="let option of sortOptions"
-									[ngClass]="{'selected' : selectedSortOption.name === option.name}"
+									[ngClass]="{'selected' : selectedSortOption === option}"
 									appMenuItem
 									[closeOnSelect]="true"
 									class="option-item"
 									(activate)="setSort(option)">
-									{{ option.name }}
+									{{ option.name }} <i class="pi" [ngClass]="{'pi-sort-alpha-down': option.state === sort.Asc, 'pi-sort-alpha-up': option.state === sort.Desc}"></i>
 								</a>
 							</div>
 						</div>

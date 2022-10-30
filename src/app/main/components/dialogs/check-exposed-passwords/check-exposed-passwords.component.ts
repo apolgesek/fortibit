@@ -3,8 +3,8 @@ import { ICommunicationService } from '@app/core/models';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { combineLatest, from, take, timer } from 'rxjs';
-import { ModalRef, ReportService } from '@app/core/services';
+import { combineLatest, finalize, from, take, timer } from 'rxjs';
+import { ModalRef, ReportService, WorkspaceService } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { CommunicationService } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
@@ -30,10 +30,12 @@ export class CheckExposedPasswordsComponent implements IModal {
 
   lastReportLoaded = false;
   showDetails = false;
+  showError = false;
   
   constructor(
     private readonly modalRef: ModalRef,
     private readonly reportService: ReportService,
+    private readonly workspaceService: WorkspaceService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService
   ) { }
 
@@ -47,8 +49,17 @@ export class CheckExposedPasswordsComponent implements IModal {
 
     combineLatest([
       from(this.reportService.scanForLeaks()),
-      timer(1000).pipe(take(1))
-    ]).subscribe(async ([result]) => {
+      timer(1000).pipe(take(1)),
+    ]).pipe(finalize(() => {
+      this.scanInProgress = false;
+    })).subscribe(async ([result]) => {
+      if (result.error) {
+        this.scanInProgress = false;
+        this.showError = true;
+
+        return;
+      }
+
       const t1 = performance.now();
 
       const reportId = await this.reportService.addReport({
@@ -58,6 +69,7 @@ export class CheckExposedPasswordsComponent implements IModal {
         payload: result.data
       });
       
+      this.workspaceService.dateSaved = null;
       this.scanInProgress = false;
       await this.getLastReport();
       

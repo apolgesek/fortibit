@@ -1,4 +1,5 @@
 import { app } from 'electron';
+import { copyFileSync, existsSync, mkdirSync } from 'fs';
 import { writeFileSync } from 'fs-extra';
 import * as os from 'os';
 import { join } from 'path';
@@ -15,10 +16,20 @@ export class ConfigService implements IConfigService {
     return this._productPath;
   }
 
-  private readonly _productPath = join(global['__basedir'], 'product.json');
+  private readonly _productPath: string;
   private _appConfig: IAppConfig;
 
   constructor() {
+    const dir = join(app.getPath('appData'), app.getName(), 'config');
+    const filePath = join(dir, 'product.json');
+
+    if (!existsSync(filePath)) {
+      mkdirSync(dir, { recursive: true });
+      copyFileSync(join(global['__basedir'], 'product.json'), filePath);
+    }
+
+    this._productPath = filePath;
+
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const productInformation: IProduct = require(this._productPath);
 

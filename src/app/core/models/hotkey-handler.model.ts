@@ -9,6 +9,7 @@ export interface IHotkeyHandler {
   registerDeleteGroup: (event: KeyboardEvent) => void;
   registerRenameGroup: (event: KeyboardEvent) => void;
   registerEditEntry: (event: KeyboardEvent) => void;
+  registerMoveEntry: (event: KeyboardEvent) => void;
   registerAddEntry: (event: KeyboardEvent) => void;
   registerCopyPassword: (event: KeyboardEvent) => void;
   registerCopyUsername: (event: KeyboardEvent) => void;

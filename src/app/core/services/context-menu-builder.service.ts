@@ -110,7 +110,7 @@ export class ContextMenuBuilderService {
       label: 'Move to... (M)',
       icon: 'pi pi-fw pi-pencil',
       command: () => {
-        this.modalService.openMoveEntryWindow(0);
+        this.modalService.openMoveEntryWindow();
       }
     });
 

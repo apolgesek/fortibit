@@ -47,6 +47,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
     this.registerLockDatabase(event)
     this.registerRenameGroup(event);
     this.registerAddGroup(event);
+    this.registerMoveEntry(event);
   }
 
   public registerSaveDatabase(event: KeyboardEvent) {
@@ -90,6 +91,13 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
   public registerEditEntry(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'e' && this.entryManager.selectedPasswords.length === 1) {
       this.modalService.openEditEntryWindow();
+      event.preventDefault();
+    }
+  }
+
+  public registerMoveEntry(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'm') {
+      this.modalService.openMoveEntryWindow();
       event.preventDefault();
     }
   }

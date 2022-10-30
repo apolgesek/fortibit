@@ -36,6 +36,7 @@ export class SearchService implements ISearchService {
 
   constructor() {
     this.searchPhrase$ = this.searchPhraseSource.asObservable();
+    this.setSort(Sort.Desc, 'creationDate');
 
     this.searchInputSource.pipe(
       tap((value) => {

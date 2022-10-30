@@ -1,4 +1,5 @@
 import { spawnSync } from "child_process";
+import { app } from "electron";
 import { ICommandHandler } from "./command-handler.model";
 
 export class DarwinCommandHandler implements ICommandHandler {
@@ -8,8 +9,11 @@ export class DarwinCommandHandler implements ICommandHandler {
       cwd: updateDirectory,
       shell: true
     });
+    
+    spawnSync('rm -R /Applications/fortibit.app', { shell: true });
+    spawnSync('cp -R /Volumes/fortibit/fortibit.app /Applications/fortibit.app', { shell: true });
 
-    spawnSync('cp -R /Volumes/fortibit\ 1.1.0-arm64/fortibit.app /Applications');
-    spawnSync('open /Applications/fortibit.app');
+    app.relaunch();
+    app.exit();
   }
 }

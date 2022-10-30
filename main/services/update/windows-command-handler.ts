@@ -1,14 +1,18 @@
-import { spawnSync } from "child_process";
+import { spawn } from "child_process";
+import { app } from "electron";
 import { ICommandHandler } from "./command-handler.model";
 
 export class WindowsCommandHandler implements ICommandHandler {
   updateApp(filePath: string, updateDirectory: string) {
-    spawnSync(filePath, ['/R'],
+    spawn(filePath, ['/R'],
       {
         cwd: updateDirectory,
+        detached: true,
         stdio: ['ignore', 'ignore', 'ignore'],
         windowsVerbatimArguments: true
       }
     );
+    
+    app.exit();
   }
 }

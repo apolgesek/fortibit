@@ -110,7 +110,7 @@ class MainProcess {
       this._databaseService.setFilePath(windowRef.webContents.id, filePath);
       this._windowService.setTitle(windowRef.id, basename(filePath));
     } else {
-      const workspaceConfigPath = join(global['__basedir'], 'workspaces.json');
+      const workspaceConfigPath = join(app.getPath('appData'), app.getName(), 'config', 'workspaces.json');
 
       if (!existsSync(workspaceConfigPath)) {
         writeFileSync(workspaceConfigPath, '{}', { encoding: 'utf-8' });

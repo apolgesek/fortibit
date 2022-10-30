@@ -6,7 +6,6 @@ import { CommunicationService } from 'injection-tokens';
 import { DbContext } from '../database';
 import { ICommunicationService } from '../models';
 import { EntryRepository, GroupRepository, ReportRepository } from '../repositories';
-import { WorkspaceService } from './workspace.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +13,6 @@ import { WorkspaceService } from './workspace.service';
 export class ReportService {
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly workspaceService: WorkspaceService,
     private readonly dbContext: DbContext,
     private readonly reportRepository: ReportRepository,
     private readonly entryRepository: EntryRepository,
@@ -22,16 +20,18 @@ export class ReportService {
   ) {}
 
   async scanForLeaks(): Promise<any> {
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve, reject) => {
       const blob = await exportDB(this.dbContext);
 
       const fr = new FileReader();
       fr.readAsText(blob);
       fr.onloadend = async () => {
-        const data = await this.communicationService.ipcRenderer.invoke(IpcChannel.ScanLeaks, fr.result);
-
-        resolve(data);
-        this.workspaceService.dateSaved = null;
+        try {
+          const data = await this.communicationService.ipcRenderer.invoke(IpcChannel.ScanLeaks, fr.result);
+          resolve(data);
+        } catch (err) {
+          reject(err);
+        }
       };
     });
   }

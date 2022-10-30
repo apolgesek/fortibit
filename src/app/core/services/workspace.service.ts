@@ -78,6 +78,9 @@ export class WorkspaceService {
       break;
     case EventType.Lock:
       this.lock({ minimize: true });
+      break;
+    case EventType.Update:
+      this.communicationService.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
     default:
       break;
     }

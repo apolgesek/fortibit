@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
+import { EventType } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
-import { ModalService } from '@app/core/services';
+import { ModalService, WorkspaceService } from '@app/core/services';
 import { slideDown } from '@app/shared';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
@@ -47,21 +48,34 @@ export class SettingsButtonComponent implements OnInit {
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly zone: NgZone,
-    private readonly modalService: ModalService
+    private readonly modalService: ModalService,
+    private readonly workspaceService: WorkspaceService
   ) { 
     this.notifications$ = this.notificationsSource.asObservable()
     .pipe(
-      scan((a, c: INotification) => ([...a, c]), [] as INotification[]),
+      scan((acc, n: INotification) => {
+        const updateNotificationIndex = acc.findIndex(x => x.type === 'update');
+
+        if (updateNotificationIndex > -1 && n.type === 'update') {
+          acc[updateNotificationIndex] = n;
+        } else {
+          acc.push(n);
+        }
+
+        return acc;
+      }, [] as INotification[]),
       startWith([]),
       takeUntil(this.destroyed)
     );
 
     this.updateListener = (_: Electron.IpcRendererEvent, state: UpdateState, version: string) => {
       this.zone.run(() => {
-        if (state === UpdateState.Downloaded) {
-          this.updateAvailable = version;
-          this.notificationsSource.next({ type: 'update', content: version });
+        if (state !== UpdateState.Downloaded) {
+          return;
         }
+        
+        this.updateAvailable = version;
+        this.notificationsSource.next({ type: 'update', content: version });
       });
     };
 
@@ -73,13 +87,11 @@ export class SettingsButtonComponent implements OnInit {
   }
 
   updateAndRelaunch() {
-    this.communicationService.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
+    this.workspaceService.checkFileSaved(EventType.Update);
   }
 
   ngOnInit(): void {
-    if (!this.updateAvailable) {
-      this.communicationService.ipcRenderer.send(IpcChannel.GetUpdateState);
-    }
+    this.communicationService.ipcRenderer.send(IpcChannel.GetUpdateState);
   }
 
   ngOnDestroy() {

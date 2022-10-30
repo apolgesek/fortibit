@@ -141,6 +141,7 @@
 }
 
 .group-item {
+  user-select: none;
   display: flex;
   align-items: center;
   border-radius: 0.25rem;

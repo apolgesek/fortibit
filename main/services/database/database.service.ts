@@ -2,7 +2,7 @@ import { app, dialog, FileFilter, ipcMain, IpcMainEvent, powerMonitor, safeStora
 import { existsSync, readFileSync, rmSync, writeFile, writeFileSync } from 'fs-extra';
 import { basename, join } from 'path';
 import { IProduct } from '../../../product';
-import { ImportHandler, IPasswordEntry, IpcChannel } from '../../../shared-models';
+import { ImportHandler, IpcChannel } from '../../../shared-models';
 import { IConfigService } from '../config';
 import { IEncryptionProcessService, MessageEventType } from '../encryption';
 import { IExportService } from '../export';
@@ -129,8 +129,7 @@ export class DatabaseService implements IDatabaseService {
 
   public setFilePath(windowId: number, filePath: string) {
     this._fileMap.set(windowId, filePath);
-
-    writeFileSync(join(global['__basedir'], 'workspaces.json'), JSON.stringify({ workspace: filePath }));  
+    writeFileSync(join(app.getPath('appData'), app.getName(), 'config', 'workspaces.json'), JSON.stringify({ workspace: filePath }));  
   }
 
   public getFilePath(windowId: number): string {
@@ -230,6 +229,7 @@ export class DatabaseService implements IDatabaseService {
 
     return {
       data: !payload.error && payload.data,
+      error: payload.error
     };
   }
 

@@ -32,6 +32,8 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   public filePath: string = '';
 
   private readonly destroyed$: Subject<void> = new Subject();
+  private readonly defaultGroup = GroupId.AllItems;
+
   private onDecryptedContent: (_: IpcRendererEvent, { decrypted }: { decrypted: string }) => void;
 
   get passwordControl(): FormControl {
@@ -86,8 +88,8 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   }
 
   async selectDefaultGroup() {
-    this.groupManager.selectGroup(GroupId.Root);
-    this.entryManager.setByGroup(GroupId.Root);
+    await this.groupManager.selectGroup(this.defaultGroup);
+    await this.entryManager.setByGroup(this.defaultGroup);
     this.entryManager.updateEntriesSource();
   }
 
