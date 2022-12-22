@@ -1,6 +1,6 @@
 export interface IReport {
+  id: number;
   creationDate: Date;
-  generationTime: number;
   type: number;
   payload: string;
 }

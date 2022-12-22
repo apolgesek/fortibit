@@ -16,7 +16,7 @@
     "!build",
     "!release",
     "!release-scripts",
-    "!src",
+    "!renderer",
     "!e2e",
     "!.angular",
     "!*.md",
@@ -31,7 +31,7 @@
   "extraResources": [
     {
       "from": "dist",
-      "to": "app/src",
+      "to": "app/renderer",
       "filter": [
         "**/*"
       ]

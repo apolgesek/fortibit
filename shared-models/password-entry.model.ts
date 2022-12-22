@@ -6,7 +6,7 @@ export interface IPasswordEntry extends IEntry {
 	url?: string;
 	notes?: string;
 	autotypeExp?: string;
-	iconPath?: string;
+	icon?: string;
 	history?: IPasswordEntry[];
 	expirationDate?: Date;
 	expirationStatus?: 'expired' | 'due-expiration';

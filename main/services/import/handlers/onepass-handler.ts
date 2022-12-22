@@ -2,7 +2,7 @@ import * as csv from 'csv-parser';
 import { dialog } from "electron";
 import { createReadStream } from "fs";
 import { ImportHandler } from "../../../../shared-models";
-import { IEncryptionProcessService, MessageEventType } from '../../encryption';
+import { IEncryptionEventWrapper, MessageEventType } from '../../encryption';
 import { IWindowService } from '../../window';
 import { IImportHandler } from "../import-handler.model";
 import { IImportMetadata } from "./import-metadata.model";
@@ -18,7 +18,7 @@ interface IOnePasswordEntry {
 export class OnePassHandler implements IImportHandler {
   constructor(
     private readonly _windowService: IWindowService,
-    private readonly _encryptionProcessService: IEncryptionProcessService
+    private readonly _encryptionEventWrapper: IEncryptionEventWrapper
   ) {}
 
   async getMetadata(): Promise<IImportMetadata> {
@@ -78,7 +78,7 @@ export class OnePassHandler implements IImportHandler {
             };
         
             const window = this._windowService.getWindowByWebContentsId(event.sender.id);
-            const password = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { encrypted: string };
+            const password = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, window.key) as { encrypted: string };
       
             return {
               ...e,

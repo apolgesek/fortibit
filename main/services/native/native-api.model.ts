@@ -10,4 +10,5 @@ export interface INativeApiService {
   setThumbnailBitmap(handle: Buffer, path: string): number;
   setIconicBitmap(handle: Buffer): number;
   unsetIconicBitmap(handle: Buffer): number;
+  verifySignature(path: string, subject: string): boolean;
 }

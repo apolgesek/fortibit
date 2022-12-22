@@ -7,11 +7,13 @@ export interface IProduct {
   webUrl: string;
   staticContentUrl: string;
   updateUrl: string;
+  signatureSubject: string;
   leakedPasswordsUrl: string;
   compressionEnabled: boolean;
   encryption: IEncryptionSettings;
   idleSeconds: number;
   lockOnSystemLock: boolean;
+  saveOnLock: boolean;
   displayIcons: boolean;
   autoTypeEnabled: boolean;
 }

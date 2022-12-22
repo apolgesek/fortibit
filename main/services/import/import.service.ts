@@ -1,5 +1,5 @@
 import { ImportHandler } from "../../../shared-models";
-import { IEncryptionProcessService } from "../encryption";
+import { IEncryptionEventWrapper } from "../encryption";
 import { IWindowService } from "../window";
 import { KeePassHandler } from "./handlers/keepass-handler";
 import { OnePassHandler } from "./handlers/onepass-handler";
@@ -12,7 +12,7 @@ export class ImportService implements IImportService {
 
   constructor(
     @IWindowService private readonly _windowService: IWindowService,
-    @IEncryptionProcessService private readonly _encryptionProcessService: IEncryptionProcessService,
+    @IEncryptionEventWrapper private readonly _encryptionEventWrapper: IEncryptionEventWrapper,
   ) {}
 
   setHandler(type: ImportHandler) {
@@ -42,7 +42,7 @@ export class ImportService implements IImportService {
     return this._handler;
   }
 
-  create<T extends IImportHandler>(c: new (windowService: IWindowService, encryptionProcess: IEncryptionProcessService) => T): IImportHandler {
-    return new c(this._windowService, this._encryptionProcessService);
+  create<T extends IImportHandler>(c: new (windowService: IWindowService, encryptionProcess: IEncryptionEventWrapper) => T): IImportHandler {
+    return new c(this._windowService, this._encryptionEventWrapper);
   }
 }

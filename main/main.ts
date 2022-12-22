@@ -2,15 +2,15 @@
 
 import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron';
 import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { basename, join } from 'path';
 import { IpcChannel } from '../shared-models';
 import { SingleInstanceServices } from './dependency-injection';
 import { ProcessArgument } from './process-argument.enum';
+import { IAutotypeService } from './services/autotype';
 import { IConfigService } from './services/config';
 import { IDatabaseService } from './services/database';
-import { IEncryptionProcessService, MessageEventType } from './services/encryption';
-import { INativeApiService } from './services/native';
+import { IEncryptionEventWrapper, MessageEventType } from './services/encryption';
 import { IPerformanceService } from './services/performance/performance-service.model';
 import { IUpdateService } from './services/update';
 import { IWindowService } from './services/window';
@@ -18,10 +18,6 @@ import { IWindowService } from './services/window';
 class MainProcess {
   private readonly _services: SingleInstanceServices;
   private _fileArg: string;
-
-  private get _nativeApiService(): INativeApiService {
-    return this._services.get(INativeApiService);
-  }
 
   private get _databaseService(): IDatabaseService {
     return this._services.get(IDatabaseService);
@@ -31,8 +27,8 @@ class MainProcess {
     return this._services.get(IWindowService);
   }  
 
-  private get _encryptionProcessService(): IEncryptionProcessService {
-    return this._services.get(IEncryptionProcessService);
+  private get _encryptionEventWrapper(): IEncryptionEventWrapper {
+    return this._services.get(IEncryptionEventWrapper);
   }
 
   private get _updateService(): IUpdateService {
@@ -47,6 +43,10 @@ class MainProcess {
     return this._services.get(IConfigService);
   }
 
+  private get _autotypeService(): IAutotypeService {
+    return this._services.get(IAutotypeService);
+  }
+
   constructor() {
     this._services = new SingleInstanceServices();
     this._fileArg = process.argv.find(x => x.endsWith(this._services.get(IConfigService).appConfig.fileExtension));
@@ -56,47 +56,44 @@ class MainProcess {
 
   private registerAppEvents() {
     app.on('second-instance', (event: Electron.Event, argv) => {
-      const windowRef = this._windowService.createWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve)));
+      const windowRef = this._windowService.createMainWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve)));
       const filePath = argv.find(x => x.endsWith(this._configService.appConfig.fileExtension));
       this.setFile(windowRef, filePath);
 
-      windowRef.once('closed', () => {
-        this._windowService.removeWindow(windowRef);
-      });
-
       this._windowService.loadWindow(windowRef);
     });
-
     app.on('open-file', (event, path) => {
       event.preventDefault();
       this._fileArg = path;
     });
-
     app.once('ready', () => this.onReady());
 
-    app.once('window-all-closed', () => {
-      this._databaseService.clear();
-      globalShortcut.unregisterAll();
-
-      app.quit();
+    // exit listeners
+    app.once('window-all-closed', () => this.exitApp());
+    ['SIGINT', 'SIGTERM', 'SIGQUIT', 'uncaughtException'].forEach(event => {
+      process.once(event, () => this.exitApp());
     });
   }
 
+  private exitApp() {
+    globalShortcut.unregisterAll();
+    this._databaseService.clear();
+    app.exit();
+  }
+
   private onReady() {
-    const windowRef = this._windowService.createWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));    
+    const windowRef = this._windowService.createMainWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));
+    const entrySelectWindowRef = this._windowService.createEntrySelectWindow();
     this.registerIpcEventListeners();
 
     if (this._configService.appConfig.autoTypeEnabled) {
-      this._windowService.registerAutocompleteShortcut();
+      this._autotypeService.registerAutocompleteShortcut();
     }
-
-    windowRef.once('closed', () => {
-      this._windowService.removeWindow(windowRef);
-    });
 
     this.setFile(windowRef, this._fileArg);
 
     const windowLoaded = this._windowService.loadWindow(windowRef);
+    const entrySelectWindowLoaded = this._windowService.loadWindow(entrySelectWindowRef, 'entry-select');
     
     windowLoaded.then(() => {
       this._performanceService.mark('firstWindowLoaded');
@@ -107,7 +104,7 @@ class MainProcess {
 
   private setFile(windowRef: BrowserWindow, filePath: string) {
     if (filePath) {
-      this._databaseService.setFilePath(windowRef.webContents.id, filePath);
+      this._databaseService.setDatabaseEntry(windowRef.webContents.id, filePath);
       this._windowService.setTitle(windowRef.id, basename(filePath));
     } else {
       const workspaceConfigPath = join(app.getPath('appData'), app.getName(), 'config', 'workspaces.json');
@@ -120,7 +117,7 @@ class MainProcess {
       const path = JSON.parse(workspace);
 
       if (path.workspace && existsSync(path.workspace)) {
-        this._databaseService.setFilePath(windowRef.webContents.id, path.workspace);
+        this._databaseService.setDatabaseEntry(windowRef.webContents.id, path.workspace);
         this._windowService.setTitle(windowRef.id, basename(path.workspace));
       }
     }
@@ -132,7 +129,7 @@ class MainProcess {
         return;
       }
 
-      this._databaseService.setFilePath(event.sender.id, filePath);
+      this._databaseService.setDatabaseEntry(event.sender.id, filePath);
       this._windowService.setTitle(event.sender.id, basename(filePath));
 
       event.reply(IpcChannel.ProvidePassword, this._databaseService.getFilePath(event.sender.id));
@@ -140,14 +137,14 @@ class MainProcess {
 
     ipcMain.handle(IpcChannel.EncryptPassword, async (event, password) => {
       const encryptionEvent = { type: MessageEventType.EncryptString, plain: password };
-      const response = await this._encryptionProcessService.processEventAsync(encryptionEvent, this._windowService.getWindowByWebContentsId(event.sender.id).key ) as { encrypted: string };
+      const response = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, this._windowService.getWindowByWebContentsId(event.sender.id).key ) as { encrypted: string };
 
       return response.encrypted;
     });
 
     ipcMain.handle(IpcChannel.DecryptPassword, async (event, password) => {
       const encryptionEvent = { type: MessageEventType.DecryptString, encrypted: password };
-      const response = await this._encryptionProcessService.processEventAsync(encryptionEvent, this._windowService.getWindowByWebContentsId(event.sender.id).key) as { decrypted: string };
+      const response = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, this._windowService.getWindowByWebContentsId(event.sender.id).key) as { decrypted: string };
 
       return response.decrypted;
     });
@@ -172,12 +169,12 @@ class MainProcess {
       this._updateService.updateAndRelaunch();
     });
 
-    ipcMain.handle(IpcChannel.ValidatePassword, (_, password: string): boolean => {
+    ipcMain.handle(IpcChannel.ValidatePassword, (event: IpcMainEvent, password: string): boolean => {
       if (!password?.length) {
         return false;
       }
 
-      return password === this._databaseService.dbPassword;
+      return password === this._databaseService.getPassword(event.sender.id);
     });
   }
 }

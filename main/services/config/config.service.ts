@@ -42,6 +42,7 @@ export class ConfigService implements IConfigService {
       commit: productInformation.commit,
       updateUrl: productInformation.updateUrl,
       webUrl: productInformation.webUrl,
+      signatureSubject: productInformation.signatureSubject,
       staticContentUrl: productInformation.staticContentUrl,
       leakedPasswordsUrl: productInformation.leakedPasswordsUrl,
       temporaryFileExtension: productInformation.temporaryFileExtension,
@@ -58,8 +59,9 @@ export class ConfigService implements IConfigService {
       },
       idleSeconds: productInformation.idleSeconds ?? 600,
       lockOnSystemLock: productInformation.lockOnSystemLock ?? true,
+      saveOnLock: productInformation.saveOnLock ?? false,
       displayIcons: productInformation.displayIcons ?? true,
-      autoTypeEnabled: productInformation.autoTypeEnabled ?? true
+      autoTypeEnabled: productInformation.autoTypeEnabled ?? true,
     };
   }
 

@@ -1,0 +1,59 @@
+<div class="sidebar">
+	<div class="header blur-groups">
+		<div class="file">{{ fileName }}</div>
+	</div>
+	<div
+		class="scroll-viewport"
+		cdkVirtualScrollingElement
+		appFocusableList
+		[selected]="[selectedGroup]"
+		(focused)="selectGroup($event.item)">
+		<div class="default-groups">
+			<div
+				*ngFor="let group of builtInGroups; trackBy: groupTrackFn"
+				tabindex="0"
+				[appContextMenuItem]="getContextMenu(group.id)"
+				class="group-item"
+				[ngClass]="{'active': group.id === this.selectedGroup}"
+				(focus)="selectGroup(group.id)"
+				[appFocusableListItem]="group.id">
+				<i class="pi pi-{{ group.icon }}"></i> <div class="group-name">{{ group.name }}</div>
+			</div>
+		</div>
+		<div class="divider">
+			<div>Folders</div>
+			<div class="quick-actions">
+				<button
+					tabindex="-1"
+					appTooltip="Add group"
+					container="body"
+					(click)="addGroup(); false">
+					<span class="pi pi-plus"></span>
+				</button>
+			</div>
+		</div>
+		<cdk-virtual-scroll-viewport
+			class="group-viewport"
+			itemSize="32"
+			role="rowgroup">
+			<ng-container *cdkVirtualFor="let group of groups; let i = index; trackBy: groupTrackFn; templateCacheSize: 0">
+				<div
+					[appFocusableListItem]="group.id"
+					tabindex="0"
+					appDroppable
+					[appContextMenuItem]="getContextMenu(group.id)"
+					class="group-item"
+					[ngClass]="{'active': group.id === this.selectedGroup}"
+					(focus)="selectGroup(group.id)"
+					(drop)="onEntryDrop(group.id)">
+					<i class="pi" [ngClass]="group.isImported ? 'pi-download' : 'pi-folder'"></i> <div class="group-name">{{ group.name }}</div>
+				</div>
+			</ng-container>
+		</cdk-virtual-scroll-viewport>
+	</div>
+</div>
+
+<div
+	appSidebarHandle
+	position="right">
+</div>

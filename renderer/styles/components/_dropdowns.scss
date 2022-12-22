@@ -1,0 +1,92 @@
+.dropdown-content {
+	right: 0;
+  background-color: $white;
+  z-index: 999;
+	width: 200px;	
+	padding-top: 4px;
+	padding-bottom: 4px;
+	position: absolute;
+	// Box shadow changes anchor color inside for some reason
+	filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.12));
+
+	&.select {
+		padding-top: 0;
+		padding-bottom: 0;
+		width: 100%;
+		filter: none;
+		margin-top: 0 !important;
+		border: 1px solid $silver;
+		border-top: 0;
+		box-sizing: border-box;
+	}
+
+	&.left {
+		left: 0;
+	}
+
+	&.right {
+		right: 0;
+	}
+
+	.divider {
+		padding: 4px;
+
+		hr {
+			margin: 0;
+			border: 0;
+			border-top: 1px solid $silver;
+		}
+	}
+
+	.disabled {
+		color: $grey-80;
+		cursor: default;
+
+		&:hover {
+			background-color: $white;
+		}
+	}
+
+	a {
+		color: $pickled-bluewood;
+		padding: 0.5rem;
+		text-decoration: none;
+		display: block;
+		font-size: 0.875rem;
+
+		&.focused {
+			background: $porcelain;
+		}
+	}
+
+	&.filter-dropdown {
+		display: flex;
+		flex-direction: column;
+		padding: 1rem;
+		max-width: 120px;
+
+		> .dropdown {
+			display: flex !important;
+		}
+	}
+}
+
+.dropdown {
+  position: relative;
+  display: block;
+
+	a:focus {
+		outline: none;
+	}
+
+	&.open {
+		button, a {
+			border-bottom-right-radius: 0;
+		}
+	}
+
+	label {
+		margin-left: 0.5rem;
+		width: 5rem;
+	}
+}

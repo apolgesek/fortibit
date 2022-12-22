@@ -1,7 +1,7 @@
 import { dialog } from "electron";
 import { writeFileSync } from "fs";
 import { IPasswordEntry } from "../../../shared-models";
-import { IEncryptionProcessService, MessageEventType } from "../encryption";
+import { IEncryptionEventWrapper, MessageEventType } from "../encryption";
 import { IWindow } from "../window/window-model";
 import { IExportService } from "./export-service.model";
 
@@ -10,7 +10,7 @@ export class ExportService implements IExportService {
     filters: [{ name: 'Comma Separated Values File', extensions: [ 'csv' ] }]
   };
 
-  constructor(@IEncryptionProcessService private readonly _encryptionProcessService: IEncryptionProcessService) {}
+  constructor(@IEncryptionEventWrapper private readonly _encryptionEventWrapper: IEncryptionEventWrapper) {}
 
   async export(window: IWindow, database: string): Promise<boolean> {
     const saveDialogReturnValue = await dialog.showSaveDialog(window.browserWindow, this._fileFilters);
@@ -28,7 +28,7 @@ export class ExportService implements IExportService {
       type: MessageEventType.BulkDecryptString
     };
 
-    const payload = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { error: string, decrypted: IPasswordEntry[] };
+    const payload = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, window.key) as { error: string, decrypted: IPasswordEntry[] };
     const header: (keyof IPasswordEntry)[] = ['title', 'username', 'password', 'url', 'notes'];
     let data = header.join(',') + '\r\n';
 

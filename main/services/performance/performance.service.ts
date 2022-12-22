@@ -21,7 +21,7 @@ export class PerformanceService implements IPerformanceService {
     const time = performance.now();
     const directoryPath = app.getPath('logs');
 
-    const filePath = join(directoryPath, `perf_${description}.txt`);
+    const filePath = join(directoryPath, `performance_${description}.txt`);
     appendFileSync(filePath, (time - global['__perfStart']).toString() + ' ms' + os.EOL);
   }
 }

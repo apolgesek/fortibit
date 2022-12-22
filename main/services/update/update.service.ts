@@ -1,15 +1,15 @@
-import { emptyDirSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync } from 'fs-extra';
+import { app, ipcMain, IpcMainEvent } from 'electron';
+import { emptyDirSync, existsSync, mkdirSync, readdirSync, renameSync } from 'fs-extra';
 import { request } from 'https';
 import { arch, platform } from 'os';
 import { join } from 'path';
-import { IWindowService } from '../window/window-service.model';
-import { IUpdateService } from './update-service.model';
-import { app, ipcMain, IpcMainEvent } from 'electron';
-import { createHash } from 'crypto';
 import { IpcChannel, UpdateState } from '../../../shared-models';
-import { IConfigService } from '../config';
-import { IFileService } from '../file';
+import { IConfigService } from '../config/config-service.model';
+import { IFileService } from '../file/file-service.model';
+import { INativeApiService } from '../native/native-api.model';
+import { IWindowService } from '../window/window-service.model';
 import { ICommandHandler } from './command-handler.model';
+import { IUpdateService } from './update-service.model';
 
 interface UpdateInformation {
   version: string;
@@ -23,6 +23,7 @@ export class UpdateService implements IUpdateService {
   private readonly fileExt = process.platform === 'win32' ? 'exe' : 'dmg';
 
   private _updateDestinationPath = '';
+  private _executablePath = '';
   private _updateInformation: UpdateInformation;
   private _updateState: UpdateState;
 
@@ -30,7 +31,8 @@ export class UpdateService implements IUpdateService {
     @IConfigService private readonly _configService: IConfigService,
     @IWindowService private readonly _windowService: IWindowService,
     @IFileService private readonly _fileService: IFileService,
-    @ICommandHandler private readonly _commandHandler: ICommandHandler
+    @ICommandHandler private readonly _commandHandler: ICommandHandler,
+    @INativeApiService private readonly _nativeApiService: INativeApiService
   ) {
     this.updateDirectory = join(app.getPath('appData'), this._configService.appConfig.name.toLowerCase(), 'update');
 
@@ -53,17 +55,18 @@ export class UpdateService implements IUpdateService {
     return this._updateState;
   }
 
-  checkForUpdates(): Promise<boolean> {  
+  checkForUpdates(): Promise<boolean> {
+    if (!existsSync(this.updateDirectory)) {
+      mkdirSync(this.updateDirectory, { recursive: true });
+    }
+
     return new Promise((resolve, reject) => {
       if (this.updateState === UpdateState.Available || this.updateState === UpdateState.Downloaded) {
         // reannounce update status
         this.setUpdateState(this.updateState);
-  
         resolve(true);
-
         return;
       }
-
 
       const req = request(this._configService.appConfig.updateUrl, res => {
         let body = '';
@@ -73,8 +76,7 @@ export class UpdateService implements IUpdateService {
         });
 
         res.on('error', (err) => {
-          console.log(err);
-          reject();
+          reject(err);
         });
 
         res.on('end', () => {
@@ -93,7 +95,7 @@ export class UpdateService implements IUpdateService {
             this.resolveUpdateInformation(updateMetadata);
             this.setUpdateState(UpdateState.Available);
     
-            if (!this.validateUpdateFile()) {
+            if (!this.isAnyValidUpdateFile()) {
               this.getUpdate();
             }
           } else {
@@ -103,9 +105,7 @@ export class UpdateService implements IUpdateService {
           resolve(isUpdateAvailable);
         });
       }).on('error', (err) => {
-        console.log(err.message);
-
-        reject();
+        reject(err);
       });
 
       req.end();
@@ -124,22 +124,15 @@ export class UpdateService implements IUpdateService {
     this.spawnUpdateProcess();
   }
 
-  private getFileHash(filePath: string): string {
-    return createHash('md5')
-      .update(readFileSync(join(this.updateDirectory, filePath)))
-      .digest('hex');
+  private isFileVerified(filePath: string): boolean {
+    return this._nativeApiService.verifySignature(filePath, this._configService.appConfig.signatureSubject);
   }
 
-  private validateUpdateFile(): boolean {
-    if (!existsSync(this.updateDirectory)) {
-      mkdirSync(this.updateDirectory, { recursive: true });
-    }
-
+  private isAnyValidUpdateFile(): boolean {
     const updateFilePaths = readdirSync(this.updateDirectory);
 
-    if (updateFilePaths.some(filePath => this._updateInformation.checksum === this.getFileHash(filePath))) {
+    if (updateFilePaths.some(fileName => fileName === this._executablePath && this.isFileVerified(join(this.updateDirectory, fileName)))) {
       this.setUpdateState(UpdateState.Downloaded);
-
       return true;
     }
 
@@ -147,12 +140,7 @@ export class UpdateService implements IUpdateService {
   }
 
   private spawnUpdateProcess() {
-    if (existsSync(this._updateDestinationPath) || !this.isNewUpdateAvailable()) {
-      return;
-    }
-
-    const filePath = this.getExecutablePath(this._updateInformation.fileName);
-    this._commandHandler.updateApp(filePath, this.updateDirectory);
+    this._commandHandler.updateApp(this._executablePath, this.updateDirectory);
   }
 
   private async getUpdate(): Promise<string> {
@@ -164,7 +152,7 @@ export class UpdateService implements IUpdateService {
 
     const onFinish = () => {
       renameSync(this._updateDestinationPath, this.getExecutablePath(this._updateDestinationPath));
-      this.validateUpdateFile();
+      this.isAnyValidUpdateFile();
     };
 
     return this._fileService.download(this._updateInformation.url, this._updateDestinationPath, onError, onFinish);
@@ -176,7 +164,6 @@ export class UpdateService implements IUpdateService {
 
   private getExecutablePath(path: string) {
     const pathParts = path.split('.');
-
     pathParts.pop();
     pathParts.push(this.fileExt);
 
@@ -195,13 +182,12 @@ export class UpdateService implements IUpdateService {
     this._updateInformation.fileName = `${this._configService.appConfig.name.toLowerCase()}_${updateMetadata.version}_${platform()}_${arch()}_update.${this._configService.appConfig.temporaryFileExtension}`;
     this._updateInformation.url = `${this._configService.appConfig.webUrl}/update/${this._updateInformation.fileName.replace(`.${this._configService.appConfig.temporaryFileExtension}`, `.${this.fileExt}`)}`;
     this._updateInformation.checksum = updateMetadata.checksum;
-
     this._updateDestinationPath = join(this.updateDirectory, this._updateInformation.fileName);
+    this._executablePath = this.getExecutablePath(this._updateInformation.fileName);
   }
 
   private setUpdateState(state: UpdateState) {
     this._updateState = state;
-
     this._windowService.windows.forEach(window => {
       window.browserWindow.webContents.send(IpcChannel.UpdateState, this.updateState, this._updateInformation?.version);
     });

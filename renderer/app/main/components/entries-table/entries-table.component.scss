@@ -1,0 +1,284 @@
+@import 'variables';
+@import 'mixins';
+
+$sidePanelInDuration: 300ms;
+$sidePanelOutDuration: 250ms;
+
+:host {
+	display: flex;
+	flex: 1;
+	overflow: auto;
+	overflow-y: hidden;
+	position: relative;
+
+	// horizontal scrollbar
+	@include scrollbar;
+
+	.table-viewport {
+		height: map-get($map: $layout, $key: "entry-table");
+		// vertical scrollbar inside the table viewport
+		@include scrollbar;
+
+		&::-webkit-scrollbar-track {
+			display: inline;
+			background-color: $porcelain;
+		}
+	}
+
+	::ng-deep {
+		.p-selectable-row {
+			outline: none;
+		}
+	}
+}
+
+.password-table {
+	width: 100%;
+	@include font-regular;
+
+	.row-entry {
+		font-size: 0.875rem;
+		cursor: pointer;
+		border: 1px solid transparent;
+		box-sizing: border-box;
+		@include default-table-row;
+
+		&:focus,
+		&:hover {
+			@include default-table-row;
+		}
+
+		&.selected {
+			background-color: darken($curious-blue-light, 2);
+			&:hover {
+				background-color: darken($curious-blue-light, 2);
+			}
+		}
+
+		.column.password {
+			display: flex;
+			align-items: center;
+
+			.pi {
+				margin-left: 2rem;
+			}
+		}
+
+		&.expired {
+			.column.password {
+				color: $red-orange;
+			}
+		}
+
+		&.due-expiration {
+			.column.password {
+				color: $tulip-tree;
+			}
+		}
+
+		&.selected:focus {
+			background-color: darken($curious-blue-light, 2);
+			border: 1px solid $picton-blue;
+		}
+
+		&:hover:not(.selected) {
+			background-color: $porcelain;
+		}
+
+		.column {
+			min-width: calc((100% / 2) - 0.25rem);
+			white-space: nowrap;
+			padding-left: 1rem;
+
+			.row {
+				text-overflow: ellipsis;
+				overflow: hidden;
+
+				&:first-child {
+					margin-bottom: 0.25rem;
+				}
+			}
+
+			&-icon {
+				min-width: 28px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				border-radius: 3px;
+				margin-left: 0.875rem;
+
+				img {
+					border-radius: 3px;
+				}
+			}
+		}
+	}
+
+	#table-header {
+		display: flex;
+		background-color: $white;
+		user-select: none;
+		font-size: 0.875rem;
+		border-bottom: 1px solid $silver;
+		box-sizing: border-box;
+		height: $workspace-header-height;
+		position: relative;
+		z-index: 1;
+		padding-left: 1rem;
+
+		div {
+			display: flex;
+			color: $pickled-bluewood;
+			align-items: center;
+			text-align: left;
+			cursor: pointer;
+			outline: none;
+
+			span {
+				margin: 0 1rem;
+			}
+
+			&:hover, &:focus, &.active {
+				i {
+					display: block;
+				}
+			}
+
+			&:focus {
+				background-color: $curious-blue-light;
+			}
+
+			&:first-child {
+				border-left: 0;
+			}
+
+			&:last-child {
+				display: block;
+			}
+		}
+	}
+
+	@include scrollbar;
+}
+
+.list-cta {
+	text-align: center;
+	color: $grey-text;
+	font-size: 1rem;
+	user-select: none;
+	margin-top: 2rem;
+
+	p {
+		margin: 2rem 0;
+	}
+
+	a {
+		font-size: 1rem;
+	}
+}
+
+.table-body {
+	height: 100%;
+}
+
+.group-separator {
+	display: flex;
+	padding: 0.5rem 1rem;
+	align-items: center;
+	font-size: 0.875rem;
+	color: $grey-text;
+
+	span {
+		margin-right: 0.6rem;
+	}
+}
+
+.results-badge {
+	display: flex;
+	align-items: center;
+	background: $porcelain;
+	font-size: 0.75rem;
+	padding-left: 1rem;
+	z-index: 0;
+
+	> div {
+		box-sizing: border-box;
+		padding-top: 0.5625rem;
+		height: 2rem;
+	}
+
+	+ .table-viewport {
+		height: calc(map-get($map: $layout, $key: "entry-table") - 2rem);
+	}
+}
+
+.pi-sort-alpha-down-alt::before,
+.pi-sort-alpha-up-alt::before {
+	color: $curious-blue;
+}
+
+.filters {
+	position: relative;
+	margin-left: auto;
+	margin-right: 1rem;
+	border-radius: 0.25rem;
+	padding: 0.25rem 0;
+	color: $curious-blue;
+
+	&:focus-visible:not(:hover) {
+    outline: 3px solid $barberry !important;
+  }
+
+	.pi {
+		font-size: 1rem;
+	}
+}
+
+.filter-option {
+	display: flex;
+	width: 120px;
+	background-color: $white;
+	border: 1px solid $silver;
+	color: $pickled-bluewood;
+	border-radius: 0.25rem !important;
+	padding: 0.5rem;
+
+	.pi {
+		margin: 0 0 0 auto !important;
+	}
+}
+
+.expanded {
+	border-bottom: 1px solid transparent !important;
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+}
+
+.option-item {
+	display: flex;
+	align-items: center;
+	list-style-type: none;
+	padding: 0.5rem;
+
+	i {
+		margin-left: 0.5rem;
+	}
+
+	&:hover, &.focused, &.selected {
+		background-color: $porcelain;
+	}
+}
+
+#sort-by.focused:focus-visible:not(:hover) {
+	outline: 2px solid #aedaff !important;
+	outline-offset: 3px !important;
+}
+
+.group-data {
+	flex: 1;
+	width: auto;
+}
+
+.filter-label {
+	@include font-medium;
+}

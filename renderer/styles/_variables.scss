@@ -1,0 +1,36 @@
+$handle-width-px: 4;
+
+// COLORS
+$pickled-bluewood: hsl(207, 29%, 30%);
+$curious-blue: hsl(207, 78%, 41%);
+$picton-blue: hsl(185, 78%, 41%);
+$curious-blue-light: #e9f3fb;
+
+$gumbo: #87a5ab;
+
+$grey-text: #65676b;
+$grey-80: #ccc;
+$silver: #dadada;
+$porcelain: #f1f3f4;
+$white: #fff;
+
+$jungle-green: #21A67A;
+$bright-red: #a80000;
+$red-orange: #ff3333;
+
+$barberry: #eccc14;
+$tulip-tree: #f0a544;
+
+// LAYOUT
+$menu-bar-height: 2rem;
+$toolbar-height: 5rem;
+$workspace-header-height: 2.5rem;
+
+$layout: (
+  "app": calc(100vh - $menu-bar-height),
+  "workspace": calc(100vh - $menu-bar-height - $toolbar-height),
+  "entry-table": calc(100vh - $menu-bar-height - $toolbar-height - $workspace-header-height)
+);
+
+// OTHER
+$handle-width: unquote($handle-width-px + 'px');

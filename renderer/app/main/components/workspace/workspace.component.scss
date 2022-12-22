@@ -1,0 +1,7 @@
+@import 'variables';
+
+.main-container {
+	display: flex;
+	width: 100vw;
+	height: map-get($map: $layout, $key: "workspace")
+}

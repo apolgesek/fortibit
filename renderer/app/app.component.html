@@ -1,0 +1,9 @@
+<ng-container *ngIf="fontsLoaded">
+  <router-outlet></router-outlet>
+</ng-container>
+
+<svg class="d-none">
+  <filter id="blur-shadow">
+    <feGaussianBlur stdDeviation="2" />
+  </filter>
+</svg>

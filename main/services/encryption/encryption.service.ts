@@ -15,7 +15,6 @@ export class EncryptionService implements IEncryptionService {
     const key = this.createKeyFromPassword(password, salt);
     // Encrypt and prepend salt.
     const ciphertextAndNonceAndSalt = Buffer.concat([ salt, this.encrypt(Buffer.from(plaintext, 'utf8'), key) ]);
-    
     // Return as base64 string.
     return ciphertextAndNonceAndSalt.toString('base64');
   }
@@ -24,8 +23,8 @@ export class EncryptionService implements IEncryptionService {
     // Decode the base64.
     const ciphertextAndNonceAndSalt = Buffer.from(base64CiphertextAndNonceAndSalt, 'base64');
     // Create buffers of salt and ciphertextAndNonce.
-    const salt = ciphertextAndNonceAndSalt.slice(0, KDF_SALT_SIZE);
-    const ciphertextAndNonce = ciphertextAndNonceAndSalt.slice(KDF_SALT_SIZE);
+    const salt = ciphertextAndNonceAndSalt.subarray(0, KDF_SALT_SIZE);
+    const ciphertextAndNonce = ciphertextAndNonceAndSalt.subarray(KDF_SALT_SIZE);
     // Derive the key using PBKDF2.
     const key = this.createKeyFromPassword(password, salt);
     
@@ -46,8 +45,8 @@ export class EncryptionService implements IEncryptionService {
     
   private decrypt(ciphertextAndNonce: Buffer, key: Buffer): Buffer {
     // Create buffers of nonce, ciphertext and tag.
-    const nonce = ciphertextAndNonce.slice(0, ALGORITHM_NONCE_SIZE);
-    const ciphertext = ciphertextAndNonce.slice(
+    const nonce = ciphertextAndNonce.subarray(0, ALGORITHM_NONCE_SIZE);
+    const ciphertext = ciphertextAndNonce.subarray(
       ALGORITHM_NONCE_SIZE,
       ciphertextAndNonce.length - ALGORITHM_TAG_SIZE
     );

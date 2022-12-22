@@ -1,18 +1,19 @@
+import { AutotypeService, IAutotypeService } from '../services/autotype';
 import { ClipboardService, IClipboardService } from '../services/clipboard';
 import { IConfigService } from '../services/config';
 import { ConfigService } from '../services/config/config.service';
 import { DatabaseService, IDatabaseService } from '../services/database';
-import { EncryptionProcessService, IEncryptionProcessService } from '../services/encryption';
+import { EncryptionEventService, EncryptionEventWrapper, IEncryptionEventService, IEncryptionEventWrapper } from '../services/encryption';
+import { ExportService, IExportService } from '../services/export';
 import { FileService, IFileService } from '../services/file';
 import { IconService, IIconService } from '../services/icon';
-import { DarwinApiService, INativeApiService, WindowsApiService } from '../services/native';
+import { IImportService, ImportService } from '../services/import';
+import { DarwinApiService, INativeApiService, Win32ApiService } from '../services/native';
 import { IPerformanceService } from '../services/performance/performance-service.model';
 import { PerformanceService } from '../services/performance/performance.service';
-import { DarwinSendInputService, ISendInputService, WindowsSendInputService } from '../services/send-input';
-import { DarwinCommandHandler, ICommandHandler, IUpdateService, UpdateService, WindowsCommandHandler } from '../services/update';
+import { DarwinSendInputService, ISendInputService, Win32SendInputService } from '../services/send-input';
+import { DarwinCommandHandler, ICommandHandler, IUpdateService, UpdateService, Win32CommandHandler } from '../services/update';
 import { IWindowService, WindowService } from '../services/window';
-import { IImportService, ImportService } from '../services/import';
-import { ExportService, IExportService } from '../services/export';
 import { ServiceCollection } from './index';
 
 export class SingleInstanceServices extends ServiceCollection {
@@ -23,27 +24,35 @@ export class SingleInstanceServices extends ServiceCollection {
 
   configureServices() {
     this.set(IConfigService, new ConfigService());
-    this.set(IEncryptionProcessService, new EncryptionProcessService());
+    this.set(IEncryptionEventWrapper, new EncryptionEventWrapper());
+    this.set(IEncryptionEventService, new EncryptionEventService(this.get(IEncryptionEventWrapper)));
     this.set(IPerformanceService, new PerformanceService());
     this.set(IFileService, new FileService());
     this.set(IClipboardService, new ClipboardService(this.get(IConfigService)));
 
     this.set(INativeApiService, this.getNativeApiService());
     this.set(ISendInputService, this.getSendInputService());
-  
+
     this.set(IWindowService, new WindowService(
       this.get(IConfigService),
-      this.get(IEncryptionProcessService),
       this.get(IPerformanceService),
-      this.get(ISendInputService),
-      this.get(INativeApiService)
+      this.get(INativeApiService),
     ));
 
     this.set(IUpdateService, new UpdateService(
       this.get(IConfigService),
       this.get(IWindowService),
       this.get(IFileService),
-      this.getCommandHandler()
+      this.getCommandHandler(),
+      this.get(INativeApiService)
+    ));
+
+    this.set(IAutotypeService, new AutotypeService(
+      this.get(IWindowService),
+      this.get(IEncryptionEventWrapper),
+      this.get(ISendInputService),
+      this.get(IConfigService),
+      this.get(INativeApiService)
     ));
 
     this.set(IIconService, new IconService(
@@ -54,24 +63,24 @@ export class SingleInstanceServices extends ServiceCollection {
 
     this.set(IImportService, new ImportService(
       this.get(IWindowService),
-      this.get(IEncryptionProcessService)
+      this.get(IEncryptionEventWrapper)
     ));
 
-    this.set(IExportService, new ExportService(this.get(IEncryptionProcessService)));
+    this.set(IExportService, new ExportService(this.get(IEncryptionEventWrapper)));
   
     this.set(IDatabaseService, new DatabaseService(
       this.get(IConfigService),
-      this.get(IEncryptionProcessService),
       this.get(IWindowService),
       this.get(IIconService),
       this.get(IImportService),
-      this.get(IExportService)
+      this.get(IExportService),
+      this.get(IEncryptionEventService)
     ));
   }
 
   getNativeApiService(): INativeApiService {
     if (process.platform === 'win32') {
-      return new WindowsApiService();
+      return new Win32ApiService();
     } else if (process.platform === 'darwin') {
       return new DarwinApiService();
     }
@@ -79,7 +88,7 @@ export class SingleInstanceServices extends ServiceCollection {
 
   getSendInputService(): ISendInputService {
     if (process.platform === 'win32') {
-      return new WindowsSendInputService(this.get(INativeApiService));
+      return new Win32SendInputService(this.get(INativeApiService));
     } else if (process.platform === 'darwin') {
       return new DarwinSendInputService(this.get(INativeApiService));
     }
@@ -87,7 +96,7 @@ export class SingleInstanceServices extends ServiceCollection {
 
   getCommandHandler(): ICommandHandler {
     if (process.platform === 'win32') {
-      return new WindowsCommandHandler();
+      return new Win32CommandHandler();
     } else if (process.platform === 'darwin') {
       return new DarwinCommandHandler();
     }

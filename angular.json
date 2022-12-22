@@ -2,14 +2,17 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "cli": {
     "defaultCollection": "@angular-eslint/schematics",
-    "analytics": false
+    "analytics": false,
+    "cache": {
+      "enabled": false
+    }
   },
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
     "angular-electron": {
       "root": "",
-      "sourceRoot": "src",
+      "sourceRoot": "renderer",
       "projectType": "application",
       "schematics": {
         "@schematics/angular:application": {
@@ -21,22 +24,23 @@
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "outputPath": "dist",
-            "index": "src/index.html",
-            "main": "src/main.ts",
-            "tsConfig": "src/tsconfig.json",
-            "polyfills": "src/polyfills.ts",
+            "index": "renderer/index.html",
+            "main": "renderer/main.ts",
+            "tsConfig": "renderer/tsconfig.json",
+            "polyfills": "renderer/polyfills.ts",
+            "allowedCommonJsDependencies": ["rxjs", "zxcvbn"],
             "assets": [
-              "src/assets",
-              "src/manifest.json",
-              "src/content-script.js"
+              "renderer/assets",
+              "renderer/manifest.json",
+              "renderer/content-script.js"
             ],
             "styles": [
               "node_modules/primeicons/primeicons.css",
-              "src/styles.scss"
+              "renderer/styles.scss"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
-                "src/styles"
+                "renderer/styles"
               ]
             },
             "scripts": [],
@@ -65,8 +69,8 @@
               "buildOptimizer": false,
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.web.ts"
+                  "replace": "renderer/environments/environment.ts",
+                  "with": "renderer/environments/environment.web.ts"
                 }
               ]
             },
@@ -80,8 +84,8 @@
               "buildOptimizer": false,
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
+                  "replace": "renderer/environments/environment.ts",
+                  "with": "renderer/environments/environment.dev.ts"
                 }
               ]
             },
@@ -95,8 +99,8 @@
               "buildOptimizer": true,
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "replace": "renderer/environments/environment.ts",
+                  "with": "renderer/environments/environment.prod.ts"
                 }
               ]
             },
@@ -110,8 +114,8 @@
               "buildOptimizer": true,
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.e2e.ts"
+                  "replace": "renderer/environments/environment.ts",
+                  "with": "renderer/environments/environment.e2e.ts"
                 }
               ]
             }
@@ -146,20 +150,20 @@
         "test": {
           "builder": "@angular-builders/custom-webpack:karma",
           "options": {
-            "main": "src/test.ts",
-            "polyfills": "src/polyfills-test.ts",
-            "karmaConfig": "src/karma.conf.js",
+            "main": "renderer/test.ts",
+            "polyfills": "renderer/polyfills-test.ts",
+            "karmaConfig": "renderer/karma.conf.js",
             "scripts": [],
             "styles": [
-              "src/styles.scss"
+              "renderer/styles.scss"
             ],
             "assets": [
-              "src/assets",
-              "src/favicon.ico",
-              "src/favicon.png",
-              "src/favicon.icns",
-              "src/favicon.256x256.png",
-              "src/favicon.512x512.png"
+              "renderer/assets",
+              "renderer/favicon.ico",
+              "renderer/favicon.png",
+              "renderer/favicon.icns",
+              "renderer/favicon.256x256.png",
+              "renderer/favicon.512x512.png"
             ],
             "customWebpackConfig": {
               "path": "./angular.webpack.js"
@@ -171,7 +175,7 @@
           "options": {
             "eslintConfig": ".eslintrc.json",
             "lintFilePatterns": [
-              "src/**/*.ts",
+              "renderer/**/*.ts",
               "main.ts"
             ]
           }

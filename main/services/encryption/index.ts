@@ -1,7 +1,12 @@
-export * from './encryption-process-service.model';
-export * from './encryption-process.service';
+export * from './encryption-event.service';
+export * from './encryption-event-service.model';
+export * from './encryption-event-wrapper';
+export * from './encryption-event-wrapper.model';
 export * from './encryption-service.model';
 export * from './encryption.service';
 export * from './in-memory-encryption.service';
 export * from './main';
 export * from './message-event-type.enum';
+
+export * from './events/event.model';
+export * from './events/get-leaks-event.model';

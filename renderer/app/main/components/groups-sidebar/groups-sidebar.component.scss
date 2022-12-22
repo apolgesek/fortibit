@@ -1,0 +1,202 @@
+@import 'variables';
+@import 'mixins';
+
+:host {
+  display: flex;
+  position: relative;
+  width: 16rem;
+  z-index: 0;
+}
+
+.sidebar {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  .file {
+    flex: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    height: inherit;
+  }
+
+  .divider {
+    .quick-actions {
+      margin-left: auto;
+      margin-right: 1.25rem;
+      display: none;
+
+      button {
+        background-color: $white;
+        border: 0;
+        width: 1.5rem;
+        color: $curious-blue;
+        cursor: pointer;
+        margin-top: 4px;
+        transition: 50ms color;
+
+        &:hover, &:focus {
+          color: $pickled-bluewood;
+        }
+
+        &:last-child {
+          margin-right: 0;
+        }
+
+        .pi {
+          font-size: 0.875rem;
+        }
+      }
+    }
+  }
+
+  &:hover {
+    .divider .quick-actions {
+      display: flex;
+    }
+  }
+
+  .group-info {
+    font-size: 0.75rem;
+    padding: 0 1rem;
+    background-color: $white;
+    border-top: 1px solid $silver;
+    position: sticky;
+    box-sizing: border-box;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    user-select: none;
+    min-height: 2rem;
+
+    div {
+      border-right: 1px solid $silver;
+      margin: 0 4px;
+      padding: 0 2px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      width: 20%;
+
+      &:first-child {
+        justify-content: flex-start;
+        flex: 1;
+      }
+
+      &:last-child {
+        border: 0;
+      }
+    }
+  }
+
+  .rename-group {
+    @include font-regular;
+    background: $curious-blue-light;
+    width: 8rem;
+    border: none;
+    padding: 6px;
+    font-size: 0.875rem;
+    color: $pickled-bluewood;
+  }
+}
+
+.pi-download {
+  margin-right: 0.5rem;
+}
+
+.pi-star-fill {
+  color: $picton-blue;
+}
+
+.divider {
+  @include font-medium;
+  height: 2rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  color: $pickled-bluewood;
+  margin: 0.5rem 0 0.5rem 0;
+  padding: 0.25rem;
+  padding-left: 1.5rem;
+  box-sizing: border-box;
+}
+
+.group-item {
+  user-select: none;
+  display: flex;
+  align-items: center;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin: 0.25rem;
+  margin-top: 0;
+  margin-right: 0.5rem;
+  height: 1rem;
+
+  &:hover {
+    background-color: $porcelain;
+  }
+
+  &:focus {
+    background-color: $curious-blue-light;
+    outline: 1px solid $picton-blue;
+  }
+
+  &.active {
+    background-color: $curious-blue-light;
+  }
+
+  .pi {
+    margin-right: 0.5rem;
+    margin-top: 1px;
+  }
+}
+
+.scroll-viewport {
+  height: 100%;
+  border-color: rgba(0,0,0,0);
+  transition: border-color 150ms;
+  @include scrollbar-hover;
+
+  &:hover {
+    border-color: rgba(0,0,0,0.2);
+  }
+}
+
+.group-viewport {
+  margin: 0 0.25rem 0 1rem;
+  font-size: 0.875rem;
+
+  ::ng-deep .cdk-virtual-scroll-content-wrapper {
+    padding-bottom: 0.5rem;
+    max-width: 100%;
+    overflow: hidden;    
+  }
+
+  .group-item {
+    margin: 0.25rem;
+    margin-right: 1.25rem;
+
+    .group-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.default-groups {
+  display: flex;
+  flex-direction: column;
+  margin: 0.75rem 1rem 0;
+  font-size: 0.875rem;
+}
+
+.is-dragging-over {
+	background-color: $porcelain !important;
+}

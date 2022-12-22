@@ -7,7 +7,7 @@
 /app-builds
 /release
 main.js
-src/**/*.js
+renderer/**/*.js
 main/**/*.js
 shared-models/**/*.js
 shared-models/**/*.js.map

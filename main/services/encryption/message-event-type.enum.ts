@@ -5,5 +5,6 @@ export enum MessageEventType {
   DecryptString = 'decryptString',
   BulkEncryptString = 'bulkEncryptString',
   BulkDecryptString = 'bulkDecryptString',
-  GetLeaks = 'getLeaks' 
+  GetLeaks = 'getLeaks',
+  GetWeakPasswords = 'getWeakPasswords'
 }

@@ -7,12 +7,11 @@ export const IWindowService = createServiceDecorator<IWindowService>('windowServ
 export interface IWindowService {
   windows: IWindow[];
   getWindowByWebContentsId(id: number): IWindow;
-  createWindow(isDevMode: boolean): BrowserWindow;
-  loadWindow(windowRef: BrowserWindow): Promise<void>;
+  createMainWindow(isDevMode: boolean): BrowserWindow;
+  createEntrySelectWindow(): BrowserWindow;
+  loadWindow(windowRef: BrowserWindow, path?: string): Promise<void>;
   getWindow(index: number): BrowserWindow;
   removeWindow(windowRef: BrowserWindow): void;
-  findEntry(activeWindowTitle: string): void;
-  setIdleTimer(windowId: number): void;
+  setIdleTimer(): void;
   setTitle(windowId: number, title: string): void;
-  registerAutocompleteShortcut(): void;
 }

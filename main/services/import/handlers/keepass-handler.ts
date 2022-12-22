@@ -2,7 +2,7 @@ import { dialog, IpcMainEvent } from "electron";
 import { XMLParser } from "fast-xml-parser";
 import { readFileSync } from "fs";
 import { ImportHandler } from "../../../../shared-models";
-import { IEncryptionProcessService, MessageEventType } from "../../encryption";
+import { IEncryptionEventWrapper, MessageEventType } from "../../encryption";
 import { IWindowService } from '../../window';
 import { IImportHandler } from "../import-handler.model";
 import { IImportMetadata } from "./import-metadata.model";
@@ -10,7 +10,7 @@ import { IImportMetadata } from "./import-metadata.model";
 export class KeePassHandler implements IImportHandler {
   constructor(
     private readonly _windowService: IWindowService,
-    private readonly _encryptionProcessService: IEncryptionProcessService
+    private readonly _encryptionEventWrapper: IEncryptionEventWrapper
   ) {}
 
   public async getMetadata(): Promise<IImportMetadata> {
@@ -56,7 +56,7 @@ export class KeePassHandler implements IImportHandler {
       };
   
       const window = this._windowService.getWindowByWebContentsId(event.sender.id);
-      const password = await this._encryptionProcessService.processEventAsync(encryptionEvent, window.key) as { encrypted: string };
+      const password = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, window.key) as { encrypted: string };
 
       return {
         ...e,

@@ -9,6 +9,7 @@ export enum IpcChannel {
   Exit = 'exit',
   GetSaveStatus = 'saveStatus',
   GetAutotypeFoundEntry = 'getAutotypeFoundEntry',
+  AutotypeEntrySelected = 'autotypeEntrySelected',
   ProvidePassword = 'providePassword',
   SaveFile = 'saveFile',
   Minimize = 'minimize',
@@ -32,10 +33,13 @@ export enum IpcChannel {
   GetImportedDatabaseMetadata = 'getImportedDatabaseMetadata',
   ScanLeaks = 'scanLeaks',
   ChangeEncryptionSettings = 'changeEncryptionSettings',
+  CheckIconExists = 'checkIconExists',
   TryGetIcon = 'tryGetIcon',
   TryReplaceIcon = 'tryReplaceIcon',
   RemoveIcon = 'removeIcon',
   UpdateIcon = 'updateIcon',
   CreateNew = 'createNew',
-  Export = 'export'
+  Export = 'export',
+  SendMatchingEntries = 'sendMatchingEntries',
+  GetWeakPasswords = 'getWeakPasswords'
 }
