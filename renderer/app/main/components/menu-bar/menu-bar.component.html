@@ -3,69 +3,80 @@
 	class="topbar">
 	<div appMenu class="menu">
 		<div class="brand-logo"></div>
-		<div appDropdown class="dropdown">
-			<a href="#" role="button" appDropdownToggle appMenuItem aria-hidden="true">
+		<ul appDropdown class="dropdown">
+			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true">
 				File
-			</a>
+			</li>
 			<div *appDropdownMenu class="dropdown-content left">
-				<a href="#" appMenuItem (activate)="openFile()">Open file...</a>
-				<div class="divider"><hr /></div>
-				<a href="#" appMenuItem (activate)="save()" [disabled]="isDatabasePristine">Save</a>
-				<a href="#" appMenuItem [disabled]="isLocked" (activate)="saveAs()">Save as...</a>
+				<li appMenuItem (activate)="newFile()">New file...</li>
+				<li appMenuItem (activate)="openFile()">Open file...</li>
 				<div appDropdown class="dropdown" style="width: 100%;">
-					<a href="#" appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
+					<li appDropdownToggle trigger="hover" appMenuItem class="submenu-open">
+						Open recent <span class="pi pi-angle-right"></span>
+					</li>
+					<div *appDropdownMenu class="dropdown-content left submenu-container">
+						<li *ngFor="let file of recentFiles; let i = index" aria-hidden="true" appMenuItem (activate)="openFile(file)">
+							{{ i + 1 }}: {{ file | fileName }}
+						</li>
+					</div>
+				</div>
+				<div class="divider"><hr /></div>
+				<li appMenuItem (activate)="save()" [disabled]="isDatabasePristine">Save</li>
+				<li appMenuItem [disabled]="isLocked" (activate)="saveAs()">Save as...</li>
+				<div appDropdown class="dropdown" style="width: 100%;">
+					<li appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
 						Import <span class="pi pi-angle-right"></span>
-					</a>
+					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<a href="#" aria-hidden="true" appMenuItem (activate)="import(importHandler.KeePass)">KeePass (.xml)</a>
-						<a href="#" aria-hidden="true" appMenuItem (activate)="import(importHandler.OnePassword)">1Password (.csv)</a>
+						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.KeePass)">KeePass (.xml)</li>
+						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.OnePassword)">1Password (.csv)</li>
 					</div>
 				</div>
 				<div appDropdown class="dropdown" style="width: 100%;">
-					<a href="#" appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
+					<li appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
 						Export <span class="pi pi-angle-right"></span>
-					</a>
+					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<a href="#" aria-hidden="true" appMenuItem (activate)="export()">CSV</a>
+						<li aria-hidden="true" appMenuItem (activate)="export()">CSV</li>
 					</div>
 				</div>
-				<a href="#" appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">Lock</a>
+				<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">Lock</li>
 				<div class="divider"><hr /></div>
-				<a href="#" appMenuItem (activate)="exit()">Exit</a>
+				<li appMenuItem (activate)="exit()">Exit</li>
 			</div>
-		</div>
-		<div appDropdown class="dropdown">
-			<a href="#" role="button" appDropdownToggle appMenuItem aria-hidden="true">
+		</ul>
+		<ul appDropdown class="dropdown">
+			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true">
 				Tools
-			</a>
+			</li>
 			<div *appDropdownMenu class="dropdown-content left">
 				<div appDropdown class="dropdown" style="width: 100%;">
-					<a href="#" appDropdownToggle trigger="hover" appMenuItem class="submenu-open" [disabled]="isLocked">
+					<li appDropdownToggle trigger="hover" appMenuItem class="submenu-open" [disabled]="isLocked">
 						Report <span class="pi pi-angle-right"></span>
-					</a>
+					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<a href="#" aria-hidden="true" appMenuItem (activate)="openExposedPasswordsWindow()">
+						<li aria-hidden="true" appMenuItem (activate)="openExposedPasswordsWindow()">
 							Leaked passwords
-						</a>
-						<a href="#" aria-hidden="true" appMenuItem (activate)="openWeakPasswordsWindow()">
+						</li>
+						<li aria-hidden="true" appMenuItem (activate)="openWeakPasswordsWindow()">
 							Weak passwords
-						</a>
+						</li>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div appDropdown class="dropdown">
-			<a href="#" role="button" appDropdownToggle appMenuItem aria-hidden="true">
+		</ul>
+		<ul appDropdown class="dropdown">
+			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true">
 				Help
-			</a>
+			</li>
 			<div *appDropdownMenu class="dropdown-content left">
-				<a href="#" appMenuItem (activate)="openKeyboardShortcuts()">Keyboard shortcuts</a>
+				<li appMenuItem (activate)="openKeyboardShortcuts()">Keyboard shortcuts</li>
 				<div class="divider"><hr /></div>
-				<a href="#" appMenuItem (activate)="openReleaseNotes()">Release notes</a>
-				<a href="#" appMenuItem (activate)="openReportIssue()">Report issue</a>
-				<a href="#" appMenuItem (activate)="openAboutModal()">About</a>
+				<li appMenuItem (activate)="openReleaseNotes()">Release notes</li>
+				<li appMenuItem (activate)="openReportIssue()">Report issue</li>
+				<li appMenuItem (activate)="openAboutModal()">About</li>
 			</div>
-		</div>
+		</ul>
 	</div>
 	<div class="window-icons">
 		<ul>

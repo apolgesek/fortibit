@@ -46,7 +46,7 @@
 					[ngClass]="{'active': group.id === this.selectedGroup}"
 					(focus)="selectGroup(group.id)"
 					(drop)="onEntryDrop(group.id)">
-					<i class="pi" [ngClass]="group.isImported ? 'pi-download' : 'pi-folder'"></i> <div class="group-name">{{ group.name }}</div>
+					<i class="pi" [ngClass]="group.isImported ? 'pi-clone' : 'pi-folder'"></i> <div class="group-name">{{ group.name }}</div>
 				</div>
 			</ng-container>
 		</cdk-virtual-scroll-viewport>

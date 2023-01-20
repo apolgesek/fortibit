@@ -11,7 +11,9 @@ export interface IEncryptionSettings {
 export interface IAppConfig extends Partial<IProduct> {
   clipboardClearTimeMs: number;
   autocompleteShortcut: string;
+  autocompletePasswordOnlyShortcut: string;
   fileExtension: string;
+  workspaces: any;
   version?: string;
   electronVersion?: string;
   nodeVersion?: string;

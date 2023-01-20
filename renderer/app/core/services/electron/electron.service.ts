@@ -1,34 +1,18 @@
 import { Injectable } from '@angular/core';
 import { ICommunicationService } from '@app/core/models';
-
-// If you import a module but never use any of the imported values other than as TypeScript types,
-// the resulting javascript file will look as if you never imported the module at all.
-import { ipcRenderer } from 'electron';
-import * as os from 'os';
-import * as path from 'path';
-import * as zxcvbn from 'zxcvbn';
+import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 
 @Injectable()
 export class ElectronService implements ICommunicationService {
   ipcRenderer: any;
-  os: typeof os;
-  zxcvbn: typeof zxcvbn;
-  path: typeof path;
+  platform: string;
 
   constructor() {
-    const electron = window.require('electron');
-
-    this.ipcRenderer = electron.ipcRenderer as typeof ipcRenderer;
-    this.os = window.require('os');
-    this.zxcvbn = window.require('zxcvbn');
-    this.path = window.require('path');
+    this.ipcRenderer = (window as any).api;
   }
 
-  getPlatform(): string {
-    return this.os.platform();
-  }
-
-  getPasswordGenerator(): any {
-    return this.zxcvbn;
+  async getPlatform(): Promise<string> {
+    this.platform = await this.ipcRenderer.invoke(IpcChannel.GetPlatformInfo);
+    return this.platform;
   }
 }

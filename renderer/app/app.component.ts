@@ -2,11 +2,12 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { NavigationStart, Router, RouterModule } from '@angular/router';
 import { CommunicationService } from 'injection-tokens';
-import { filter, tap, fromEvent } from 'rxjs';
+import { filter, tap, fromEvent, take } from 'rxjs';
+import { IAppConfig } from '../../app-config';
 import { AppConfig } from '../environments/environment';
 import { EventType } from './core/enums';
 import { ICommunicationService } from './core/models';
-import { AppViewContainer, EntryManager, ModalManager, ComponentGridService, WorkspaceService } from './core/services';
+import { AppViewContainer, EntryManager, ModalManager, ComponentGridService, WorkspaceService, ConfigService } from './core/services';
 import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component';
 
 @Component({
@@ -21,6 +22,7 @@ import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component'
 })
 export class AppComponent implements OnInit {
   public fontsLoaded = false;
+  private config: IAppConfig;
 
   @HostListener('document:dragenter', ['$event'])
   private onDragEnter(event: MouseEvent) {
@@ -30,6 +32,7 @@ export class AppComponent implements OnInit {
   constructor(
     @Inject(CommunicationService) public readonly communicationService: ICommunicationService,
     private readonly router: Router,
+    private readonly configService: ConfigService,
     private readonly modalManager: ModalManager,
     private readonly appViewContainer: AppViewContainer,
     private readonly viewContainerRef: ViewContainerRef,
@@ -38,15 +41,18 @@ export class AppComponent implements OnInit {
     private readonly userInterfaceService: ComponentGridService,
     @Inject(DOCUMENT) private document: Document,
   ) {
-    console.log('AppConfig', AppConfig);
     this.appViewContainer.appViewContainerRef = this.viewContainerRef;
   }
   ngOnInit(): void {
     this.closeModalsOnRouteChange();
-    this.registerGlobalEvents();
 
     this.preloadFonts().then(() => {
       this.fontsLoaded = true;
+    });
+
+    this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
+      this.config = config;
+      this.registerGlobalEvents();
     });
   }
 
@@ -75,7 +81,7 @@ export class AppComponent implements OnInit {
 
     if (productionMode) {
       window.onbeforeunload = (event: Event) => {
-        this.workspaceService.checkFileSaved(EventType.Exit);
+        this.workspaceService.executeEvent(EventType.Exit);
         event.returnValue = false;
       };
     }
@@ -96,7 +102,11 @@ export class AppComponent implements OnInit {
         const dataTransfer = (event as DragEvent).dataTransfer as DataTransfer;
 
         if (dataTransfer.files.length) {
-          this.workspaceService.checkFileSaved(EventType.DropFile, dataTransfer.files[0].path);
+          const file = dataTransfer.files[0] as any;
+
+          if (file.path.endsWith(this.config.fileExtension)) {
+            this.workspaceService.executeEvent(EventType.DropFile, file.path);
+          }
         }
 
         event.preventDefault();

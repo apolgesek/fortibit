@@ -1,8 +1,8 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ContentChildren, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { GroupId, Sort } from '@app/core/enums';
+import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { GroupId } from '@app/core/enums';
 import { IHotkeyHandler } from '@app/core/models';
 import { ConfigService, EntryManager, GroupManager, WorkspaceService } from '@app/core/services';
 import { ClipboardService } from '@app/core/services/clipboard.service';
@@ -11,32 +11,23 @@ import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
 import { EntryIconDirective } from '@app/main/directives/entry-icon.directive';
 import { TextEmphasizeDirective } from '@app/main/directives/text-emphasize.directive';
+import { MenuItem, slideDown } from '@app/shared';
+import { ContextMenuItemDirective } from '@app/shared/directives/context-menu-item.directive';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
 import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
+import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
+import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
-import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
-import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
-import { ContextMenuItemDirective } from '@app/shared/directives/context-menu-item.directive';
+import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { DomUtil } from '@app/utils';
-import { IPasswordEntry } from '@shared-renderer/index';
+import { ExpirationStatus, IPasswordEntry } from '@shared-renderer/index';
 import { HotkeyHandler } from 'injection-tokens';
 import { Observable, Subject } from 'rxjs';
-import { map, take, takeUntil } from 'rxjs/operators';
-import { MenuItem, slideDown } from '@app/shared';
-import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
+import { map, takeUntil } from 'rxjs/operators';
+import { TableFiltersComponent } from '../table-filters/table-filters.component';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
-
-interface ISortOption {
-  name: string;
-  prop: 'username' | 'creationDate' | 'title';
-}
-
-interface ISortDirectionOption {
-  name: string;
-  state: Sort;
-}
 
 @Component({
   selector: 'app-entries-table',
@@ -69,27 +60,15 @@ interface ISortDirectionOption {
     FocusableListItemDirective,
     ContextMenuItemDirective,
     TooltipDirective,
-    ToolbarComponent
+    ToolbarComponent,
+    TableFiltersComponent,
   ]
 })
 export class EntriesTableComponent implements OnInit, OnDestroy {
   @ViewChild(CdkVirtualScrollViewport) public readonly scrollViewport: CdkVirtualScrollViewport | undefined;
-  @ViewChildren('sort') public readonly sortDropdowns: QueryList<DropdownDirective>;
 
-  public readonly sortOptions: ISortOption[] = [
-    { name: 'Creation date', prop: 'creationDate' },
-    { name: 'Title', prop: 'title' },
-    { name: 'User', prop: 'username' },
-  ];
+  public readonly expirationStatus = ExpirationStatus;
 
-  public readonly sortDirectionOptions: ISortDirectionOption[] = [
-    { name: 'Ascending', state: Sort.Asc },
-    { name: 'Descending', state: Sort.Desc }
-  ];
-
-  public readonly sort = Sort;
-  public selectedSortOption = this.sortOptions[0];
-  public selectedSortDirection = this.sortDirectionOptions[0];
   public passwordList$: Observable<IPasswordEntry[]>;
   public searchPhrase$: Observable<string>;
   public entryMenuItems: MenuItem[] = [];
@@ -111,6 +90,10 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   ) { 
     this.passwordList$ = this.entryManager.entries$;
     this.searchPhrase$ = this.searchService.searchPhrase$;
+  }
+
+  get activeFilters(): ExpirationStatus[] {
+    return this.searchService.expirationStatus;
   }
 
   get selectedEntries(): IPasswordEntry[] {
@@ -224,22 +207,6 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
 
   endDrag() {
     this.entryManager.movedEntries = [];
-  }
-
-  setSort(option: ISortOption) {
-    this.selectedSortOption = option;
-    this.searchService.setSort(this.selectedSortDirection.state, option.prop);
-  }
-
-  setSortDirection(option: ISortDirectionOption) {
-    this.selectedSortDirection = option;
-    this.searchService.setSort(option.state, this.selectedSortOption.prop);
-  }
-
-  onChildDropdownOpen(dropdown: DropdownDirective) {
-    this.sortDropdowns.toArray().filter(x => x !== dropdown).forEach(dropdown => {
-      dropdown.state.close();
-    });
   }
 
   getContextMenu(entry: IPasswordEntry): MenuItem[] {

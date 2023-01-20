@@ -1,56 +1,9 @@
 <div class="password-table">
 	<div id="table-header" data-prevent-entry-deselect>
 		<div class="group-data">
-			Total: {{ passwordEntries.length }} <span class="separator">|</span> Selected: {{ selectedEntries.length }}
+			{{ passwordEntries.length }}
 		</div>
-		<div style="display: flex;" appMenu>
-			<div appDropdown class="dropdown">
-				<button appDropdownToggle appMenuItem appTooltip="Filters" class="filters">
-					<span class="pi pi-sliders-h"></span>
-				</button>
-				<div *appDropdownMenu class="dropdown-content right filter-dropdown" @slideDown>
-					<div class="filter-label" style="width: 100%; margin-bottom: 0.5rem;">Sort by</div>
-					<div #sort="appDropdown" (open)="onChildDropdownOpen($event)" appDropdown [select]="true" class="dropdown">
-						<div (click)="$event.stopPropagation()" style="position: relative; width: 120px;">
-							<button id="sort-by" class="filter-option fit" appDropdownToggle>
-								{{ selectedSortOption.name }} <span class="pi pi-angle-down"></span>
-							</button>
-							<div *appDropdownMenu class="dropdown-content select right">
-								<a
-									href="#"
-									*ngFor="let option of sortOptions"
-									[ngClass]="{'selected' : selectedSortOption === option}"
-									appMenuItem
-									[closeOnSelect]="true"
-									class="option-item"
-									(activate)="setSort(option)">
-									{{ option.name }}
-								</a>
-							</div>
-						</div>
-					</div>
-					<div #sort="appDropdown" (open)="onChildDropdownOpen($event)" appDropdown #sortDropdown [select]="true" class="dropdown" style="margin-top: 0.5rem;">
-						<div (click)="$event.stopPropagation()" style="position: relative; width: 120px;">
-							<button id="sort-by-direction" class="filter-option fit" appDropdownToggle>
-								{{ selectedSortDirection.name }} <i class="pi pi-angle-down"></i>
-							</button>
-							<div *appDropdownMenu class="dropdown-content select right">
-								<a
-									href="#"
-									*ngFor="let option of sortDirectionOptions"
-									[ngClass]="{'selected' : selectedSortOption === option}"
-									appMenuItem
-									[closeOnSelect]="true"
-									class="option-item"
-									(activate)="setSortDirection(option)">
-									{{ option.name }}
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+		<app-table-filters></app-table-filters>
 	</div>
 	<div *ngIf="searchPhrase?.length && (!isSearching || wasSearched)" class="results-badge" @slideIn>
 		<div *ngIf="entriesFound$ | async as entriesCount">
@@ -84,7 +37,7 @@
 						<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" [appEntryIcon]="item" width="28" height="28"/>
 					</div>
 					<div class="column long-text">
-						<div class="row" [appTextEmphasize]="searchPhrase$ | async" (dblclick)="copyToClipboard(item, 'title')">
+						<div class="row" [appTextEmphasize]="searchPhrase$ | async">
 							{{ item.title }}
 						</div>
 						<div class="row" [appTextEmphasize]="searchPhrase$ | async" (dblclick)="copyToClipboard(item, 'username')" style="color: #999">
@@ -93,15 +46,15 @@
 					</div>
 					<div
 						(dblclick)="copyToClipboard(item, 'password')"
-						class="column password">•••••• <i *ngIf="item.expirationStatus" class="pi pi-clock"></i>
+						class="column password">•••••• <i *ngIf="item.expirationStatus !== expirationStatus.None" class="pi pi-clock"></i>
 					</div>
 				</div>
 			</ng-container>
 		</cdk-virtual-scroll-viewport>
 		<ng-template #noPasswordsTemplate>
 			<div class="list-cta">
-				<ng-container *ngIf="(searchPhrase$ | async)?.length; else noEntriesTemplate">
-					No results found
+				<ng-container *ngIf="(searchPhrase$ | async)?.length || activeFilters?.length; else noEntriesTemplate">
+					No matching entries found
 				</ng-container>
 				<ng-template #noEntriesTemplate>
 					<p class="no-entries">There are no entries in this group</p>

@@ -68,7 +68,7 @@ class Main {
   }
 
   public encryptDatabase(event: EventPayload) {
-    const { database, password, memoryKey } = event;
+    const { database, password } = event;
     const parsedDb = JSON.parse(database);
     const stores = parsedDb.data.data;
     const entriesStore = stores.find(x => x.tableName === 'entries');
@@ -76,11 +76,11 @@ class Main {
 
     entriesStore.rows = entriesStore.rows.map(entry => ({
       ...entry,
-      password: this._inMemoryEncryptionService.decryptString(entry.password, memoryKey)
+      password: this._inMemoryEncryptionService.decryptString(entry.password, process.env.ENCRYPTION_KEY)
     }));
 
     historyStore.rows = historyStore.rows.map(item => {
-      item.entry.password = this._inMemoryEncryptionService.decryptString(item.entry.password, memoryKey);
+      item.entry.password = this._inMemoryEncryptionService.decryptString(item.entry.password, process.env.ENCRYPTION_KEY);
       return item;
     });
     
@@ -89,7 +89,7 @@ class Main {
   }
 
   public decryptDatabase(event: EventPayload) {
-    const { data, password, memoryKey } = event;
+    const { data, password } = event;
   
     try {
       const decryptedDb = JSON.parse(this._encryptionService.decryptString(data, password));
@@ -99,11 +99,11 @@ class Main {
 
       entriesStore.rows = entriesStore.rows.map(entry => ({
         ...entry,
-        password: this._inMemoryEncryptionService.encryptString(entry.password, memoryKey)
+        password: this._inMemoryEncryptionService.encryptString(entry.password, process.env.ENCRYPTION_KEY)
       }));
 
       historyStore.rows = historyStore.rows.map(item => {
-        item.entry.password = this._inMemoryEncryptionService.encryptString(item.entry.password, memoryKey);
+        item.entry.password = this._inMemoryEncryptionService.encryptString(item.entry.password, process.env.ENCRYPTION_KEY);
         return item;
       });
 
@@ -114,7 +114,7 @@ class Main {
   }
 
   public async getLeaks(event: EventPayload) {
-    const { database, memoryKey } = event;
+    const { database } = event;
   
     try {
       const parsedDb = JSON.parse(database);
@@ -122,7 +122,7 @@ class Main {
       const entriesStore = stores.find(x => x.tableName === 'entries');
       const entries = entriesStore.rows.map(entry => {
         const shasum = createHash('sha1');
-        shasum.update(this._inMemoryEncryptionService.decryptString(entry.password, memoryKey));
+        shasum.update(this._inMemoryEncryptionService.decryptString(entry.password, process.env.ENCRYPTION_KEY));
         const hash = shasum.digest('hex');
         
         return {
@@ -139,7 +139,7 @@ class Main {
   }
 
   public async getWeakPasswords(event: EventPayload) {
-    const { database, memoryKey } = event;
+    const { database } = event;
   
     try {
       const parsedDb = JSON.parse(database);
@@ -148,7 +148,7 @@ class Main {
       const entries = entriesStore.rows.map(entry => {
         return {
           id: entry.id,
-          password: this._inMemoryEncryptionService.decryptString(entry.password, memoryKey)
+          password: this._inMemoryEncryptionService.decryptString(entry.password, process.env.ENCRYPTION_KEY)
         };
       });
 
@@ -160,21 +160,21 @@ class Main {
   }
 
   public encryptString(event: EventPayload) {
-    const { plain, memoryKey } = event;
-    const encryptedPassword = this._inMemoryEncryptionService.encryptString(plain, memoryKey);
+    const { plain } = event;
+    const encryptedPassword = this._inMemoryEncryptionService.encryptString(plain, process.env.ENCRYPTION_KEY);
     process.send({ encrypted: encryptedPassword });
   }
 
   public decryptString(event: EventPayload) {
-    const { encrypted, memoryKey } = event;
-    const decryptedPassword = this._inMemoryEncryptionService.decryptString(encrypted, memoryKey);
+    const { encrypted } = event;
+    const decryptedPassword = this._inMemoryEncryptionService.decryptString(encrypted, process.env.ENCRYPTION_KEY);
     process.send({ decrypted: decryptedPassword });
   }
 
   public bulkDecryptString(event: EventPayload) {
-    const { rows, memoryKey } = event;
+    const { rows } = event;
     let decrypted: IPasswordEntry[] = JSON.parse(rows);
-    decrypted = decrypted.map(x => ({ ...x, password: this._inMemoryEncryptionService.decryptString(x.password, memoryKey) }));
+    decrypted = decrypted.map(x => ({ ...x, password: this._inMemoryEncryptionService.decryptString(x.password, process.env.ENCRYPTION_KEY) }));
     process.send({ decrypted });
   }
 }

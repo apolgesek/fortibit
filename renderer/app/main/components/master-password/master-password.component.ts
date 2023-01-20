@@ -8,7 +8,6 @@ import { EntryManager, GroupManager, ModalService, WorkspaceService } from '@app
 import { ConfigService } from '@app/core/services/config.service';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { IpcChannel } from '@shared-renderer/index';
-import { IpcRendererEvent } from 'electron/main';
 import { CommunicationService } from 'injection-tokens';
 import { from, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
@@ -33,7 +32,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   private readonly destroyed$: Subject<void> = new Subject();
   private readonly defaultGroup = GroupId.AllItems;
 
-  private onDecryptedContent: (_: IpcRendererEvent, { decrypted }: { decrypted: string }) => void;
+  private onDecryptedContent: (_: any, { decrypted }: { decrypted: string }) => void;
   private _filePath: string;
 
   get passwordControl(): FormControl {
@@ -66,7 +65,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
       password: ['', Validators.required]
     });
 
-    this.onDecryptedContent = (_: IpcRendererEvent, { decrypted }: { decrypted: string }) => {
+    this.onDecryptedContent = (_: any, { decrypted }: { decrypted: string }) => {
       this.zone.run(() => {
         if (decrypted) {
           this.workspaceService.setSynced();
@@ -134,8 +133,6 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   }
 
   async onLoginSubmit() {
-    await this.workspaceService.clearDatabase();
-
     Object.values(this.loginForm.controls).forEach(control => {
       control.markAsDirty();
     });

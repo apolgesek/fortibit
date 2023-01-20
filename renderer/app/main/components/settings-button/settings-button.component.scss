@@ -1,9 +1,13 @@
 @import 'variables';
 
+:host {
+	flex: 1;
+	justify-content: flex-end;
+}
+
 .settings {
-	margin-left: auto;
 	position: relative;
-	padding-left: 2rem;
+	margin-right: 1rem;
 
 	&.new {
 		.dropbtn {
@@ -63,6 +67,7 @@
 		transition: padding 100ms;
 		background-color: transparent;
 		transition: color 200ms;
+		margin-left: auto;
 
 		&:hover {
 			.pi {

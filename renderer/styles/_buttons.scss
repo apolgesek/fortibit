@@ -11,6 +11,7 @@ button {
 .primary-btn {
 	@include font-medium;
 	border: 0;
+	line-height: 1;
 	padding: 0.875rem 1.625rem;
 	border-radius: 0.25rem;
 	font-size: 0.875rem;
@@ -47,6 +48,7 @@ button {
 .outline-btn {
 	@include font-medium;
 	border: 0;
+	line-height: 1;
 	padding: 0.875rem 1.625rem;
 	border-radius: 0.25rem;
 	font-size: 0.875rem;
@@ -89,6 +91,7 @@ button {
 .text-btn {
 	@include font-medium;
 	color: $curious-blue;
+	line-height: 1;
 	padding: 0.875rem 1.625rem;
 	border: 1px solid transparent;
 	font-size: 0.875rem;
@@ -165,6 +168,7 @@ button {
 	@include font-regular;
 	display: flex;
 	align-items: center;
+	line-height: 1;
   font-size: 0.875rem;
 	color: $pickled-bluewood;
 	background-color: $white;

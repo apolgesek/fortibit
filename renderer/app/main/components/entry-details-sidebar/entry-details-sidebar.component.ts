@@ -1,9 +1,9 @@
 import { trigger, style, transition, animate, keyframes } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Inject, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService, IPasswordGroup } from '@app/core/models';
-import { WorkspaceService, EntryManager, GroupManager, ModalService, NotificationService } from '@app/core/services';
+import { WorkspaceService, EntryManager, GroupManager, ModalService, NotificationService, ClipboardService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
 import { TooltipComponent } from '@app/shared/components/tooltip/tooltip.component';
 import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.directive';
@@ -13,6 +13,8 @@ import { AppConfig } from 'environments/environment';
 import { CommunicationService } from 'injection-tokens';
 import { Subject, takeUntil } from 'rxjs';
 import { IAppConfig } from '../../../../../app-config';
+import { LinkPipe } from '@app/shared/pipes/link.pipe'
+import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
 
 @Component({
   selector: 'app-entry-details-sidebar',
@@ -23,7 +25,9 @@ import { IAppConfig } from '../../../../../app-config';
     CommonModule,
     SidebarHandleDirective,
     TooltipDirective,
-    TooltipComponent
+    TooltipComponent,
+    LinkPipe,
+    TimeRemainingPipe
   ],
   animations: [
     trigger('star', [
@@ -51,6 +55,10 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
     }
   }
 
+  get isUnsecured(): boolean {
+    return !this.entry?.url?.startsWith('https://');
+  }
+
   get isEntrySelected(): boolean {
     return this.entryManager.selectedPasswords.length === 1;
   }
@@ -73,7 +81,7 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
     private readonly modalService: ModalService,
     private readonly configService: ConfigService,
     private readonly notificationService: NotificationService,
-    private readonly renderer: Renderer2,
+    private readonly clipboardService: ClipboardService
   ) {}
 
   ngOnInit(): void {
@@ -104,6 +112,10 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
 
   openAutotypeInformation() {
     this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, AppConfig.urls.repositoryUrl + AppConfig.urls.keyboardReference + AppConfig.urls.autotypeShortcut);
+  }
+
+  copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry) {
+    this.clipboardService.copyToClipboard(entry, property);
   }
 
   async toggleStarred(entry: IPasswordEntry) {

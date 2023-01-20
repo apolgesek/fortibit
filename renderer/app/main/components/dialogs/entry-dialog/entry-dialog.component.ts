@@ -1,21 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, Component, ComponentRef, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControlOptions, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
-import { IModal, IAdditionalData } from '@app/shared';
-import { DateMaskDirective } from '../../../../shared/directives/date-mask.directive';
-import { valueMatchValidator } from '../../../../shared/validators/value-match.validator';
-import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { IAdditionalData, IModal } from '@app/shared';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
-import { generate } from 'generate-password';
 import { CommunicationService } from 'injection-tokens';
 import { fromEvent, Subject } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
+import * as zxcvbn from 'zxcvbn';
 import { IAppConfig } from '../../../../../../app-config';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { DateMaskDirective } from '../../../../shared/directives/date-mask.directive';
+import { valueMatchValidator } from '../../../../shared/validators/value-match.validator';
 
 @Component({
   selector: 'app-entry-dialog',
@@ -57,7 +57,8 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     private readonly modalRef: ModalRef,
     private readonly entryManager: EntryManager,
     private readonly groupManager: GroupManager,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly cdRef: ChangeDetectorRef
   ) {
     this.newEntryForm = this.fb.group({
       id: [null],
@@ -142,18 +143,20 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     });
   }
 
-  private prefillForm() {
+  private async prefillForm() {
     if (this.entryManager.editedEntry) {
       this.fillExistingEntry();
     } else {
-      this.fillNewEntry();
+      await this.fillNewEntry();
     }
 
     const password = this.newEntryForm.get('passwords.password')?.value;
 
     if (password) {
-      this.passwordScore = this.communicationService.getPasswordGenerator()(password).score;
+      this.passwordScore = zxcvbn(password).score;
     }
+
+    this.cdRef.detectChanges();
   }
 
   ngAfterViewInit() {
@@ -194,7 +197,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   onPasswordChange(event: Event) {
     const password = (event.target as HTMLInputElement).value;
-    this.passwordScore = this.communicationService.getPasswordGenerator()(password).score;
+    this.passwordScore = zxcvbn(password).score;
   }
 
   ngOnDestroy(): void {
@@ -227,8 +230,9 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     markAllAsDirty(this.newEntryForm);
 
     if (this.newEntryForm.invalid) {
-      const el = (this.entryForm.nativeElement as HTMLElement).querySelector('.ng-invalid');
-      this.entryForm.nativeElement.scrollTo({ top: el.getBoundingClientRect().top });
+      const el = (this.entryForm.nativeElement as HTMLElement).querySelector('input.ng-invalid, .form-group.ng-invalid');
+      const elToScroll = el.tagName.toLowerCase() === 'div' ? el : el.parentElement;
+      elToScroll.scrollIntoView({ block: "start", inline: "nearest" });
 
       return;
     }
@@ -328,8 +332,8 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     return null;
   }
 
-  private fillNewEntry() {
-    const password = this.generatePassword();
+  private async fillNewEntry() {
+    const password = await this.generatePassword();
 
     this.newEntryForm.get('passwords')?.patchValue({
       password: password,
@@ -349,10 +353,10 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     });
   }
 
-  private generatePassword(): string {
+  private generatePassword(): Promise<string> {
     const settings = this.config.encryption;
 
-    return generate({
+    return (window as any).api.invoke(IpcChannel.GeneratePassword, {
       length: settings.passwordLength,
       lowercase: settings.lowercase,
       uppercase: settings.uppercase,

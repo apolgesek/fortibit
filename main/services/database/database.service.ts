@@ -1,6 +1,8 @@
-import { app, dialog, FileFilter, ipcMain, IpcMainEvent, powerMonitor, safeStorage, session } from 'electron';
-import { readFileSync, writeFile, writeFileSync } from 'fs-extra';
-import { basename, join } from 'path';
+import { dialog, FileFilter, ipcMain, IpcMainEvent, powerMonitor, safeStorage, session } from 'electron';
+import { copyFile, rename, unlink, writeFile } from 'fs';
+import { readFileSync, writeFileSync } from 'fs-extra';
+import { generate } from 'generate-password';
+import { basename } from 'path';
 import { IProduct } from '../../../product';
 import { ImportHandler, IpcChannel } from '../../../shared-models';
 import { IConfigService } from '../config';
@@ -25,10 +27,12 @@ export class DatabaseService implements IDatabaseService {
   };
 
   setPassword(value: string, windowId: number) {
+    const fileEntry = this._fileMap.get(windowId);
+
     if (!value) {
-      this._fileMap.get(windowId).password = Buffer.alloc(0);
+      fileEntry.password = null;
     } else {
-      this._fileMap.get(windowId).password = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(value) : Buffer.from(value);
+      fileEntry.password = safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(value) : Buffer.from(value);
     }
   }
 
@@ -58,8 +62,8 @@ export class DatabaseService implements IDatabaseService {
       await this.saveDatabase(event, payload);
     });
 
-    ipcMain.on(IpcChannel.OpenFile, (event: IpcMainEvent) => {
-      this.openDatabase(event);
+    ipcMain.on(IpcChannel.OpenFile, (event: IpcMainEvent, path: string) => {
+      this.openDatabase(event, path);
     });
 
     ipcMain.handle(IpcChannel.GetImportedDatabaseMetadata, async (_: IpcMainEvent, type: ImportHandler) => {
@@ -103,6 +107,10 @@ export class DatabaseService implements IDatabaseService {
       return await this._exportService.export(this._windowService.getWindowByWebContentsId(event.sender.id), database);
     });
 
+    ipcMain.handle(IpcChannel.GeneratePassword, async (event: IpcMainEvent, options) => {
+      return generate(options);
+    });
+
     if (this._configService.appConfig.lockOnSystemLock) {
       powerMonitor.addListener('lock-screen', this._screenLockHandler);
     }
@@ -118,7 +126,20 @@ export class DatabaseService implements IDatabaseService {
 
   public setDatabaseEntry(windowId: number, filePath: string) {
     this._fileMap.set(windowId, { file: filePath });
-    writeFileSync(join(app.getPath('appData'), app.getName(), 'config', 'workspaces.json'), JSON.stringify({ workspace: filePath }));  
+    const workspaces = this._configService.appConfig.workspaces;
+    const fileIndex = workspaces.recentlyOpened.findIndex(x => x === filePath);
+
+    if (fileIndex > -1) {
+      workspaces.recentlyOpened.splice(fileIndex, 1);
+    }
+
+    workspaces.recentlyOpened.unshift(filePath);
+
+    if (workspaces.recentlyOpened.length > 10) {
+      workspaces.recentlyOpened.length = 10;
+    }
+
+    writeFileSync(this._configService.workspacesPath, JSON.stringify({ workspace: filePath, recentlyOpened: workspaces.recentlyOpened }));  
   }
 
   public getFilePath(windowId: number): string {
@@ -149,14 +170,30 @@ export class DatabaseService implements IDatabaseService {
       : this.appendExtension(savePath.filePath);
 
     try {
-      writeFile(finalFilePath, payload.encrypted, { encoding: 'base64' }, () => {
-        this._fileMap.get(event.sender.id).file = finalFilePath;
-        this._windowService.setTitle(event.sender.id, basename(finalFilePath));
+      const temporaryPath = this.createTemporaryPathFrom(finalFilePath);
 
-        event.reply(IpcChannel.GetSaveStatus, {
-          status: true,
-          file: finalFilePath,
-          notify: saveFilePayload.config?.notify ?? true
+      writeFile(temporaryPath,  payload.encrypted, { encoding: 'base64' }, (err) => {
+        if (err) {
+          unlink(temporaryPath, (err) => { if (err) throw err; });
+          return;
+        }
+
+        copyFile(temporaryPath, finalFilePath, (err) => {
+          if (err) {
+            rename(temporaryPath, finalFilePath, (err) => { if (err) throw err; });
+            return;
+          }
+
+          unlink(temporaryPath, (err) => { if (err) throw err; });
+
+          this._fileMap.get(event.sender.id).file = finalFilePath;
+          this._windowService.setTitle(event.sender.id, basename(finalFilePath));
+    
+          event.reply(IpcChannel.GetSaveStatus, {
+            status: true,
+            file: finalFilePath,
+            notify: saveFilePayload.config?.notify ?? true
+          });
         });
       });
     } catch (err) {
@@ -165,24 +202,31 @@ export class DatabaseService implements IDatabaseService {
     }
   }
 
-  public async openDatabase(event: IpcMainEvent): Promise<void> {
-    const fileObj = await dialog.showOpenDialog({
-      properties: ['openFile'],
-      filters: [{  name: 'Fortibit database file', extensions: [this._configService.appConfig.fileExtension] }]
-    });
+  public async openDatabase(event: IpcMainEvent, path: string): Promise<void> {
+    let fileObj;
 
-    if (!fileObj.canceled) {
-      this.setDatabaseEntry(event.sender.id, fileObj.filePaths[0]);
+    if (!path) {
+      fileObj = await dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [{  name: 'Fortibit database file', extensions: [this._configService.appConfig.fileExtension] }]
+      });
+    }
+
+    if (!fileObj?.canceled || path) {
+      this.setDatabaseEntry(event.sender.id, fileObj?.filePaths[0] ?? path);
       event.reply(IpcChannel.ProvidePassword, this.getFilePath(event.sender.id));
     }
   }
 
   public async decryptDatabase(event: IpcMainEvent, password: string): Promise<void> {
     const window = this._windowService.getWindowByWebContentsId(event.sender.id);
+    const key = this._windowService.getSecureKey();
+
     const fileData = readFileSync(this.getFilePath(event.sender.id), { encoding: 'base64' });
-    let payload = await this._encryptionEventService.decryptDatabase(fileData, password, window.key);
+    let payload = await this._encryptionEventService.decryptDatabase(fileData, password, key);
     
     if (!payload.error) {
+      window.key = key;
       this.setPassword(password, event.sender.id);
       const parsedDb = JSON.parse(payload.decrypted);
       const stores = parsedDb.data.data;
@@ -227,5 +271,12 @@ export class DatabaseService implements IDatabaseService {
 
   private removeBrowserSession(): Promise<void> {
     return session.defaultSession.clearStorageData();
+  }
+
+  private createTemporaryPathFrom(path: string) {
+    const temp = path.split('.');
+    temp.pop();
+    
+    return temp.join('') + '~';
   }
 }

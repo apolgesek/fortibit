@@ -5,11 +5,11 @@
       <div *ngIf="notifications.length" class="badge">{{ notifications.length }} <span class="sr-only">notifications</span></div>
       <span class="pi pi-cog"></span>
     </button>
-    <div *appDropdownMenu class="dropdown-content right" @slideDown>
-      <a *ngIf="updateAvailable" href="#" appMenuItem (click)="updateAndRelaunch()" class="update-btn">
+    <ul *appDropdownMenu class="dropdown-content right" @slideDown>
+      <li *ngIf="updateAvailable" appMenuItem (click)="updateAndRelaunch()" class="update-btn">
         Update and restart <span class="version">{{ updateAvailable }}</span>
-      </a>
-      <a href="#" appMenuItem (click)="openSettings(); false">{{ settingsLabel }}</a>
-    </div>
+      </li>
+      <li appMenuItem (click)="openSettings(); false">{{ settingsLabel }}</li>
+    </ul>
   </div>
 </ng-container>

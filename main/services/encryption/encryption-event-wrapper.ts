@@ -7,9 +7,9 @@ import { IEncryptionEventWrapper } from './encryption-event-wrapper.model';
 export class EncryptionEventWrapper implements IEncryptionEventWrapper {
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
 
-  public async processEventAsync(event, key): Promise<Serializable> {
-    const process = await this.createEncryptionProcess();
-    process.send({ ...event, memoryKey: this.getMemoryKey(key) });
+  public async processEventAsync(event: any, encryptedKey: string): Promise<Serializable> {
+    const process = await this.createEncryptionProcess(encryptedKey);
+    process.send({ ...event });
 
     return new Promise((resolve) => {
       process.once('message', (result) => {
@@ -18,17 +18,18 @@ export class EncryptionEventWrapper implements IEncryptionEventWrapper {
     });
   }
 
-  public async createEncryptionProcess(): Promise<ChildProcess> {
+  public async createEncryptionProcess(encryptedKey: string): Promise<ChildProcess> {
     const encryptionProcessPath = join(global['__basedir'], 'main', 'services', 'encryption', 'main.js');
     return fork(encryptionProcessPath, [], {
       silent: !this._isDevMode,
       env: {
         ELECTRON_RUN_AS_NODE: '1',
+        ENCRYPTION_KEY: this.decryptKey(encryptedKey)
       }
     });
   }
 
-  private getMemoryKey(key: string): string {
+  private decryptKey(key: string): string {
     return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(Buffer.from(key, 'base64')) : key;
   }
 }

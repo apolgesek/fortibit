@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+import { Cron } from "croner";
 import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron';
 import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { platform } from 'os';
 import { basename, join } from 'path';
 import { IpcChannel } from '../shared-models';
 import { SingleInstanceServices } from './dependency-injection';
@@ -85,6 +87,7 @@ class MainProcess {
     const windowRef = this._windowService.createMainWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));
     const entrySelectWindowRef = this._windowService.createEntrySelectWindow();
     this.registerIpcEventListeners();
+    this.registerScheduledTasks();
 
     if (this._configService.appConfig.autoTypeEnabled) {
       this._autotypeService.registerAutocompleteShortcut();
@@ -107,13 +110,11 @@ class MainProcess {
       this._databaseService.setDatabaseEntry(windowRef.webContents.id, filePath);
       this._windowService.setTitle(windowRef.id, basename(filePath));
     } else {
-      const workspaceConfigPath = join(app.getPath('appData'), app.getName(), 'config', 'workspaces.json');
-
-      if (!existsSync(workspaceConfigPath)) {
-        writeFileSync(workspaceConfigPath, '{}', { encoding: 'utf-8' });
+      if (!existsSync(this._configService.workspacesPath)) {
+        writeFileSync(this._configService.workspacesPath, '{"recentlyOpened": [], "workspace": null}', { encoding: 'utf-8' });
       }
 
-      const workspace = readFileSync(workspaceConfigPath, 'utf-8');
+      const workspace = readFileSync(this._configService.workspacesPath, 'utf-8');
       const path = JSON.parse(workspace);
 
       if (path.workspace && existsSync(path.workspace)) {
@@ -124,11 +125,15 @@ class MainProcess {
   }
   
   private registerIpcEventListeners() {
-    ipcMain.on(IpcChannel.DropFile, (event: IpcMainEvent, filePath: string) => {
-      if (!filePath.endsWith(this._configService.appConfig.fileExtension)) {
-        return;
-      }
+    ipcMain.handle(IpcChannel.GetWhitelistedChannels, () => {
+      return Object.values(IpcChannel);
+    });
 
+    ipcMain.handle(IpcChannel.GetPlatformInfo, () => {
+      return platform();
+    });
+
+    ipcMain.on(IpcChannel.DropFile, (event: IpcMainEvent, filePath: string) => {
       this._databaseService.setDatabaseEntry(event.sender.id, filePath);
       this._windowService.setTitle(event.sender.id, basename(filePath));
 
@@ -162,7 +167,11 @@ class MainProcess {
     });
 
     ipcMain.on(IpcChannel.OpenUrl, async (_, url: string) => {
-      shell.openExternal(url.includes('http') ? url : 'http://' + url);
+      if (!/^https?/.test(url)) {
+        url = 'http://' + url;
+      }
+
+      shell.openExternal(url);
     });
 
     ipcMain.once(IpcChannel.UpdateAndRelaunch, () => {
@@ -175,6 +184,14 @@ class MainProcess {
       }
 
       return password === this._databaseService.getPassword(event.sender.id);
+    });
+  }
+
+  private registerScheduledTasks() {
+    const updatePasswordExpiration = new Cron('0 0 * * *', () => {
+      this._windowService.windows.forEach(window => {
+        window.browserWindow.webContents.send(IpcChannel.UpdateExpiration);
+      });
     });
   }
 }

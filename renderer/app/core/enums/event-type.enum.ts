@@ -3,5 +3,6 @@ export enum EventType {
   OpenFile,
   DropFile,
   Lock,
-  Update
+  Update,
+  NewFile
 }

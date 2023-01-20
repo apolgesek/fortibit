@@ -2,6 +2,7 @@ import { Inject, Injectable, NgZone } from "@angular/core";
 import { GroupId } from "@app/core/enums";
 import { ICommunicationService } from "@app/core/models";
 import { EntryRepository, HistoryRepository } from "@app/core/repositories";
+import { ExpirationStatus } from "@shared-renderer/expiration-status.enum";
 import { IHistoryEntry } from "@shared-renderer/history-entry.model";
 import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
 import { IPasswordEntry } from "@shared-renderer/password-entry.model";
@@ -83,6 +84,16 @@ export class EntryManager {
         });
       });
     });
+
+    this.communicationService.ipcRenderer.on(IpcChannel.UpdateExpiration, () => {
+      this.zone.run(() => {
+        for (const entry of this.passwordEntries) {
+          this.setExpiration(entry);
+        }
+  
+        this.updateEntriesSource();
+      });
+    });
   }
 
   async saveEntry(entry: Partial<IPasswordEntry>): Promise<number> {
@@ -90,7 +101,7 @@ export class EntryManager {
 
     if (entry.id) {
       const editedEntry = { ...this.editedEntry };
-
+    
       id = await this.entryRepository.update(entry);
       this.passwordEntries = await this.getEntries();
       this.selectedPasswords = [entry as IPasswordEntry];
@@ -118,6 +129,7 @@ export class EntryManager {
       this.searchService.reset();
     }
 
+    this.setExpiration(entry);
     this.markDirty();
 
     return id;
@@ -236,8 +248,9 @@ export class EntryManager {
     }
   }
 
-  private setExpiration(entry: IPasswordEntry): void {
+  private setExpiration(entry: Partial<IPasswordEntry>): void {
     if (!entry.expirationDate) {
+      entry.expirationStatus = ExpirationStatus.None;
       return;
     }
 
@@ -252,9 +265,11 @@ export class EntryManager {
     date.setDate(date.getDate() + daysDue);
 
     if (entry.expirationDate < new Date()) {
-      entry.expirationStatus = 'expired';
+      entry.expirationStatus = ExpirationStatus.Expired
     } else if (entry.expirationDate > new Date() && entry.expirationDate <= date) {
-      entry.expirationStatus = 'due-expiration';
+      entry.expirationStatus = ExpirationStatus.DueExpiration;
+    } else {
+      entry.expirationStatus = ExpirationStatus.None;
     }
   }
 
@@ -265,7 +280,11 @@ export class EntryManager {
 
     if (this.isGlobalSearch) {
       return from(this.entryRepository.getSearchResults(searchPhrase))
-        .pipe(map((searchResults) => ({ passwords, searchPhrase, searchResults })));
+        .pipe(map((searchResults) => {
+          searchResults.map(e => this.setExpiration(e));
+
+          return { passwords, searchPhrase, searchResults };
+        }));
     }
     
     return of({ passwords, searchPhrase, searchResults: []});

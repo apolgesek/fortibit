@@ -135,7 +135,7 @@ $sidePanelOutDuration: 250ms;
 			outline: none;
 
 			span {
-				margin: 0 1rem;
+				margin: 0 0.5rem;
 			}
 
 			&:hover, &:focus, &.active {
@@ -217,68 +217,11 @@ $sidePanelOutDuration: 250ms;
 	color: $curious-blue;
 }
 
-.filters {
-	position: relative;
-	margin-left: auto;
-	margin-right: 1rem;
-	border-radius: 0.25rem;
-	padding: 0.25rem 0;
-	color: $curious-blue;
-
-	&:focus-visible:not(:hover) {
-    outline: 3px solid $barberry !important;
-  }
-
-	.pi {
-		font-size: 1rem;
-	}
-}
-
-.filter-option {
-	display: flex;
-	width: 120px;
-	background-color: $white;
-	border: 1px solid $silver;
-	color: $pickled-bluewood;
-	border-radius: 0.25rem !important;
-	padding: 0.5rem;
-
-	.pi {
-		margin: 0 0 0 auto !important;
-	}
-}
-
-.expanded {
-	border-bottom: 1px solid transparent !important;
-	border-bottom-left-radius: 0 !important;
-	border-bottom-right-radius: 0 !important;
-}
-
-.option-item {
-	display: flex;
-	align-items: center;
-	list-style-type: none;
-	padding: 0.5rem;
-
-	i {
-		margin-left: 0.5rem;
-	}
-
-	&:hover, &.focused, &.selected {
-		background-color: $porcelain;
-	}
-}
-
-#sort-by.focused:focus-visible:not(:hover) {
-	outline: 2px solid #aedaff !important;
-	outline-offset: 3px !important;
+.selected-items {
+	color: $gumbo;
 }
 
 .group-data {
-	flex: 1;
-	width: auto;
-}
-
-.filter-label {
-	@include font-medium;
+	cursor: default !important;
+	color: $gumbo !important;
 }

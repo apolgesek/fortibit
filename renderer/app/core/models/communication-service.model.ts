@@ -1,4 +1,5 @@
 export interface ICommunicationService {
+  platform: string;
   ipcRenderer: {
     send: (...args) => void,
     on: (...args) => void,
@@ -8,6 +9,5 @@ export interface ICommunicationService {
     [name: string]: any
   };
 
-  getPlatform(): string;
-  getPasswordGenerator(): any;
+  getPlatform(): Promise<string>;
 }

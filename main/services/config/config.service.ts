@@ -16,22 +16,30 @@ export class ConfigService implements IConfigService {
     return this._productPath;
   }
 
+  public get workspacesPath(): string {
+    return this._workspacesPath;
+  }
+
   private readonly _productPath: string;
+  private readonly _workspacesPath: string;
   private _appConfig: IAppConfig;
 
   constructor() {
     const dir = join(app.getPath('appData'), app.getName(), 'config');
-    const filePath = join(dir, 'product.json');
+    const productPath = join(dir, 'product.json');
+    const workspacePath = join(dir, 'workspaces.json');
 
-    if (!existsSync(filePath)) {
+    if (!existsSync(productPath)) {
       mkdirSync(dir, { recursive: true });
-      copyFileSync(join(global['__basedir'], 'product.json'), filePath);
+      copyFileSync(join(global['__basedir'], 'product.json'), productPath);
     }
 
-    this._productPath = filePath;
+    this._productPath = productPath;
+    this._workspacesPath = workspacePath;
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const productInformation: IProduct = require(this._productPath);
+    const workspacesInformation: any = require(this._workspacesPath);
 
     this._appConfig = {
       name: productInformation.name,
@@ -48,7 +56,8 @@ export class ConfigService implements IConfigService {
       temporaryFileExtension: productInformation.temporaryFileExtension,
       compressionEnabled: productInformation.compressionEnabled,
       fileExtension: 'fbit',
-      autocompleteShortcut: process.platform === 'win32' ? 'Alt+\\' : 'Option+\\',
+      autocompleteShortcut: productInformation.autocompleteShortcut ?? process.platform === 'win32' ? 'Alt+\\' : 'Option+\\',
+      autocompletePasswordOnlyShortcut: productInformation.autocompletePasswordOnlyShortcut ?? process.platform === 'win32' ? 'Ctrl+Alt+\\' : 'Command+Option+\\',
       clipboardClearTimeMs: 15000,
       encryption: {
         lowercase: productInformation.encryption.lowercase ?? true,
@@ -62,6 +71,7 @@ export class ConfigService implements IConfigService {
       saveOnLock: productInformation.saveOnLock ?? false,
       displayIcons: productInformation.displayIcons ?? true,
       autoTypeEnabled: productInformation.autoTypeEnabled ?? true,
+      workspaces: workspacesInformation
     };
   }
 

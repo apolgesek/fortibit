@@ -43,7 +43,7 @@ export class SettingsButtonComponent implements OnInit {
   private readonly destroyed = new Subject<void>();
   private readonly notificationsSource = new Subject<INotification>();
 
-  private updateListener: (event: Electron.IpcRendererEvent, state: UpdateState, version: string) => void;
+  private updateListener: (event: any, state: UpdateState, version: string) => void;
 
   public get settingsLabel(): string {
     return this.hotkeyHandler.configuration.settingsLabel;
@@ -73,7 +73,7 @@ export class SettingsButtonComponent implements OnInit {
       takeUntil(this.destroyed)
     );
 
-    this.updateListener = (_: Electron.IpcRendererEvent, state: UpdateState, version: string) => {
+    this.updateListener = (_: any, state: UpdateState, version: string) => {
       this.zone.run(() => {
         if (state !== UpdateState.Downloaded) {
           return;
@@ -92,7 +92,7 @@ export class SettingsButtonComponent implements OnInit {
   }
 
   updateAndRelaunch() {
-    this.workspaceService.checkFileSaved(EventType.Update);
+    this.workspaceService.executeEvent(EventType.Update);
   }
 
   ngOnInit(): void {

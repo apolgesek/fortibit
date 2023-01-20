@@ -81,7 +81,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
 
   public registerRenameGroup(event: KeyboardEvent) {
-    if (event.key === 'e'
+    if (event.key.toLowerCase() === 'e'
       && event.ctrlKey
       && this.groupManager.selectedGroup
       && this.groupManager.selectedGroup !== GroupId.Root) {
@@ -91,7 +91,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
   
   public registerEditEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'e' && this.entryManager.selectedPasswords.length) {
+    if (event.key.toLowerCase() === 'e' && !event.ctrlKey && this.entryManager.selectedPasswords.length) {
       this.modalService.openEditEntryWindow();
       event.preventDefault();
     }

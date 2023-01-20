@@ -6,6 +6,24 @@
 @import "spinners";
 @import "exports";
 
+@font-face {
+	font-family: 'roboto-regular';
+	src: url('~assets/fonts/roboto-regular.woff2') format('woff2'),
+	url('~assets/fonts/roboto-regular.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'roboto-medium';
+	src: url('~assets/fonts/roboto-medium.woff2') format('woff2'),
+	url('~assets/fonts/roboto-medium.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'roboto-bold';
+	src: url('~assets/fonts/roboto-bold.woff2') format('woff2'),
+	url('~assets/fonts/roboto-bold.woff') format('woff');
+}
+
 html,
 body {
 	@include font-regular;
@@ -119,6 +137,7 @@ form [class*="-btn"] {
 
 .section-header {
   @include font-medium;
+	font-size: 1rem;
   padding-bottom: 0.5rem;
 }
 

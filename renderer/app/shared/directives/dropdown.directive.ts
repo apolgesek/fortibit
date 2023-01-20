@@ -1,5 +1,5 @@
 import { AfterViewInit, ContentChildren, Directive, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Optional, Output, QueryList, SkipSelf } from '@angular/core';
-import { delay, filter, fromEvent, Subject, takeUntil } from 'rxjs';
+import { animationFrameScheduler, filter, fromEvent, observeOn, Subject, takeUntil } from 'rxjs';
 import { DropdownStateService } from '../services/dropdown-state.service';
 import { MenuService } from '../services/menu.service';
 import { MenuItemDirective } from './menu-item.directive';
@@ -11,13 +11,14 @@ import { MenuItemDirective } from './menu-item.directive';
   exportAs: 'appDropdown'
 })
 export class DropdownDirective implements AfterViewInit, OnDestroy {
+  @Input() public select = false;
+
+  @Output('open') public onOpen: EventEmitter<DropdownDirective> = new EventEmitter();
+  @Output('close') public onClose: EventEmitter<DropdownDirective> = new EventEmitter();
+
   @ContentChildren(MenuItemDirective, { descendants: true })
   public menuItems: QueryList<MenuItemDirective>;
-  @Input() public select = false;
-  public index: number;
-
-  @Output() public open: EventEmitter<DropdownDirective> = new EventEmitter();
-  @Output() public close: EventEmitter<DropdownDirective> = new EventEmitter();
+  private _index: number;
 
   @HostBinding('class.open')
   public get isOpen(): boolean {
@@ -28,7 +29,11 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
     return this.dropdownState;
   }
 
-  private destroyed: Subject<void> = new Subject();
+  public get index(): number {
+    return this._index;
+  }
+
+  private readonly destroyed: Subject<void> = new Subject();
   private dropdownClosed: Subject<void> = new Subject();
 
   constructor(
@@ -38,54 +43,20 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
     @Optional() private readonly menuService: MenuService,
   ) {}
 
-  enableKeyboardNavigation(): void {
-    this.dropdownClosed = new Subject();
-
-    fromEvent(this.el.nativeElement, 'keydown')
-    .pipe(takeUntil(this.dropdownClosed))
-    .subscribe((event: KeyboardEvent) => {
-      event.stopPropagation();
-
-      switch (event.key) {
-        case 'ArrowDown':
-          this.focusNext();
-          break;
-        case 'ArrowUp':
-          this.focusPrevious();
-          break;
-        case 'ArrowRight':
-          this.onRightArrowDown();
-          break;
-        case 'ArrowLeft':
-          this.onLeftArrowDown();
-          break;
-        case 'Escape':
-          this.dropdownState.closeAndFocusFirst();  
-          break;
-        default:
-          break;
-      }
-    });
-  }
-
   ngAfterViewInit(): void {
     if (this.parentDropdownState) {
+      this.dropdownState.closeOnSelect = this.select;
       this.dropdownState.parent = this.parentDropdownState;
       this.parentDropdownState.child = this.dropdownState;
     }
 
-    this.menuItems.changes.pipe(delay(0), takeUntil(this.destroyed)).subscribe((items: QueryList<MenuItemDirective>) => {
+    this.menuItems.changes.pipe(observeOn(animationFrameScheduler), takeUntil(this.destroyed)).subscribe((items: QueryList<MenuItemDirective>) => {
       this.dropdownState.items = items.toArray();
     });
 
-    this.dropdownState.stateChanges$.pipe(delay(0), filter(x => x.notifyChanges), takeUntil(this.destroyed)).subscribe(state => {
+    this.dropdownState.stateChanges$.pipe(observeOn(animationFrameScheduler), filter(x => x.notifyChanges), takeUntil(this.destroyed)).subscribe(state => {
       if (state.isOpen) {  
-        if (!this.select) {
-          this.dropdownState.currentItem = this.menuItems.first;
-        } else {
-          this.dropdownState.currentItem = this.menuItems.find(x => x.nativeElement.classList.contains('selected')) ?? this.menuItems.first;
-        }
-
+        this.dropdownState.currentItem = this.menuItems.first;
         this.dropdownState.currentItem.focus();
         this.enableKeyboardNavigation();
 
@@ -93,20 +64,25 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
           this.menuService.focus(this);
         }
 
-        this.open.emit(this);
+        this.onOpen.emit(this);
       } else {
         if (this.dropdownClosed) {
           this.dropdownClosed.next();
           this.dropdownClosed.complete();
     
           this.dropdownClosed = null;
-          this.close.emit(this);
+          this.onClose.emit(this);
         }
       }
     });
 
-    this.dropdownState.focusFirstItem$.pipe(delay(0), takeUntil(this.destroyed)).subscribe(() => {
+    this.dropdownState.focusFirstItem$.pipe(observeOn(animationFrameScheduler), takeUntil(this.destroyed)).subscribe(() => {
       this.dropdownState.currentItem = this.menuItems.get(1);
+
+      if (!this.dropdownState.currentItem) {
+        this.dropdownState.currentItem = this.menuItems.first;
+      }
+
       this.dropdownState.currentItem.focus();
     });
   }
@@ -114,6 +90,17 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed.next();
     this.destroyed.complete();
+  }
+
+  enableKeyboardNavigation(): void {
+    this.dropdownClosed = new Subject();
+
+    fromEvent(this.el.nativeElement, 'keydown')
+    .pipe(takeUntil(this.dropdownClosed))
+    .subscribe((event: KeyboardEvent) => {
+      event.stopPropagation();
+      this.handleKeyboardShortcuts(event);
+    });
   }
 
   focusNext() {
@@ -174,5 +161,38 @@ export class DropdownDirective implements AfterViewInit, OnDestroy {
 
   openDropdown() {
     this.dropdownState.open();
+  }
+
+  setIndex(index: number) {
+    if (this._index !== undefined) {
+      return;
+    }
+
+    this._index = index;
+  }
+
+  private handleKeyboardShortcuts(event: KeyboardEvent) {
+    switch (event.key) {
+      case 'Tab':
+        event.preventDefault();
+        break;
+      case 'ArrowDown':
+        this.focusNext();
+        break;
+      case 'ArrowUp':
+        this.focusPrevious();
+        break;
+      case 'ArrowRight':
+        this.onRightArrowDown();
+        break;
+      case 'ArrowLeft':
+        this.onLeftArrowDown();
+        break;
+      case 'Escape':
+        this.dropdownState.closeAndFocusFirst();
+        break;
+      default:
+        break;
+    }
   }
 }

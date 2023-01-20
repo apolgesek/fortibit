@@ -43,16 +43,16 @@
 				type="text"
 				[(ngModel)]="searchPhrase"
 				class="search"
-				placeholder="Search entries" />
+				[attr.placeholder]="isGlobalSearchMode ? 'Search all' : 'Search in group' " />
 			<div class="search-mode">
-				<div appDropdown class="dropdown">
+				<ul appDropdown class="dropdown">
 					<button appDropdownToggle appMenuItem class="group-mode-btn">
-						{{ isGlobalSearchMode ? 'All' : 'Group' }} <span class="pi pi-angle-down"></span>
+						<span class="pi pi-angle-down"></span>
 					</button>
 					<div *appDropdownMenu class="dropdown-content right">
-						<a href="#" appMenuItem (click)="toggleSearchMode()">{{ isGlobalSearchMode ? 'Group' : 'All' }}</a>
+						<li appMenuItem (click)="toggleSearchMode()">{{ isGlobalSearchMode ? 'Group' : 'All' }}</li>
 					</div>
-				</div>
+				</ul>
 			</div>
 		</div>
 		<app-settings-button></app-settings-button>

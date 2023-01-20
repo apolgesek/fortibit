@@ -1,18 +1,21 @@
-import { Component, Inject, NgZone, OnInit } from '@angular/core';
-import { EventType } from '@app/core/enums';
-import { ModalService } from '@app/core/services/modal.service';
-import { ImportHandler, IpcChannel } from '@shared-renderer/index';
-import { AppConfig } from 'environments/environment';
-import { ICommunicationService } from '@app/core/models';
-import { NotificationService, WorkspaceService } from '@app/core/services';
-import { exportDB } from 'dexie-export-import';
+import { CommonModule } from '@angular/common';
+import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { DbManager } from '@app/core/database';
-import { CommunicationService } from 'injection-tokens';
-import { MenuDirective } from '@app/shared/directives/menu.directive';
-import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
-import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
+import { EventType } from '@app/core/enums';
+import { ICommunicationService } from '@app/core/models';
+import { ConfigService, NotificationService, WorkspaceService } from '@app/core/services';
+import { ModalService } from '@app/core/services/modal.service';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
+import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
+import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
+import { MenuDirective } from '@app/shared/directives/menu.directive';
+import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
+import { ImportHandler, IpcChannel } from '@shared-renderer/index';
+import { exportDB } from 'dexie-export-import';
+import { AppConfig } from 'environments/environment';
+import { CommunicationService } from 'injection-tokens';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-menu-bar',
@@ -20,17 +23,23 @@ import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
   styleUrls: ['./menu-bar.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     MenuDirective,
     DropdownDirective,
     DropdownToggleDirective,
     DropdownMenuDirective,
-    MenuItemDirective
+    MenuItemDirective,
+    FileNamePipe
   ]
 })
-export class MenuBarComponent implements OnInit {
-  private maximizeIconPath: 'max-k' | 'restore-k' = 'max-k';
+export class MenuBarComponent implements OnInit, OnDestroy {
   public readonly importHandler = ImportHandler;
   public readonly closeIcon = 'assets/icons/close.png';
+
+  private readonly destroyed = new Subject<void>();
+
+  public recentFiles: string[];
+  private maximizeIconPath: 'max-k' | 'restore-k' = 'max-k';
 
   public get maximizeRestoreIcons(): string {
     return [
@@ -75,6 +84,7 @@ export class MenuBarComponent implements OnInit {
   constructor(
     private readonly zone: NgZone,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    private readonly configService: ConfigService,
     private readonly workspaceService: WorkspaceService,
     private readonly modalService: ModalService,
     private readonly db: DbManager,
@@ -82,11 +92,20 @@ export class MenuBarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.communicationService.ipcRenderer.on('windowMaximized', (_event, isMaximized: boolean) => {
+    this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed)).subscribe(config => {
+      this.recentFiles = config.workspaces.recentlyOpened;
+    });
+
+    this.communicationService.ipcRenderer.on(IpcChannel.MaximizedRestored, (_event, isMaximized: boolean) => {
       this.zone.run(() => {
         this.maximizeIconPath = isMaximized ? 'restore-k' : 'max-k';
       });
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed.next();
+    this.destroyed.complete();
   }
 
   exit() {
@@ -101,8 +120,12 @@ export class MenuBarComponent implements OnInit {
     this.modalService.openWeakPasswordsWindow();
   }
 
-  openFile() {
-    this.workspaceService.checkFileSaved(EventType.OpenFile);
+  openFile(path?: string) {
+    this.workspaceService.executeEvent(EventType.OpenFile, path);
+  }
+
+  newFile() {
+    this.workspaceService.executeEvent(EventType.NewFile);
   }
 
   save() {  
@@ -138,7 +161,7 @@ export class MenuBarComponent implements OnInit {
   }
 
   lock() {
-    this.workspaceService.checkFileSaved(EventType.Lock);
+    this.workspaceService.executeEvent(EventType.Lock);
   }
 
   openKeyboardShortcuts() {

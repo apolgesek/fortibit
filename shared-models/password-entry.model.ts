@@ -1,4 +1,5 @@
 import { IEntry } from "./entry.model";
+import { ExpirationStatus } from "./expiration-status.enum";
 
 export interface IPasswordEntry extends IEntry {
 	username: string;
@@ -9,5 +10,5 @@ export interface IPasswordEntry extends IEntry {
 	icon?: string;
 	history?: IPasswordEntry[];
 	expirationDate?: Date;
-	expirationStatus?: 'expired' | 'due-expiration';
+	expirationStatus?: ExpirationStatus;
 }

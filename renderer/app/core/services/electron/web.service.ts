@@ -1,12 +1,12 @@
 import { Injectable } from "@angular/core";
 import { ICommunicationService } from "@app/core/models";
 import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
-import * as zxcvbn from 'zxcvbn';
 import { IAppConfig } from "../../../../../app-config";
 
 @Injectable()
 export class WebService implements ICommunicationService {
   ipcRenderer: any;
+  platform: string;
 
   constructor() {
     this.ipcRenderer = {
@@ -34,11 +34,7 @@ export class WebService implements ICommunicationService {
     };
   }
 
-  getPlatform(): string {
-    return 'web';
-  }
-
-  getPasswordGenerator(): any {
-    return zxcvbn;
+  getPlatform(): Promise<string> {
+    return Promise.resolve('web');
   }
 }

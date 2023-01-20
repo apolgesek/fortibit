@@ -10,7 +10,7 @@ export interface IDatabaseService {
   getFilePath(windowId: number): string;
   setDatabaseEntry(windowId: number, filePath: string);
   saveDatabase(event: IpcMainEvent, saveFilePayload: ISaveFilePayload): void;
-  openDatabase(event: IpcMainEvent): void;
+  openDatabase(event: IpcMainEvent, path: string): void;
   decryptDatabase(event: IpcMainEvent, password: string): Promise<void>;
   clear(): void;
 }

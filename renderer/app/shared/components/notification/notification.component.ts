@@ -16,7 +16,7 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
   public timeLeft = 0;
 
   private animationStartTime = 0;
-  private timer: NodeJS.Timeout | undefined;
+  private timer: any;
 
   constructor(
     private readonly element: ElementRef,
@@ -47,7 +47,7 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
 
         if (this.timeLeft <= 0) {
           this.notificationService.remove(this.componentRef);
-          clearInterval(this.timer as NodeJS.Timeout);
+          clearInterval(this.timer);
         }
       }, 1000);
     }
@@ -65,7 +65,7 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    clearInterval(this.timer as NodeJS.Timeout);
+    clearInterval(this.timer);
   }
 
   private startProgress(element: HTMLElement) {

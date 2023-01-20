@@ -16,4 +16,6 @@ export interface IProduct {
   saveOnLock: boolean;
   displayIcons: boolean;
   autoTypeEnabled: boolean;
+  autocompleteShortcut: string;
+  autocompletePasswordOnlyShortcut: string;
 }

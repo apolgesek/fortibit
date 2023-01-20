@@ -81,7 +81,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
   }
 
   public registerRenameGroup(event: KeyboardEvent) {
-    if (event.key === 'e'
+    if (event.key.toLowerCase() === 'e'
       && event.metaKey
       && this.groupManager.selectedGroup
       && this.groupManager.selectedGroup !== GroupId.Root) {
@@ -91,7 +91,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
   }
   
   public registerEditEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'e' && this.entryManager.selectedPasswords.length === 1) {
+    if (event.key.toLowerCase() === 'e' && !event.metaKey && this.entryManager.selectedPasswords.length === 1) {
       this.modalService.openEditEntryWindow();
       event.preventDefault();
     }

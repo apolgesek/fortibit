@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { ApplicationRef, ComponentRef, Directive, EmbeddedViewRef, HostListener, Inject, Input, Renderer2 } from '@angular/core';
 import { AppViewContainer } from '@app/core/services';
-import { fromEvent, race, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { fromEvent, race } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { MenuItem } from '..';
 import { ContextMenuComponent } from '../components/context-menu/context-menu.component';
 
@@ -13,7 +13,6 @@ import { ContextMenuComponent } from '../components/context-menu/context-menu.co
 export class ContextMenuItemDirective {
   @Input('appContextMenuItem') model!: MenuItem[];
   private componentRef!: ComponentRef<ContextMenuComponent>;
-  private destroyed: Subject<void> = new Subject();
 
   constructor(
     private readonly appRef: ApplicationRef,
@@ -34,7 +33,7 @@ export class ContextMenuItemDirective {
     });
   }
 
-  private createContextMenu(event: Event): void {
+  private createContextMenu(event: Event): void {  
     this.componentRef = this.appViewContainer.getRootViewContainer().createComponent(ContextMenuComponent);
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -48,15 +47,12 @@ export class ContextMenuItemDirective {
     race([
       fromEvent(this.document.body, 'click'),
       fromEvent(this.document.body, 'contextmenu')
-    ]).pipe(takeUntil(this.destroyed)).subscribe(() => {
+    ]).pipe(take(1)).subscribe(() => {
       this.destroyMenu();
     });
   }
 
   private destroyMenu() {
-    this.destroyed.next();
-    this.destroyed.complete();
-
     this.appRef.detachView(this.componentRef.hostView);
     this.componentRef.destroy();
     this.componentRef = null;

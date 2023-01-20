@@ -13,7 +13,7 @@ export class TooltipDirective {
   @Input() public container: 'default' | 'body' = 'default';
 
   private componentRef!: ComponentRef<TooltipComponent>;
-  private timeout: NodeJS.Timeout;
+  private timeout: any;
 
   constructor(
     private readonly appViewContainer: AppViewContainer,

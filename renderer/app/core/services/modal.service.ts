@@ -33,14 +33,14 @@ export class ModalService {
     private readonly entryManager: EntryManager,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
   ) {
-    this.communicationService.ipcRenderer.on(
-      IpcChannel.OpenCloseConfirmationWindow,
-      (_, event: EventType, payload: unknown) => {
-        this.zone.run(() => {
-          this.openConfirmExitWindow(event, payload);
-        });
-      }
-    );
+    // this.communicationService.ipcRenderer.on(
+    //   IpcChannel.OpenCloseConfirmationWindow,
+    //   (_, event: EventType, payload: unknown) => {
+    //     this.zone.run(() => {
+    //       this.openConfirmExitWindow(event, payload);
+    //     });
+    //   }
+    // );
   }
 
   openDeleteEntryWindow() {

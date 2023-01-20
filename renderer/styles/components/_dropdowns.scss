@@ -6,6 +6,8 @@
 	padding-top: 4px;
 	padding-bottom: 4px;
 	position: absolute;
+	padding: 0;
+	list-style-type: none;
 	// Box shadow changes anchor color inside for some reason
 	filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.12));
 
@@ -47,26 +49,17 @@
 		}
 	}
 
-	a {
+	li {
+		cursor: pointer;
 		color: $pickled-bluewood;
 		padding: 0.5rem;
 		text-decoration: none;
 		display: block;
 		font-size: 0.875rem;
+		line-height: 1;
 
 		&.focused {
 			background: $porcelain;
-		}
-	}
-
-	&.filter-dropdown {
-		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		max-width: 120px;
-
-		> .dropdown {
-			display: flex !important;
 		}
 	}
 }
@@ -74,18 +67,20 @@
 .dropdown {
   position: relative;
   display: block;
+	list-style-type: none;
+	padding: 0;
 
-	a:focus {
+	li:focus {
 		outline: none;
 	}
 
 	&.open {
-		button, a {
+		button, li {
 			border-bottom-right-radius: 0;
 		}
 	}
 
-	label {
+	label:not(.switch) {
 		margin-left: 0.5rem;
 		width: 5rem;
 	}

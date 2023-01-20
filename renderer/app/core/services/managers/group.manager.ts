@@ -80,6 +80,7 @@ export class GroupManager {
   async setupGroups() {
     await this.groupRepository.bulkAdd(initialEntries);
     this.groups = await this.getGroupsTree();
+    this.selectedGroup = GroupId.AllItems;
   }
 
   async getGroupsTree(): Promise<IPasswordGroup[]> {

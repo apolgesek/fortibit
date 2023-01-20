@@ -33,7 +33,7 @@
       </div>
       <div
         class="inputgroup required"
-        [ngClass]="{'ng-invalid': isControlInvalid(newEntryForm.get('username')), 'readonly': isReadOnly}">
+        [ngClass]="{'readonly': isReadOnly}">
         <span class="inputgroup-addon"><i class="pi pi-user"></i></span>
         <input
           type="text"
@@ -42,10 +42,10 @@
           formControlName="username"
           placeholder="Username">         
       </div>
-      <ng-container formGroupName="passwords">
+      <div formGroupName="passwords" class="form-group">
         <div
           class="inputgroup required"
-          [ngClass]="{'ng-invalid': isControlInvalid(passwordsGroup.get('password')), 'readonly': isReadOnly}">
+          [ngClass]="{'readonly': isReadOnly}">
           <span class="inputgroup-addon"><i class="pi pi-key"></i></span>
           <input
             #passwordInput
@@ -88,7 +88,7 @@
           class="validation-error">
           Passwords must match
         </div>
-      </ng-container>
+      </div>
       <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
         <div class="inputgroup-addon"><i class="pi pi-globe"></i></div>
         <input
@@ -96,7 +96,7 @@
           [readonly]="isReadOnly"
           id="entry-website"
           formControlName="url"
-          placeholder="Website">      
+          placeholder="Website">
       </div>
       <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
         <div class="inputgroup-addon"><i class="pi pi-info-circle"></i></div>

@@ -1,8 +1,9 @@
 import { Inject, Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 import { DbManager } from "@app/core/database";
-import { EventType } from "@app/core/enums";
+import { EventType as WorkspaceEventType } from "@app/core/enums";
 import { ICommunicationService } from "@app/core/models";
+import { FileNamePipe } from "@app/shared/pipes/file-name.pipe";
 import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
 import { IPasswordEntry } from "@shared-renderer/password-entry.model";
 import { exportDB, importInto } from "dexie-export-import";
@@ -13,12 +14,13 @@ import { EntryRepository } from "../repositories";
 import { ConfigService } from "./config.service";
 import { EntryManager } from "./managers/entry.manager";
 import { GroupManager } from "./managers/group.manager";
+import { ModalService } from "./modal.service";
 import { NotificationService } from "./notification.service";
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceService {
   public readonly loadedDatabase$: Observable<boolean>;
-
+  
   public isSynced?: boolean;
   public file?: { filePath: string, filename: string };
   public isLocked = true;
@@ -32,12 +34,14 @@ export class WorkspaceService {
 
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    private readonly configService: ConfigService,
     private readonly entryRepository: EntryRepository,
     private readonly entryManager: EntryManager,
     private readonly groupManager: GroupManager,
     private readonly db: DbManager,
     private readonly notificationService: NotificationService,
-    private readonly configService: ConfigService,
+    private readonly modalService: ModalService,
+    private readonly fileNamePipe: FileNamePipe,
     private readonly zone: NgZone,
     private readonly router: Router,
   ) {
@@ -63,41 +67,45 @@ export class WorkspaceService {
           await this.saveDatabase({ notify: false });
           await this.lock({ minimize: true });
         } else {
-          this.checkFileSaved(EventType.Lock);
+          this.executeEvent(WorkspaceEventType.Lock);
         }
       });
     });
   }
 
-  checkFileSaved(event?: EventType, payload?: unknown): void {
+  async executeEvent(event?: WorkspaceEventType, payload?: unknown): Promise<void> {
     if (this.isSynced) {
       this.execute(event, payload);
+      Promise.resolve();
       return;
-    }
-
-    this.communicationService.ipcRenderer.send(IpcChannel.TryClose, event, payload);
-  }
-
-  execute(event?: EventType, payload?: unknown) {
-    switch (event) {
-    case EventType.Exit:
-      this.exitApp();
-      break;
-    case EventType.OpenFile:
-      this.communicationService.ipcRenderer.send(IpcChannel.OpenFile);
-      break;
-    case EventType.DropFile:
-      this.communicationService.ipcRenderer.send(IpcChannel.DropFile, payload);
-      break;
-    case EventType.Lock:
-      this.lock({ minimize: true });
-      break;
-    case EventType.Update:
-      this.communicationService.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
-    default:
-      break;
+    } else {
+      this.communicationService.ipcRenderer.send(IpcChannel.TryClose, event, payload);
+      return this.modalService.openConfirmExitWindow();
     }
   }
+
+  // execute(event?: WorkspaceEventType, payload?: unknown) {
+  //   switch (event) {
+  //   case WorkspaceEventType.Exit:
+  //     this.exitApp();
+  //     break;
+  //   case WorkspaceEventType.OpenFile:
+  //     this.communicationService.ipcRenderer.send(IpcChannel.OpenFile, payload);
+  //     break;
+  //   case WorkspaceEventType.DropFile:
+  //     this.communicationService.ipcRenderer.send(IpcChannel.DropFile, payload);
+  //     break;
+  //   case WorkspaceEventType.Lock:
+  //     this.lock({ minimize: true });
+  //     break;
+  //   case WorkspaceEventType.Update:
+  //     this.communicationService.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
+  //   case WorkspaceEventType.NewFile:
+  //     this.communicationService.ipcRenderer.invoke(IpcChannel.CreateNew).then(() => this.createNew());
+  //   default:
+  //     break;
+  //   }
+  // }
 
   setDatabaseLoaded(): void {
     this.loadedDatabaseSource.next(true);
@@ -112,10 +120,13 @@ export class WorkspaceService {
 
     this.entryManager.selectedPasswords = [];
     this.entryManager.passwordEntries = [];
-    this.groupManager.groups = [];    
+    this.groupManager.groups = [];
+    this.entryManager.updateEntriesSource();   
     
     await this.db.reset();
     await this.setupDatabase();
+
+    await this.communicationService.ipcRenderer.invoke(IpcChannel.RegenerateKey)
   }
 
   async lock({ minimize = false }): Promise<void> {
@@ -125,10 +136,10 @@ export class WorkspaceService {
     this.entryManager.passwordEntries = [];
     this.groupManager.groups = [];
 
+    await this.db.reset();
+
     this.communicationService.ipcRenderer.send(IpcChannel.Lock);
     this.router.navigate(['/pass'], { queryParams: { minimize } });
-
-    await this.db.reset();
   }
 
   unlock(): void {
@@ -152,7 +163,7 @@ export class WorkspaceService {
   async loadDatabase(jsonString: string) {
     const blob = new Blob([jsonString]);
 
-    await importInto(this.db.context, blob, { acceptNameDiff: true });
+    await importInto(this.db.context, blob, { acceptNameDiff: true, overwriteValues: true });
     await this.groupManager.getGroupsTree();
 
     this.setDatabaseLoaded();
@@ -185,7 +196,9 @@ export class WorkspaceService {
   }
 
   async setupDatabase() {
-    await this.groupManager.setupGroups();
+    if (!this.file) {
+      await this.groupManager.setupGroups();
+    }
 
     this.setSynced();
     this.setDatabaseLoaded();
@@ -193,10 +206,6 @@ export class WorkspaceService {
 
   setSynced() {
     this.isSynced = true;
-  }
-
-  getFileName(path: string): string {
-    return path.split(this.communicationService.getPlatform() === 'win32' ? '\\' : '/').splice(-1)[0];
   }
 
   private exitApp() {
@@ -210,8 +219,7 @@ export class WorkspaceService {
   private handleDatabaseLock() {
     this.communicationService.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
       this.zone.run(() => {
-        console.log('workspace: ', filePath);
-        this.file = { filePath: filePath, filename: this.getFileName(filePath) };
+        this.file = { filePath: filePath, filename: this.fileNamePipe.transform(filePath) };
         this.lock({ minimize: false });
       });
     });
@@ -221,7 +229,7 @@ export class WorkspaceService {
     this.communicationService.ipcRenderer.on(IpcChannel.GetSaveStatus, (_, { status, error, file, notify }) => {
       this.zone.run(() => {
         if (status) {
-          this.file = { filePath: file, filename: this.getFileName(file) };
+          this.file = { filePath: file, filename: this.fileNamePipe.transform(file)};
           this.setSynced();
 
           if (notify) {

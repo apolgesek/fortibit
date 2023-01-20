@@ -18,13 +18,13 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
   constructor(
     private readonly renderer: Renderer2,
     private readonly el: ElementRef,
-    private readonly userInterfaceService: ComponentGridService,
+    private readonly componentGridService: ComponentGridService,
     private readonly zone: NgZone,
     @Inject(DOCUMENT) private readonly document: Document,
   ) {}
 
   ngOnInit() {
-    this.userInterfaceService.registerResizableSidebar(this);
+    this.componentGridService.registerResizableSidebar(this);
   }
 
   ngAfterViewInit() {
@@ -41,7 +41,7 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
     this.unlisteners.forEach(u => u());
     this.unlisteners = [];
 
-    this.userInterfaceService.unregisterResizeableSidebar(this);
+    this.componentGridService.unregisterResizeableSidebar(this);
   }
 
   @HostBinding('class.right')
@@ -77,10 +77,10 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private setMaxWidth() {
-    const otherHandle = this.isLeftSidebar ? this.userInterfaceService.rightSidebar : this.userInterfaceService.leftSidebar;
+    const otherHandle = this.isLeftSidebar ? this.componentGridService.rightSidebar : this.componentGridService.leftSidebar;
     const otherHandleWidth = (otherHandle.el.nativeElement as HTMLElement).parentElement.offsetWidth;
 
-    this.maxWidth = this.document.body.clientWidth - otherHandleWidth - this.userInterfaceService.minMainContainerWidth;
+    this.maxWidth = this.document.body.clientWidth - otherHandleWidth - this.componentGridService.minMainContainerWidth;
   }
 
   private onMouseMove(event: MouseEvent) {
@@ -125,7 +125,7 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
   private getAvailableHorizontalSpace(): number {
     return this.document.body.clientWidth
       - this.el.nativeElement.parentElement.offsetWidth
-      - this.userInterfaceService.minMainContainerWidth
+      - this.componentGridService.minMainContainerWidth
       - this.getOtherHandle().el.nativeElement.parentElement.offsetWidth;
   }
 
@@ -143,6 +143,6 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private getOtherHandle(): SidebarHandleDirective {
-    return this.isLeftSidebar ? this.userInterfaceService.rightSidebar : this.userInterfaceService.leftSidebar;
+    return this.isLeftSidebar ? this.componentGridService.rightSidebar : this.componentGridService.leftSidebar;
   }
 }

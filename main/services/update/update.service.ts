@@ -1,6 +1,6 @@
 import { app, ipcMain, IpcMainEvent } from 'electron';
 import { emptyDirSync, existsSync, mkdirSync, readdirSync, renameSync } from 'fs-extra';
-import { request } from 'https';
+import { request, RequestOptions } from 'https';
 import { arch, platform } from 'os';
 import { join } from 'path';
 import { IpcChannel, UpdateState } from '../../../shared-models';

@@ -3,6 +3,7 @@ import { IAppConfig } from "../../../app-config";
 import { IProduct } from "../../../product";
 import { IPasswordEntry, IpcChannel } from "../../../shared-models";
 import { IConfigService } from "../config";
+import { IDatabaseService } from "../database";
 import { IEncryptionEventWrapper, MessageEventType } from "../encryption";
 import { INativeApiService } from "../native";
 import { ISendInputService, KeyCode } from "../send-input";
@@ -17,12 +18,16 @@ interface IAutotypeResult {
 
 export class AutotypeService implements IAutotypeService {
   private _result: IAutotypeResult[] = [];
+  private _passwordOnly = false;
+  private _processRunning = false;
+
   private get _windows(): IWindow[] {
     return this._windowService.windows;
   }
 
   constructor(
     @IWindowService private readonly _windowService: IWindowService,
+    @IDatabaseService private readonly _databaseService: IDatabaseService,
     @IEncryptionEventWrapper private readonly _encryptionEventWrapper: IEncryptionEventWrapper,
     @ISendInputService private readonly _sendInputService: ISendInputService,
     @IConfigService private readonly _configService: IConfigService,
@@ -42,16 +47,29 @@ export class AutotypeService implements IAutotypeService {
 
   registerAutocompleteShortcut() {
     globalShortcut.register(this._configService.appConfig.autocompleteShortcut, () => {
-      const activeWindowTitle = this._nativeApiService.getActiveWindowTitle();
-      this.registerAutotypeHandler(activeWindowTitle);
+      this._passwordOnly = false;
+      this.autotypeEntry();
+    });
+
+    globalShortcut.register(this._configService.appConfig.autocompletePasswordOnlyShortcut, () => {
+      this._passwordOnly = true;
+      this.autotypeEntry();
     });
   }
 
   unregisterAutocompleteShortcut() {
     globalShortcut.unregister(this._configService.appConfig.autocompleteShortcut);
+    globalShortcut.unregister(this._configService.appConfig.autocompletePasswordOnlyShortcut);
   }
 
-  registerAutotypeHandler(title: string) {
+  autotypeEntry() {
+    if (this._processRunning) {
+      return;
+    }
+
+    this._processRunning = true;
+    const activeWindowTitle = this._nativeApiService.getActiveWindowTitle();
+
     this._result = [];
     // stop running listeners
     this._windows.forEach(win => {
@@ -60,42 +78,60 @@ export class AutotypeService implements IAutotypeService {
       win.autocompleteListener = null;
     });
 
-    this._windows.forEach((win) => {
-      if (win.browserWindow.id === this._windowService.getWindow(1).id) {
-        return;
-      }
+    const databaseWindows = this._windows.filter(x => x.browserWindow.id !== this._windowService.getWindow(1).id);
 
-      const listener = (event: Electron.Event, channel: string, entries: IPasswordEntry[]) => {
-        try {
-          if (channel === IpcChannel.AutocompleteEntry) {
-            this._result.push({ entries: entries, windowId: (event as IpcMainEvent).sender.id });
-  
-            if (this._windows.length - 1 === this._result.length) {
-              const foundEntries: IPasswordEntry[] = this._result.reduce((arr, current) => ([...arr, ...current.entries]), []);
-              
-              if (foundEntries.length > 1) {
-                const entrySelectWindow = this._windowService.getWindow(1);
-                entrySelectWindow.webContents.send(IpcChannel.SendMatchingEntries, foundEntries);
-                entrySelectWindow.show();
-                entrySelectWindow.focus();
-              } else {
-                const entry = foundEntries[0];
-                this.typeLoginDetails(entry);
+    databaseWindows.forEach((win) => {
+      this.addWindowHandler(win);
+    });
+
+    this._windows.forEach((win) => {
+      win.browserWindow.webContents.send(IpcChannel.GetAutotypeFoundEntry, activeWindowTitle);
+    });
+  }
+
+  private addWindowHandler(win: IWindow) {
+    const listener = (event: Electron.Event, channel: string, entries: IPasswordEntry[]) => {
+      if (channel !== IpcChannel.AutocompleteEntry) return;
+      
+      try {
+        this._result.push({ entries: entries, windowId: (event as IpcMainEvent).sender.id });
+
+        if (this._windows.length - 1 === this._result.length) {
+          const foundEntries: IPasswordEntry[] = this._result.reduce((arr, current) => ([...arr, ...current.entries]), []);
+
+          switch (foundEntries.length) {
+            case 0:
+              // if there are no unlocked databases restore all windows
+              const dbContextWindows = this._windows.filter(x => x.browserWindow.id !== this._windowService.getWindow(1).id);
+              if (dbContextWindows.length === 0 || dbContextWindows.every(x => this._databaseService.getPassword(x.browserWindow.id) === null)) {
+                dbContextWindows.forEach(window => { 
+                  if (window.browserWindow.isMinimized()) {
+                    window.browserWindow.restore();
+                  }
+                  
+                  window.browserWindow.focus();
+                });
               }
-            }
+              break;
+            case 1:
+              const entry = foundEntries[0];
+              this.typeLoginDetails(entry);
+              break;
+            default:
+              const entrySelectWindow = this._windowService.getWindow(1);
+              entrySelectWindow.webContents.send(IpcChannel.SendMatchingEntries, foundEntries);
+              entrySelectWindow.show();
+              entrySelectWindow.focus();
           }
-        } catch (err) {
-          this._result = [];
         }
-      };
+      } catch (err) {
+        this._processRunning = false;
+        this._result = [];
+      }
+    };
 
-      win.autocompleteListener = listener;
-      win.browserWindow.webContents.on('ipc-message', listener);
-    });
-
-    this._windows.forEach((win) => {
-      win.browserWindow.webContents.send(IpcChannel.GetAutotypeFoundEntry, title);
-    });
+    win.autocompleteListener = listener;
+    win.browserWindow.webContents.on('ipc-message', listener);
   }
 
   private async typeLoginDetails(entry: IPasswordEntry): Promise<void> {
@@ -110,14 +146,18 @@ export class AutotypeService implements IAutotypeService {
     const payload = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, window.key) as { decrypted: string };
     await this._sendInputService.sleep(200);
 
-    if (entry.username) {
+    if (entry.username && !this._passwordOnly) {
       await this._sendInputService.typeWord(entry.username);
       await this._sendInputService.pressKey(KeyCode.TAB);
     }
 
     await this._sendInputService.typeWord(payload.decrypted);
-    await this._sendInputService.pressKey(KeyCode.ENTER);
 
+    if (!this._passwordOnly) {
+      await this._sendInputService.pressKey(KeyCode.ENTER);
+    }
+
+    this._processRunning = false;
     this._result = [];
   }
 

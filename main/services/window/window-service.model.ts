@@ -14,4 +14,5 @@ export interface IWindowService {
   removeWindow(windowRef: BrowserWindow): void;
   setIdleTimer(): void;
   setTitle(windowId: number, title: string): void;
+  getSecureKey(): string;
 }

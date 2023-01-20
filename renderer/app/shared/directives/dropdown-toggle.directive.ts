@@ -68,12 +68,14 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
   }
 
   private handleClick() {
-    this.renderer.listen(this.element.nativeElement, 'click', () => {
+    this.renderer.listen(this.element.nativeElement, 'click', (event: MouseEvent) => {
       if (this.dropdownState.isOpen) {
         this.dropdownState.close();
       } else {
         this.dropdownState.open();
       }
+
+      event.stopPropagation();
     });
 
     const listener = this.renderer.listen(window, 'click', (event: MouseEvent) => {

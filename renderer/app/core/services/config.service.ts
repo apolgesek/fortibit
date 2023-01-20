@@ -1,4 +1,4 @@
-import { Inject, Injectable, NgZone } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { IpcChannel } from '@shared-renderer/index';
 import { CommunicationService } from 'injection-tokens';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
@@ -12,22 +12,10 @@ export class ConfigService {
   public readonly configLoadedSource$: Observable<IAppConfig>;
   private readonly configLoaded: Subject<IAppConfig> = new ReplaySubject(1);
   private config: IAppConfig | null = null;
+  private workspaceData: any;
 
-  constructor(
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly zone: NgZone
-  ) { 
+  constructor(@Inject(CommunicationService) private readonly communicationService: ICommunicationService) { 
     this.configLoadedSource$ = this.configLoaded.asObservable();
-
-    this.communicationService.ipcRenderer
-      .invoke(IpcChannel.GetAppConfig)
-      .then((result: IAppConfig) => {
-        this.zone.run(() => {
-          this.config = result;
-
-          this.configLoaded.next(this.config);
-        });
-      });
   }
 
   setConfig(config: Partial<IAppConfig>) {
@@ -35,5 +23,10 @@ export class ConfigService {
 
     this.config = {...this.config, ...config};
     this.configLoaded.next(this.config);
+  }
+
+  async getWorkspaceData(): Promise<string> {
+    this.workspaceData = await this.communicationService.ipcRenderer.invoke(IpcChannel.GetRecentFiles);
+    return this.workspaceData;
   }
 }

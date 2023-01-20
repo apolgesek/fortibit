@@ -46,10 +46,12 @@ export class DbManager {
     return;
   }
 
-  public async reset(): Promise<void[] | void> {  
+  public async reset(): Promise<void> {  
     if (this.instance) {
       await this.instance.delete();
       await this.instance.open();
+    } else {
+      Promise.resolve();
     }
   }
 }

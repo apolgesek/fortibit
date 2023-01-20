@@ -5,17 +5,19 @@ import { DropdownStateService } from '../services/dropdown-state.service';
   selector: '[appMenuItem]',
   host: {
     'role': 'menuitem',
-    'aria-hidden': 'true'
+    'aria-hidden': 'true',
+    'tabindex': '0'
   },
   standalone: true
 })
 export class MenuItemDirective {
-  @Output() activate = new EventEmitter();
+  @Input('appDropdownToggle') isDropdownToggle: string;
+  @Input() closeOnSelect = true;
   @Input() public set disabled(value: boolean) {
     this._isDisabled = value;
   }
 
-  @Input() public closeOnSelect: boolean = false;
+  @Output() activate = new EventEmitter();
 
   private _isDisabled = false;
 
@@ -40,9 +42,10 @@ export class MenuItemDirective {
 
   @HostBinding('class.focused')
   public get isFocused(): boolean {  
-    return this.dropdownState.currentItem === this
+    return (this.dropdownState.currentItem === this
       || (this.dropdownState.parent && this.dropdownState.parent.currentItem === this)
-      || (this.dropdownState.isOpen && this.dropdownState.items && this === this.dropdownState.items[0]);
+      || (this.dropdownState.isOpen && this.dropdownState.items && this === this.dropdownState.items[0]))
+      && !this.dropdownState.closeOnSelect;
   }
 
   @HostListener('click', ['$event'])
@@ -56,11 +59,9 @@ export class MenuItemDirective {
 
     this.activate.emit();
 
-    if (this.closeOnSelect) {
+    if (this.isDropdownToggle === undefined && this.closeOnSelect) {
       this.dropdownState.closeAndFocusFirst();
     }
-
-    event.preventDefault();
   }
 
   @HostListener('mouseenter')

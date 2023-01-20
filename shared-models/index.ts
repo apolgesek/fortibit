@@ -1,5 +1,6 @@
 export * from './database-type.enum';
 export * from './entry.model';
+export * from './expiration-status.enum';
 export * from './history-entry.model';
 export * from './import-handler.enum';
 export * from './ipc-channel.enum';

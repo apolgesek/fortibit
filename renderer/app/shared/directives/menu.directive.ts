@@ -1,4 +1,5 @@
-import { ContentChildren, Directive, QueryList } from '@angular/core';
+import { ContentChildren, Directive, OnDestroy, QueryList } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { MenuService } from '../services/menu.service';
 import { DropdownDirective } from './dropdown.directive';
 
@@ -10,8 +11,9 @@ import { DropdownDirective } from './dropdown.directive';
   },
   standalone: true
 })
-export class MenuDirective {
+export class MenuDirective implements OnDestroy {
   @ContentChildren(DropdownDirective) items: QueryList<DropdownDirective>;
+  private readonly destroyed: Subject<void> = new Subject();
 
   constructor(private readonly menuService: MenuService) {}
 
@@ -22,7 +24,19 @@ export class MenuDirective {
     const dropdownCollection = this.items.toArray();
 
     for (let index = 0; index < dropdownCollection.length; index++) {
-      dropdownCollection[index].index = index;
+      dropdownCollection[index].setIndex(index);
+
+      // close all other dropdowns when one opens
+      dropdownCollection[index].state.stateChanges$.pipe(takeUntil(this.destroyed)).subscribe((state) => {
+        if (state.isOpen) {
+          dropdownCollection.filter(x => x.index !== index).forEach(x => x.state.close());
+        }
+      });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed.next();
+    this.destroyed.complete();
   }
 }

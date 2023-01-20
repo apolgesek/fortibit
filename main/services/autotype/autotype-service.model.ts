@@ -4,5 +4,5 @@ export const IAutotypeService = createServiceDecorator<IAutotypeService>('autoty
 
 export interface IAutotypeService {
   registerAutocompleteShortcut(): void;
-  registerAutotypeHandler(title: string): void;
+  autotypeEntry(title: string): void;
 }

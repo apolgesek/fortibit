@@ -28,13 +28,15 @@
 		> .dropdown {
 			height: 100%;
 			transition: 50ms background-color;
+			list-style-type: none;
+			padding: 0;
 
 			&:hover,
 			&.active {
 				background-color: $porcelain;
 			}
 
-			a {
+			li {
 				color: $pickled-bluewood;
 				align-items: center;
 				height: 100%;
@@ -114,5 +116,6 @@
 }
 
 .submenu-container {
-	transform: translateX(100%); top: -4px;
+	transform: translateX(100%);
+	top: 0;
 }

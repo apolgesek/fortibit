@@ -34,9 +34,8 @@ export class WindowService implements IWindowService {
   ) {
     ipcMain.on(IpcChannel.TryClose, (ipcEvent: IpcMainEvent, event?: EventType, payload?: unknown) => {
       const win = this._windows.find(x => x.browserWindow.webContents.id === ipcEvent.sender.id);
-  
       win.browserWindow.focus();
-      win.browserWindow.webContents.send(IpcChannel.OpenCloseConfirmationWindow, event, payload);
+      // win.browserWindow.webContents.send(IpcChannel.OpenCloseConfirmationWindow, event, payload);
     });
 
     ipcMain.on(IpcChannel.Exit, (event: IpcMainEvent) => {
@@ -49,11 +48,7 @@ export class WindowService implements IWindowService {
     });
 
     ipcMain.on(IpcChannel.Unlock, (event: IpcMainEvent) => {
-      const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
-
-      if (process.platform === 'win32') {
-        this.enablePreviewFeatures(win);
-      }
+      this.onUnlock(event.sender.id);
     });
 
     ipcMain.on(IpcChannel.Minimize, (event: IpcMainEvent) => {
@@ -75,6 +70,10 @@ export class WindowService implements IWindowService {
 
       win.browserWindow.close();
     });
+
+    ipcMain.handle(IpcChannel.RegenerateKey, (event: IpcMainEvent) => {
+      this.getWindowByWebContentsId(event.sender.id).key = this.getSecureKey();
+    });
   }
 
   getWindow(index: number): BrowserWindow {
@@ -91,35 +90,18 @@ export class WindowService implements IWindowService {
   }
 
   createMainWindow(): BrowserWindow {
-    const window = new BrowserWindow({
+    const window = this.createFromTemplate({
       width: 960,
       height: 600,
       minHeight: 520,
       minWidth: 800,
       resizable: true,
-      title: this._configService.appConfig.name,
-      backgroundColor: '#fff',
-      frame: false,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-        devTools: this._isDevMode,
-        backgroundThrottling: false,
-        v8CacheOptions: 'code',
-        enableWebSQL: false,
-        spellcheck: false,
-        webgl: false,
-        webSecurity: !this._isDevMode
-      },
+      title: this._configService.appConfig.name
     });
 
     if (this._isDevMode) {
       window.webContents.openDevTools({ mode: 'detach' });
     }
-
-    window.webContents.on('will-navigate', (e) => {
-      e.preventDefault();
-    });
 
     window.once('closed', () => {
       this.removeWindow(window);
@@ -129,14 +111,14 @@ export class WindowService implements IWindowService {
     })
 
     window.on('maximize', () => {
-      window.webContents.send('windowMaximized', true);
+      window.webContents.send(IpcChannel.MaximizedRestored, true);
     });
 
     window.on('unmaximize', () => {
-      window.webContents.send('windowMaximized', false);
+      window.webContents.send(IpcChannel.MaximizedRestored, false);
     });
 
-    this._windows.push({ browserWindow: window, key: this.getRandomSecureKey() });
+    this._windows.push({ browserWindow: window, key: null });
 
     // log performance only for the first window when the app initializes
     if (window.id === 1) {
@@ -149,29 +131,12 @@ export class WindowService implements IWindowService {
   }
 
   createEntrySelectWindow(): BrowserWindow {
-    const window = new BrowserWindow({
+    const window = this.createFromTemplate({
       width: 600,
       height: 400,
       resizable: false,
       title: this._configService.appConfig.name + '- entry select',
-      backgroundColor: '#fff',
-      frame: false,
-      show: false,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-        devTools: false,
-        backgroundThrottling: false,
-        v8CacheOptions: 'code',
-        enableWebSQL: false,
-        spellcheck: false,
-        webgl: false,
-        webSecurity: !this._isDevMode
-      },
-    });
-
-    window.webContents.on('will-navigate', (e) => {
-      e.preventDefault();
+      show: false
     });
 
     window.on('close', (event) => {
@@ -188,7 +153,7 @@ export class WindowService implements IWindowService {
       this.removeWindow(window);
     })
 
-    this._windows.push({ browserWindow: window, key: this.getRandomSecureKey() });
+    this._windows.push({ browserWindow: window, key: null });
     return window;
   }
 
@@ -232,14 +197,30 @@ export class WindowService implements IWindowService {
     this.windows.find(x => x.browserWindow.id === windowId).browserWindow.setTitle(`${title} - Fortibit`);
   }
 
+  getSecureKey(): string {
+    const key = randomBytes(32).toString('base64');
+    return safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(key).toString('base64') : key;
+  }
+
   private onLock(windowId: number) {
+    const win = this.getWindowByWebContentsId(windowId);
+    win.key = null;
+
     if (process.platform === 'win32') {
-      this.disablePreviewFeatures(windowId);
+      this.disablePreviewFeatures(win);
     }
 
     if (this._idleTimer) {
       clearInterval(this._idleTimer);
       this._idleTimer = null;
+    }
+  }
+
+  private onUnlock(windowId: number) {
+    const win = this.getWindowByWebContentsId(windowId);
+
+    if (process.platform === 'win32') {
+      this.enablePreviewFeatures(win);
     }
   }
 
@@ -250,8 +231,7 @@ export class WindowService implements IWindowService {
     this._nativeApiService.unsetIconicBitmap(win.browserWindow.getNativeWindowHandle());
   }
 
-  private disablePreviewFeatures(windowId: number): void {
-    const win = this._windows.find(x => x.browserWindow.webContents.id === windowId);
+  private disablePreviewFeatures(win: IWindow): void {
     const appIcon = nativeImage.createFromPath(join(global['__basedir'], 'assets', 'forbidden.png'));
     win.browserWindow.setOverlayIcon(appIcon, 'Database locked');
 
@@ -270,8 +250,32 @@ export class WindowService implements IWindowService {
     });
   }
 
-  private getRandomSecureKey(): string {
-    const key = randomBytes(32).toString('base64');
-    return safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(key).toString('base64') : key;
+  private createFromTemplate(options: Omit<Electron.BrowserWindowConstructorOptions, 'webPreferences'>): BrowserWindow {
+    const template: Electron.BrowserWindowConstructorOptions = {
+      backgroundColor: '#fff',
+      frame: false, 
+      // shouldn't be changed for best security
+      webPreferences: {
+        sandbox: true,
+        nodeIntegration: false,
+        contextIsolation: true,
+        nodeIntegrationInSubFrames: false,
+        nodeIntegrationInWorker: false,
+        preload: join(global['__basedir'], this._isTestMode ? 'dist' : 'renderer', 'preload.js'),
+        webSecurity: !this._isDevMode,
+        devTools: this._isDevMode,
+        backgroundThrottling: false,
+        v8CacheOptions: 'code',
+        enableWebSQL: false,
+        spellcheck: false,
+      },
+    };
+    const window = new BrowserWindow({ ...options, ...template });
+
+    window.webContents.on('will-navigate', (e) => {
+      e.preventDefault();
+    });
+
+    return window;
   }
 }

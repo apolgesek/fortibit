@@ -39,8 +39,11 @@ export class ImportDatabaseMetadataDialogComponent implements IModal {
       let deserializedEntries: IPasswordEntry[] = JSON.parse(entries);
       deserializedEntries = deserializedEntries.map(x => ({...x, creationDate: new Date()}));
 
-      const filePath = this.additionalData?.payload.filePath;
-      await this.workspaceService.importDatabase((this.communicationService as ElectronService).path.parse(filePath).name, deserializedEntries);
+      const filePath: string = this.additionalData?.payload.filePath;
+      const fileNameParts = filePath.split('.');
+      fileNameParts.pop();
+
+      await this.workspaceService.importDatabase(fileNameParts.join(''), deserializedEntries);
 
       this.notificationService.add({ type: 'success', message: 'Passwords imported successfully', alive: 5000 });
       this.close();

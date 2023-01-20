@@ -163,7 +163,7 @@ namespace Main {
     HWND win = static_cast<HWND>(*reinterpret_cast<void **>(buffer));
 
     HRESULT result = E_FAIL;
-    HBITMAP hbmp = CreateDIB(ICON_WIDTH, ICON_HEIGHT, path);
+    HBITMAP hbmp = CreateDIB(ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT, path);
 
     if (hbmp) {
       result = DwmSetIconicThumbnail(win, hbmp, 0);
@@ -218,7 +218,7 @@ namespace Main {
       int winWidth = rcClient.right - rcClient.left;
       int winHeight = rcClient.bottom - rcClient.top;
 
-      HBITMAP hbm = CreateDIB(winWidth, winHeight, path);
+      HBITMAP hbm = CreateDIB(winWidth, winHeight, ICON_WIDTH, ICON_HEIGHT, path);
       if (hbm)
       {
         result = DwmSetIconicLivePreviewBitmap(win, hbm, NULL, 0);

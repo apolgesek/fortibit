@@ -47,14 +47,6 @@ export class SingleInstanceServices extends ServiceCollection {
       this.get(INativeApiService)
     ));
 
-    this.set(IAutotypeService, new AutotypeService(
-      this.get(IWindowService),
-      this.get(IEncryptionEventWrapper),
-      this.get(ISendInputService),
-      this.get(IConfigService),
-      this.get(INativeApiService)
-    ));
-
     this.set(IIconService, new IconService(
       this.get(IConfigService),
       this.get(IFileService),
@@ -75,6 +67,15 @@ export class SingleInstanceServices extends ServiceCollection {
       this.get(IImportService),
       this.get(IExportService),
       this.get(IEncryptionEventService)
+    ));
+
+    this.set(IAutotypeService, new AutotypeService(
+      this.get(IWindowService),
+      this.get(IDatabaseService),
+      this.get(IEncryptionEventWrapper),
+      this.get(ISendInputService),
+      this.get(IConfigService),
+      this.get(INativeApiService)
     ));
   }
 

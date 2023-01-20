@@ -4,7 +4,6 @@ import { Component, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { ChildrenOutletContexts, RouterModule } from '@angular/router';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { CommunicationService } from 'injection-tokens';
-import { AppConfig } from '../../environments/environment';
 import { ICommunicationService } from '../core/models';
 import { AppViewContainer, WorkspaceService } from '../core/services';
 import { MenuBarComponent } from '../main/components/menu-bar/menu-bar.component';
@@ -71,8 +70,7 @@ export class MainComponent implements OnInit {
     private readonly viewContainerRef: ViewContainerRef,
     private readonly workspaceService: WorkspaceService,
   ) {
-    console.log('AppConfig', AppConfig);
-    this.isElectron = this.communicationService.getPlatform() != 'web';
+    this.isElectron = this.communicationService.platform != 'web';
     this.appViewContainer.appViewContainerRef = this.viewContainerRef;
   }
 

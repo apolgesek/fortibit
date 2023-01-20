@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
+import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { IpcChannel } from '@shared-renderer/index';
 import { CommunicationService } from 'injection-tokens';
 import { from, Observable } from 'rxjs';
@@ -12,7 +13,8 @@ export class WorkspaceGuard implements CanActivate {
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly workspaceService: WorkspaceService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly fileNamePipe: FileNamePipe
   ) {}
 
   canActivate(): Observable<boolean> {
@@ -20,7 +22,7 @@ export class WorkspaceGuard implements CanActivate {
       .pipe(
         map((filePath: string) => {
           if (filePath) {
-            this.workspaceService.file = { filePath: filePath, filename: this.workspaceService.getFileName(filePath) };
+            this.workspaceService.file = { filePath: filePath, filename: this.fileNamePipe.transform(filePath) };
             
             if (this.workspaceService.isLocked) {
               this.router.navigate(['/pass']);

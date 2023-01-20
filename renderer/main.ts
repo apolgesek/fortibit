@@ -6,15 +6,28 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from '@app/app.component';
 import { DbManager } from '@app/core/database';
 import { ICommunicationService } from '@app/core/models';
-import { ClipboardService, ElectronService, EntryManager, GroupManager, ModalService, WindowsHotkeyHandler, WorkspaceService } from '@app/core/services';
+import { ClipboardService, ConfigService, ElectronService, EntryManager, GroupManager, ModalService, WindowsHotkeyHandler, WorkspaceService } from '@app/core/services';
+import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
+import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { CommunicationService, HotkeyHandler } from 'injection-tokens';
+import 'zone.js';
 import { WebService } from './app/core/services/electron/web.service';
 import { DarwinHotkeyHandler } from './app/core/services/hotkey/darwin-hotkey-handler';
 import { routes } from './app/routes';
 import { AppConfig } from './environments/environment';
 
-function initializeApp(db: DbManager): () => Promise<void> {
+function initializeApp(
+  db: DbManager,
+  communicationService: ICommunicationService,
+  configService: ConfigService,
+): () => Promise<void> {
   return async () => {
+    await (window as any).api.loadChannels();
+    await communicationService.getPlatform();
+
+    const config = await communicationService.ipcRenderer.invoke(IpcChannel.GetAppConfig);
+    configService.setConfig(config);
+  
     await db.delete();
     await db.create();
   }
@@ -25,7 +38,7 @@ if (AppConfig.production) {
 }
 
 const isElectron = () => {
-  return window && window.process && window.process.type;
+  return true;
 };
 
 bootstrapApplication(AppComponent, {
@@ -35,12 +48,7 @@ bootstrapApplication(AppComponent, {
       HttpClientModule,
       RouterModule.forRoot(routes, { useHash: true }),
     ),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeApp,
-      deps: [DbManager],
-      multi: true
-    },
+    FileNamePipe,
     {
       provide: CommunicationService,
       useFactory: () => {
@@ -52,21 +60,31 @@ bootstrapApplication(AppComponent, {
       }
     },
     {
+      provide: APP_INITIALIZER,
+      useFactory: initializeApp,
+      deps: [
+        DbManager,
+        CommunicationService,
+        ConfigService,
+      ],
+      multi: true
+    },
+    {
       provide: HotkeyHandler,
       useFactory: (
         communicationService: ICommunicationService,
-        appController: WorkspaceService,
+        workspaceService: WorkspaceService,
         entriesManager: EntryManager,
         groupsManager: GroupManager,
         modalService: ModalService,
         clipboardService: ClipboardService
       ) => {
-        switch (communicationService.getPlatform()) {
+        switch (communicationService.platform) {
           case 'win32':
           case 'web':
-            return new WindowsHotkeyHandler(modalService, clipboardService, appController, entriesManager, groupsManager);
+            return new WindowsHotkeyHandler(modalService, clipboardService, workspaceService, entriesManager, groupsManager);
           case 'darwin':
-            return new DarwinHotkeyHandler(modalService, clipboardService, appController, entriesManager, groupsManager);
+            return new DarwinHotkeyHandler(modalService, clipboardService, workspaceService, entriesManager, groupsManager);
           default:
             throw new Error('HotkeyHandler: Unsupported platform');
         }

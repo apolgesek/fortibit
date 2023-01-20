@@ -5,6 +5,7 @@ export const IConfigService = createServiceDecorator<IConfigService>('configServ
 
 export interface IConfigService {
   get productPath(): string;
+  get workspacesPath(): string;
   get appConfig(): IAppConfig;
   set(settings: Partial<IAppConfig>)
 }

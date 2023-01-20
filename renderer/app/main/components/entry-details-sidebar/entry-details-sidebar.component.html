@@ -3,7 +3,7 @@
 	class="details-container"
 	[ngClass]="{ 'database-summary': !isEntrySelected }">
 	<ng-container *ngIf="isEntrySelected; else databaseDetails">
-		<div class="header">Entry details</div>
+		<div class="header">{{ group?.name }} <ng-container *ngIf="entry?.title"><i class="pi pi-angle-right"></i> {{ entry.title }}</ng-container></div>
 		<div class="content">
 			<div *ngIf="shouldDisplayToolbar" class="section quick-actions">
 				<button
@@ -18,44 +18,69 @@
 				<button aria-label="Entry history" appTooltip="History" (click)="openEntryHistory()" class="action-btn">
 					<span class="pi pi-book"></span>
 				</button>
-				<button aria-label="Open URL" appTooltip="Open link" *ngIf="entry.url" (click)="openUrl(entry.url)" class="action-btn">
-					<span class="pi pi-link"></span>
+				<button
+					*ngIf="entry.url"
+					attr.aria-label="'Open {{ isUnsecured ? 'unsecured' : '' }} link"
+					appTooltip="Open {{ isUnsecured ? 'unsecured' : '' }} link"
+					(click)="openUrl(entry.url)"
+					class="action-btn">
+					<span class="pi pi-external-link"></span>
 				</button>
 			</div>
-	
-			<div class="section">
-				<p class="label">Group</p>
-				<p>{{ group?.name }}</p>
+
+			<div *ngIf="entry?.expirationStatus === 'expired' || entry?.expirationStatus === 'due-expiration'" class="section">
+				<p [ngClass]="entry.expirationStatus ?? ''">
+					<ng-container *ngIf="entry.expirationStatus === 'due-expiration'">Password will expire {{ entry.expirationDate | timeRemaining: 'day' }}</ng-container>
+					<ng-container *ngIf="entry.expirationStatus === 'expired'">Password has expired</ng-container>
+				</p>
 			</div>
 
-			<div *ngIf="entry?.title" class="section">
-				<p class="label">Title</p>
-				<p>{{ entry?.title }}</p>
+			<div *ngIf="entry?.url" class="section">
+				<div class="subsection">
+					<p class="label">URL <span appTooltip="http:// protocol is not secure. Use https if possible" *ngIf="isUnsecured" class="pi pi-exclamation-circle"></span></p>
+					<p class="word-wrap"><span class="url-protocol">{{ isUnsecured ? 'http://' : 'https://' }}</span><a (click)="openUrl(entry?.url)" href="#">{{ entry?.url | link }}</a></p>
+				</div>
 			</div>
 
 			<div *ngIf="entry?.username" class="section">
-				<p class="label">Username</p>
-				<p>{{ entry?.username }}</p>
+				<div class="subsection">
+					<p class="label">Username</p>
+					<p>{{ entry?.username }}</p>
+				</div>
+				<div>
+					<a href="#" class="copy" (click)="copyToClipboard(entry, 'username'); false"><i class="pi pi-copy" appTooltip="Copy"></i></a>
+				</div>
 			</div>
 
-			<div *ngIf="entry?.url" class="section word-wrap">
-				<p class="label">URL</p>
-				<p><a (click)="openUrl(entry?.url)" href="#">{{ entry?.url }}</a></p>
+			<div *ngIf="entry?.password" class="section">
+				<div class="subsection">
+					<p class="label">Password</p>
+					<p>••••••</p>
+				</div>
+				<div>
+					<a href="#" class="copy" (click)="copyToClipboard(entry, 'password'); false"><i class="pi pi-copy" appTooltip="Copy"></i></a>
+				</div>
 			</div>
 
-			<div *ngIf="entry?.notes" class="section">
+			<div *ngIf="entry?.notes" class="section column">
 				<p class="label">Notes</p>
 				<p>{{ entry?.notes }}</p>
 			</div>
 
-			<div *ngIf="entry?.creationDate" class="section">
-				<p class="label">Creation date</p>
-				<p>{{ entry?.creationDate | date: "dd/MM/yy HH:mm" }}</p>
+			<div *ngIf="entry?.expirationDate" class="section">
+				<div class="subsection">
+					<p class="label">Expiration date</p>
+					<p>{{ entry?.expirationDate | date: "dd/MM/yyyy" }}</p>
+				</div>
 			</div>
 
-			<div *ngIf="entry?.lastModificationDate" class="section">
-				<p class="label">Last modification date</p>
-				<p>{{ entry?.lastModificationDate | date: "dd/MM/yy HH:mm" }}</p>
+			<div class="small">
+				<div *ngIf="entry?.creationDate" class="section">
+					<p>Creation date: {{ entry?.creationDate | date: "dd/MM/yyyy HH:mm" }}</p>
+				</div>
+				<div *ngIf="entry?.lastModificationDate" class="section">
+					<p>Modification date: {{ entry?.lastModificationDate | date: "dd/MM/yyyy HH:mm" }}</p>
+				</div>
 			</div>
 		</div>
 	</ng-container>
@@ -65,20 +90,36 @@
 	<div class="header">Database details</div>
 	<div class="content" *ngIf="config">
 		<div class="section">
-			<p class="label">File name</p>
-			<p>{{ databaseInformation.name }}</p>
+			<div class="subsection">
+				<p class="label">File name</p>
+				<p>{{ databaseInformation.name }}</p>
+			</div>
 		</div>
 		<div class="section">
-			<p class="label">Encryption algorithm</p>
-			<p>AES-256</p>
+			<div class="subsection">
+				<p class="label">Encryption algorithm</p>
+				<p>AES-256</p>
+			</div>
 		</div>
 		<div class="section">
-			<p class="label">Autotype shortcut</p>
- 			<p>
-				{{ config.autocompleteShortcut }}
-				<span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
-				<i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
-			</p>
+			<div class="subsection">
+				<p class="label">Autotype shortcut</p>
+				<p>
+				 {{ config.autocompleteShortcut }}
+				 <span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
+				 <i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
+			 </p>
+			</div>
+		</div>
+		<div class="section">
+			<div class="subsection">
+				<p class="label">Autotype password only shortcut</p>
+				<p>
+				 {{ config.autocompletePasswordOnlyShortcut }}
+				 <span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
+				 <i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
+			 </p>
+			</div>
 		</div>
 	</div>
 </ng-template>

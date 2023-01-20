@@ -26,7 +26,8 @@
     "product.json",
     "build/*.ico",
     "*.scpt",
-    "assets"
+    "assets",
+    "renderer/preload.js"
   ],
   "extraResources": [
     {

@@ -7,7 +7,7 @@ import { IMenuStateChange } from '../models/menu-state-change.model';
 export class DropdownStateService {
   public currentItem?: MenuItemDirective;
   public items: MenuItemDirective[];
-
+  public closeOnSelect = false;
   public parent: DropdownStateService;
   public child: DropdownStateService;
 

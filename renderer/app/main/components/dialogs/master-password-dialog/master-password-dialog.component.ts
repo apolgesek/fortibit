@@ -21,7 +21,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
   ]
 })
 export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal {
-  public onGetSaveStatus: (_: Electron.IpcRendererEvent, { status, message, file }: {status: boolean, message: string, file: unknown}) => void;
+  public onGetSaveStatus: (_: any, { status, message, file }: {status: boolean, message: string, file: unknown}) => void;
   
   public readonly ref!: ComponentRef<MasterPasswordDialogComponent>;
   public readonly additionalData!: IAdditionalData;
