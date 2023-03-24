@@ -10,7 +10,7 @@ import {
   Type,
 } from '@angular/core';
 import { IAdditionalData, IModal } from '@app/shared';
-import { fromEvent } from 'rxjs';
+import { fromEvent, race, Subject, take } from 'rxjs';
 import { AppViewContainer } from './app-view-container';
 import { ModalRef } from './modal-ref';
 
@@ -42,6 +42,15 @@ export class ModalManager {
     return this.openedModals.length > 0;
   }
 
+  openPrompt<T extends IModal>(component: Type<T>): Promise<boolean> {
+    return new Promise((resolve) => {
+      const modalRef = this.open(component);
+      modalRef.onActionResult.pipe(take(1)).subscribe(value => {
+        resolve(value);
+      });
+    });
+  }
+
   open<T extends IModal>(component: Type<T>, additionalData?: IAdditionalData) : ModalRef {
     const injector: Injector = Injector.create({ providers: [{ provide: ModalRef }], parent: this.appRef.injector });
     const modalRef = injector.get(ModalRef);
@@ -56,20 +65,20 @@ export class ModalManager {
     const componentInstance = componentRef.instance as T;
 
     modalRef.ref = componentRef;
-    modalRef.onClose = new EventEmitter<void>();
+    modalRef.onClose = new Subject<void>();
+    modalRef.onActionResult = new Subject<boolean>();
     // set component properties
     componentInstance.additionalData = additionalData;
 
     const modal = (componentRef.hostView as EmbeddedViewRef<T>).rootNodes[0] as HTMLElement;
     const root = (this.appRef.components[0].hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement;
     this.renderer.appendChild(root, modal);
-
     this.openedModals.push(componentRef);
 
     return modalRef;
   }
 
-  close<T>(componentRef: ComponentRef<T>) {  
+  close<T>(componentRef: ComponentRef<T>) {
     this.appRef.detachView(componentRef.hostView);
     componentRef.destroy();
 

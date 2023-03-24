@@ -7,6 +7,5 @@ export * from './encryption.service';
 export * from './in-memory-encryption.service';
 export * from './main';
 export * from './message-event-type.enum';
-
 export * from './events/event.model';
 export * from './events/get-leaks-event.model';

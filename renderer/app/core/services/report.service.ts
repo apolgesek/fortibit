@@ -52,6 +52,7 @@ export class ReportService {
 
     const reportedEntries = entries.map(e => {
       return {
+        id: e.id,
         groupName: groups.find(x => x.id === e.groupId).name,
         title: e.title,
         username: e.username,

@@ -80,6 +80,14 @@ export class MenuItemDirective {
     this.blur();
   }
 
+  @HostListener('keydown', ['$event'])
+  public onEnterDown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.activate.emit();
+      this.dropdownState.closeAndFocusFirst();
+    }
+  }
+
   public focus() {
     this.nativeElement.focus();
   }

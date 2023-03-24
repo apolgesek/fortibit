@@ -2,13 +2,17 @@ import { AfterViewInit, Component, ComponentRef, ElementRef, HostBinding, HostLi
 import { NotificationService } from '@app/core/services/notification.service';
 import { IToastModel } from '@app/core/models';
 import { CommonModule } from '@angular/common';
+import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-notification',
   templateUrl: './notification.component.html',
   styleUrls: ['./notification.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [
+    CommonModule,
+    FeatherModule
+  ]
 })
 export class NotificationComponent implements AfterViewInit, OnDestroy {
   public model!: IToastModel;
@@ -57,11 +61,11 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
     const rootElement = this.element.nativeElement as HTMLElement;
     rootElement.setAttribute('data-prevent-entry-deselect', '');
 
-    this.startSlideIn(rootElement);
-
     if (this.model.showCount) {
       this.startProgress(rootElement);
     }
+
+    this.startSlideIn(rootElement);
   }
 
   ngOnDestroy() {
@@ -80,9 +84,10 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
   private startSlideIn(element: HTMLElement) {
     requestAnimationFrame((timestamp) => {
       this.animationStartTime = timestamp;
+      const elementHeight = element.offsetHeight;
 
-      const startPos = 80;
-      const distance = 100;
+      const startPos = elementHeight;
+      const distance = elementHeight + 20;
       const durationMs = 150;
 
       this.slideIn(element, timestamp, startPos, distance, durationMs);
@@ -107,7 +112,7 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
     const runtime = timestamp - this.animationStartTime;
     let progress = (100 - ((runtime / duration) * 100)).toFixed(2);
 
-    element.style.background = `linear-gradient(90deg, ${this.successClass ? '#e6faf3' : '#ff9898'} ${progress}%, white ${progress}% 100%)`;
+    element.style.background = `linear-gradient(90deg, ${this.successClass ? 'var(--notification-success-bg)' : 'var(--notification-error-bg)'} ${progress}%, var(--notification-bg) ${progress}% 100%)`;
 
     if (runtime < duration) {
       requestAnimationFrame((timestamp) => {

@@ -49,5 +49,7 @@ export enum IpcChannel {
   GetWhitelistedChannels = 'app:getWhitelistedChannels',
   UpdateExpiration = 'app:updateExpiration',
   GetRecentFiles = 'app:getRecentFiles',
-  RegenerateKey = 'app:regenerateKey'
+  RegenerateKey = 'app:regenerateKey',
+  ToggleTheme = 'app:toggleTheme',
+  SetSystemTheme = 'app:setSystemTheme'
 }

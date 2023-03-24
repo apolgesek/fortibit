@@ -1,10 +1,10 @@
-@import "variables";
+@import "themes/light/variables";
 @import "mixins";
 @import "input";
 @import "buttons";
 @import "components";
 @import "spinners";
-@import "exports";
+@import "themes";
 
 @font-face {
 	font-family: 'roboto-regular';
@@ -31,13 +31,21 @@ body {
 	padding: 0;
 	height: 100%;
 	overflow: hidden;
-	background-color: $white;
-	color: $pickled-bluewood;
+	background-color: var(--primary-bg); // keep in sync with window bg color!
+	color: var(--primary-font);
 }
 
-body.sidebar-drag {
-	* {
-		cursor: ew-resize !important;
+body {
+	&.sidebar-drag {
+		* {
+			cursor: ew-resize !important;
+		}
+	}
+
+	&.lock {
+		* {
+			pointer-events: none !important;
+		}
 	}
 }
 
@@ -47,6 +55,7 @@ body.sidebar-drag {
 }
 
 a {
+	color: var(--link-font);
 	text-decoration: none;
 }
 
@@ -58,7 +67,6 @@ a {
 	top: 0;
 	left: 0;
 	z-index: 999;
-	background-color: $white;
 
 	svg {
 		display: block;
@@ -74,7 +82,7 @@ a {
 	position: relative;
 	z-index: 2;
 	padding: 0 1rem;
-	color: $pickled-bluewood;
+	color: var(--primary-font);
 	font-size: 0.875rem;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -82,11 +90,11 @@ a {
 	min-height: $workspace-header-height;
 	box-sizing: border-box;
 	user-select: none;
-	border-bottom: 1px solid $silver;
+	border-bottom: 1px solid var(--border-color);
 }
 
 .validation-error {
-	color: $bright-red;
+	color: var(--error-font);
 	font-size: 0.875rem;
 }
 
@@ -122,7 +130,7 @@ a {
 }
 
 .pi-star-fill {
-	color: $picton-blue;
+	color: $blue-200;
 }
 
 app-root, app-workspace {
@@ -143,7 +151,7 @@ form [class*="-btn"] {
 
 code {
 	@include font-regular;
-	background-color: $porcelain;
+	background-color: $grey-100;
 	border-radius: 3px;
 	padding: 0.2rem;
 	margin: 1rem 0;

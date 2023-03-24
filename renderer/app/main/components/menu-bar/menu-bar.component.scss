@@ -1,4 +1,4 @@
-@import "variables";
+@import 'themes/light/variables';
 
 .topbar {
 	height: $menu-bar-height;
@@ -7,7 +7,7 @@
 	align-items: center;
 	justify-content: space-between;
 	font-size: 0.875rem;
-	color: $pickled-bluewood;
+	color: var(--primary-font);
 	-webkit-app-region: drag;
 
 	.brand-logo {
@@ -33,22 +33,23 @@
 
 			&:hover,
 			&.active {
-				background-color: $porcelain;
+				background-color: var(--dropdown-list-item-hover);
 			}
 
 			li {
-				color: $pickled-bluewood;
+				color: var(--primary-font);
+				background-color: var(--dropdown-primary-bg);
 				align-items: center;
 				height: 100%;
 				-webkit-app-region: no-drag;
 
 				&:focus {
-					background: $porcelain;
+					background: var(--dropdown-list-item-hover);
 				}
 
 				&.disabled {
-					color: $grey-80;
-					background: transparent;
+					color: var(--dropdown-disabled-font);
+					background-color: var(--dropdown-primary-bg);
 				}
 			}
 
@@ -84,15 +85,17 @@
 				transition: all 150ms;
 
 				&:hover {
-					background-color: $porcelain;
+					background-color: var(--list-item-hover);
 				}
 
 				&.quit-icon {
 					&:hover {
 						background-color: $red-orange;
-	
-						img {
-							filter: invert(1);
+
+						@media (prefers-color-scheme: light) {
+							img {
+								filter: invert(1);
+							}
 						}
 					}
 				}
@@ -107,7 +110,7 @@
 }
 
 .pi-angle-right {
-	color: $grey-80;
+	color: $grey-300;
 }
 
 .submenu-open {
@@ -118,4 +121,12 @@
 .submenu-container {
 	transform: translateX(100%);
 	top: 0;
+}
+
+.menu-bar-item {
+	background-color: var(--primary-bg) !important;
+
+	&:hover:not(:disabled), &.active, &.expanded {
+		background-color: var(--dropdown-list-item-hover) !important;
+	}
 }

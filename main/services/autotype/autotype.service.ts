@@ -112,6 +112,7 @@ export class AutotypeService implements IAutotypeService {
                   window.browserWindow.focus();
                 });
               }
+              this._processRunning = false;
               break;
             case 1:
               const entry = foundEntries[0];

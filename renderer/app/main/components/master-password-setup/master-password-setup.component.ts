@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { WorkspaceService } from '@app/core/services';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
+import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-master-password-setup',
@@ -12,7 +13,8 @@ import { isControlInvalid, markAllAsDirty } from '@app/utils';
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FeatherModule
   ]
 })
 export class MasterPasswordSetupComponent {

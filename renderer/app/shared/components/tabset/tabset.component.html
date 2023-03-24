@@ -4,10 +4,10 @@
       #headerButton
       type="button"
       [attr.disabled]="tab.disabled"
-      [ngClass]="{'active': activeTab === tab}"
-      class="tab-btn text-btn"
+      [ngClass]="{ 'active': activeTab === tab }"
+      class="button-secondary"
       (click)="setTab(tab)">
-      <span *ngIf="tab.icon" class="pi pi-{{ tab.icon }}"></span> {{ tab.header }}
+      {{ tab.header }}
     </button>
   </li>
 </ul>

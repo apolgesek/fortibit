@@ -9,6 +9,7 @@ import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { CommunicationService } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
 import { ReportType } from '@app/core/enums';
+import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-weak-passwords-dialog',
@@ -17,6 +18,7 @@ import { ReportType } from '@app/core/enums';
   standalone: true,
   imports: [
     CommonModule,
+    FeatherModule,
     AutofocusDirective,
     ModalComponent
   ]

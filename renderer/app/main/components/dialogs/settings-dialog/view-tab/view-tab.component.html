@@ -1,7 +1,17 @@
 <div class="container">
-  <p class="description">
-    Download icons for web login entries automatically from fortibit CDN server.
   <form [formGroup]="viewForm">
+    <div class="inputgroup checkbox">
+      <label class="label" for="displayIcons">Dark theme:</label>
+      <label class="switch">
+        <input
+          id="darkTheme"
+          type="checkbox"
+          formControlName="darkTheme">
+          <span class="slider"></span>
+      </label>    
+    </div>
+    <p class="description">
+      Icons for web login entries are provided by fortibit's trusted content server.</p>
     <div class="inputgroup checkbox">
       <label class="label" for="displayIcons">Display entry icons:</label>
       <label class="switch">

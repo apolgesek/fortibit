@@ -1,5 +1,5 @@
 @import 'mixins';
-@import 'variables';
+@import 'themes/light/variables';;
 
 .list {
   margin-top: 1rem;
@@ -27,12 +27,12 @@
   font-size: 1rem;
   cursor: pointer;
   height: 20px;
-  color: $pickled-bluewood;
+  color: var(--primary-font);
   border-radius: 0.25rem;
 
   &:hover, &:focus {
     outline: none;
-    background-color: $porcelain;
+    background-color: var(--tabset-bg);
   }
 
   .pi {

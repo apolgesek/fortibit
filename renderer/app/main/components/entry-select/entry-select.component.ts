@@ -9,6 +9,7 @@ import { FocusableListDirective } from '@app/shared/directives/focusable-list.di
 import { ICommunicationService } from '@app/core/models';
 import { CommunicationService } from 'injection-tokens';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-entry-select',
@@ -17,11 +18,12 @@ import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
   standalone: true,
   imports: [
     CommonModule,
-    SecondaryMenuBarComponent,
     ScrollingModule,
+    FeatherModule,
     EntryIconDirective,
     FocusableListDirective,
     FocusableListItemDirective,
+    SecondaryMenuBarComponent,
   ]
 })
 export class EntrySelectComponent implements OnInit {

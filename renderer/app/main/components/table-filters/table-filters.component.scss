@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/light/variables';;
 @import 'mixins';
 
 :host {
@@ -13,6 +13,8 @@
 	flex-direction: column;
 	padding: 1rem;
 	max-width: 200px;
+	border-top: 1px solid rgba(0,0,0, 0.04);
+	background-color: var(--modal-bg);
 
 	> .dropdown {
 		display: flex !important;
@@ -21,19 +23,37 @@
 
 .filter {
 	display: flex;
+
+	&:hover {
+		.filters-btn, .sort-btn {
+			&:focus {
+				outline: none !important;
+			}
+		}
+	}
 }
 
 .filters-btn, .sort-btn {
-	margin-right: 0.25rem;
 	border-radius: 0.25rem;
-	padding: 6px;
-	color: $curious-blue;
+	background-color: var(--primary-bg);
+	padding: 0.5rem;
+	color: var(--link-font);
+	position: relative;
+	z-index: 9999;
 
-	// &:focus:not(:hover) {
-  //   outline: 3px solid $barberry !important;
-  // }
+	&:hover {
+		background-color: var(--list-item-hover);
+	}
 
-	.pi {
+	&:focus:not(:hover) {
+    outline: 3px solid $barberry !important;
+  }
+
+	&:active {
+		outline: none !important;
+	}
+
+	i-feather {
 		font-size: 0.875rem;
 	}
 }
@@ -41,18 +61,22 @@
 .filter-option {
 	display: flex;
 	width: 100%;
-	background-color: $white;
-	border: 1px solid $silver;
-	color: $pickled-bluewood;
+	background-color: var(--primary-bg);
+	border: 1px solid var(--border-color);
+	color: var(--primary-font);
 	border-radius: 0.25rem !important;
 	padding: 0.5rem;
 
-	.pi {
+	i-feather {
 		margin: 0 0 0 auto !important;
 	}
 
 	&:focus:not(:hover) {
 		outline: 3px solid $barberry !important;
+	}
+
+	&.expanded {
+		background-color: var(--primary-bg) !important;
 	}
 }
 
@@ -72,7 +96,7 @@
 	}
 
 	&:hover, &:focus, &.selected {
-		background-color: $porcelain;
+		background-color: var(--tabset-bg);
 	}
 }
 

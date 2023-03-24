@@ -1,16 +1,16 @@
-@import "variables";
+@import 'themes/light/variables';
 
 :host {
   position: absolute;
   z-index: 9999;
   display: block;
   min-width: 200px;
-  background-color: $white;
-  color: $pickled-bluewood;
+  background-color: var(--context-menu-bg);
+  color: var(--primary-font);
   top: 0;
   left: 0;
   visibility: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
   border-radius: 0.25rem;
 
   &.hidden {
@@ -25,26 +25,26 @@
 
   li {
     padding: 0.4rem 0.5rem;
-    color: $pickled-bluewood;
+    color: var(--primary-font);
     font-size: 0.875rem;
     cursor: pointer;
 
     &.separator {
-      border-top: 1px solid $silver;
+      border-top: 1px solid var(--border-color);
       padding: 0;
     }
 
     &.disabled {
       cursor: default;
-      color: $grey-80;
+      color: $grey-300;
 
       &:hover {
-        background-color: $white;
+        background-color: var(--primary-bg);
       }
     }
 
     &:hover {
-      background-color: $porcelain;
+      background-color: var(--dropdown-list-item-hover);
     }
   }
 }

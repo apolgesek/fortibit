@@ -9,7 +9,7 @@ import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
-import { ExpirationStatus } from '@shared-renderer/expiration-status.enum';
+import { FeatherModule } from 'angular-feather';
 
 interface ISortOption {
   name: string;
@@ -26,6 +26,7 @@ interface ISortDirectionOption {
   standalone: true,
   imports: [
     CommonModule,
+    FeatherModule,
     MenuDirective,
     DropdownDirective,
     DropdownToggleDirective,
@@ -54,19 +55,14 @@ export class TableFiltersComponent {
   ];
 
   public readonly sort = Sort;
-  public readonly expirationStatus = ExpirationStatus;
   public selectedSortOption = this.sortOptions.find(x => x.prop === this.searchService.sortProp);
   public selectedSortDirection = this.sortDirectionOptions.find(x => x.state === this.searchService.sortOrder);
 
   public get filtersCount(): number {
-    return this.searchService.expirationStatus.length;
+    return 0;
   }
 
   constructor(private readonly searchService: SearchService) {}
-
-  isExpirationSet(state: ExpirationStatus) {
-    return this.searchService.expirationStatus.includes(state);
-  }
 
   setSort(option: ISortOption) {
     this.selectedSortOption = option;
@@ -76,10 +72,6 @@ export class TableFiltersComponent {
   setSortDirection(option: ISortDirectionOption) {
     this.selectedSortDirection = option;
     this.searchService.setSort(option.state, this.selectedSortOption.prop);
-  }
-
-  setExpiration(state: ExpirationStatus, event: Event) {
-    this.searchService.setExpiration(state, (event.target as HTMLInputElement).checked);
   }
 
   onChildDropdownOpen(dropdown: DropdownDirective) {

@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/light/variables';;
 @import 'mixins';
 
 :host {
@@ -31,24 +31,25 @@
       display: none;
 
       button {
-        background-color: $white;
+        background-color: var(--input-bg);
         border: 0;
         width: 1.5rem;
-        color: $curious-blue;
+        color: $blue-300;
         cursor: pointer;
         margin-top: 4px;
         transition: 50ms color;
 
         &:hover, &:focus {
-          color: $pickled-bluewood;
+          color: var(--primary-font);
         }
 
         &:last-child {
           margin-right: 0;
         }
 
-        .pi {
-          font-size: 0.875rem;
+        i-feather {
+          width: 1rem !important;
+          height: 1rem !important;
         }
       }
     }
@@ -63,8 +64,8 @@
   .group-info {
     font-size: 0.75rem;
     padding: 0 1rem;
-    background-color: $white;
-    border-top: 1px solid $silver;
+    background-color: var(--input-bg);
+    border-top: 1px solid var(--border-color);
     position: sticky;
     box-sizing: border-box;
     bottom: 0;
@@ -74,7 +75,7 @@
     min-height: 2rem;
 
     div {
-      border-right: 1px solid $silver;
+      border-right: 1px solid var(--border-color);
       margin: 0 4px;
       padding: 0 2px;
       overflow: hidden;
@@ -95,12 +96,12 @@
 
   .rename-group {
     @include font-regular;
-    background: $curious-blue-light;
+    background: $blue-100;
     width: 8rem;
     border: none;
     padding: 6px;
     font-size: 0.875rem;
-    color: $pickled-bluewood;
+    color: var(--primary-font);
   }
 }
 
@@ -109,7 +110,7 @@
 }
 
 .pi-star-fill {
-  color: $picton-blue;
+  color: $blue-200;
 }
 
 .divider {
@@ -120,7 +121,7 @@
   align-items: center;
   text-transform: uppercase;
   font-size: 0.875rem;
-  color: $pickled-bluewood;
+  color: var(--primary-font);
   margin: 0.5rem 0 0.5rem 0;
   padding: 0.25rem;
   padding-left: 1.5rem;
@@ -140,16 +141,16 @@
   height: 1rem;
 
   &:hover {
-    background-color: $porcelain;
+    background-color: var(--list-item-hover);
   }
 
   &:focus {
-    background-color: $curious-blue-light;
-    outline: 1px solid $picton-blue;
+    background-color: var(--list-item-active);
+    outline: 1px solid $blue-200;
   }
 
   &.active {
-    background-color: $curious-blue-light;
+    background-color: var(--list-item-active);
   }
 
   .pi {
@@ -198,5 +199,10 @@
 }
 
 .is-dragging-over {
-	background-color: $porcelain !important;
+	background-color: var(--list-item-hover) !important;
+
+  // fix flickering - dragleave event being triggered when dragging over child element
+  * {
+    pointer-events: none;
+  }
 }

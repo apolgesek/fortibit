@@ -1,7 +1,7 @@
+import { DOCUMENT } from "@angular/common";
 import { Inject, Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 import { DbManager } from "@app/core/database";
-import { EventType as WorkspaceEventType } from "@app/core/enums";
 import { ICommunicationService } from "@app/core/models";
 import { FileNamePipe } from "@app/shared/pipes/file-name.pipe";
 import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
@@ -26,6 +26,7 @@ export class WorkspaceService {
   public isLocked = true;
 
   private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
+  private readonly lockKeydownEvent = (event: KeyboardEvent) => event.preventDefault();
   private config: IAppConfig;
 
   get databaseFileName(): string {
@@ -34,6 +35,7 @@ export class WorkspaceService {
 
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(DOCUMENT) private readonly document: Document,
     private readonly configService: ConfigService,
     private readonly entryRepository: EntryRepository,
     private readonly entryManager: EntryManager,
@@ -67,45 +69,24 @@ export class WorkspaceService {
           await this.saveDatabase({ notify: false });
           await this.lock({ minimize: true });
         } else {
-          this.executeEvent(WorkspaceEventType.Lock);
+          this.executeEvent().then(value => {
+            if (value) {
+              this.lock({ minimize: true });
+            }
+          });
         }
       });
     });
   }
 
-  async executeEvent(event?: WorkspaceEventType, payload?: unknown): Promise<void> {
+  async executeEvent(): Promise<boolean> {
     if (this.isSynced) {
-      this.execute(event, payload);
-      Promise.resolve();
-      return;
+      return Promise.resolve(true);
     } else {
-      this.communicationService.ipcRenderer.send(IpcChannel.TryClose, event, payload);
+      this.communicationService.ipcRenderer.send(IpcChannel.TryClose);
       return this.modalService.openConfirmExitWindow();
     }
   }
-
-  // execute(event?: WorkspaceEventType, payload?: unknown) {
-  //   switch (event) {
-  //   case WorkspaceEventType.Exit:
-  //     this.exitApp();
-  //     break;
-  //   case WorkspaceEventType.OpenFile:
-  //     this.communicationService.ipcRenderer.send(IpcChannel.OpenFile, payload);
-  //     break;
-  //   case WorkspaceEventType.DropFile:
-  //     this.communicationService.ipcRenderer.send(IpcChannel.DropFile, payload);
-  //     break;
-  //   case WorkspaceEventType.Lock:
-  //     this.lock({ minimize: true });
-  //     break;
-  //   case WorkspaceEventType.Update:
-  //     this.communicationService.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
-  //   case WorkspaceEventType.NewFile:
-  //     this.communicationService.ipcRenderer.invoke(IpcChannel.CreateNew).then(() => this.createNew());
-  //   default:
-  //     break;
-  //   }
-  // }
 
   setDatabaseLoaded(): void {
     this.loadedDatabaseSource.next(true);
@@ -125,8 +106,6 @@ export class WorkspaceService {
     
     await this.db.reset();
     await this.setupDatabase();
-
-    await this.communicationService.ipcRenderer.invoke(IpcChannel.RegenerateKey)
   }
 
   async lock({ minimize = false }): Promise<void> {
@@ -145,7 +124,9 @@ export class WorkspaceService {
   unlock(): void {
     this.isLocked = false;
     this.communicationService.ipcRenderer.send(IpcChannel.Unlock);
-    this.router.navigate(['/workspace']);
+    this.router.navigate(['/workspace']).then(() => {
+      this.unlockInterface();
+    });
   }
 
   async saveDatabase(config?: { forceNew?: boolean; notify?: boolean }, password?: string): Promise<true | Error> {
@@ -196,6 +177,8 @@ export class WorkspaceService {
   }
 
   async setupDatabase() {
+    await this.communicationService.ipcRenderer.invoke(IpcChannel.RegenerateKey);
+    
     if (!this.file) {
       await this.groupManager.setupGroups();
     }
@@ -208,12 +191,26 @@ export class WorkspaceService {
     this.isSynced = true;
   }
 
-  private exitApp() {
+  exitApp() {
     window.onbeforeunload = null;
 
     setTimeout(() => {
       this.communicationService.ipcRenderer.send(IpcChannel.Exit);
     });
+  }
+
+  toggleTheme() {
+    this.communicationService.ipcRenderer.invoke(IpcChannel.ToggleTheme);
+  }
+
+  lockInterface() {
+    this.document.body.classList.add('lock');
+    window.addEventListener('keydown', this.lockKeydownEvent);
+  }
+
+  unlockInterface() {
+    this.document.body.classList.remove('lock');
+    window.removeEventListener('keydown', this.lockKeydownEvent);
   }
 
   private handleDatabaseLock() {

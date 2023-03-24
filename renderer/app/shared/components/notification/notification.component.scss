@@ -1,11 +1,11 @@
-@import 'variables';
+@import 'themes/light/variables';;
 @import 'mixins';
 
 :host {
 	display: block;
 	width: 300px;
 	padding: 0.5rem 0;
-	transform: translateX(50%) translateY(80px);
+	transform: translateX(50%) translateY(100vh);
 	bottom: 0;
 	right: 50%;
 	position: absolute;
@@ -14,7 +14,7 @@
 	color: $white;
 	cursor: pointer;
 	border-radius: 0.25rem;
-	background: $white;
+	background: var(--notification-bg);
 	box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
 
 	.toast-body {

@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/light/variables';;
 @import 'mixins';
 
 :host {
@@ -15,7 +15,7 @@
   max-width: 200px;
   text-align: center;
   padding: 0.5rem;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--tooltip-bg);
   border-radius: 0.25rem;
   color: $white;
   text-transform: none;

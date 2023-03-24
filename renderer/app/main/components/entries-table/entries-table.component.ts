@@ -22,7 +22,7 @@ import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { DomUtil } from '@app/utils';
-import { ExpirationStatus, IPasswordEntry } from '@shared-renderer/index';
+import { IPasswordEntry } from '@shared-renderer/index';
 import { HotkeyHandler } from 'injection-tokens';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -67,8 +67,6 @@ import { ToolbarComponent } from '../toolbar/toolbar.component';
 export class EntriesTableComponent implements OnInit, OnDestroy {
   @ViewChild(CdkVirtualScrollViewport) public readonly scrollViewport: CdkVirtualScrollViewport | undefined;
 
-  public readonly expirationStatus = ExpirationStatus;
-
   public passwordList$: Observable<IPasswordEntry[]>;
   public searchPhrase$: Observable<string>;
   public entryMenuItems: MenuItem[] = [];
@@ -92,8 +90,8 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     this.searchPhrase$ = this.searchService.searchPhrase$;
   }
 
-  get activeFilters(): ExpirationStatus[] {
-    return this.searchService.expirationStatus;
+  get activeFilters(): string[] {
+    return [];
   }
 
   get selectedEntries(): IPasswordEntry[] {

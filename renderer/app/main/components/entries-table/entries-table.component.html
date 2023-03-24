@@ -32,21 +32,21 @@
 					(dragstart)="startDrag($event, item)"
 					(dragend)="endDrag()"
 					[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
-					class="row-entry {{ item.expirationStatus ?? '' }}">
+					class="row-entry">
 					<div *ngIf="iconsEnabled" class="column-icon">
 						<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" [appEntryIcon]="item" width="28" height="28"/>
 					</div>
 					<div class="column long-text">
-						<div class="row" [appTextEmphasize]="searchPhrase$ | async">
+						<div class="row title" [appTextEmphasize]="searchPhrase$ | async">
 							{{ item.title }}
 						</div>
-						<div class="row" [appTextEmphasize]="searchPhrase$ | async" (dblclick)="copyToClipboard(item, 'username')" style="color: #999">
+						<div class="row" [appTextEmphasize]="searchPhrase$ | async" (dblclick)="copyToClipboard(item, 'username')" style="color: #757575">
 							{{ item.username }}
 						</div>
 					</div>
 					<div
 						(dblclick)="copyToClipboard(item, 'password')"
-						class="column password">•••••• <i *ngIf="item.expirationStatus !== expirationStatus.None" class="pi pi-clock"></i>
+						class="column password">••••••
 					</div>
 				</div>
 			</ng-container>
@@ -58,7 +58,7 @@
 				</ng-container>
 				<ng-template #noEntriesTemplate>
 					<p class="no-entries">There are no entries in this group</p>
-					<button *ngIf="isAddPossible" class="outline-btn" id="add-entry-list" (click)="addNewEntry(); false">Add entry</button>
+					<a href="#" *ngIf="isAddPossible" id="add-entry-list" class="add-entry-list-button" (click)="addNewEntry(); false">Add entry</a>
 				</ng-template>
 			</div>
 		</ng-template>

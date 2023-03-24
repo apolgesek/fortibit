@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/light/variables';;
 @import 'mixins';
 
 $sidePanelInDuration: 300ms;
@@ -21,7 +21,7 @@ $sidePanelOutDuration: 250ms;
 
 		&::-webkit-scrollbar-track {
 			display: inline;
-			background-color: $porcelain;
+			background-color: var(--scrollbar-track);
 		}
 	}
 
@@ -49,9 +49,9 @@ $sidePanelOutDuration: 250ms;
 		}
 
 		&.selected {
-			background-color: darken($curious-blue-light, 2);
+			background-color: var(--list-item-active);
 			&:hover {
-				background-color: darken($curious-blue-light, 2);
+				background-color: var(--list-item-active);
 			}
 		}
 
@@ -64,25 +64,13 @@ $sidePanelOutDuration: 250ms;
 			}
 		}
 
-		&.expired {
-			.column.password {
-				color: $red-orange;
-			}
-		}
-
-		&.due-expiration {
-			.column.password {
-				color: $tulip-tree;
-			}
-		}
-
 		&.selected:focus {
-			background-color: darken($curious-blue-light, 2);
-			border: 1px solid $picton-blue;
+			background-color: var(--list-item-active);
+			border: 1px solid $blue-200;
 		}
 
 		&:hover:not(.selected) {
-			background-color: $porcelain;
+			background-color: var(--list-item-hover);
 		}
 
 		.column {
@@ -93,6 +81,10 @@ $sidePanelOutDuration: 250ms;
 			.row {
 				text-overflow: ellipsis;
 				overflow: hidden;
+
+				&.title {
+					@include font-medium;
+				}
 
 				&:first-child {
 					margin-bottom: 0.25rem;
@@ -116,10 +108,10 @@ $sidePanelOutDuration: 250ms;
 
 	#table-header {
 		display: flex;
-		background-color: $white;
+		background-color: var(--primary-bg);
 		user-select: none;
 		font-size: 0.875rem;
-		border-bottom: 1px solid $silver;
+		border-bottom: 1px solid var(--border-color);
 		box-sizing: border-box;
 		height: $workspace-header-height;
 		position: relative;
@@ -128,7 +120,7 @@ $sidePanelOutDuration: 250ms;
 
 		div {
 			display: flex;
-			color: $pickled-bluewood;
+			color: var(--primary-font);
 			align-items: center;
 			text-align: left;
 			cursor: pointer;
@@ -145,7 +137,7 @@ $sidePanelOutDuration: 250ms;
 			}
 
 			&:focus {
-				background-color: $curious-blue-light;
+				background-color: $blue-100;
 			}
 
 			&:first-child {
@@ -163,7 +155,7 @@ $sidePanelOutDuration: 250ms;
 
 .list-cta {
 	text-align: center;
-	color: $grey-text;
+	color: $grey-500;
 	font-size: 1rem;
 	user-select: none;
 	margin-top: 2rem;
@@ -186,7 +178,7 @@ $sidePanelOutDuration: 250ms;
 	padding: 0.5rem 1rem;
 	align-items: center;
 	font-size: 0.875rem;
-	color: $grey-text;
+	color: $grey-500;
 
 	span {
 		margin-right: 0.6rem;
@@ -196,7 +188,7 @@ $sidePanelOutDuration: 250ms;
 .results-badge {
 	display: flex;
 	align-items: center;
-	background: $porcelain;
+	background: var(--input-bg-secondary);
 	font-size: 0.75rem;
 	padding-left: 1rem;
 	z-index: 0;
@@ -214,14 +206,23 @@ $sidePanelOutDuration: 250ms;
 
 .pi-sort-alpha-down-alt::before,
 .pi-sort-alpha-up-alt::before {
-	color: $curious-blue;
+	color: $blue-300;
 }
 
 .selected-items {
-	color: $gumbo;
+	color: $grey-400;
 }
 
 .group-data {
 	cursor: default !important;
-	color: $gumbo !important;
+	color: $grey-400 !important;
+}
+
+.add-entry-list-button {
+	padding: 0.5rem;
+	border-radius: 0.25rem;
+
+	&:hover {
+		background-color: var(--list-item-hover);
+	}
 }

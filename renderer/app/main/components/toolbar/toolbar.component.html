@@ -7,7 +7,7 @@
 			class="button-secondary add-entry"
 			id="add-entry"
 			(click)="openAddEntryWindow()">
-			<span class="pi pi-plus-circle"></span>
+			<i-feather name="plus-circle"></i-feather>
 			<div class="label">Add entry</div>
 		</button>
 		<button
@@ -16,7 +16,7 @@
 			[disabled]="isDatabaseInSync"
 			class="button-secondary save-db"
 			(click)="trySaveDatabase()">
-			<span class="pi pi-save mr-2"></span>
+			<i-feather name="save"></i-feather>
 			<span class="label">Save</span>
 		</button>
 		<button
@@ -25,7 +25,7 @@
 			[disabled]="!(isAnyEntry && isOneEntrySelected)"
 			class="button-secondary edit-entry"
 			(click)="openEditEntryWindow()">
-			<span class="pi pi-pencil mr-2"></span>
+			<i-feather name="edit"></i-feather>
 			<span class="label">Edit</span>
 		</button>
 		<button
@@ -34,20 +34,30 @@
 			[disabled]="!(isAnyEntry && isAnyEntrySelected)"
 			class="button-secondary remove-entry"
 			(click)="openDeleteEntryWindow()">
-			<span class="pi pi-trash mr-2"></span>
+			<i-feather name="trash"></i-feather>
 			<span class="label">Remove</span>
 		</button>
-		<div class="searchbox" #searchbox>
+		<div class="searchbox">
 			<input
+				#searchInput
 				role="searchbox"
 				type="text"
 				[(ngModel)]="searchPhrase"
 				class="search"
 				[attr.placeholder]="isGlobalSearchMode ? 'Search all' : 'Search in group' " />
 			<div class="search-mode">
+				<i-feather
+					role="button"
+					tabindex="0"
+					(click)="resetSearch()"
+					(keydown.enter)="resetSearch()"
+					[style.visibility]="searchPhrase?.length ? 'visible' : 'hidden'"
+					name="x-circle"
+					class="clear-search">
+				</i-feather>
 				<ul appDropdown class="dropdown">
 					<button appDropdownToggle appMenuItem class="group-mode-btn">
-						<span class="pi pi-angle-down"></span>
+						<i-feather name="chevron-down"></i-feather>
 					</button>
 					<div *appDropdownMenu class="dropdown-content right">
 						<li appMenuItem (click)="toggleSearchMode()">{{ isGlobalSearchMode ? 'Group' : 'All' }}</li>

@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { randomBytes } from 'crypto';
-import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, powerMonitor, safeStorage } from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, nativeTheme, powerMonitor, safeStorage } from 'electron';
 import { join } from 'path';
 import { UrlObject } from 'url';
-import { EventType } from '../../../renderer/app/core/enums';
 import { IpcChannel } from '../../../shared-models';
 import { ProcessArgument } from '../../process-argument.enum';
 import { IConfigService } from '../config';
@@ -32,10 +31,9 @@ export class WindowService implements IWindowService {
     @IPerformanceService private readonly _performanceService: IPerformanceService,
     @INativeApiService private readonly _nativeApiService: INativeApiService,
   ) {
-    ipcMain.on(IpcChannel.TryClose, (ipcEvent: IpcMainEvent, event?: EventType, payload?: unknown) => {
+    ipcMain.on(IpcChannel.TryClose, (ipcEvent: IpcMainEvent) => {
       const win = this._windows.find(x => x.browserWindow.webContents.id === ipcEvent.sender.id);
       win.browserWindow.focus();
-      // win.browserWindow.webContents.send(IpcChannel.OpenCloseConfirmationWindow, event, payload);
     });
 
     ipcMain.on(IpcChannel.Exit, (event: IpcMainEvent) => {
@@ -96,7 +94,7 @@ export class WindowService implements IWindowService {
       minHeight: 520,
       minWidth: 800,
       resizable: true,
-      title: this._configService.appConfig.name
+      title: this._configService.appConfig.name,
     });
 
     if (this._isDevMode) {
@@ -126,6 +124,8 @@ export class WindowService implements IWindowService {
         this._performanceService.mark('domReady');
       });
     }
+
+    window.webContents.setFrameRate(60);
 
     return window;
   }
@@ -252,8 +252,8 @@ export class WindowService implements IWindowService {
 
   private createFromTemplate(options: Omit<Electron.BrowserWindowConstructorOptions, 'webPreferences'>): BrowserWindow {
     const template: Electron.BrowserWindowConstructorOptions = {
-      backgroundColor: '#fff',
-      frame: false, 
+      frame: false,
+      backgroundColor: nativeTheme.shouldUseDarkColors ? '#191d1e' : '#fff',
       // shouldn't be changed for best security
       webPreferences: {
         sandbox: true,

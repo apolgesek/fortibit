@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/light/variables';;
 
 :host {
 	flex: 1;
@@ -48,13 +48,13 @@
 		border-radius: 0.25rem;
 
 		.update-btn {
-			color: $curious-blue;
+			color: $blue-300;
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 
 			.version {
-				color: $silver;
+				color: var(--border-color);
 				font-size: 1rem;
 			}
 		}
@@ -70,14 +70,19 @@
 		margin-left: auto;
 
 		&:hover {
-			.pi {
-				color: $curious-blue-light;
+			i-feather {
+				color: var(--settings-button-bg-hover);
 			}
 		}
 
-		.pi {
-			font-size: 1.5rem;
-			color: $white;
+		&.expanded {
+			background-color: transparent !important;
+		}
+
+		i-feather {
+			width: 1.5rem !important;
+			height: 1.5rem !important;
+			color: var(--settings-button-bg);
 
 			&:before {
 				margin-right: 0;

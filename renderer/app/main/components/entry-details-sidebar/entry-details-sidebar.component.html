@@ -3,7 +3,7 @@
 	class="details-container"
 	[ngClass]="{ 'database-summary': !isEntrySelected }">
 	<ng-container *ngIf="isEntrySelected; else databaseDetails">
-		<div class="header">{{ group?.name }} <ng-container *ngIf="entry?.title"><i class="pi pi-angle-right"></i> {{ entry.title }}</ng-container></div>
+		<div class="header">{{ group?.name }} <ng-container *ngIf="entry?.title"><i-feather name="chevron-right"></i-feather> {{ entry.title }}</ng-container></div>
 		<div class="content">
 			<div *ngIf="shouldDisplayToolbar" class="section quick-actions">
 				<button
@@ -13,10 +13,10 @@
 					class="action-btn"
 					[ngClass]="{ 'active': entry?.isStarred }"
 					(click)="toggleStarred(entry)">
-					<span [@star]="isFavoriteAnimationInProgress" (@star.done)="isFavoriteAnimationInProgress = false" class="pi pi-star"></span>
+					<i-feather [@star]="isFavoriteAnimationInProgress" (@star.done)="isFavoriteAnimationInProgress = false" name="star"></i-feather>
 				</button>
 				<button aria-label="Entry history" appTooltip="History" (click)="openEntryHistory()" class="action-btn">
-					<span class="pi pi-book"></span>
+					<i-feather name="book"></i-feather>
 				</button>
 				<button
 					*ngIf="entry.url"
@@ -24,20 +24,13 @@
 					appTooltip="Open {{ isUnsecured ? 'unsecured' : '' }} link"
 					(click)="openUrl(entry.url)"
 					class="action-btn">
-					<span class="pi pi-external-link"></span>
+					<i-feather name="external-link"></i-feather>
 				</button>
-			</div>
-
-			<div *ngIf="entry?.expirationStatus === 'expired' || entry?.expirationStatus === 'due-expiration'" class="section">
-				<p [ngClass]="entry.expirationStatus ?? ''">
-					<ng-container *ngIf="entry.expirationStatus === 'due-expiration'">Password will expire {{ entry.expirationDate | timeRemaining: 'day' }}</ng-container>
-					<ng-container *ngIf="entry.expirationStatus === 'expired'">Password has expired</ng-container>
-				</p>
 			</div>
 
 			<div *ngIf="entry?.url" class="section">
 				<div class="subsection">
-					<p class="label">URL <span appTooltip="http:// protocol is not secure. Use https if possible" *ngIf="isUnsecured" class="pi pi-exclamation-circle"></span></p>
+					<p class="label">URL <i-feather appTooltip="http:// protocol is not secure. Use https if possible" *ngIf="isUnsecured" name="alert-circle" class="url-alert-icon"></i-feather></p>
 					<p class="word-wrap"><span class="url-protocol">{{ isUnsecured ? 'http://' : 'https://' }}</span><a (click)="openUrl(entry?.url)" href="#">{{ entry?.url | link }}</a></p>
 				</div>
 			</div>
@@ -48,7 +41,7 @@
 					<p>{{ entry?.username }}</p>
 				</div>
 				<div>
-					<a href="#" class="copy" (click)="copyToClipboard(entry, 'username'); false"><i class="pi pi-copy" appTooltip="Copy"></i></a>
+					<a href="#" class="copy" (click)="copyToClipboard(entry, 'username'); false"><i-feather name="copy" appTooltip="Copy"></i-feather></a>
 				</div>
 			</div>
 
@@ -58,20 +51,13 @@
 					<p>••••••</p>
 				</div>
 				<div>
-					<a href="#" class="copy" (click)="copyToClipboard(entry, 'password'); false"><i class="pi pi-copy" appTooltip="Copy"></i></a>
+					<a href="#" class="copy" (click)="copyToClipboard(entry, 'password'); false"><i-feather name="copy" appTooltip="Copy"></i-feather></a>
 				</div>
 			</div>
 
 			<div *ngIf="entry?.notes" class="section column">
 				<p class="label">Notes</p>
 				<p>{{ entry?.notes }}</p>
-			</div>
-
-			<div *ngIf="entry?.expirationDate" class="section">
-				<div class="subsection">
-					<p class="label">Expiration date</p>
-					<p>{{ entry?.expirationDate | date: "dd/MM/yyyy" }}</p>
-				</div>
 			</div>
 
 			<div class="small">
@@ -107,7 +93,7 @@
 				<p>
 				 {{ config.autocompleteShortcut }}
 				 <span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
-				 <i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
+				 <i-feather name="info" (click)="openAutotypeInformation()"></i-feather>
 			 </p>
 			</div>
 		</div>
@@ -117,7 +103,7 @@
 				<p>
 				 {{ config.autocompletePasswordOnlyShortcut }}
 				 <span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
-				 <i class="pi pi-info-circle" (click)="openAutotypeInformation()"></i>
+				 <i-feather name="info" (click)="openAutotypeInformation()"></i-feather>
 			 </p>
 			</div>
 		</div>

@@ -14,6 +14,7 @@ import { FocusableListDirective } from '@app/shared/directives/focusable-list.di
 import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { IPasswordEntry } from '@shared-renderer/index';
+import { FeatherModule } from 'angular-feather';
 import { Subject } from 'rxjs';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
 
@@ -25,6 +26,7 @@ import { ToolbarComponent } from '../toolbar/toolbar.component';
   imports: [
     CommonModule,
     ScrollingModule,
+    FeatherModule,
     ContextMenuItemDirective,
     SidebarHandleDirective,
     DroppableDirective,
@@ -38,7 +40,7 @@ export class GroupsSidebarComponent implements OnInit, OnDestroy {
   public readonly groupIds = GroupId;
 
   public readonly builtInGroups = [
-    { id: GroupId.AllItems, name: 'All entries', icon: 'th-large', parent: null },
+    { id: GroupId.AllItems, name: 'All entries', icon: 'grid', parent: null },
     { id: GroupId.Starred, name: 'Favourites', icon: 'star', parent: null },
     { id: GroupId.RecycleBin, name: 'Recycle bin', icon: 'trash', parent: null },
   ];
@@ -107,13 +109,13 @@ export class GroupsSidebarComponent implements OnInit, OnDestroy {
     return group.id;
   }
 
-  onEntryDrop(to: number) {
-    this.entryManager.moveEntry(to);
+  async onEntryDrop(to: number): Promise<void> {
+    await this.entryManager.moveEntry(to);
   }
 
   async selectGroup(id: number): Promise<number> {
-    if (!id) {
-      return;
+    if (id === this.selectedGroup) {
+      return id;
     }
     
     await this.entryManager.setByGroup(id);

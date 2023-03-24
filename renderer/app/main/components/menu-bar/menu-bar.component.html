@@ -4,7 +4,7 @@
 	<div appMenu class="menu">
 		<div class="brand-logo"></div>
 		<ul appDropdown class="dropdown">
-			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true">
+			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
 				File
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
@@ -12,7 +12,7 @@
 				<li appMenuItem (activate)="openFile()">Open file...</li>
 				<div appDropdown class="dropdown" style="width: 100%;">
 					<li appDropdownToggle trigger="hover" appMenuItem class="submenu-open">
-						Open recent <span class="pi pi-angle-right"></span>
+						Open recent <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
 						<li *ngFor="let file of recentFiles; let i = index" aria-hidden="true" appMenuItem (activate)="openFile(file)">
@@ -25,7 +25,7 @@
 				<li appMenuItem [disabled]="isLocked" (activate)="saveAs()">Save as...</li>
 				<div appDropdown class="dropdown" style="width: 100%;">
 					<li appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
-						Import <span class="pi pi-angle-right"></span>
+						Import <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
 						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.KeePass)">KeePass (.xml)</li>
@@ -34,7 +34,7 @@
 				</div>
 				<div appDropdown class="dropdown" style="width: 100%;">
 					<li appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
-						Export <span class="pi pi-angle-right"></span>
+						Export <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
 						<li aria-hidden="true" appMenuItem (activate)="export()">CSV</li>
@@ -46,13 +46,13 @@
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
-			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true">
+			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
 				Tools
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
 				<div appDropdown class="dropdown" style="width: 100%;">
 					<li appDropdownToggle trigger="hover" appMenuItem class="submenu-open" [disabled]="isLocked">
-						Report <span class="pi pi-angle-right"></span>
+						Report <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
 						<li aria-hidden="true" appMenuItem (activate)="openExposedPasswordsWindow()">
@@ -66,7 +66,7 @@
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
-			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true">
+			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
 				Help
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
@@ -87,7 +87,7 @@
 				<img class="icon" [srcset]="maximizeRestoreIcons" draggable="false" />
 			</li>
 			<li (click)="quit()" class="quit-icon">
-				<img class="icon" [srcset]="closeIcon" draggable="false" />
+				<img class="icon" [srcset]="closeIcons" draggable="false" />
 			</li>
 		</ul>
 	</div>

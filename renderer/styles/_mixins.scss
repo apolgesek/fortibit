@@ -23,7 +23,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(0,0,0,0.2);
+    background-color: var(--scrollbar-thumb);
   }
 
   &::-webkit-scrollbar-track {
@@ -74,7 +74,7 @@
 }
 
 @mixin toolbar-btn {
-  @include font-medium;
+  @include font-regular;
   position: relative;
   border: 0;
   outline: 0;
@@ -83,20 +83,20 @@
 	padding: 1rem 1.625rem;
 	display: flex;
 	align-items: center;
-	background: $white;
-	color: $curious-blue;
+	background-color: var(--primary-bg);
+	color: var(--primary-font);
 	border-radius: 0.25rem;
 	cursor: pointer;
 	transition: transform 100ms;
   text-transform: uppercase;
 
 	&:hover:not(:disabled) {
-    background: $curious-blue-light;
-    color: $pickled-bluewood;
+    background-color: var(--toolbar-dropdown-bg);
+    color: var(--primary-cta-text-hover);
   }
 
   &:focus {
-    background: $curious-blue-light;
+    background-color: var(--toolbar-dropdown-bg);
     outline: 3px solid $barberry !important;
   }
 }

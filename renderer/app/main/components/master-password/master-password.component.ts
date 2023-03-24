@@ -8,6 +8,7 @@ import { EntryManager, GroupManager, ModalService, WorkspaceService } from '@app
 import { ConfigService } from '@app/core/services/config.service';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { IpcChannel } from '@shared-renderer/index';
+import { FeatherModule } from 'angular-feather';
 import { CommunicationService } from 'injection-tokens';
 import { from, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
@@ -21,6 +22,7 @@ import { IAppConfig } from '../../../../../app-config';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FeatherModule,
     AutofocusDirective
   ]
 })
@@ -66,11 +68,12 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     });
 
     this.onDecryptedContent = (_: any, { decrypted }: { decrypted: string }) => {
-      this.zone.run(() => {
+      this.zone.run(async () => {
         if (decrypted) {
           this.workspaceService.setSynced();
-          this.workspaceService.loadDatabase(decrypted);
+          await this.workspaceService.loadDatabase(decrypted);
         } else {
+          this.workspaceService.unlockInterface();
           this.loginForm.get('password').setErrors({ invalidPassword: true });
           this.animate('.brand .brand-logo', 'animate-invalid', 500);
         }
@@ -79,12 +82,8 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed$)).subscribe(config => {
-      this.config = config;
-    });
-
+    this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed$)).subscribe(config => this.config = config);
     this.communicationService.ipcRenderer.on(IpcChannel.DecryptedContent, this.onDecryptedContent);
-
     this.workspaceService.loadedDatabase$
     .pipe(
       switchMap(() => from(this.selectDefaultGroup())),
@@ -111,10 +110,8 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.loginForm.reset();
-
     this.destroyed$.next();
     this.destroyed$.complete();
-
     this.communicationService.ipcRenderer.off(IpcChannel.DecryptedContent, this.onDecryptedContent);
   }
 
@@ -133,6 +130,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   }
 
   async onLoginSubmit() {
+    this.workspaceService.lockInterface();
     Object.values(this.loginForm.controls).forEach(control => {
       control.markAsDirty();
     });

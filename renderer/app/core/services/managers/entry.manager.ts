@@ -2,12 +2,12 @@ import { Inject, Injectable, NgZone } from "@angular/core";
 import { GroupId } from "@app/core/enums";
 import { ICommunicationService } from "@app/core/models";
 import { EntryRepository, HistoryRepository } from "@app/core/repositories";
-import { ExpirationStatus } from "@shared-renderer/expiration-status.enum";
 import { IHistoryEntry } from "@shared-renderer/history-entry.model";
 import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
 import { IPasswordEntry } from "@shared-renderer/password-entry.model";
 import { CommunicationService } from "injection-tokens";
 import { BehaviorSubject, combineLatest, from, map, Observable, of, shareReplay, Subject, switchMap } from "rxjs";
+import { NotificationService } from "../notification.service";
 import { SearchService } from "../search.service";
 import { GroupManager } from "./group.manager";
 
@@ -51,6 +51,7 @@ export class EntryManager {
     private readonly entryRepository: EntryRepository,
     private readonly historyRepository: HistoryRepository,
     private readonly groupManager: GroupManager,
+    private readonly notificationService: NotificationService
   ) {
     this.markDirtySource = new Subject();
 
@@ -87,10 +88,6 @@ export class EntryManager {
 
     this.communicationService.ipcRenderer.on(IpcChannel.UpdateExpiration, () => {
       this.zone.run(() => {
-        for (const entry of this.passwordEntries) {
-          this.setExpiration(entry);
-        }
-  
         this.updateEntriesSource();
       });
     });
@@ -129,7 +126,6 @@ export class EntryManager {
       this.searchService.reset();
     }
 
-    this.setExpiration(entry);
     this.markDirty();
 
     return id;
@@ -141,13 +137,7 @@ export class EntryManager {
   }
 
   private async getEntries(id = this.groupManager.selectedGroup): Promise<IPasswordEntry[]> {
-    const entries = await this.getEntriesInternal(id);
-
-    for (const entry of entries) {
-      this.setExpiration(entry);
-    }
-
-    return entries;
+    return await this.getEntriesInternal(id);
   }
 
   async bulkAddEntries(entries: IPasswordEntry[]): Promise<number> {
@@ -191,6 +181,11 @@ export class EntryManager {
     await this.entryRepository.moveEntries(draggedEntries, targetGroupId);
 
     this.passwordEntries = await this.getEntries();
+    this.notificationService.add({
+      message: `${this.movedEntries.length > 1 ? 'Entries' : 'Entry'} moved`,
+      type: 'success',
+      alive: 5000
+    });
 
     this.movedEntries = [];
     this.selectedPasswords = [];
@@ -242,34 +237,9 @@ export class EntryManager {
     if (id === GroupId.Starred) {
       return this.entryRepository.getAllByPredicate(x => x.isStarred);
     } else if (id === GroupId.AllItems) {
-      return this.entryRepository.getAll();
+      return this.entryRepository.getAllByPredicate(x => x.groupId !== GroupId.RecycleBin);
     } else {
       return this.entryRepository.getAllByGroup(id);
-    }
-  }
-
-  private setExpiration(entry: Partial<IPasswordEntry>): void {
-    if (!entry.expirationDate) {
-      entry.expirationStatus = ExpirationStatus.None;
-      return;
-    }
-
-    const daysDue = 3;
-    const date = new Date();
-
-    date.setHours(0);
-    date.setMinutes(0);
-    date.setSeconds(0);
-    date.setMilliseconds(0);
-
-    date.setDate(date.getDate() + daysDue);
-
-    if (entry.expirationDate < new Date()) {
-      entry.expirationStatus = ExpirationStatus.Expired
-    } else if (entry.expirationDate > new Date() && entry.expirationDate <= date) {
-      entry.expirationStatus = ExpirationStatus.DueExpiration;
-    } else {
-      entry.expirationStatus = ExpirationStatus.None;
     }
   }
 
@@ -281,8 +251,6 @@ export class EntryManager {
     if (this.isGlobalSearch) {
       return from(this.entryRepository.getSearchResults(searchPhrase))
         .pipe(map((searchResults) => {
-          searchResults.map(e => this.setExpiration(e));
-
           return { passwords, searchPhrase, searchResults };
         }));
     }
@@ -302,7 +270,7 @@ export class EntryManager {
 
   private isEntryMatchingRegex(entry: IPasswordEntry, title: string): boolean {
     if (entry.autotypeExp?.trim()) {
-      return new RegExp(entry.autotypeExp).test(title.toLowerCase());
+      return new RegExp(entry.autotypeExp).test(title);
     }
     
     if (entry.title?.trim()) {
@@ -316,8 +284,8 @@ export class EntryManager {
     this.communicationService.ipcRenderer.send(IpcChannel.TryReplaceIcon, id, editedEntry.icon, newEntry.url);
   }
 
-  private removeIconPath(entry: Partial<IPasswordEntry>): Promise<boolean> {
-    return this.communicationService.ipcRenderer.invoke(IpcChannel.RemoveIcon, entry);
+  private removeIconPath(entry: Partial<IPasswordEntry>): void {
+    this.communicationService.ipcRenderer.send(IpcChannel.RemoveIcon, entry);
   }
 
   private markDirty() {

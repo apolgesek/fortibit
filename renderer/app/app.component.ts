@@ -1,13 +1,13 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { NavigationStart, Router, RouterModule } from '@angular/router';
+import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { CommunicationService } from 'injection-tokens';
-import { filter, tap, fromEvent, take } from 'rxjs';
+import { filter, fromEvent, take, tap } from 'rxjs';
 import { IAppConfig } from '../../app-config';
 import { AppConfig } from '../environments/environment';
-import { EventType } from './core/enums';
 import { ICommunicationService } from './core/models';
-import { AppViewContainer, EntryManager, ModalManager, ComponentGridService, WorkspaceService, ConfigService } from './core/services';
+import { AppViewContainer, ComponentGridService, ConfigService, EntryManager, ModalManager, WorkspaceService } from './core/services';
 import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component';
 
 @Component({
@@ -18,7 +18,7 @@ import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component'
     RouterModule,
     CommonModule,
     MenuBarComponent
-  ],
+  ]
 })
 export class AppComponent implements OnInit {
   public fontsLoaded = false;
@@ -80,9 +80,12 @@ export class AppComponent implements OnInit {
     const productionMode = AppConfig.environment === 'PROD';
 
     if (productionMode) {
-      window.onbeforeunload = (event: Event) => {
-        this.workspaceService.executeEvent(EventType.Exit);
+      window.onbeforeunload = async (event: Event) => {
         event.returnValue = false;
+        const exit = await this.workspaceService.executeEvent();
+        if (exit) {
+          this.workspaceService.exitApp();
+        }
       };
     }
   }
@@ -105,7 +108,11 @@ export class AppComponent implements OnInit {
           const file = dataTransfer.files[0] as any;
 
           if (file.path.endsWith(this.config.fileExtension)) {
-            this.workspaceService.executeEvent(EventType.DropFile, file.path);
+            this.workspaceService.executeEvent().then(value => {
+              if (value) {
+                this.communicationService.ipcRenderer.send(IpcChannel.DropFile, file.path);
+              }
+            });
           }
         }
 

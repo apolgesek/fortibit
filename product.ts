@@ -5,7 +5,6 @@ export interface IProduct {
   temporaryFileExtension: string;
   commit: string;
   webUrl: string;
-  staticContentUrl: string;
   updateUrl: string;
   signatureSubject: string;
   leakedPasswordsUrl: string;
@@ -18,4 +17,5 @@ export interface IProduct {
   autoTypeEnabled: boolean;
   autocompleteShortcut: string;
   autocompletePasswordOnlyShortcut: string;
+  theme: 'dark' | 'light';
 }

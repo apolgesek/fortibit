@@ -13,10 +13,10 @@
   width: 16px;
   height: 16px;
   margin: 2px;
-  border: 2px solid $curious-blue;
+  border: 2px solid $blue-300;
   border-radius: 50%;
   animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  border-color: $curious-blue transparent transparent transparent;
+  border-color: $blue-300 transparent transparent transparent;
 }
 
 .lds-ring div:nth-child(1) {

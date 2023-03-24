@@ -1,6 +1,6 @@
 <div class="toast-body" [ngClass]="{'countdown': model.showCount}">
   <div class="message">
-    <i class="pi pi-check-circle"></i>
+    <i-feather name="check-circle"></i-feather>
     {{ model.message }}
   </div>
   <div *ngIf="model.showCount && timeLeft > 0" class="seconds-left">{{ timeLeft }}</div>

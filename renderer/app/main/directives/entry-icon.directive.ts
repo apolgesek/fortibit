@@ -89,12 +89,12 @@ export class EntryIconDirective implements AfterViewInit {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // draw text
-    const font = text.length > 0 ? 'Arial' : 'primeicons';
+    const font = 'Arial';
     context.font = 'bold 16px ' + font;
     context.textAlign = 'center';
     context.textBaseline = 'top';
     context.fillStyle = textColor;
-    context.fillText(text.length > 0 ? text : '\ue939', 16, 10);
+    context.fillText(text.length > 0 ? text : '?', 16, 10);
 
     return canvas;
   }

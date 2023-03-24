@@ -1,8 +1,7 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
-import { fromEvent, Subject } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { WorkspaceService, EntryManager, GroupManager } from '@app/core/services';
 import { SettingsButtonComponent } from '../settings-button/settings-button.component';
 import { CommonModule } from '@angular/common';
@@ -12,6 +11,7 @@ import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
+import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-toolbar',
@@ -21,6 +21,7 @@ import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.dire
   imports: [
     CommonModule,
     FormsModule,
+    FeatherModule,
     MenuDirective,
     DropdownDirective,
     DropdownToggleDirective,
@@ -29,8 +30,8 @@ import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.dire
     SettingsButtonComponent
   ]
 })
-export class ToolbarComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('searchbox') public searchBox!: ElementRef; 
+export class ToolbarComponent implements OnDestroy {
+  @ViewChild('searchInput') public searchInput!: ElementRef; 
 
   public searchModes = [
     { label: 'This group', value: false },
@@ -87,10 +88,6 @@ export class ToolbarComponent implements AfterViewInit, OnDestroy {
     private readonly modalService: ModalService,
   ) {}
 
-  ngAfterViewInit(): void {
-    this.registerFocusEvent(this.searchBox.nativeElement, 'shadow');
-  }
-
   ngOnDestroy() {
     this.destroyed$.next();
     this.destroyed$.complete();
@@ -119,19 +116,8 @@ export class ToolbarComponent implements AfterViewInit, OnDestroy {
     this.entryManager.updateEntriesSource();
   }
 
-  private registerFocusEvent(element: HTMLElement, className: string) {
-    const input = element.querySelector('input') as HTMLInputElement;
-
-    fromEvent(input, 'focus')
-      .pipe(
-        tap(() => element.classList.add(className)),
-        takeUntil(this.destroyed$)
-      ).subscribe();
-
-    fromEvent(input, 'blur')
-      .pipe(
-        tap(() => element.classList.remove(className)),
-        takeUntil(this.destroyed$)
-      ).subscribe();
+  resetSearch() {
+    this.searchPhrase = '';
+    (this.searchInput.nativeElement as HTMLInputElement).focus();
   }
 }

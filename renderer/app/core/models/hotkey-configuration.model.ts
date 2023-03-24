@@ -6,4 +6,5 @@ export interface IHotkeyConfiguration {
   renameGroupLabel: string;
   emptyBinLabel: string;
   settingsLabel: string;
+  moveEntryLabel: string;
 }

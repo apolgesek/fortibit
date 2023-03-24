@@ -1,4 +1,4 @@
-@import "variables";
+@import 'themes/light/variables';
 
 .dialog-message {
   padding: 0;
@@ -7,7 +7,7 @@
 ul {
   list-style-type: none;
   padding-left: 0;
-  color: $pickled-bluewood;
+  color: var(--primary-font);
   font-size: 0.875rem;
 
   li {

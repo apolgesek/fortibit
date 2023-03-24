@@ -6,6 +6,7 @@ import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { CommonModule } from '@angular/common';
+import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-group-dialog',
@@ -15,6 +16,7 @@ import { CommonModule } from '@angular/common';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FeatherModule,
     AutofocusDirective,
     ModalComponent
   ]

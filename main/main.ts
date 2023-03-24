@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { Cron } from "croner";
-import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeTheme, shell } from 'electron';
 import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { platform } from 'os';
-import { basename, join } from 'path';
+import { basename } from 'path';
 import { IpcChannel } from '../shared-models';
 import { SingleInstanceServices } from './dependency-injection';
 import { ProcessArgument } from './process-argument.enum';
@@ -53,6 +53,10 @@ class MainProcess {
     this._services = new SingleInstanceServices();
     this._fileArg = process.argv.find(x => x.endsWith(this._services.get(IConfigService).appConfig.fileExtension));
   
+    // https://www.electronjs.org/docs/latest/tutorial/performance#8-call-menusetapplicationmenunull-when-you-do-not-need-a-default-menu
+    Menu.setApplicationMenu(null);
+    app.disableHardwareAcceleration();
+
     this.registerAppEvents();
   }
 
@@ -88,6 +92,12 @@ class MainProcess {
     const entrySelectWindowRef = this._windowService.createEntrySelectWindow();
     this.registerIpcEventListeners();
     this.registerScheduledTasks();
+
+    if (this._configService.appConfig.theme === 'dark') {
+      nativeTheme.themeSource = 'dark';
+    } else if (this._configService.appConfig.theme === 'light') {
+      nativeTheme.themeSource = 'light';
+    }
 
     if (this._configService.appConfig.autoTypeEnabled) {
       this._autotypeService.registerAutocompleteShortcut();
@@ -185,6 +195,22 @@ class MainProcess {
 
       return password === this._databaseService.getPassword(event.sender.id);
     });
+
+    ipcMain.handle(IpcChannel.ToggleTheme, () => {
+      if (nativeTheme.shouldUseDarkColors) {
+        nativeTheme.themeSource = 'light';
+        this._configService.set({theme: 'light'});
+      } else {
+        nativeTheme.themeSource = 'dark';
+        this._configService.set({theme: 'dark'});
+      }
+
+      return nativeTheme.shouldUseDarkColors;
+    })
+  
+    ipcMain.handle(IpcChannel.SetSystemTheme, () => {
+      nativeTheme.themeSource = 'system';
+    })
   }
 
   private registerScheduledTasks() {

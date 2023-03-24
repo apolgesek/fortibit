@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/light/variables';;
 
 .text-right {
   text-align: right;
@@ -10,10 +10,10 @@
 
 .row {
   display: flex;
-  border-top: 1px solid $silver;
+  border-top: 1px solid var(--border-color);
 
   &:last-child {
-    border-bottom: 1px solid $silver;
+    border-bottom: 1px solid var(--border-color);
   }
 }
 

@@ -15,6 +15,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { IAppConfig } from '../../../../../app-config';
 import { LinkPipe } from '@app/shared/pipes/link.pipe'
 import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
+import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-entry-details-sidebar',
@@ -23,6 +24,7 @@ import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
   standalone: true,
   imports: [
     CommonModule,
+    FeatherModule,
     SidebarHandleDirective,
     TooltipDirective,
     TooltipComponent,

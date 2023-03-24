@@ -1,5 +1,5 @@
 <div class="filter" appMenu>
-  <div #filterDropdown="appDropdown" (open)="onDropdownOpen($event)" appDropdown class="dropdown">
+  <div #filterDropdown="appDropdown" (open)="onDropdownOpen($event)" appDropdown class="dropdown" style="margin-right: 0.5rem;">
     <button appDropdownToggle appMenuItem class="sort-btn">
       {{ selectedSortOption.name }} <span
         class="pi"
@@ -11,7 +11,7 @@
       <div #sort="appDropdown" (open)="onChildDropdownOpen($event)" appDropdown [select]="true" class="dropdown">
         <div (click)="$event.stopPropagation()" style="position: relative; width: 100%;">
           <button id="sort-by" class="filter-option fit" appDropdownToggle appMenuItem>
-            {{ selectedSortOption.name }} <span class="pi pi-angle-down"></span>
+            {{ selectedSortOption.name }} <i-feather name="chevron-down"></i-feather>
           </button>
           <div *appDropdownMenu class="dropdown-content select right">
             <li
@@ -28,7 +28,7 @@
       <div #sort="appDropdown" (open)="onChildDropdownOpen($event)" appDropdown #sortDropdown [select]="true" class="dropdown" style="margin-top: 0.5rem;">
         <div (click)="$event.stopPropagation()" style="position: relative; width: 100%;">
           <button id="sort-by-direction" class="filter-option fit" appDropdownToggle appMenuItem>
-            {{ selectedSortDirection.name }} <i class="pi pi-angle-down"></i>
+            {{ selectedSortDirection.name }} <i-feather name="chevron-down"></i-feather>
           </button>
           <div *appDropdownMenu class="dropdown-content select right">
             <li
@@ -46,7 +46,7 @@
   </div>
 </div>
 
-<div class="filter" appMenu style="margin-right: 0.5rem;">
+<!-- <div class="filter" appMenu style="margin-right: 0.5rem;">
   <div #filterDropdown="appDropdown" (open)="onDropdownOpen($event)" appDropdown class="dropdown">
     <div (click)="$event.stopPropagation()" style="position: relative; width: 100%;">
       <button appDropdownToggle appMenuItem class="filters-btn">
@@ -83,4 +83,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->

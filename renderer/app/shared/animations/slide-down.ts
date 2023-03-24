@@ -7,6 +7,6 @@ export const slideDown = trigger('slideDown', [
   ]),
 
   transition(':leave', [
-    animate('80ms ease-out', style({ transform: 'translateY(-10px)', opacity: 0 }))
+    animate('80ms ease-out', style({ transform: 'translateY(0)', opacity: 0 }))
   ])
 ]);

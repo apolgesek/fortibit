@@ -9,6 +9,8 @@ import { ICommunicationService } from '@app/core/models';
 import { ClipboardService, ConfigService, ElectronService, EntryManager, GroupManager, ModalService, WindowsHotkeyHandler, WorkspaceService } from '@app/core/services';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { FeatherModule } from 'angular-feather';
+import { AlertCircle, Book, Bookmark, CheckCircle, ChevronDown, ChevronRight, ChevronUp, Code, Copy, Edit, ExternalLink, FilePlus, Folder, Globe, Grid, Info, Key, Plus, PlusCircle, RefreshCcw, Save, Settings, Star, Trash, User, XCircle } from 'angular-feather/icons';
 import { CommunicationService, HotkeyHandler } from 'injection-tokens';
 import 'zone.js';
 import { WebService } from './app/core/services/electron/web.service';
@@ -21,7 +23,7 @@ function initializeApp(
   communicationService: ICommunicationService,
   configService: ConfigService,
 ): () => Promise<void> {
-  return async () => {
+  return async () => {  
     await (window as any).api.loadChannels();
     await communicationService.getPlatform();
 
@@ -41,12 +43,15 @@ const isElectron = () => {
   return true;
 };
 
+const icons = { Edit, Trash, Save, PlusCircle, Grid, Star, Bookmark, Globe, Folder, Key, Info, User, Code, Plus, Settings, FilePlus, CheckCircle, RefreshCcw, ChevronRight, ChevronDown, ChevronUp, XCircle, AlertCircle, Copy, ExternalLink, Book };
+
 bootstrapApplication(AppComponent, {
   providers: [
     importProvidersFrom(
       BrowserAnimationsModule,
       HttpClientModule,
       RouterModule.forRoot(routes, { useHash: true }),
+      FeatherModule.pick(icons)
     ),
     FileNamePipe,
     {

@@ -7,6 +7,7 @@ import { MasterPasswordSetupComponent } from '@app/main/components/master-passwo
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { FeatherModule } from 'angular-feather';
 import { CommunicationService } from 'injection-tokens';
 import { debounceTime, delay, distinctUntilChanged, from, map, Observable, Subject, take, takeUntil, tap } from 'rxjs';
 import { IAppConfig } from '../../../../../../../app-config';
@@ -20,6 +21,7 @@ import { IProduct } from '../../../../../../../product';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FeatherModule,
     MasterPasswordSetupComponent
   ]
 })

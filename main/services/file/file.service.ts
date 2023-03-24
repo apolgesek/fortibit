@@ -12,6 +12,11 @@ export class FileService implements IFileService {
           return;
         }
 
+        if (response.statusCode == 302) {
+          resolve(this.download(response.headers.location, path, errorCallback, finishCallback));
+          return;
+        }
+
         const file = createWriteStream(path);
 
         response.on('error', (err) => {

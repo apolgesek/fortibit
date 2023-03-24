@@ -20,7 +20,7 @@ export class ClipboardService {
       value = await this.communicationService.ipcRenderer.invoke(IpcChannel.DecryptPassword, entry[property]);
     }
 
-    const isCopied = await this.communicationService.ipcRenderer.invoke(IpcChannel.CopyCliboard, value);
+    const isCopied = this.communicationService.ipcRenderer.invoke(IpcChannel.CopyCliboard, value);
 
     if (isCopied) {
       this.notificationService.add({

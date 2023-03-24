@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ExpirationStatus, IPasswordEntry } from '@shared-renderer/index';
+import { IPasswordEntry } from '@shared-renderer/index';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, map, Observable, Subject, tap } from 'rxjs';
 import { Sort } from '../enums';
 
@@ -20,7 +20,6 @@ export class SearchService implements ISearchService {
   public searchPhraseValue = '';
   public sortProp: SortableEntryProp;
   public sortOrder: Sort = Sort.Desc;
-  public expirationStatus: ExpirationStatus[] = [];
   public isSearching = false;
   public wasSearched = false;
 
@@ -67,16 +66,6 @@ export class SearchService implements ISearchService {
     this.updateSearchResults();
   }
 
-  public setExpiration(state: ExpirationStatus, value: boolean) {
-    if (value) {
-      this.expirationStatus.push(state);
-    } else {
-      this.expirationStatus = this.expirationStatus.filter(x => x !== state);
-    }
-
-    this.updateSearchResults();
-  }
-
   public filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]): IPasswordEntry[] {
     if (!searchResults.length) {
       let filteredPasswords = passwords.filter(p => { 
@@ -88,10 +77,6 @@ export class SearchService implements ISearchService {
         return true;
       });
 
-      if (this.expirationStatus.length) {
-        filteredPasswords = filteredPasswords.filter(x => this.expirationStatus.includes(x.expirationStatus));
-      }
-
       if (this.sortOrder === Sort.Asc) {
         filteredPasswords.sort((a, b) => this.compareAscending(a, b));
       } else if (this.sortOrder === Sort.Desc) {
@@ -100,10 +85,6 @@ export class SearchService implements ISearchService {
 
       return filteredPasswords;
     } else {
-      if (this.expirationStatus.length) {
-        searchResults = searchResults.filter(x => this.expirationStatus.includes(x.expirationStatus));
-      }
-
       if (this.sortOrder === Sort.Asc) {
         searchResults.sort((a, b) => this.compareAscending(a, b));
       } else if (this.sortOrder === Sort.Desc) {

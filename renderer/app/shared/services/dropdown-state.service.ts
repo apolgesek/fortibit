@@ -48,7 +48,7 @@ export class DropdownStateService {
     this.close();
 
     if (this.parent) {
-      this.parent.focusFirstItem();
+      this.focusFirstItem();
     }
   }
 

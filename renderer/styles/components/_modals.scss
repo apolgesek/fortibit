@@ -9,7 +9,7 @@
 	.modal-body {
 		display: flex;
 		flex-direction: column;
-		background: $white;
+		background: var(--modal-bg);
 		min-width: 600px;
 		max-height: calc(100% - 10rem);
 		padding: 2rem;
@@ -19,6 +19,13 @@
 		transform: translateY(-50%) translateX(-50%);
 		z-index: 991;
 		border-radius: 0.5rem;
+
+		.inputgroup {
+			background-color: var(--modal-input-bg);
+			input, textarea {
+				background-color: var(--modal-input-bg);
+			}
+		}
 	}
 }
 	
@@ -37,7 +44,7 @@
 	display: flex;
 	justify-content: flex-end;
 	align-items: center;
-	background: #fff;
+	background: var(--modal-bg);
 	z-index: 999;
 	gap: 1rem;
 	padding-top: 1rem;
@@ -67,12 +74,12 @@
 		@include font-medium;
 		margin: 0;
 		font-size: 1.375rem;
-		color: $pickled-bluewood;
+		color: var(--primary-font);
 		flex: 1;
 	}
 
 	.close-dialog {
-		color: $gumbo;
+		color: $grey-400;
 		font-size: 2rem;
 		line-height: 1rem;
 		font-weight: bold;
@@ -80,13 +87,17 @@
 		transition: color 100ms;
 
 		&:hover {
-			color: $pickled-bluewood;
+			color: var(--primary-font);
 		}
 	}
 }
 
 .settings-modal {
 	min-height: 460px;
+
+	.inputgroup {
+		background-color: var(--modal-bg) !important;
+	}
 }
 
 .move-entry-modal {

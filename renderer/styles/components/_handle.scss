@@ -36,7 +36,7 @@
 	&::after {
 		content: '';
 		width: 1px;
-		background-color: $silver;
+		background-color: var(--border-color);
 		opacity: 1;
 	}
 
@@ -59,7 +59,7 @@
 	}
 
 	&.active {
-		background-color: $silver !important;
+		background-color: var(--border-color) !important;
     width: $handle-width;
 
 		&::after {
@@ -73,7 +73,7 @@
     background-color: transparent;
   }
   100% {
-    background-color: $curious-blue;
+    background-color: $blue-300;
     width: $handle-width;
   }
 }

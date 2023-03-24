@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/light/variables';;
 @import 'mixins';
 
 .container {
@@ -26,7 +26,7 @@
 
   input {
     padding: 0.5rem;
-    background-color: $porcelain;
+    background-color: var(--input-bg);
   }
 }
 

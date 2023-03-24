@@ -3,13 +3,13 @@
     <button appDropdownToggle appMenuItem class="icon-btn">
       <span class="sr-only">Settings</span>
       <div *ngIf="notifications.length" class="badge">{{ notifications.length }} <span class="sr-only">notifications</span></div>
-      <span class="pi pi-cog"></span>
+      <i-feather name="settings"></i-feather>
     </button>
     <ul *appDropdownMenu class="dropdown-content right" @slideDown>
-      <li *ngIf="updateAvailable" appMenuItem (click)="updateAndRelaunch()" class="update-btn">
+      <li *ngIf="updateAvailable" appMenuItem (activate)="updateAndRelaunch()" class="update-btn">
         Update and restart <span class="version">{{ updateAvailable }}</span>
       </li>
-      <li appMenuItem (click)="openSettings(); false">{{ settingsLabel }}</li>
+      <li appMenuItem (activate)="openSettings()">{{ settingsLabel }}</li>
     </ul>
   </div>
 </ng-container>

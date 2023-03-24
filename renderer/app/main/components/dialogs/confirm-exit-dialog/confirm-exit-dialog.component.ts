@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, ComponentRef, Inject } from '@angular/core';
 import { IpcChannel } from '@shared-renderer/index';
 import { MasterPasswordDialogComponent } from '../master-password-dialog/master-password-dialog.component';
-import { EventType } from '@app/core/enums';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { ICommunicationService } from '@app/core/models';
 import { WorkspaceService, ModalRef } from '@app/core/services';
@@ -34,9 +33,13 @@ export class ConfirmExitDialogComponent implements IModal {
 
   async saveChanges() {
     if (!this.workspaceService.file) {
-      this.modalManager.open(MasterPasswordDialogComponent, { event: this.additionalData.event });
-      this.close();
-
+      const result = await this.modalManager.openPrompt(MasterPasswordDialogComponent);
+      if (result) {
+        this.modalRef.onActionResult.next(true);
+        this.modalRef.close();
+      } else {
+        this.close();
+      }
     } else {
       this.communicationService.ipcRenderer.once(IpcChannel.GetSaveStatus, () => {
         setTimeout(() => {
@@ -49,11 +52,12 @@ export class ConfirmExitDialogComponent implements IModal {
   }
 
   executeTask() {
-    this.close();
-    this.workspaceService.execute(this.additionalData.event as EventType, this.additionalData.payload);
+    this.modalRef.onActionResult.next(true);
+    this.modalRef.close();
   }
 
   close() {
-    this.modalRef.close()
+    this.modalRef.onActionResult.next(false);
+    this.modalRef.close();
   }
 }

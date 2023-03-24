@@ -1,21 +1,20 @@
-import { ComponentRef, Inject, Injectable, NgZone } from '@angular/core';
+import { ComponentRef, Inject, Injectable } from '@angular/core';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { AboutDialogComponent } from '@app/main/components/dialogs/about-dialog/about-dialog.component';
-import { ExposedPasswordsDialogComponent } from '@app/main/components/dialogs/exposed-passwords-dialog/exposed-passwords-dialog.component';
-import { WeakPasswordsDialogComponent } from '@app/main/components/dialogs/weak-passwords-dialog/weak-passwords-dialog.component';
 import { ConfirmExitDialogComponent } from '@app/main/components/dialogs/confirm-exit-dialog/confirm-exit-dialog.component';
 import { DeleteEntryDialogComponent } from '@app/main/components/dialogs/delete-entry-dialog/delete-entry-dialog.component';
 import { DeleteGroupDialogComponent } from '@app/main/components/dialogs/delete-group-dialog/delete-group-dialog.component';
 import { EntryDialogComponent } from '@app/main/components/dialogs/entry-dialog/entry-dialog.component';
 import { EntryHistoryDialogComponent } from '@app/main/components/dialogs/entry-history-dialog/entry-history-dialog.component';
+import { ExposedPasswordsDialogComponent } from '@app/main/components/dialogs/exposed-passwords-dialog/exposed-passwords-dialog.component';
 import { GroupDialogComponent } from '@app/main/components/dialogs/group-dialog/group-dialog.component';
-import { MoveEntryDialogComponent } from '@app/main/components/dialogs/move-entry-dialog/move-entry-dialog.component';
 import { ImportDatabaseMetadataDialogComponent } from '@app/main/components/dialogs/import-database-metadata-dialog/import-database-metadata-dialog.component';
 import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/master-password-dialog/master-password-dialog.component';
+import { MoveEntryDialogComponent } from '@app/main/components/dialogs/move-entry-dialog/move-entry-dialog.component';
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
-import { IHistoryEntry, IpcChannel } from '@shared-renderer/index';
+import { WeakPasswordsDialogComponent } from '@app/main/components/dialogs/weak-passwords-dialog/weak-passwords-dialog.component';
+import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { CommunicationService } from 'injection-tokens';
-import { EventType } from '../enums';
 import { ICommunicationService } from '../models';
 import { EntryManager } from './managers/entry.manager';
 
@@ -28,20 +27,10 @@ export class ModalService {
   }
 
   constructor(
-    private readonly zone: NgZone,
     private readonly modalManager: ModalManager,
     private readonly entryManager: EntryManager,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-  ) {
-    // this.communicationService.ipcRenderer.on(
-    //   IpcChannel.OpenCloseConfirmationWindow,
-    //   (_, event: EventType, payload: unknown) => {
-    //     this.zone.run(() => {
-    //       this.openConfirmExitWindow(event, payload);
-    //     });
-    //   }
-    // );
-  }
+  ) {}
 
   openDeleteEntryWindow() {
     this.modalManager.open(DeleteEntryDialogComponent);
@@ -51,8 +40,8 @@ export class ModalService {
     this.modalManager.open(DeleteGroupDialogComponent);
   }
 
-  openConfirmExitWindow(event: EventType, payload: unknown) {
-    this.modalManager.open(ConfirmExitDialogComponent, { event, payload });
+  async openConfirmExitWindow(): Promise<boolean> {
+    return this.modalManager.openPrompt(ConfirmExitDialogComponent);
   }
 
   async openNewEntryWindow() {
@@ -60,8 +49,8 @@ export class ModalService {
     await this.openEntryWindow();
   }
 
-  async openEditEntryWindow() {
-    this.entryManager.editedEntry = this.entryManager.selectedPasswords[0];
+  async openEditEntryWindow(entry?: IPasswordEntry) {
+    this.entryManager.editedEntry = entry ?? this.entryManager.selectedPasswords[0];
     this.openEntryWindow();
   }
 

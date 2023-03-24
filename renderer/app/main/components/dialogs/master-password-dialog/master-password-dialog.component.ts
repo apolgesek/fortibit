@@ -1,8 +1,7 @@
 import { Component, ComponentRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { IpcChannel } from '@shared-renderer/index';
-import { EventType } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
-import { WorkspaceService, ModalRef } from '@app/core/services';
+import { ModalRef } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { CommunicationService } from 'injection-tokens';
 import { MasterPasswordSetupComponent } from '../../master-password-setup/master-password-setup.component';
@@ -28,17 +27,13 @@ export class MasterPasswordDialogComponent implements OnInit, OnDestroy, IModal 
 
   constructor(
     private readonly zone: NgZone,
-    private readonly workspaceService: WorkspaceService,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly modalRef: ModalRef
   ) { 
     this.onGetSaveStatus = (_, { status })  => {
       this.zone.run(() => {
         if (status) {
-          if (typeof this.additionalData?.event !== 'undefined' && this.additionalData?.event !== null) {
-            this.workspaceService.execute(this.additionalData.event as EventType, this.additionalData.payload);
-          }
-          
+          this.modalRef.onActionResult.next(true);          
           this.close();
         }
       });

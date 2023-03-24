@@ -32,7 +32,6 @@
               "renderer/content-script.js"
             ],
             "styles": [
-              "node_modules/primeicons/primeicons.css",
               "renderer/styles.scss"
             ],
             "stylePreprocessorOptions": {

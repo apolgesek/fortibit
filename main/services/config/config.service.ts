@@ -51,7 +51,6 @@ export class ConfigService implements IConfigService {
       updateUrl: productInformation.updateUrl,
       webUrl: productInformation.webUrl,
       signatureSubject: productInformation.signatureSubject,
-      staticContentUrl: productInformation.staticContentUrl,
       leakedPasswordsUrl: productInformation.leakedPasswordsUrl,
       temporaryFileExtension: productInformation.temporaryFileExtension,
       compressionEnabled: productInformation.compressionEnabled,
@@ -71,7 +70,8 @@ export class ConfigService implements IConfigService {
       saveOnLock: productInformation.saveOnLock ?? false,
       displayIcons: productInformation.displayIcons ?? true,
       autoTypeEnabled: productInformation.autoTypeEnabled ?? true,
-      workspaces: workspacesInformation
+      workspaces: workspacesInformation,
+      theme: productInformation.theme
     };
   }
 

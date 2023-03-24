@@ -4,11 +4,13 @@ import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { combineLatest, from, take, timer } from 'rxjs';
-import { ModalRef, NotificationService, ReportService, WorkspaceService } from '@app/core/services';
+import { ModalRef, ModalService, NotificationService, ReportService, WorkspaceService } from '@app/core/services';
 import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { CommunicationService } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
 import { ReportType } from '@app/core/enums';
+import { FeatherModule } from 'angular-feather';
+import { EntryRepository } from '@app/core/repositories';
 
 @Component({
   selector: 'app-exposed-passwords-dialog',
@@ -17,6 +19,7 @@ import { ReportType } from '@app/core/enums';
   standalone: true,
   imports: [
     CommonModule,
+    FeatherModule,
     AutofocusDirective,
     ModalComponent
   ]
@@ -37,6 +40,8 @@ export class ExposedPasswordsDialogComponent implements IModal {
     private readonly reportService: ReportService,
     private readonly workspaceService: WorkspaceService,
     private readonly notificationService: NotificationService,
+    private readonly modalService: ModalService,
+    private readonly entryRepository: EntryRepository,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService
   ) { }
 
@@ -81,6 +86,10 @@ export class ExposedPasswordsDialogComponent implements IModal {
 
   openUrl(url: string) {
     this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, url);
+  }
+
+  async editEntry(id: number) {
+    this.modalService.openEditEntryWindow(await this.entryRepository.get(id));
   }
 
   private async getLastReport() {

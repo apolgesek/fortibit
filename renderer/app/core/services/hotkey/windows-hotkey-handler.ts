@@ -5,7 +5,6 @@ import { ClipboardService } from '../clipboard.service';
 import { WorkspaceService } from '../workspace.service';
 import { EntryManager } from '../managers/entry.manager';
 import { GroupManager } from '../managers/group.manager';
-import { GroupId } from '@app/core/enums';
 
 export class WindowsHotkeyHandler implements IHotkeyHandler {
   public configuration: IHotkeyConfiguration = {
@@ -15,7 +14,8 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
     removeGroupLabel: 'Delete (Del)',
     renameGroupLabel: 'Rename (Ctrl + E)',
     emptyBinLabel: 'Empty recycle bin',
-    settingsLabel: 'Settings (Ctrl + .)'
+    settingsLabel: 'Settings (Ctrl + .)',
+    moveEntryLabel: 'Move (M)'
   };
 
   constructor(
@@ -74,7 +74,8 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   public registerDeleteGroup(event: KeyboardEvent) {
     if (event.key === 'Delete'
       && this.groupManager.selectedGroup
-      && this.groupManager.selectedGroup !== GroupId.Root) {
+      && !this.groupManager.builtInGroups.map(x => x.id).includes(this.groupManager.selectedGroup)
+      && this.entryManager.selectedPasswords.length === 0) {
       this.modalService.openDeleteGroupWindow();
       event.preventDefault();
     }
@@ -84,7 +85,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
     if (event.key.toLowerCase() === 'e'
       && event.ctrlKey
       && this.groupManager.selectedGroup
-      && this.groupManager.selectedGroup !== GroupId.Root) {
+      && !this.groupManager.builtInGroups.map(x => x.id).includes(this.groupManager.selectedGroup)) {
       this.modalService.openGroupWindow('edit');
       event.preventDefault();
     }
@@ -98,7 +99,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
 
   public registerMoveEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'm' && event.ctrlKey) {
+    if (event.key.toLowerCase() === 'm' && this.entryManager.selectedPasswords.length) {
       this.modalService.openMoveEntryWindow();
       event.preventDefault();
     }

@@ -122,7 +122,7 @@ export class IconService implements IIconService {
   private async getFile(url: string): Promise<string> {
     const formattedHostname = await this.getFileName(url);
 
-    const fileUrl = this._configService.appConfig.staticContentUrl + '/icon/' +formattedHostname + '.png';
+    const fileUrl = this._configService.appConfig.webUrl + '/icon/' + formattedHostname + '.png';
     const filePath = join(`${this.iconDirectory}`, `${formattedHostname}.png`);
 
     if (existsSync(filePath)) {

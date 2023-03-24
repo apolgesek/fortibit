@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { DbManager } from '@app/core/database';
-import { EventType } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { ConfigService, NotificationService, WorkspaceService } from '@app/core/services';
 import { ModalService } from '@app/core/services/modal.service';
@@ -12,6 +11,7 @@ import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { ImportHandler, IpcChannel } from '@shared-renderer/index';
+import { FeatherModule } from 'angular-feather';
 import { exportDB } from 'dexie-export-import';
 import { AppConfig } from 'environments/environment';
 import { CommunicationService } from 'injection-tokens';
@@ -24,6 +24,7 @@ import { Subject, takeUntil } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
+    FeatherModule,
     MenuDirective,
     DropdownDirective,
     DropdownToggleDirective,
@@ -34,12 +35,12 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class MenuBarComponent implements OnInit, OnDestroy {
   public readonly importHandler = ImportHandler;
-  public readonly closeIcon = 'assets/icons/close.png';
-
   private readonly destroyed = new Subject<void>();
 
   public recentFiles: string[];
-  private maximizeIconPath: 'max-k' | 'restore-k' = 'max-k';
+  private theme: 'w' | 'k' = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'w' : 'k';
+  private maximizeIconPath: string = `max-${this.theme}`;
+  private isMaximized: boolean;
 
   public get maximizeRestoreIcons(): string {
     return [
@@ -57,15 +58,29 @@ export class MenuBarComponent implements OnInit, OnDestroy {
 
   public get minimizeIcons(): string {
     return [
-      `assets/icons/min-k-10.png 1x`,
-      `assets/icons/min-k-12.png 1.25x`,
-      `assets/icons/min-k-15.png 1.5x`,
-      `assets/icons/min-k-15.png 1.75x`,
-      `assets/icons/min-k-20.png 2x`,
-      `assets/icons/min-k-20.png 2.25x`,
-      `assets/icons/min-k-24.png 2.5x`,
-      `assets/icons/min-k-30.png 3x`,
-      `assets/icons/min-k-30.png 3.5x`
+      `assets/icons/min-${this.theme}-10.png 1x`,
+      `assets/icons/min-${this.theme}-12.png 1.25x`,
+      `assets/icons/min-${this.theme}-15.png 1.5x`,
+      `assets/icons/min-${this.theme}-15.png 1.75x`,
+      `assets/icons/min-${this.theme}-20.png 2x`,
+      `assets/icons/min-${this.theme}-20.png 2.25x`,
+      `assets/icons/min-${this.theme}-24.png 2.5x`,
+      `assets/icons/min-${this.theme}-30.png 3x`,
+      `assets/icons/min-${this.theme}-30.png 3.5x`
+    ].join(',');
+  }
+
+  public get closeIcons(): string {
+    return [
+      `assets/icons/close-${this.theme}-10.png 1x`,
+      `assets/icons/close-${this.theme}-12.png 1.25x`,
+      `assets/icons/close-${this.theme}-15.png 1.5x`,
+      `assets/icons/close-${this.theme}-15.png 1.75x`,
+      `assets/icons/close-${this.theme}-20.png 2x`,
+      `assets/icons/close-${this.theme}-20.png 2.25x`,
+      `assets/icons/close-${this.theme}-24.png 2.5x`,
+      `assets/icons/close-${this.theme}-30.png 3x`,
+      `assets/icons/close-${this.theme}-30.png 3.5x`
     ].join(',');
   }
 
@@ -92,13 +107,19 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      this.theme = event.matches ? "w" : "k";
+      this.maximizeIconPath = this.isMaximized ? `restore-${this.theme}` : `max-${this.theme}`;
+    });
+
     this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed)).subscribe(config => {
       this.recentFiles = config.workspaces.recentlyOpened;
     });
 
     this.communicationService.ipcRenderer.on(IpcChannel.MaximizedRestored, (_event, isMaximized: boolean) => {
       this.zone.run(() => {
-        this.maximizeIconPath = isMaximized ? 'restore-k' : 'max-k';
+        this.isMaximized = isMaximized;
+        this.maximizeIconPath = isMaximized ? `restore-${this.theme}` : `max-${this.theme}`;
       });
     });
   }
@@ -121,11 +142,19 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   openFile(path?: string) {
-    this.workspaceService.executeEvent(EventType.OpenFile, path);
+    this.workspaceService.executeEvent().then(value => {
+      if (value) {
+        this.communicationService.ipcRenderer.send(IpcChannel.OpenFile, path);
+      }
+    });
   }
 
   newFile() {
-    this.workspaceService.executeEvent(EventType.NewFile);
+    this.workspaceService.executeEvent().then(value => {
+      if (value) {
+        this.communicationService.ipcRenderer.invoke(IpcChannel.CreateNew).then(() => this.workspaceService.createNew());
+      }
+    });
   }
 
   save() {  
@@ -161,7 +190,11 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   lock() {
-    this.workspaceService.executeEvent(EventType.Lock);
+    this.workspaceService.executeEvent().then(value => {
+      if (value) {
+        this.workspaceService.lock({ minimize: true });
+      }
+    });
   }
 
   openKeyboardShortcuts() {

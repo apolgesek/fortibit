@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, NgZone, OnInit } from '@angular/core';
-import { EventType } from '@app/core/enums';
 import { ICommunicationService, IHotkeyHandler } from '@app/core/models';
 import { ModalService, WorkspaceService } from '@app/core/services';
 import { slideDown } from '@app/shared';
@@ -11,6 +10,7 @@ import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { UpdateState } from '@shared-renderer/update-state.model';
+import { FeatherModule } from 'angular-feather';
 import { CommunicationService, HotkeyHandler } from 'injection-tokens';
 import { Observable, scan, startWith, Subject, takeUntil } from 'rxjs';
 
@@ -26,6 +26,7 @@ interface INotification {
   standalone: true,
   imports: [
     CommonModule,
+    FeatherModule,
     MenuDirective,
     DropdownDirective,
     DropdownToggleDirective,
@@ -92,7 +93,11 @@ export class SettingsButtonComponent implements OnInit {
   }
 
   updateAndRelaunch() {
-    this.workspaceService.executeEvent(EventType.Update);
+    this.workspaceService.executeEvent().then(value => {
+      if (value) {
+        this.communicationService.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
+      }
+    });
   }
 
   ngOnInit(): void {

@@ -1,12 +1,13 @@
 input,
 textarea {
 	@include font-regular;
-	color: $pickled-bluewood;
+	color: var(--primary-font);
+	background-color: var(--input-bg);
 }
 
 .inputgroup {
-	background-color: $porcelain;
-	box-shadow: inset 0px 0.25rem 0px 0px darken($porcelain, 1);
+	background-color: var(--input-bg-secondary);
+	box-shadow: inset 0px 0.25rem 0px 0px var(--input-inset-shadow);
 	border: 0;
 	border-radius: 0.25rem;
 	margin: 0.5rem 0;
@@ -26,8 +27,7 @@ textarea {
 		border: 0;
 		border-radius: 0.25rem;
 		width: 100%;
-		background: transparent;
-		z-index: 1;
+		background: var(--input-bg);
 		outline: none;
 		font-size: 0.875rem;
 	}
@@ -51,8 +51,14 @@ input[type='number'] {
 	position: absolute;
 	border: 0;
 	background-color: transparent;
-	color: $pickled-bluewood;
+	color: var(--primary-font);
 	z-index: 2;
+
+	i-feather {
+		padding-top: 2px;
+		width: 1rem !important;
+		height: 1rem !important;
+	}
 }
 
 
@@ -80,7 +86,7 @@ input[type='number'] {
   right: 0;
   bottom: 0;
   border-radius: 0.25rem;
-  background-color: $silver;
+  background-color: var(--checkbox-bg);
   -webkit-transition: .4s;
   transition: .4s;
 }
@@ -92,18 +98,18 @@ input[type='number'] {
   width: 20px;
   left: 4px;
   bottom: 5px;
-  background-color: white;
+  background-color: $white;
   -webkit-transition: .4s;
   transition: .4s;
   border-radius: 0.25rem;
 }
 
 input:checked + .slider {
-  background-color: $curious-blue;
+  background-color: var(--checkbox-checked-bg);
 }
 
 input:focus + .slider:before, input:focus:active + .slider:before {
-  box-shadow: 0px 0px 0px 2px $picton-blue;
+  box-shadow: 0px 0px 0px 2px $blue-200;
 }
 
 input:checked + .slider:before {
@@ -115,7 +121,7 @@ input:checked + .slider:before {
 .readonly {
 	background: $white;
 	box-shadow: none;
-	border: 1px solid $silver;
+	border: 1px solid var(--border-color);
 
 	input:read-only, textarea:read-only {
 		background: $white;

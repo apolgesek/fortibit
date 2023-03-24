@@ -1,0 +1,73 @@
+@import "../scss-variables";
+
+@mixin dark-theme {
+  --primary-font: #{$grey-200};
+
+  --primary-bg: #{$black-900};
+  --secondary-bg: #{$black-800};
+
+  --input-bg: #{$black-900};
+  --input-bg-secondary: #{$black-800};
+
+  --input-inset-shadow: #{lighten($black-900, 1)};
+
+  --list-item-hover: #{$black-800};
+  --list-item-active: #{$black-800};
+
+  --border-color: #{$grey-600};
+
+  --modal-bg: #{$black-800};
+  --modal-input-bg: #{$black-900};
+
+  --tooltip-bg: #{$black-800};
+
+  --scrollbar-thumb: #{$grey-600};
+  --scrollbar-track: #{$black-800};
+
+  --checkbox-checked-bg: #{$blue-300};
+  --checkbox-bg: #{$black-900};
+
+  --add-entry-cta-text: #{$white};
+  --add-entry-cta-bg: #{$blue-300};
+  --add-entry-disabled-text: #{rgba(255, 255, 255, 0.38)};
+  --add-entry-disabled-bg: #{#393939};
+  --add-entry-cta-bg-hover: #{lighten($blue-300, 7)};
+
+  --primary-cta-text: #{$grey-200};
+  --primary-cta-text-hover: #{$white};
+  --primary-cta-bg: #{$blue-300};
+
+  --toolbar-dropdown-bg: #494949;
+  --toolbar-dropdown-item-hover: #494949;
+
+  --toolbar-btn-text: #{$grey-100};
+  --toolbar-btn-bg: #{$grey-600};
+
+  --context-menu-bg: #{$black-800};
+
+  --error-font: #{$red-orange};
+
+  --tabset-bg: #{$grey-600};
+  --tabset-bg-hover: #{lighten($grey-600, 11)};
+  --tabset-font-hover: #{$grey-100};
+
+  --icon-secondary-color: #{$grey-200};
+
+  --toolbar-disabled-bg: #393939;
+  --toolbar-disabled-font: #{rgba(255, 255, 255, 0.38)};
+
+  --dropdown-shadow: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.23));
+  --dropdown-primary-bg: #{$black-800};
+  --dropdown-disabled-font: #{$grey-500};
+  --dropdown-list-item-hover: #{$grey-600};
+
+  --menu-item-hover: #{$black-800};
+  --settings-button-bg: #{$grey-200};
+  --settings-button-bg-hover: #{$white};
+
+  --link-font: #{$blue-250};
+
+  --notification-bg: #{$black-800};
+  --notification-success-bg: #{$grey-600};
+  --notification-error-bg: #{$grey-600};
+}

@@ -17,7 +17,7 @@
 				[ngClass]="{'active': group.id === this.selectedGroup}"
 				(focus)="selectGroup(group.id)"
 				[appFocusableListItem]="group.id">
-				<i class="pi pi-{{ group.icon }}"></i> <div class="group-name">{{ group.name }}</div>
+				<i-feather [name]="group.icon"></i-feather> <div class="group-name">{{ group.name }}</div>
 			</div>
 		</div>
 		<div class="divider">
@@ -28,7 +28,7 @@
 					appTooltip="Add group"
 					container="body"
 					(click)="addGroup(); false">
-					<span class="pi pi-plus"></span>
+					<i-feather name="plus"></i-feather>
 				</button>
 			</div>
 		</div>
@@ -46,7 +46,7 @@
 					[ngClass]="{'active': group.id === this.selectedGroup}"
 					(focus)="selectGroup(group.id)"
 					(drop)="onEntryDrop(group.id)">
-					<i class="pi" [ngClass]="group.isImported ? 'pi-clone' : 'pi-folder'"></i> <div class="group-name">{{ group.name }}</div>
+					<i-feather name="folder"></i-feather> <div class="group-name">{{ group.name }}</div>
 				</div>
 			</ng-container>
 		</cdk-virtual-scroll-viewport>

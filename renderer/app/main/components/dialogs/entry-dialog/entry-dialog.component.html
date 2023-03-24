@@ -17,7 +17,7 @@
     [formGroup]="newEntryForm">
     <div>
       <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
-        <span class="inputgroup-addon"><i class="pi pi-bookmark"></i></span>
+        <span class="inputgroup-addon"><i-feather name="bookmark"></i-feather></span>
         <input
           type="text"
           [readonly]="isReadOnly"
@@ -34,7 +34,7 @@
       <div
         class="inputgroup required"
         [ngClass]="{'readonly': isReadOnly}">
-        <span class="inputgroup-addon"><i class="pi pi-user"></i></span>
+        <span class="inputgroup-addon"><i-feather name="user"></i-feather></span>
         <input
           type="text"
           [readonly]="isReadOnly"
@@ -46,7 +46,7 @@
         <div
           class="inputgroup required"
           [ngClass]="{'readonly': isReadOnly}">
-          <span class="inputgroup-addon"><i class="pi pi-key"></i></span>
+          <span class="inputgroup-addon"><i-feather name="key"></i-feather></span>
           <input
             #passwordInput
             type="password"
@@ -74,7 +74,7 @@
         </div>
         <div
           class="inputgroup required" [ngClass]="{'readonly': isReadOnly}">
-          <span class="inputgroup-addon"><i class="pi pi-key"></i></span>
+          <span class="inputgroup-addon"><i-feather name="key"></i-feather></span>
           <input
             #passwordInput
             [readonly]="isReadOnly"
@@ -90,7 +90,7 @@
         </div>
       </div>
       <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
-        <div class="inputgroup-addon"><i class="pi pi-globe"></i></div>
+        <div class="inputgroup-addon"><i-feather name="globe"></i-feather></div>
         <input
           type="text"
           [readonly]="isReadOnly"
@@ -99,7 +99,7 @@
           placeholder="Website">
       </div>
       <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
-        <div class="inputgroup-addon"><i class="pi pi-info-circle"></i></div>
+        <div class="inputgroup-addon"><i-feather name="info"></i-feather></div>
         <textarea
           formControlName="notes"
           [readonly]="isReadOnly"
@@ -110,37 +110,14 @@
       </div>
       <div>
         <button type="button" class="expandable-section" (click)="isVisible = !isVisible">
-          <i class="pi" [ngClass]="isVisible ? 'pi-angle-up' : 'pi-angle-right'"></i>
+          <i-feather [name]="isVisible ? 'chevron-up' : 'chevron-right'"></i-feather>
           Advanced options
         </button>
         <ng-container *ngIf="isVisible">
           <div class="section">
-            <label class="label" for="entry-expiration-date">Expiration date:</label>
-            <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
-              <div class="inputgroup-addon"><i class="pi pi-calendar"></i></div>
-              <input
-                appDateMask
-                formControlName="expirationDate"
-                [readonly]="isReadOnly"
-                type="text"
-                id="entry-expiration-date"
-                placeholder="Expiration date" />  
-            </div>
-            <div
-              *ngIf="isControlInvalid(expirationDate)"
-              class="validation-error">
-              <ng-container *ngIf="expirationDate.hasError('invalidDate')">
-                Date is invalid.
-              </ng-container>
-              <ng-container *ngIf="expirationDate.hasError('pastDate')">
-                Date cannot be in the past.
-              </ng-container>
-            </div>
-          </div>
-          <div class="section">
             <label class="label" for="entry-autotype-exp">Autotype expression:</label>
             <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
-            <div class="inputgroup-addon"><i class="pi pi-code"></i></div>
+            <div class="inputgroup-addon"><i-feather name="code"></i-feather></div>
               <input
                 formControlName="autotypeExp"
                 [readonly]="isReadOnly"
@@ -159,7 +136,7 @@
       type="button"
       (click)="delete(); false"
       class="text-btn delete">
-      <i class="pi pi-trash"></i>
+      <i-feather name="trash"></i-feather>
       Delete
     </button>
     <button
@@ -167,7 +144,7 @@
       type="button"
       (click)="restore(); false"
       class="text-btn restore">
-      <i class="pi pi-replay"></i>
+      <i-feather name="refresh-ccw"></i-feather>
       Restore
     </button>
     <button

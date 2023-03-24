@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/scss-variables';
 @import 'mixins';
 
 :host {
@@ -24,8 +24,8 @@
 	width: 100%;
 	transition: background-color 50ms;
 
-	i {
-		color: $curious-blue;
+	i-feather {
+		color: var(--link-font);
 		cursor: pointer;
 		margin-left: 0.25rem;
 	}
@@ -52,37 +52,26 @@
 	font-size: 0.875rem;
 }
 
-.active .pi {
-	color: $white;
-}
-
-.pi-exclamation-circle {
+.url-alert-icon {
 	cursor: pointer;
-	color: $red-orange;
+	color: $red-orange !important;
 }
 
 .url-protocol {
-	color: $grey-text;
-}
-
-.expired {
-	color: $red-orange;
-}
-
-.due-expiration {
-	color: $tulip-tree;
+	color: $grey-500;
 }
 
 .copy {
 	display: inline-flex;
 	align-items: center;
 
-	.pi {
-		font-size: 1.25rem;
-		color: $gumbo;
+	i-feather {
+		width: 1.25rem !important;
+		height: 1.25rem !important;
+		color: var(--icon-secondary-color);
 
 		&:hover {
-			color: $curious-blue;
+			color: $blue-300;
 		}
 
 		&:focus:not(:hover) {
@@ -96,7 +85,7 @@
 	align-items: center;
 	margin: 0.5rem 0;
 	word-break: break-all;
-	color: $pickled-bluewood;
+	color: var(--primary-font);
 	margin-right: 0.75rem;
 
 	&.column {
@@ -105,11 +94,12 @@
 	}
 
 	.label {
+		display: flex;
 		@include font-medium;
 	}
 
 	a {
-		color: $curious-blue;
+		color: var(--link-font);
 	}
 }
 
@@ -124,7 +114,7 @@
 
 	.section {
 		font-size: 0.75rem;
-		color: $grey-text;
+		color: $grey-500;
 		margin: 0.25rem 0;
 
 		p {
@@ -144,7 +134,7 @@
 	}
 }
 
-.header .pi {
-	color: $gumbo;
+.header i-feather {
+	color: $grey-400;
 	margin: 0 0.25rem;
 }

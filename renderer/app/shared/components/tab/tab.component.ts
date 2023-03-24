@@ -8,7 +8,6 @@ import { TabService } from '@app/shared/services/tab.service';
 })
 export class TabComponent {
   @Input() public readonly header: string;
-  @Input() public readonly icon: string;
   @Input() public readonly disabled: boolean;
 
   public active = false;

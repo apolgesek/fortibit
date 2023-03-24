@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/light/variables';;
 
 .inputgroup {
   background: none;
@@ -7,11 +7,15 @@
 
   input {
     padding: 0.5rem;
-    background-color: $porcelain;
+    background-color: $grey-100;
   }
+}
+
+.label {
+  flex: 1;
 }
 
 .description {
   line-height: 1.5rem;
-  margin-top: 0;
+  margin-top: 3rem;
 }

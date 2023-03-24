@@ -1,9 +1,6 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ICommunicationService } from '@app/core/models';
-import { ConfigService } from '@app/core/services';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { CommunicationService } from 'injection-tokens';
+import { ConfigService, WorkspaceService } from '@app/core/services';
 import { Subject, take, takeUntil } from 'rxjs';
 import { IProduct } from '../../../../../../../product';
 
@@ -22,13 +19,15 @@ export class ViewTabComponent implements OnInit {
 
   constructor(
     private readonly formBuilder: FormBuilder,
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    private readonly workspaceService: WorkspaceService,
     private readonly configService: ConfigService,
   ) { }
 
   ngOnInit(): void {
     this.configService.configLoadedSource$.pipe(take(1)).subscribe((config) => {
+      console.log(config.theme);
       this.viewForm = this.formBuilder.group({
+        darkTheme: [config.theme === 'dark'],
         displayIcons: [config.displayIcons]
       });
 
@@ -38,12 +37,23 @@ export class ViewTabComponent implements OnInit {
       ).subscribe((form) => {
         if (this.viewForm.valid) {
           const configPartial = {
-            displayIcons: form.displayIcons
+            displayIcons: form.displayIcons,
+            theme: form.darkTheme ? 'dark' : 'light'
           } as Partial<IProduct>;
   
           this.configService.setConfig(configPartial);
         }
       });
+
+      this.viewForm.get('darkTheme').valueChanges
+        .pipe(takeUntil(this.destroyed))
+        .subscribe(() => {
+          this.toggleTheme();
+        });
     });
+  }
+
+  toggleTheme() {
+    this.workspaceService.toggleTheme();
   }
 }

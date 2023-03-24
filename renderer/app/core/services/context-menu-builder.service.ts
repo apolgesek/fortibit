@@ -3,7 +3,6 @@ import { ModalService } from '@app/core/services/modal.service';
 import { MenuItem } from '@app/shared';
 import { HotkeyHandler } from 'injection-tokens';
 import { ClipboardService, EntryManager } from '.';
-import { GroupId } from '../enums';
 import { IHotkeyHandler } from '../models';
 
 @Injectable({
@@ -24,7 +23,6 @@ export class ContextMenuBuilderService {
       {
         label: this.hotkeyHandler.configuration.renameGroupLabel,
         disabled: configuration.isRoot,
-        icon: 'pi pi-fw pi-pencil',
         command: () => {
           this.modalService.openGroupWindow('edit');
         }
@@ -32,7 +30,6 @@ export class ContextMenuBuilderService {
       {
         label: this.hotkeyHandler.configuration.removeGroupLabel,
         disabled: configuration.isRoot,
-        icon: 'pi pi-fw pi-trash',
         command: () => this.modalService.openDeleteGroupWindow(),
       },
     ];
@@ -43,7 +40,6 @@ export class ContextMenuBuilderService {
   buildEmptyRecycleBinContextMenuItem(): this {
     this.contextMenuItems.push({
       label: this.hotkeyHandler.configuration.emptyBinLabel,
-      icon: 'pi pi-fw pi-trash',
       command: () => {
         this.entryManager.selectedPasswords = [...this.entryManager.passwordEntries];
         this.modalService.openDeleteEntryWindow();
@@ -56,7 +52,6 @@ export class ContextMenuBuilderService {
   buildRemoveEntryContextMenuItem(): this {
     this.contextMenuItems.push({
       label: this.hotkeyHandler.configuration.deleteLabel,
-      icon: 'pi pi-fw pi-trash',
       command: () => {
         this.modalService.openDeleteEntryWindow();
       }
@@ -96,7 +91,6 @@ export class ContextMenuBuilderService {
   buildEditEntryContextMenuItem(): this {
     this.contextMenuItems.push({
       label: 'Edit (E)',
-      icon: 'pi pi-fw pi-pencil',
       command: () => {
         this.modalService.openEditEntryWindow();
       }
@@ -107,8 +101,7 @@ export class ContextMenuBuilderService {
 
   buildMoveEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: 'Move to... (M)',
-      icon: 'pi pi-fw pi-pencil',
+      label: this.hotkeyHandler.configuration.moveEntryLabel,
       command: () => {
         this.modalService.openMoveEntryWindow();
       }

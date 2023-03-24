@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AbstractControlOptions, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
@@ -8,6 +8,7 @@ import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
 import { IAdditionalData, IModal } from '@app/shared';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { FeatherModule } from 'angular-feather';
 import { CommunicationService } from 'injection-tokens';
 import { fromEvent, Subject } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
@@ -25,6 +26,7 @@ import { valueMatchValidator } from '../../../../shared/validators/value-match.v
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FeatherModule,
     AutofocusDirective,
     ModalComponent,
     DateMaskDirective
@@ -72,7 +74,6 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
       notes: [null],
       autotypeExp: [null],
       creationDate: [null],
-      expirationDate: [null, { validators: this.dateValidator, updateOn: 'blur' } as AbstractControlOptions]
     });
   }
 
@@ -134,12 +135,6 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
       this.config = config;
 
       this.prefillForm();
-    });
-
-    fromEvent(window, 'keydown').pipe(takeUntil(this.destroyed$)).subscribe((event: Event) => {
-      if ((event as KeyboardEvent).key === 'Escape') {
-        this.close();
-      }
     });
   }
 
@@ -260,7 +255,6 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
         password: encryptedPassword,
         lastModificationDate: date,
         icon: this.entryManager.editedEntry.icon,
-        expirationDate: formData.expirationDate
       });
     } else {
       const newEntry = {
@@ -274,12 +268,12 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
         lastModificationDate: date,
         groupId: this.getGroup(),
         isStarred: false,
-        expirationDate: formData.expirationDate
       };
 
       const id = await this.entryManager.saveEntry(newEntry);
     }
 
+    this.saveLocked = false;
     this.close();
   }
 
@@ -307,29 +301,6 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   closeReadOnly() {
     this.modalRef.close();
-  }
-
-  private dateValidator(control: FormControl): { [s: string]: boolean } {
-    const date = control.value as Date;
-
-    let today = new Date();
-    const day = today.getDate().toString().padStart(2, '0');
-    const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    const year = today.getFullYear();
-
-    today = new Date(`${month}/${day}/${year}`);
-
-    if (date) {
-      if (!(date instanceof Date) || isNaN(date.getTime())) {
-        return { 'invalidDate': true };
-      } else if (date.getTime() < today.getTime()) {
-        return { 'pastDate': true };
-      } else {
-        return null;
-      }
-    }
-
-    return null;
   }
 
   private async fillNewEntry() {
@@ -373,7 +344,6 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
       && formData.passwords.password === this.additionalData.payload.decryptedPassword
       && formData.url === entry.url
       && formData.notes === entry.notes
-      && formData.autotypeExp === entry.autotypeExp
-      && formData.expirationDate?.getTime() === entry.expirationDate?.getTime();
+      && formData.autotypeExp === entry.autotypeExp;
   }
 }

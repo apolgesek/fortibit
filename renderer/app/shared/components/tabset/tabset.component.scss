@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'themes/light/variables';;
 @import 'mixins';
 
 :host {
@@ -26,26 +26,28 @@ ul {
 }
 
 .text-btn {
-  margin: 0.25rem 0;
-  font-size: 0.875rem;
-  letter-spacing: 1px;
+  margin: 0.5rem 0;
   margin-left: 0.25rem;
-
-  .pi {
-    margin-right: 0.25rem;
-  }
-
-  &.active {
-    background-color: $curious-blue-light;
-    color: $pickled-bluewood;
-  }
 }
 
 ul li {
+  margin-left: 0.25rem;
   display: block;
 
-  button {
+  .button-secondary {
     width: 100%;
     text-align: left;
+    margin: 0.5rem 0;
+    background-color: var(--tabset-bg);
+    border-left: 4px solid transparent;
+
+    &:hover, :focus {
+      color: var(--tabset-font-hover);
+      background-color: var(--tabset-bg-hover);
+    }
+
+    &.active {
+      border-left: 4px solid $blue-300;
+    }
   }
 }

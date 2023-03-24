@@ -1,6 +1,5 @@
 .dropdown-content {
 	right: 0;
-  background-color: $white;
   z-index: 999;
 	width: 200px;	
 	padding-top: 4px;
@@ -8,8 +7,9 @@
 	position: absolute;
 	padding: 0;
 	list-style-type: none;
+	background-color: var(--dropdown-primary-bg);
 	// Box shadow changes anchor color inside for some reason
-	filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.12));
+	filter: var(--dropdown-shadow);
 
 	&.select {
 		padding-top: 0;
@@ -17,7 +17,7 @@
 		width: 100%;
 		filter: none;
 		margin-top: 0 !important;
-		border: 1px solid $silver;
+		border: 1px solid var(--border-color);
 		border-top: 0;
 		box-sizing: border-box;
 	}
@@ -32,34 +32,44 @@
 
 	.divider {
 		padding: 4px;
+		background-color: var(--dropdown-primary-bg);
 
 		hr {
 			margin: 0;
 			border: 0;
-			border-top: 1px solid $silver;
+			border-top: 1px solid var(--border-color);
 		}
 	}
 
 	.disabled {
-		color: $grey-80;
+		color: $grey-300;
 		cursor: default;
+		background-color: var(--dropdown-primary-bg);
 
-		&:hover {
-			background-color: $white;
+		&:hover  {
+			background-color: var(--dropdown-primary-bg) !important;
+		}
+	}
+
+	&:last-child {
+		li:last-child {
+			border-bottom-left-radius: 0.25rem;
+			border-bottom-right-radius: 0.25rem;
 		}
 	}
 
 	li {
 		cursor: pointer;
-		color: $pickled-bluewood;
+		color: var(--primary-font);
 		padding: 0.5rem;
 		text-decoration: none;
 		display: block;
 		font-size: 0.875rem;
 		line-height: 1;
+		background-color: var(--dropdown-primary-bg);
 
-		&.focused {
-			background: $porcelain;
+		&:hover, &:focus, &.focused  {
+			background-color: var(--dropdown-list-item-hover) !important;
 		}
 	}
 }
@@ -69,19 +79,22 @@
   display: block;
 	list-style-type: none;
 	padding: 0;
+	border-radius: 0.25rem;
 
 	li:focus {
 		outline: none;
 	}
 
-	&.open {
-		button, li {
-			border-bottom-right-radius: 0;
-		}
-	}
-
 	label:not(.switch) {
 		margin-left: 0.5rem;
 		width: 5rem;
+	}
+}
+
+.expanded {
+	background-color: var(--list-item-hover) !important;
+
+	.pi {
+		color: var(--primary-font);
 	}
 }
