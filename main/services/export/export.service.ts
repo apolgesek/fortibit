@@ -1,9 +1,9 @@
 import { dialog } from "electron";
-import { writeFileSync } from "fs";
 import { IPasswordEntry } from "../../../shared-models";
 import { IEncryptionEventWrapper, MessageEventType } from "../encryption";
 import { IWindow } from "../window/window-model";
 import { IExportService } from "./export-service.model";
+import { CsvWriter } from "../../util";
 
 export class ExportService implements IExportService {
   private readonly _fileFilters = {
@@ -29,15 +29,8 @@ export class ExportService implements IExportService {
     };
 
     const payload = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, window.key) as { error: string, decrypted: IPasswordEntry[] };
-    const header: (keyof IPasswordEntry)[] = ['title', 'username', 'password', 'url', 'notes'];
-    let data = header.join(',') + '\r\n';
-
-    for (const entry of payload.decrypted) {
-      data += `${entry.title},${entry.username},${entry.password},${entry.url},${entry.notes}\r\n`;
-    }
-
-    writeFileSync(saveDialogReturnValue.filePath, data);
-
+    CsvWriter.writeFile(saveDialogReturnValue.filePath, payload.decrypted, ['title', 'username', 'password', 'url', 'notes']);
+  
     return true;
   }
 }

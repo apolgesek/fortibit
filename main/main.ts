@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { Cron } from "croner";
 import { app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeTheme, shell } from 'electron';
-import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { platform } from 'os';
 import { basename } from 'path';
@@ -14,8 +12,8 @@ import { IConfigService } from './services/config';
 import { IDatabaseService } from './services/database';
 import { IEncryptionEventWrapper, MessageEventType } from './services/encryption';
 import { IPerformanceService } from './services/performance/performance-service.model';
-import { IUpdateService } from './services/update';
 import { IWindowService } from './services/window';
+import { spawn } from 'child_process';
 
 class MainProcess {
   private readonly _services: SingleInstanceServices;
@@ -31,10 +29,6 @@ class MainProcess {
 
   private get _encryptionEventWrapper(): IEncryptionEventWrapper {
     return this._services.get(IEncryptionEventWrapper);
-  }
-
-  private get _updateService(): IUpdateService {
-    return this._services.get(IUpdateService);
   }
 
   private get _performanceService(): IPerformanceService {
@@ -68,22 +62,28 @@ class MainProcess {
 
       this._windowService.loadWindow(windowRef);
     });
+
     app.on('open-file', (event, path) => {
       event.preventDefault();
       this._fileArg = path;
     });
+
     app.once('ready', () => this.onReady());
 
     // exit listeners
-    app.once('window-all-closed', () => this.exitApp());
-    ['SIGINT', 'SIGTERM', 'SIGQUIT', 'uncaughtException'].forEach(event => {
+    app.once('window-all-closed', () => {
+      this.exitApp();
+    });
+
+    ['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach(event => {
       process.once(event, () => this.exitApp());
     });
   }
 
   private exitApp() {
     globalShortcut.unregisterAll();
-    this._databaseService.clear();
+    this._databaseService.onAppExit();
+
     app.exit();
   }
 
@@ -91,7 +91,6 @@ class MainProcess {
     const windowRef = this._windowService.createMainWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));
     const entrySelectWindowRef = this._windowService.createEntrySelectWindow();
     this.registerIpcEventListeners();
-    this.registerScheduledTasks();
 
     if (this._configService.appConfig.theme === 'dark') {
       nativeTheme.themeSource = 'dark';
@@ -121,10 +120,10 @@ class MainProcess {
       this._windowService.setTitle(windowRef.id, basename(filePath));
     } else {
       if (!existsSync(this._configService.workspacesPath)) {
-        writeFileSync(this._configService.workspacesPath, '{"recentlyOpened": [], "workspace": null}', { encoding: 'utf-8' });
+        writeFileSync(this._configService.workspacesPath, '{"recentlyOpened": [], "workspace": null}', { encoding: 'utf8' });
       }
 
-      const workspace = readFileSync(this._configService.workspacesPath, 'utf-8');
+      const workspace = readFileSync(this._configService.workspacesPath, 'utf8');
       const path = JSON.parse(workspace);
 
       if (path.workspace && existsSync(path.workspace)) {
@@ -143,13 +142,6 @@ class MainProcess {
       return platform();
     });
 
-    ipcMain.on(IpcChannel.DropFile, (event: IpcMainEvent, filePath: string) => {
-      this._databaseService.setDatabaseEntry(event.sender.id, filePath);
-      this._windowService.setTitle(event.sender.id, basename(filePath));
-
-      event.reply(IpcChannel.ProvidePassword, this._databaseService.getFilePath(event.sender.id));
-    });
-
     ipcMain.handle(IpcChannel.EncryptPassword, async (event, password) => {
       const encryptionEvent = { type: MessageEventType.EncryptString, plain: password };
       const response = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, this._windowService.getWindowByWebContentsId(event.sender.id).key ) as { encrypted: string };
@@ -164,60 +156,12 @@ class MainProcess {
       return response.decrypted;
     });
 
-    ipcMain.on(IpcChannel.DecryptDatabase, (event: IpcMainEvent, password: string) => {
-      this._databaseService.decryptDatabase(event, password);
-    });
-
-    ipcMain.handle(IpcChannel.CheckOpenMode, (event: IpcMainInvokeEvent) => {
-      return this._databaseService.getFilePath(event.sender.id);
-    });
-
-    ipcMain.handle(IpcChannel.GetAppConfig, () => {
-      return this._configService.appConfig;
-    });
-
     ipcMain.on(IpcChannel.OpenUrl, async (_, url: string) => {
       if (!/^https?/.test(url)) {
         url = 'http://' + url;
       }
 
       shell.openExternal(url);
-    });
-
-    ipcMain.once(IpcChannel.UpdateAndRelaunch, () => {
-      this._updateService.updateAndRelaunch();
-    });
-
-    ipcMain.handle(IpcChannel.ValidatePassword, (event: IpcMainEvent, password: string): boolean => {
-      if (!password?.length) {
-        return false;
-      }
-
-      return password === this._databaseService.getPassword(event.sender.id);
-    });
-
-    ipcMain.handle(IpcChannel.ToggleTheme, () => {
-      if (nativeTheme.shouldUseDarkColors) {
-        nativeTheme.themeSource = 'light';
-        this._configService.set({theme: 'light'});
-      } else {
-        nativeTheme.themeSource = 'dark';
-        this._configService.set({theme: 'dark'});
-      }
-
-      return nativeTheme.shouldUseDarkColors;
-    })
-  
-    ipcMain.handle(IpcChannel.SetSystemTheme, () => {
-      nativeTheme.themeSource = 'system';
-    })
-  }
-
-  private registerScheduledTasks() {
-    const updatePasswordExpiration = new Cron('0 0 * * *', () => {
-      this._windowService.windows.forEach(window => {
-        window.browserWindow.webContents.send(IpcChannel.UpdateExpiration);
-      });
     });
   }
 }

@@ -14,6 +14,7 @@ export class TooltipDirective {
 
   private componentRef!: ComponentRef<TooltipComponent>;
   private timeout: any;
+  private mouseEntered = false;
 
   constructor(
     private readonly appViewContainer: AppViewContainer,
@@ -25,6 +26,11 @@ export class TooltipDirective {
 
   @HostListener('mouseenter', ['$event'])
   public onMouseEnter() {
+    if (this.mouseEntered) {
+      return;
+    }
+
+    this.mouseEntered = true;
     if (!this.tooltipText?.trim()) {
       return;
     }
@@ -36,6 +42,7 @@ export class TooltipDirective {
 
   @HostListener('mouseleave', ['$event'])
   public onMouseLeave() {
+    this.mouseEntered = false;
     if (this.componentRef) {
       this.destroyTooltipComponent();
     } else {

@@ -7,7 +7,7 @@
 	align-items: center;
 	justify-content: space-between;
 	font-size: 0.875rem;
-	color: var(--primary-font);
+	color: var(--primary-text);
 	-webkit-app-region: drag;
 
 	.brand-logo {
@@ -33,23 +33,23 @@
 
 			&:hover,
 			&.active {
-				background-color: var(--dropdown-list-item-hover);
+				background-color: var(--dropdown-list-item-bg--hover);
 			}
 
 			li {
-				color: var(--primary-font);
-				background-color: var(--dropdown-primary-bg);
+				color: var(--primary-text);
+				background-color: var(--dropdown-bg);
 				align-items: center;
 				height: 100%;
 				-webkit-app-region: no-drag;
 
 				&:focus {
-					background: var(--dropdown-list-item-hover);
+					background: var(--dropdown-list-item-bg--hover);
 				}
 
 				&.disabled {
-					color: var(--dropdown-disabled-font);
-					background-color: var(--dropdown-primary-bg);
+					color: var(--dropdown-text--disabled);
+					background-color: var(--dropdown-bg);
 				}
 			}
 
@@ -85,7 +85,7 @@
 				transition: all 150ms;
 
 				&:hover {
-					background-color: var(--list-item-hover);
+					background-color: var(--list-item-bg--hover);
 				}
 
 				&.quit-icon {
@@ -123,10 +123,10 @@
 	top: 0;
 }
 
-.menu-bar-item {
-	background-color: var(--primary-bg) !important;
+.topbar .menu > .dropdown li.menu-bar-item {
+	background-color: var(--primary-bg);
 
-	&:hover:not(:disabled), &.active, &.expanded {
-		background-color: var(--dropdown-list-item-hover) !important;
+	&:hover:not(:disabled), &:focus, &.expanded {
+		background-color: var(--dropdown-list-item-bg--hover) !important;
 	}
 }

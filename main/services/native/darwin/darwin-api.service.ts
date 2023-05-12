@@ -2,6 +2,21 @@ import { execSync } from 'child_process';
 import { INativeApiService } from '../native-api.model';
 
 export class DarwinApiService implements INativeApiService {
+  listCredentials(): Promise<string[]> {
+    throw new Error('Method not implemented.');
+  }
+
+  getPassword(windowHandleHex: Buffer, dbPath: string): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+
+  saveCredential(dbPath: string, password: string): void {
+    throw new Error('Method not implemented.');
+  }
+  removeCredential(dbPath: string): void {
+    throw new Error('Method not implemented.');
+  }
+
   pressPhraseKey(char: string): void {
     try {
       execSync(`osascript SendString.scpt "${char}"`, { cwd: __dirname });
@@ -45,6 +60,6 @@ export class DarwinApiService implements INativeApiService {
   }
 
   verifySignature(path: string): boolean {
-    return false;
+    return true;
   }
 }

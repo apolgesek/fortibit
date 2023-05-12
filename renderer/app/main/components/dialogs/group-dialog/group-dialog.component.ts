@@ -1,7 +1,7 @@
 import { Component, ComponentRef, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupManager, ModalRef, NotificationService } from '@app/core/services';
-import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
@@ -17,7 +17,7 @@ import { FeatherModule } from 'angular-feather';
     CommonModule,
     ReactiveFormsModule,
     FeatherModule,
-    AutofocusDirective,
+    
     ModalComponent
   ]
 })

@@ -7,19 +7,22 @@ import { EncryptionService } from './encryption.service';
 import { InMemoryEncryptionService } from './in-memory-encryption.service';
 import { MessageEventType } from './message-event-type.enum';
 
-type EventPayload = { [key: string]: string };
+type EventPayload = {
+  type: MessageEventType;
+  [key: string]: any;
+};
 
 class Main {
   private readonly _encryptionService: IEncryptionService;
   private readonly _inMemoryEncryptionService: IEncryptionService;
-  private readonly _leakService: ExposedPasswordsService;
+  private readonly _exposedPasswordsService: ExposedPasswordsService;
   private readonly _weakPasswordsService: WeakPasswordsService;
   private readonly _messageListener: () => void;
 
   constructor() {
     this._encryptionService = new EncryptionService();
     this._inMemoryEncryptionService = new InMemoryEncryptionService();
-    this._leakService = new ExposedPasswordsService();
+    this._exposedPasswordsService = new ExposedPasswordsService();
     this._weakPasswordsService = new WeakPasswordsService();
 
     this._messageListener = this.execute.bind(this);
@@ -29,7 +32,7 @@ class Main {
     return process.once('message', this._messageListener);
   }
 
-  public async execute(event): Promise<void> {
+  public async execute(event: EventPayload): Promise<void> {
     switch (event.type) {
     case MessageEventType.DecryptDatabase:
       this.decryptDatabase(event);
@@ -131,7 +134,7 @@ class Main {
         };
       });
 
-      const leaks = await this._leakService.findLeaks(entries);
+      const leaks = await this._exposedPasswordsService.findLeaks(entries);
       process.send({ data: JSON.stringify(leaks) });
     } catch (err) {
       process.send({ error: err });

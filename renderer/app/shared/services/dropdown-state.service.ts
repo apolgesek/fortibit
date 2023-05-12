@@ -44,6 +44,19 @@ export class DropdownStateService {
     node.close();
   }
 
+  closeTree(node: DropdownStateService) {
+    const root = this.getTreeRoot(node);
+    root.closeRecursive(root);
+  }
+
+  private getTreeRoot(node: DropdownStateService): DropdownStateService {
+    if (node.parent) {
+      return this.getTreeRoot(node.parent);
+    } else {
+      return node;
+    }
+  }
+
   closeAndFocusFirst(): void {
     this.close();
 

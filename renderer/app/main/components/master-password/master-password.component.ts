@@ -1,16 +1,18 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, OnInit, NgZone, OnDestroy, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute  } from '@angular/router';
+import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { EntryManager, GroupManager, ModalService, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
-import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+import { AutofocusDirective } from '@app/shared/directives/autofocus.directive';
+import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
+import { UiUtil } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { CommunicationService } from 'injection-tokens';
-import { from, Subject } from 'rxjs';
+import { Subject, from } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
 import { IAppConfig } from '../../../../../app-config';
 
@@ -23,12 +25,14 @@ import { IAppConfig } from '../../../../../app-config';
     CommonModule,
     ReactiveFormsModule,
     FeatherModule,
-    AutofocusDirective
+    AutofocusDirective,
+    TooltipDirective
   ]
 })
 export class MasterPasswordComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;
   public config: IAppConfig;
+  public errorMessage: string;
   public passwordVisible = false;
 
   private readonly destroyed$: Subject<void> = new Subject();
@@ -51,6 +55,14 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     return this._filePath ?? '';
   }
 
+  get biometricsAuthenticationEnabled(): boolean {
+    return this.config.biometricsAuthenticationEnabled && this.config.biometricsProtectedFiles.includes(this.filePath);
+  }
+
+  get isBiometricsAuthenticationInProgress(): boolean {
+    return this.workspaceService.isBiometricsAuthenticationInProgress;
+  }
+
   constructor(
     private readonly workspaceService: WorkspaceService,
     private readonly groupManager: GroupManager,
@@ -67,14 +79,16 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
       password: ['', Validators.required]
     });
 
-    this.onDecryptedContent = (_: any, { decrypted }: { decrypted: string }) => {
+    this.onDecryptedContent = (_, { decrypted, error }: { decrypted: string, error: string }) => {
       this.zone.run(async () => {
-        if (decrypted) {
+        if (decrypted && !error) {
           this.workspaceService.setSynced();
           await this.workspaceService.loadDatabase(decrypted);
         } else {
-          this.workspaceService.unlockInterface();
-          this.loginForm.get('password').setErrors({ invalidPassword: true });
+          this.workspaceService.isBiometricsAuthenticationInProgress = false;
+          UiUtil.unlockInterface();
+          this.errorMessage = error;
+          this.loginForm.get('password').setErrors({ error: true });
           this.animate('.brand .brand-logo', 'animate-invalid', 500);
         }
       });
@@ -99,7 +113,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     this.entryManager.updateEntriesSource();
   }
 
-  // make sure window preview displays password entry page
+  // make sure window preview displays master password entry page
   ngAfterViewInit() {
     if (this.route.snapshot.queryParams.minimize === 'true') {
       setTimeout(() => {
@@ -129,8 +143,13 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     this.modalService.openSettingsWindow();
   }
 
+  biometricsUnlock() {
+    UiUtil.lockInterface();
+    this.workspaceService.isBiometricsAuthenticationInProgress = true;
+    this.communicationService.ipcRenderer.send(IpcChannel.DecryptBiometrics);
+  }
+
   async onLoginSubmit() {
-    this.workspaceService.lockInterface();
     Object.values(this.loginForm.controls).forEach(control => {
       control.markAsDirty();
     });
@@ -139,6 +158,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
       return;
     }
 
+    UiUtil.lockInterface();
     this.communicationService.ipcRenderer.send(IpcChannel.DecryptDatabase, this.loginForm.value.password);
   }
 

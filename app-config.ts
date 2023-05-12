@@ -9,7 +9,6 @@ export interface IEncryptionSettings {
 }
 
 export interface IAppConfig extends Partial<IProduct> {
-  clipboardClearTimeMs: number;
   autocompleteShortcut: string;
   autocompletePasswordOnlyShortcut: string;
   fileExtension: string;
@@ -17,7 +16,9 @@ export interface IAppConfig extends Partial<IProduct> {
   version?: string;
   electronVersion?: string;
   nodeVersion?: string;
+  chromiumVersion?: string;
   os?: string;
   commit?: string;
   encryption?: IEncryptionSettings;
+  biometricsProtectedFiles?: string[];
 }

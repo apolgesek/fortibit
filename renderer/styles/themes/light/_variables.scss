@@ -1,74 +1,92 @@
-@import "../scss-variables";
+@import "../base-variables";
 
 @mixin light-theme {
-  --primary-font: #{$blue-400};
+  // TYPOGRAHPY
+  --primary-text: #{$blue-400};
+  --secondary-text: #{$grey-500};
 
+  // BACKGROUNDS
   --primary-bg: #{$white};
   --secondary-bg: #{$blue-100};
-
   --input-bg: #{$white};
   --input-bg-secondary: #{$grey-100};
-
-  --input-inset-shadow: #{darken($grey-100, 1)};
-
-  --list-item-hover: #{$grey-100};
-  --list-item-active: #{lighten($blue-100, 7)};
-
-  --border-color: #{$grey-200};
-
   --modal-bg: #{$white};
-  --modal-input-bg: #{$grey-100};
-
+  --input-modal-bg: #{$grey-100};
   --tooltip-bg: #{#000000b3};
+  --context-menu-bg: #{$white};
 
+  // LIST ITEM
+  --list-item-bg--hover: #{$grey-100};
+  --list-item-bg--active: #{lighten($blue-100, 7)};
+
+  // SCROLLBAR
   --scrollbar-thumb: #{#00000033};
   --scrollbar-track: #{$grey-100};
 
-  --checkbox-checked-bg: #{$blue-300};
+  // CHECKBOX
   --checkbox-bg: #{$grey-200};
+  --checkbox-bg--checked: #{$blue-300};
 
+  // ADD ENTRY CTA BUTTON
   --add-entry-cta-text: #{$white};
   --add-entry-cta-bg: #{$blue-300};
-  --add-entry-disabled-text: #{$blue-300};
-  --add-entry-disabled-bg: #{rgba(255, 255, 255, 0.6)};
-  --add-entry-cta-bg-hover: #{darken($blue-300, 7)};
+  --add-entry-text--disabled: #{$blue-300};
+  --add-entry-bg--disabled: #{rgba(255, 255, 255, 0.6)};
+  --add-entry-cta-bg--hover: #{darken($blue-300, 7)};
 
-  --primary-cta-text: #{$white};
-  --primary-cta-text-hover: #{$blue-250};
-  --primary-cta-bg: #{$blue-250};
+  // PRIMARY BUTTTON
+  --primary-btn-text: #{$white};
+  --primary-btn-text--hover: #{$blue-250};
+  --primary-btn-bg: #{$blue-250};
+  --primary-btn-bg--hover: #{darken($blue-300, 7)};
 
-  --toolbar-dropdown-bg: #{$white};
-  --toolbar-dropdown-item-hover: #{$grey-100};
+  // SECONDARY BUTTON
+  --secondary-btn-text: #{$black-900};
+  --secondary-btn-bg: #{#dddddd};
+  --secondary-btn-text--disabled: rgba(25, 29, 30, 0.3);
+  --secondary-btn-bg--disabled: #{#f0f0f0};
 
-  --toolbar-btn-text: #{$blue-300};
-  --toolbar-btn-bg: #{$white};
+  // ACTION ICON BUTTON
+  --action-btn-text: #{$blue-400};
+  --action-btn-bg: #{lighten($blue-100, 7)};
+  
+  // TEXT BUTTON
+  --text-btn-text: #{$blue-300};
+  --text-btn-bg: #{$grey-100};
 
-  --context-menu-bg: #{$white};
+  // TABSET BUTTON
+  --tabset-btn-bg: #{$grey-100};
+  --tabset-btn-text--hover: #{$blue-300};
+  --tabset-btn-bg--hover: #{darken($grey-100, 7)};
 
-  --error-font: #{$bright-red};
+  // TOOLBAR BUTTON
+  --toolbar-dropdown-bg: #{#dddddd};
+  --toolbar-dropdown-item--hover: #{$grey-100};
 
-  --tabset-bg: #{$grey-100};
-  --tabset-bg-hover: #{darken($grey-100, 7)};
-  --tabset-font-hover: #{$blue-300};
+  // SETTINGS BUTTON
+  --settings-btn-bg: #{$blue-250};
+  --settings-btn-bg--hover: #{$blue-400};
 
-  --icon-secondary-color: #{$grey-400};
-
-  --toolbar-disabled-bg: rgba(255, 255, 255, 0.6);
-  --toolbar-disabled-font: #{$blue-300};
-
+  // DROPDOWN
   --dropdown-shadow: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.12));
-  --dropdown-primary-bg: #{$white};
-  --dropdown-disabled-font: #{$grey-300};
-  --dropdown-list-item-hover: #{$grey-100};
+  --dropdown-bg: #{$white};
+  --dropdown-text--disabled: #{$grey-300};
+  --dropdown-list-item-bg--hover: #{$grey-100};
 
-  --menu-item-hover-bg: #{$grey-100};
-
-  --settings-button-bg: #{$blue-250};
-  --settings-button-bg-hover: #{$blue-400};
-
-  --link-font: #{$blue-300};
-
+  // NOTIFICATION
   --notification-bg: #{$white};
-  --notification-success-bg: #{#e6faf3};
-  --notification-error-bg: #{#ff9898};
+  --notification-bg--success: #{#e6faf3};
+  --notification-bg--error: #{#ff9898};
+
+  // EXPANDABLE SECTION
+  --expandable-bg: #{$grey-100};
+  --expandable-bg--hover: #{darken($grey-100, 5)};
+
+  // MISC
+  --link-text: #{$blue-300};
+  --label-text: #{$blue-200};
+  --error-text: #{$bright-red};
+  --border-color: #{$grey-200};
+  --input-inset-shadow: #{darken($grey-100, 1)};
+  --icon-secondary: #{$grey-400};
 }

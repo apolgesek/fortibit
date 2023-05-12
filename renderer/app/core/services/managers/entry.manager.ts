@@ -85,12 +85,6 @@ export class EntryManager {
         });
       });
     });
-
-    this.communicationService.ipcRenderer.on(IpcChannel.UpdateExpiration, () => {
-      this.zone.run(() => {
-        this.updateEntriesSource();
-      });
-    });
   }
 
   async saveEntry(entry: Partial<IPasswordEntry>): Promise<number> {
@@ -134,10 +128,6 @@ export class EntryManager {
   async setByGroup(id: number): Promise<void> {
     this.selectedPasswords = [];
     this.passwordEntries = await this.getEntries(id);
-  }
-
-  private async getEntries(id = this.groupManager.selectedGroup): Promise<IPasswordEntry[]> {
-    return await this.getEntriesInternal(id);
   }
 
   async bulkAddEntries(entries: IPasswordEntry[]): Promise<number> {
@@ -233,6 +223,10 @@ export class EntryManager {
     return this.entryRepository.update({ id, icon });
   }
 
+  async getEntries(id = this.groupManager.selectedGroup): Promise<IPasswordEntry[]> {
+    return await this.getEntriesInternal(id);
+  }
+
   private async getEntriesInternal(id: number): Promise<IPasswordEntry[]> {
     if (id === GroupId.Starred) {
       return this.entryRepository.getAllByPredicate(x => x.isStarred);
@@ -269,7 +263,7 @@ export class EntryManager {
   }
 
   private isEntryMatchingRegex(entry: IPasswordEntry, title: string): boolean {
-    if (entry.autotypeExp?.trim()) {
+    if (entry.autotypeExp) {
       return new RegExp(entry.autotypeExp).test(title);
     }
     

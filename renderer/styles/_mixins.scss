@@ -10,6 +10,10 @@
   font-family: 'roboto-bold', sans-serif;
 }
 
+@mixin font-black {
+  font-family: 'roboto-black', sans-serif;
+}
+
 @mixin scrollbar {
   &::-webkit-scrollbar {
     -webkit-appearance: none;
@@ -84,7 +88,7 @@
 	display: flex;
 	align-items: center;
 	background-color: var(--primary-bg);
-	color: var(--primary-font);
+	color: var(--primary-text);
 	border-radius: 0.25rem;
 	cursor: pointer;
 	transition: transform 100ms;
@@ -92,10 +96,10 @@
 
 	&:hover:not(:disabled) {
     background-color: var(--toolbar-dropdown-bg);
-    color: var(--primary-cta-text-hover);
+    color: var(--primary-btn-text--hover);
   }
 
-  &:focus {
+  &:focus-visible {
     background-color: var(--toolbar-dropdown-bg);
     outline: 3px solid $barberry !important;
   }

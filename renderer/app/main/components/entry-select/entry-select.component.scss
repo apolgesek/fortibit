@@ -1,4 +1,4 @@
-@import 'themes/light/variables';;
+@import 'themes/base-variables';
 @import 'mixins';
 
 $sidePanelInDuration: 300ms;
@@ -29,7 +29,7 @@ h2 {
 	@include font-medium;
 	margin: 0;
 	font-size: 1.375rem;
-	color: var(--primary-font);
+	color: var(--primary-text);
 	flex: 1;
 }
 
@@ -50,7 +50,6 @@ h2 {
 
 	.row-entry {
 		font-size: 0.875rem;
-		cursor: pointer;
 		border: 1px solid transparent;
 		box-sizing: border-box;
 		@include default-table-row;
@@ -61,9 +60,10 @@ h2 {
 		}
 
 		&.selected {
-			background-color: darken($blue-100, 2);
+			background-color: var(--list-item-bg--active);
+			cursor: pointer;
 			&:hover {
-				background-color: darken($blue-100, 2);
+				background-color: var(--list-item-bg--active);
 			}
 		}
 
@@ -77,12 +77,12 @@ h2 {
 		}
 
 		&.selected:focus {
-			background-color: darken($blue-100, 2);
+			background-color: var(--list-item-bg--active);
 			border: 1px solid $blue-200;
 		}
 
 		&:hover:not(.selected) {
-			background-color: $grey-100;
+			background-color: transparent;
 		}
 
 		.column {

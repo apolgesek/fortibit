@@ -21,7 +21,7 @@ import { FocusableListDirective } from '@app/shared/directives/focusable-list.di
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
-import { DomUtil } from '@app/utils';
+import { UiUtil } from '@app/utils';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { HotkeyHandler } from 'injection-tokens';
 import { Observable, Subject } from 'rxjs';
@@ -200,7 +200,7 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
       ? this.entryManager.movedEntries = this.selectedEntries.map(e => e.id)
       : this.entryManager.movedEntries = [ item.id ];
 
-    DomUtil.setDragGhost(event);
+    UiUtil.setDragGhost(event);
   }
 
   endDrag() {

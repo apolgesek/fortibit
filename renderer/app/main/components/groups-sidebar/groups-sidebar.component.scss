@@ -36,11 +36,10 @@
         width: 1.5rem;
         color: $blue-300;
         cursor: pointer;
-        margin-top: 4px;
         transition: 50ms color;
 
         &:hover, &:focus {
-          color: var(--primary-font);
+          color: var(--primary-text);
         }
 
         &:last-child {
@@ -48,8 +47,8 @@
         }
 
         i-feather {
-          width: 1rem !important;
-          height: 1rem !important;
+          width: 1.25rem !important;
+          height: 1.25rem !important;
         }
       }
     }
@@ -101,7 +100,7 @@
     border: none;
     padding: 6px;
     font-size: 0.875rem;
-    color: var(--primary-font);
+    color: var(--primary-text);
   }
 }
 
@@ -121,7 +120,7 @@
   align-items: center;
   text-transform: uppercase;
   font-size: 0.875rem;
-  color: var(--primary-font);
+  color: var(--primary-text);
   margin: 0.5rem 0 0.5rem 0;
   padding: 0.25rem;
   padding-left: 1.5rem;
@@ -141,16 +140,16 @@
   height: 1rem;
 
   &:hover {
-    background-color: var(--list-item-hover);
+    background-color: var(--list-item-bg--hover);
   }
 
   &:focus {
-    background-color: var(--list-item-active);
+    background-color: var(--list-item-bg--active);
     outline: 1px solid $blue-200;
   }
 
   &.active {
-    background-color: var(--list-item-active);
+    background-color: var(--list-item-bg--active);
   }
 
   .pi {
@@ -199,7 +198,7 @@
 }
 
 .is-dragging-over {
-	background-color: var(--list-item-hover) !important;
+	background-color: var(--list-item-bg--hover) !important;
 
   // fix flickering - dragleave event being triggered when dragging over child element
   * {

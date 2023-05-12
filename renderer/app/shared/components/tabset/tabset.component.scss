@@ -34,16 +34,16 @@ ul li {
   margin-left: 0.25rem;
   display: block;
 
-  .button-secondary {
+  .secondary-btn {
     width: 100%;
     text-align: left;
     margin: 0.5rem 0;
-    background-color: var(--tabset-bg);
+    background-color: var(--tabset-btn-bg);
     border-left: 4px solid transparent;
 
     &:hover, :focus {
-      color: var(--tabset-font-hover);
-      background-color: var(--tabset-bg-hover);
+      color: var(--tabset-btn-text--hover);
+      background-color: var(--tabset-btn-bg--hover);
     }
 
     &.active {

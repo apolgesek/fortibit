@@ -17,5 +17,7 @@ export interface IProduct {
   autoTypeEnabled: boolean;
   autocompleteShortcut: string;
   autocompletePasswordOnlyShortcut: string;
+  biometricsAuthenticationEnabled: boolean;
   theme: 'dark' | 'light';
+  clipboardClearTimeMs: number;
 }

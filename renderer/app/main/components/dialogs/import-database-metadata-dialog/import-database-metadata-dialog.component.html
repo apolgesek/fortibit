@@ -23,7 +23,7 @@
     <button
 			*ngIf="additionalData.payload.size > 0"
 			type="button"
-			appAutofocus
+			#autofocus
 			class="primary-btn"
 			[disabled]="isConfirmButtonLocked"
 			(click)="confirm()">

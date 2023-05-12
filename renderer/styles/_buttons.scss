@@ -15,8 +15,8 @@ button {
 	padding: 0.875rem 1.625rem;
 	border-radius: 0.25rem;
 	font-size: 0.875rem;
-	color: var(--add-entry-cta-text);
-	background-color: var(--primary-cta-bg);
+	color: var(--primary-btn-text);
+	background-color: var(--primary-btn-bg);
 	width: auto;
 	min-width: 100px;
 	position: relative;
@@ -24,19 +24,19 @@ button {
 	transition: all 150ms;
 	cursor: pointer;
 	text-transform: uppercase;
-	-webkit-font-smoothing: antialiased;
 
 	&:hover {
-		background-color: var(--add-entry-cta-bg-hover);
+		background-color: var(--primary-btn-bg--hover);
 	}
 
 	&:focus-visible {
-		background-color: var(--add-entry-cta-bg-hover);
+		background-color: var(--primary-btn-bg--hover);
 		outline: 2px solid #aedaff !important;
 		outline-offset: 3px !important;
 	}
 
 	&:disabled {
+		cursor: default;
 		background-color: var(--border-color);
 
 		&:hover {
@@ -45,11 +45,31 @@ button {
 	}
 }
 
+.secondary-btn {
+	@include toolbar-btn;
+	background-color: var(--secondary-btn-bg);
+	color: var(--secondary-btn-text);
+
+	&:disabled {
+		background-color: var(--secondary-btn-bg--disabled);
+		color: var(--secondary-btn-text--disabled);
+		cursor: default;
+
+		&:hover::after {
+			display: none;
+		}
+
+		&:active {
+			transform: translateY(0);
+		}
+	}
+}
+
 .text-btn {
 	@include font-regular;
 	display: flex;
-	color: var(--primary-cta-text);
-	background-color: var(--tabset-bg);
+	color: var(--text-btn-text);
+	background-color: var(--text-btn-bg);
 	line-height: 1;
 	padding: 0.875rem 1.625rem;
 	border: 1px solid transparent;
@@ -61,12 +81,12 @@ button {
 	-webkit-font-smoothing: antialiased;
 
 	&:hover {
-		color: var(--primary-font);
-		background-color: var(--tabset-bg-hover);
+		color: var(--primary-text);
+		background-color: var(--tabset-btn-bg--hover);
 	}
 
 	&:focus, &.active {
-		color: var(--primary-font);
+		color: var(--primary-text);
 		outline: 2px solid #aedaff !important;
 		outline-offset: 3px !important;
 	}
@@ -90,7 +110,7 @@ button {
 	cursor: pointer;
 	border: 0;
 	outline: 0;
-	color: var(--primary-font);
+	color: var(--action-btn-text);
 	padding: 0;
 	width: 2.5rem;
 	height: 2.5rem;
@@ -98,12 +118,12 @@ button {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: var(--list-item-active);
+	background-color: var(--action-btn-bg);
 	border-radius: 0.25rem;
 	position: relative;
 
 	i-feather {
-		color: var(--primary-font) !important;
+		color: var(--primary-text) !important;
 		width: 1.25rem !important;
 		height: 1.25rem !important;
 		margin: 0 !important;
@@ -114,12 +134,12 @@ button {
 
 		&:hover,&:focus {
 			i-feather {
-				color: var(--primary-cta-text) !important;
+				color: var(--primary-btn-text) !important;
 			}
 		}
 
 		i-feather {
-			color: var(--primary-cta-text) !important;
+			color: var(--primary-btn-text) !important;
 		}
 	}
 
@@ -141,13 +161,13 @@ button {
 	}
 }
 
-.dropbtn {
+.dropdown-btn {
 	@include font-regular;
 	display: flex;
 	align-items: center;
 	line-height: 1;
   font-size: 0.875rem;
-	color: var(--primary-font);
+	color: var(--primary-text);
 	background-color: var(--primary-bg);
   border: none;
   cursor: pointer;
@@ -162,16 +182,16 @@ button {
 	}
 
 	&:hover, &:visited, &.active {
-		color: var(--primary-font);
+		color: var(--primary-text);
 	}
 
 	&.active {
 		border-bottom-right-radius: 0;
-		color: var(--primary-font);
+		color: var(--primary-text);
 	}
 
 	&:focus-visible {
-		color: var(--primary-font);
+		color: var(--primary-text);
 	
 		&.icon-btn {
 			&:focus:not(:hover) {
@@ -180,28 +200,7 @@ button {
 		}
 	
 		&.icon-btn .pi {
-			color: var(--primary-font);
-		}
-	}
-}
-
-.button-secondary {
-	@include toolbar-btn;
-
-	background-color: var(--toolbar-btn-bg);
-	color: var(--toolbar-btn-text);
-
-	&:disabled {
-		background-color: var(--toolbar-disabled-bg);
-		color: var(--toolbar-disabled-font);
-		cursor: default;
-
-		&:hover::after {
-			display: none;
-		}
-
-		&:active {
-			transform: translateY(0);
+			color: var(--primary-text);
 		}
 	}
 }

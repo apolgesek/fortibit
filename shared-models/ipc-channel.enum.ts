@@ -6,6 +6,7 @@ export enum IpcChannel {
   TryClose = 'app:tryClose',
   CopyCliboard = 'app:copyClipboard',
   DecryptPassword = 'app:decryptPassword',
+  DecryptBiometrics = 'app:decryptBiometrics',
   EncryptPassword = 'app:encryptPassword',
   Exit = 'app:exit',
   GetSaveStatus = 'app:saveStatus',
@@ -47,9 +48,15 @@ export enum IpcChannel {
   GeneratePassword = 'app:generatePassword',
   GetPlatformInfo = 'app:getPlatformInfo',
   GetWhitelistedChannels = 'app:getWhitelistedChannels',
-  UpdateExpiration = 'app:updateExpiration',
   GetRecentFiles = 'app:getRecentFiles',
   RegenerateKey = 'app:regenerateKey',
   ToggleTheme = 'app:toggleTheme',
-  SetSystemTheme = 'app:setSystemTheme'
+  SetSystemTheme = 'app:setSystemTheme',
+  DatabaseChanged = 'app:databaseChanged',
+  CheckRecoveryFile = 'app:checkRecoveryFile',
+  RemoveRecoveryFile = 'app:removeRecoveryFile',
+  RecoverFile = 'app:recoverFile',
+  ToggleBiometricsUnlock = 'app:toggleBiometricsUnlock',
+  SaveExposedPasswordsReport = 'app:saveExposedPasswordsReport',
+  SaveWeakPasswordsReport = 'app:saveWeakPasswordsReport'
 }

@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Component, ComponentRef, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { IPasswordGroup } from '@app/core/models';
 import { EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
-import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { IPasswordEntry } from '@shared-renderer/password-entry.model';
 import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, fromEvent, map, Observable, of, Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -16,7 +17,7 @@ import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, fro
   imports: [
     CommonModule,
     ModalComponent,
-    AutofocusDirective,
+    
     ScrollingModule
   ]
 })
@@ -29,6 +30,10 @@ export class MoveEntryDialogComponent implements IModal, OnInit, OnDestroy {
 
   private readonly searchPhrase: BehaviorSubject<string> = new BehaviorSubject('');
   private readonly destroyed: Subject<void> = new Subject();
+
+  get selectedPasswordsLength(): number {
+    return this.entryManager.selectedPasswords.length;
+  }
 
   constructor(
     private readonly modalRef: ModalRef,

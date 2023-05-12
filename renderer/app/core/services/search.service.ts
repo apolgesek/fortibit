@@ -18,7 +18,7 @@ export class SearchService implements ISearchService {
   public searchInputSource: Subject<string> = new Subject();
   public searchPhrase$: Observable<string>;
   public searchPhraseValue = '';
-  public sortProp: SortableEntryProp;
+  public sortProp: SortableEntryProp = 'creationDate';
   public sortOrder: Sort = Sort.Desc;
   public isSearching = false;
   public wasSearched = false;
@@ -56,7 +56,6 @@ export class SearchService implements ISearchService {
 
   public reset() {
     this.searchPhraseValue = '';
-    this.isGlobalSearchMode = false;
     this.updateSearchResults();
   }
 

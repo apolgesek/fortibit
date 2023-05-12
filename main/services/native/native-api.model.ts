@@ -11,4 +11,8 @@ export interface INativeApiService {
   setIconicBitmap(handle: Buffer): number;
   unsetIconicBitmap(handle: Buffer): number;
   verifySignature(path: string, subject: string): boolean;
+  getPassword(windowHandleHex: Buffer, dbPath: string): Promise<string>;
+  saveCredential(dbPath: string, password: string): void;
+  removeCredential(dbPath: string): void;
+  listCredentials(): Promise<string[]>;
 }

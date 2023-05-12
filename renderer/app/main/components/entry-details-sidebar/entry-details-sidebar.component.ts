@@ -1,21 +1,21 @@
-import { trigger, style, transition, animate, keyframes } from '@angular/animations';
+import { animate, keyframes, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService, IPasswordGroup } from '@app/core/models';
-import { WorkspaceService, EntryManager, GroupManager, ModalService, NotificationService, ClipboardService } from '@app/core/services';
+import { ClipboardService, EntryManager, GroupManager, ModalService, NotificationService, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
 import { TooltipComponent } from '@app/shared/components/tooltip/tooltip.component';
 import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
+import { LinkPipe } from '@app/shared/pipes/link.pipe';
+import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { FeatherModule } from 'angular-feather';
 import { AppConfig } from 'environments/environment';
 import { CommunicationService } from 'injection-tokens';
 import { Subject, takeUntil } from 'rxjs';
 import { IAppConfig } from '../../../../../app-config';
-import { LinkPipe } from '@app/shared/pipes/link.pipe'
-import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
-import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-entry-details-sidebar',
@@ -29,7 +29,7 @@ import { FeatherModule } from 'angular-feather';
     TooltipDirective,
     TooltipComponent,
     LinkPipe,
-    TimeRemainingPipe
+    TimeRemainingPipe,
   ],
   animations: [
     trigger('star', [
@@ -97,10 +97,9 @@ export class EntryDetailsSidebarComponent implements OnInit, OnDestroy {
     });
   }
 
-  openUrl(url: string | undefined) {
-    if (url) {
-      this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, url);
-    }
+  openUrl(url: string): false {
+    this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, url);
+    return false;
   }
 
   openEntryHistory() {

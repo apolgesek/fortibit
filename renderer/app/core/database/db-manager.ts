@@ -8,7 +8,8 @@ interface IDbTable<T, K> extends Dexie.Table {}
 
 @Injectable({ providedIn: 'root' })
 export class DbManager {
-  private readonly name: string = 'main';
+  // name must be unique to ensure stable access with multiple vaults open at the same time
+  private readonly name: string = 'main' + new Date().getTime();
   private instance: IDbContext;
 
   public get context(): IDbContext {

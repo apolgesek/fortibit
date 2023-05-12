@@ -12,6 +12,7 @@ import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { FeatherModule } from 'angular-feather';
+import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 
 @Component({
   selector: 'app-toolbar',
@@ -27,7 +28,8 @@ import { FeatherModule } from 'angular-feather';
     DropdownToggleDirective,
     DropdownMenuDirective,
     MenuItemDirective,
-    SettingsButtonComponent
+    SettingsButtonComponent,
+    TooltipDirective
   ]
 })
 export class ToolbarComponent implements OnDestroy {
@@ -106,14 +108,13 @@ export class ToolbarComponent implements OnDestroy {
   }
 
   trySaveDatabase() {
-    !this.workspaceService.file
-      ? this.modalService.openMasterPasswordWindow()
-      : this.workspaceService.saveDatabase();
+    this.workspaceService.saveDatabase();
   }
 
   toggleSearchMode() {
     this.isGlobalSearchMode = !this.isGlobalSearchMode;
     this.entryManager.updateEntriesSource();
+    (this.searchInput.nativeElement as HTMLInputElement).focus();
   }
 
   resetSearch() {

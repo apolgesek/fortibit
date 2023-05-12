@@ -1,0 +1,30 @@
+<div class="container">
+  <form [formGroup]="integrationForm">
+    <div class="inputgroup checkbox">
+      <label class="label" for="windowsHello">Windows Hello:</label>
+      <label class="switch">
+        <input
+          id="windowsHello"
+          type="checkbox"
+          formControlName="biometricsAuthenticationEnabled">
+          <span class="slider"></span>
+      </label>    
+    </div>
+    <div *ngIf="isUnlocked" style="margin-top: 2rem">
+      <div style="display: flex"><label class="label">Credential name:</label> fbit:{{ filePath }}</div>
+      <button
+        type="button"
+        class="primary-btn"
+        [ngClass]="{ 'danger': isBiometricsEnabledForCurrentDatabase }"
+        (click)="toggleBiometrics()"
+        [disabled]="credentialButtonDisabled">
+        <ng-container *ngIf="isBiometricsEnabledForCurrentDatabase; else addDatabaseCredential">
+          Remove credential
+        </ng-container>
+        <ng-template #addDatabaseCredential>
+          Add credential
+        </ng-template>
+      </button>
+    </div>
+  </form>
+</div>

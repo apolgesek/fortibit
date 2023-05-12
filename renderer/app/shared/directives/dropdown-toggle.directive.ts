@@ -9,7 +9,7 @@ enum TriggerType {
 @Directive({
   selector: '[appDropdownToggle]',
   host: {
-    'class': 'dropbtn',
+    'class': 'dropdown-btn',
     'aria-haspopup': 'true',
   },
   standalone: true
@@ -68,7 +68,14 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
   }
 
   private handleClick() {
-    this.renderer.listen(this.element.nativeElement, 'click', (event: MouseEvent) => {
+    const enterKeydownListener = this.renderer.listen(this.element.nativeElement, 'keydown', (event: KeyboardEvent) => {
+      if (event.key == "Enter" && !this.dropdownState.isOpen) {
+        this.dropdownState.open();
+        event.preventDefault();
+      }
+    });
+
+    const clickListener = this.renderer.listen(this.element.nativeElement, 'click', (event: MouseEvent) => {
       if (this.dropdownState.isOpen) {
         this.dropdownState.close();
       } else {
@@ -78,7 +85,7 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
       event.stopPropagation();
     });
 
-    const listener = this.renderer.listen(window, 'click', (event: MouseEvent) => {
+    const outsideClickListener = this.renderer.listen(window, 'click', (event: MouseEvent) => {
       const el = this.element.nativeElement as HTMLElement;
       const eventTarget = event.target as HTMLElement;
 
@@ -87,7 +94,7 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
       }
     });
 
-    this.listeners.push(listener);
+    this.listeners.push(enterKeydownListener, clickListener, outsideClickListener);
   }
 
   ngOnDestroy(): void {

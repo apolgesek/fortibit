@@ -27,12 +27,12 @@
   font-size: 1rem;
   cursor: pointer;
   height: 20px;
-  color: var(--primary-font);
+  color: var(--primary-text);
   border-radius: 0.25rem;
 
   &:hover, &:focus {
     outline: none;
-    background-color: var(--tabset-bg);
+    background-color: var(--tabset-btn-bg);
   }
 
   .pi {

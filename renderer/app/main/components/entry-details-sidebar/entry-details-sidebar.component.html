@@ -20,8 +20,8 @@
 				</button>
 				<button
 					*ngIf="entry.url"
-					attr.aria-label="'Open {{ isUnsecured ? 'unsecured' : '' }} link"
-					appTooltip="Open {{ isUnsecured ? 'unsecured' : '' }} link"
+					attr.aria-label="'Open {{ isUnsecured ? 'insecure' : '' }} link"
+					appTooltip="Open {{ isUnsecured ? 'insecure' : '' }} link"
 					(click)="openUrl(entry.url)"
 					class="action-btn">
 					<i-feather name="external-link"></i-feather>
@@ -57,7 +57,7 @@
 
 			<div *ngIf="entry?.notes" class="section column">
 				<p class="label">Notes</p>
-				<p>{{ entry?.notes }}</p>
+				<p class="pre-wrap">{{ entry?.notes }}</p>
 			</div>
 
 			<div class="small">
@@ -99,7 +99,7 @@
 		</div>
 		<div class="section">
 			<div class="subsection">
-				<p class="label">Autotype password only shortcut</p>
+				<p class="label">Password only autotype shortcut</p>
 				<p>
 				 {{ config.autocompletePasswordOnlyShortcut }}
 				 <span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>

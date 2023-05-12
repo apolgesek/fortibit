@@ -12,6 +12,7 @@ main/**/*.js
 shared-models/**/*.js
 shared-models/**/*.js.map
 *.js.map
+*.node
 
 # dependencies
 /node_modules
@@ -52,4 +53,4 @@ package-lock.json
 .DS_Store
 Thumbs.db
 
-main/services/native/fbitnative/build/*
+main/services/native/**/build

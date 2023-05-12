@@ -15,6 +15,7 @@
 	max-width: 200px;
 	border-top: 1px solid rgba(0,0,0, 0.04);
 	background-color: var(--modal-bg);
+	border-top-left-radius: 0.25rem;
 
 	> .dropdown {
 		display: flex !important;
@@ -36,13 +37,13 @@
 .filters-btn, .sort-btn {
 	border-radius: 0.25rem;
 	background-color: var(--primary-bg);
-	padding: 0.5rem;
-	color: var(--link-font);
+	padding: 0.25rem 0.5rem;
+	color: var(--link-text);
 	position: relative;
 	z-index: 9999;
 
 	&:hover {
-		background-color: var(--list-item-hover);
+		background-color: var(--list-item-bg--hover);
 	}
 
 	&:focus:not(:hover) {
@@ -54,7 +55,10 @@
 	}
 
 	i-feather {
-		font-size: 0.875rem;
+		margin-left: 0.25rem;
+		margin-right: 0 !important;
+		height: 1rem !important;
+		width: 1rem !important;
 	}
 }
 
@@ -63,7 +67,7 @@
 	width: 100%;
 	background-color: var(--primary-bg);
 	border: 1px solid var(--border-color);
-	color: var(--primary-font);
+	color: var(--primary-text);
 	border-radius: 0.25rem !important;
 	padding: 0.5rem;
 
@@ -83,6 +87,11 @@
 .expanded {
 	border-bottom-left-radius: 0 !important;
 	border-bottom-right-radius: 0 !important;
+
+	+ .dropdown-content {
+		border-bottom-left-radius: 0.25rem !important;
+		border-bottom-right-radius: 0.25rem !important;
+	}
 }
 
 .option-item {
@@ -96,7 +105,7 @@
 	}
 
 	&:hover, &:focus, &.selected {
-		background-color: var(--tabset-bg);
+		background-color: var(--tabset-btn-bg);
 	}
 }
 

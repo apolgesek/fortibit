@@ -5,6 +5,7 @@ import { ClipboardService } from '../clipboard.service';
 import { WorkspaceService } from '../workspace.service';
 import { EntryManager } from '../managers/entry.manager';
 import { GroupManager } from '../managers/group.manager';
+import { UiUtil } from '@app/utils';
 
 export class WindowsHotkeyHandler implements IHotkeyHandler {
   public configuration: IHotkeyConfiguration = {
@@ -54,9 +55,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   
   public registerSaveDatabase(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 's' && event.ctrlKey) {
-      if (!this.workspaceService.file) {
-        this.modalService.openMasterPasswordWindow()
-      } else if (!this.workspaceService.isSynced) {
+      if (!this.workspaceService.isSynced) {
         this.workspaceService.saveDatabase();
       }
 
@@ -147,6 +146,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   public registerFindEntries(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'f' && event.ctrlKey && !event.shiftKey) {
       this.entryManager.isGlobalSearch = false;
+      this.entryManager.selectedPasswords = [];
       (document.querySelector('.search') as HTMLInputElement).focus();
       event.preventDefault();
     }
@@ -155,6 +155,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   public registerFindGlobalEntries(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'f' && event.ctrlKey && event.shiftKey) {
       this.entryManager.isGlobalSearch = true;
+      this.entryManager.selectedPasswords = [];
       (document.querySelector('.search') as HTMLInputElement).focus();
       event.preventDefault();
     }

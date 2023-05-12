@@ -1,4 +1,4 @@
-@import 'themes/scss-variables';
+@import 'themes/base-variables';
 @import 'mixins';
 
 :host {
@@ -25,7 +25,7 @@
 	transition: background-color 50ms;
 
 	i-feather {
-		color: var(--link-font);
+		color: var(--link-text);
 		cursor: pointer;
 		margin-left: 0.25rem;
 	}
@@ -68,7 +68,7 @@
 	i-feather {
 		width: 1.25rem !important;
 		height: 1.25rem !important;
-		color: var(--icon-secondary-color);
+		color: var(--icon-secondary);
 
 		&:hover {
 			color: $blue-300;
@@ -85,8 +85,12 @@
 	align-items: center;
 	margin: 0.5rem 0;
 	word-break: break-all;
-	color: var(--primary-font);
+	color: var(--primary-text);
 	margin-right: 0.75rem;
+
+	.pre-wrap {
+		white-space: pre-wrap;
+	}
 
 	&.column {
 		flex-direction: column;
@@ -94,12 +98,12 @@
 	}
 
 	.label {
+		color: var(--label-text);
 		display: flex;
-		@include font-medium;
 	}
 
 	a {
-		color: var(--link-font);
+		color: var(--link-text);
 	}
 }
 

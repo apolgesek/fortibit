@@ -4,7 +4,7 @@
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="!isAddPossible"
-			class="button-secondary add-entry"
+			class="secondary-btn add-entry"
 			id="add-entry"
 			(click)="openAddEntryWindow()">
 			<i-feather name="plus-circle"></i-feather>
@@ -14,7 +14,7 @@
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="isDatabaseInSync"
-			class="button-secondary save-db"
+			class="secondary-btn save-db"
 			(click)="trySaveDatabase()">
 			<i-feather name="save"></i-feather>
 			<span class="label">Save</span>
@@ -23,7 +23,7 @@
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="!(isAnyEntry && isOneEntrySelected)"
-			class="button-secondary edit-entry"
+			class="secondary-btn edit-entry"
 			(click)="openEditEntryWindow()">
 			<i-feather name="edit"></i-feather>
 			<span class="label">Edit</span>
@@ -32,7 +32,7 @@
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="!(isAnyEntry && isAnyEntrySelected)"
-			class="button-secondary remove-entry"
+			class="secondary-btn remove-entry"
 			(click)="openDeleteEntryWindow()">
 			<i-feather name="trash"></i-feather>
 			<span class="label">Remove</span>
@@ -55,14 +55,17 @@
 					name="x-circle"
 					class="clear-search">
 				</i-feather>
-				<ul appDropdown class="dropdown">
-					<button appDropdownToggle appMenuItem class="group-mode-btn">
-						<i-feather name="chevron-down"></i-feather>
-					</button>
-					<div *appDropdownMenu class="dropdown-content right">
-						<li appMenuItem (click)="toggleSearchMode()">{{ isGlobalSearchMode ? 'Group' : 'All' }}</li>
-					</div>
-				</ul>
+				<i-feather
+					role="button"
+					tabindex="0"
+					name="globe"
+					appTooltip="Search all groups"
+					container="body"
+					class="global-search-icon"
+					[ngClass]="{'active': isGlobalSearchMode}"
+					(click)="toggleSearchMode()"
+					(keydown.enter)="toggleSearchMode()">
+				</i-feather>
 			</div>
 		</div>
 		<app-settings-button></app-settings-button>

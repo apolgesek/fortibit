@@ -7,7 +7,7 @@
 	position: absolute;
 	padding: 0;
 	list-style-type: none;
-	background-color: var(--dropdown-primary-bg);
+	background-color: var(--dropdown-bg);
 	// Box shadow changes anchor color inside for some reason
 	filter: var(--dropdown-shadow);
 
@@ -32,7 +32,7 @@
 
 	.divider {
 		padding: 4px;
-		background-color: var(--dropdown-primary-bg);
+		background-color: var(--dropdown-bg);
 
 		hr {
 			margin: 0;
@@ -44,10 +44,10 @@
 	.disabled {
 		color: $grey-300;
 		cursor: default;
-		background-color: var(--dropdown-primary-bg);
+		background-color: var(--dropdown-bg);
 
 		&:hover  {
-			background-color: var(--dropdown-primary-bg) !important;
+			background-color: var(--dropdown-bg) !important;
 		}
 	}
 
@@ -60,16 +60,16 @@
 
 	li {
 		cursor: pointer;
-		color: var(--primary-font);
+		color: var(--primary-text);
 		padding: 0.5rem;
 		text-decoration: none;
 		display: block;
 		font-size: 0.875rem;
 		line-height: 1;
-		background-color: var(--dropdown-primary-bg);
+		background-color: var(--dropdown-bg);
 
 		&:hover, &:focus, &.focused  {
-			background-color: var(--dropdown-list-item-hover) !important;
+			background-color: var(--dropdown-list-item-bg--hover) !important;
 		}
 	}
 }
@@ -92,9 +92,9 @@
 }
 
 .expanded {
-	background-color: var(--list-item-hover) !important;
+	background-color: var(--list-item-bg--hover) !important;
 
 	.pi {
-		color: var(--primary-font);
+		color: var(--primary-text);
 	}
 }

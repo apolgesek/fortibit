@@ -1,10 +1,7 @@
 <div class="filter" appMenu>
   <div #filterDropdown="appDropdown" (open)="onDropdownOpen($event)" appDropdown class="dropdown" style="margin-right: 0.5rem;">
     <button appDropdownToggle appMenuItem class="sort-btn">
-      {{ selectedSortOption.name }} <span
-        class="pi"
-        [ngClass]="selectedSortDirection.state === sort.Desc ? 'pi-sort-down' : 'pi-sort-up'"
-        style="margin-left: 0.5rem; font-size: 13px"></span>
+      {{ selectedSortOption.name }} <i-feather [name]="selectedSortDirection.state === sort.Desc ? 'arrow-down' : 'arrow-up'"></i-feather>
     </button>
     <div *appDropdownMenu class="dropdown-content right filter-dropdown" @slideDown>
       <div class="filter-label">Sort by</div>
@@ -18,6 +15,7 @@
               *ngFor="let option of sortOptions"
               [ngClass]="{ 'selected' : selectedSortOption.prop === option.prop }"
               appMenuItem
+              closeMode="subtree"
               class="option-item"
               (activate)="setSort(option)">
               {{ option.name }}
@@ -35,6 +33,7 @@
               *ngFor="let option of sortDirectionOptions"
               [ngClass]="{ 'selected' : selectedSortDirection.state === option.state }"
               appMenuItem
+              closeMode="subtree"
               class="option-item"
               (activate)="setSortDirection(option)">
               {{ option.name }}
@@ -45,42 +44,3 @@
     </div>
   </div>
 </div>
-
-<!-- <div class="filter" appMenu style="margin-right: 0.5rem;">
-  <div #filterDropdown="appDropdown" (open)="onDropdownOpen($event)" appDropdown class="dropdown">
-    <div (click)="$event.stopPropagation()" style="position: relative; width: 100%;">
-      <button appDropdownToggle appMenuItem class="filters-btn">
-        Filters: {{ filtersCount }}
-      </button>
-      <div *appDropdownMenu class="dropdown-content right filter-dropdown" @slideDown>
-        <div class="filter-label">Expiration</div>
-        <div class="checkbox">
-          <label class="label" for="expired">Expired:</label>
-          <label class="switch">
-            <input
-              id="expired"
-              type="checkbox"
-              appMenuItem
-              [closeOnSelect]="false"
-              [checked]="isExpirationSet(expirationStatus.Expired)"
-              (change)="setExpiration(expirationStatus.Expired, $event)">
-              <span class="slider"></span>
-          </label>    
-        </div>
-        <div class="checkbox">
-          <label class="label" for="dueExpiration">Due expiration:</label>
-          <label class="switch">
-            <input
-              id="dueExpiration"
-              type="checkbox"
-              appMenuItem
-              [closeOnSelect]="false"
-              [checked]="isExpirationSet(expirationStatus.DueExpiration)"
-              (change)="setExpiration(expirationStatus.DueExpiration, $event)">
-              <span class="slider"></span>
-          </label>    
-        </div>
-      </div>
-    </div>
-  </div>
-</div> -->

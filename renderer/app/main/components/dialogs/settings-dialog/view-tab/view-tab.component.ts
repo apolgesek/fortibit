@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ConfigService, WorkspaceService } from '@app/core/services';
 import { Subject, take, takeUntil } from 'rxjs';
 import { IProduct } from '../../../../../../../product';
+import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-view-tab',
@@ -10,10 +11,11 @@ import { IProduct } from '../../../../../../../product';
   styleUrls: ['./view-tab.component.scss'],
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FeatherModule
   ]
 })
-export class ViewTabComponent implements OnInit {
+export class ViewTabComponent implements OnInit, OnDestroy {
   public viewForm: FormGroup;
   private readonly destroyed: Subject<void> = new Subject();
 
@@ -25,7 +27,6 @@ export class ViewTabComponent implements OnInit {
 
   ngOnInit(): void {
     this.configService.configLoadedSource$.pipe(take(1)).subscribe((config) => {
-      console.log(config.theme);
       this.viewForm = this.formBuilder.group({
         darkTheme: [config.theme === 'dark'],
         displayIcons: [config.displayIcons]
@@ -55,5 +56,10 @@ export class ViewTabComponent implements OnInit {
 
   toggleTheme() {
     this.workspaceService.toggleTheme();
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed.next();
+    this.destroyed.complete();
   }
 }

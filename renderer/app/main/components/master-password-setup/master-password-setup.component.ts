@@ -1,10 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Inject, NgZone } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ICommunicationService } from '@app/core/models';
 import { WorkspaceService } from '@app/core/services';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
+import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
+import { CommunicationService } from 'injection-tokens';
 
 @Component({
   selector: 'app-master-password-setup',
@@ -18,19 +22,30 @@ import { FeatherModule } from 'angular-feather';
   ]
 })
 export class MasterPasswordSetupComponent {
+  public onGetSaveStatus: (_: any, { status, message, file }: {status: boolean, message: string, file: unknown}) => void;
   public readonly minPasswordLength = 6;
   public readonly isControlInvalid = isControlInvalid;
 
   public masterPasswordForm: FormGroup;
 
   constructor(
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly workspaceService: WorkspaceService,
+    private readonly zone: NgZone,
     private readonly fb: FormBuilder,
   ) {
     this.masterPasswordForm = this.fb.group({
       newPassword: [null, Validators.compose([Validators.required, Validators.minLength(this.minPasswordLength)])],
       newPasswordDuplicate: [null]
     }, { validators: valueMatchValidator('newPassword', 'newPasswordDuplicate') });
+
+    this.onGetSaveStatus = (_, { status })  => {
+      this.zone.run(() => {
+        if (status) {
+          this.workspaceService.unlock();       
+        }
+      });
+    };
    }
 
   async saveNewDatabase() {
@@ -40,13 +55,16 @@ export class MasterPasswordSetupComponent {
       return;
     }
 
-    const success = await this.workspaceService.saveNewDatabase(this.masterPasswordForm.get('newPassword')?.value, {
+    await this.workspaceService.saveNewDatabase(this.masterPasswordForm.get('newPassword')?.value, {
       forceNew: true
     });
+  }
 
+  ngOnInit(): void {
+    this.communicationService.ipcRenderer.on(IpcChannel.GetSaveStatus, this.onGetSaveStatus);
+  }
 
-    if (success) {
-      this.masterPasswordForm.reset();
-    }
+  ngOnDestroy(): void {
+    this.communicationService.ipcRenderer.off(IpcChannel.GetSaveStatus, this.onGetSaveStatus);
   }
 }

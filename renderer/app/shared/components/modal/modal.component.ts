@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, ContentChild, ElementRef, Input, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ModalRef } from '@app/core/services';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { IAdditionalData } from '@app/shared';
+import { UiUtil } from '@app/utils';
 import * as focusTrap from 'focus-trap';
 import { fromEvent, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -24,6 +25,7 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
   public showBackdrop: boolean;
 
   @ViewChild('backdrop') public backdrop!: ElementRef;
+  @ContentChild('autofocus', { descendants: true }) public autofocusElement: ElementRef;
 
   private readonly destroyed: Subject<void> = new Subject();
   private focusTrap: focusTrap.FocusTrap;
@@ -31,7 +33,7 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
   constructor(
     private readonly el: ElementRef,
     private readonly modalManager: ModalManager,
-    private readonly modalRef: ModalRef
+    private readonly modalRef: ModalRef,
   ) {
     this.showBackdrop = this.modalRef.showBackdrop;
   }
@@ -46,8 +48,9 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
     }
 
     // outside click must be enabled for any outer elements,, e.g. notification
-    this.focusTrap = focusTrap.createFocusTrap(this.el.nativeElement, { allowOutsideClick: true, initialFocus: false });
+    this.focusTrap = focusTrap.createFocusTrap(this.el.nativeElement, { allowOutsideClick: true, initialFocus: this.autofocusElement?.nativeElement });
     this.focusTrap.activate();
+    UiUtil.unlockInterface();
   }
 
   ngOnDestroy(): void {

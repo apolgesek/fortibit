@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, ComponentRef } from '@angular/core';
+import { Component, ComponentRef } from '@angular/core';
 import { GroupManager, ModalRef } from '@app/core/services';
-import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
@@ -10,10 +10,9 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
   styleUrls: ['./delete-group-dialog.component.scss'],
   standalone: true,
   imports: [
-    AutofocusDirective,
+    
     ModalComponent
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DeleteGroupDialogComponent implements IModal {
   public readonly ref!: ComponentRef<DeleteGroupDialogComponent>;

@@ -55,14 +55,17 @@ export class TableFiltersComponent {
   ];
 
   public readonly sort = Sort;
-  public selectedSortOption = this.sortOptions.find(x => x.prop === this.searchService.sortProp);
-  public selectedSortDirection = this.sortDirectionOptions.find(x => x.state === this.searchService.sortOrder);
+  public selectedSortOption: ISortOption;
+  public selectedSortDirection: ISortDirectionOption;
 
   public get filtersCount(): number {
     return 0;
   }
 
-  constructor(private readonly searchService: SearchService) {}
+  constructor(private readonly searchService: SearchService) {
+    this.selectedSortOption = this.sortOptions.find(x => x.prop === this.searchService.sortProp);
+    this.selectedSortDirection = this.sortDirectionOptions.find(x => x.state === this.searchService.sortOrder);
+  }
 
   setSort(option: ISortOption) {
     this.selectedSortOption = option;

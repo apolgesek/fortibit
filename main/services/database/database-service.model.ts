@@ -12,5 +12,7 @@ export interface IDatabaseService {
   saveDatabase(event: IpcMainEvent, saveFilePayload: ISaveFilePayload): void;
   openDatabase(event: IpcMainEvent, path: string): void;
   decryptDatabase(event: IpcMainEvent, password: string): Promise<void>;
-  clear(): void;
+  biometricsDecrypt(event: IpcMainEvent): Promise<void>;
+  onAppExit(): void;
+  clearRecoveryFiles(): void;
 }

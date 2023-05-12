@@ -1,6 +1,6 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
 import { EntryManager, GroupManager } from '@app/core/services';
-import { DomUtil } from '@app/utils';
+import { UiUtil } from '@app/utils';
 
 @Directive({
   selector: '[appDroppable]',
@@ -10,18 +10,18 @@ export class DroppableDirective {
   @HostListener('dragenter', ['$event'])
   public onDragOver() {
     if (this.entryManager.movedEntries.length === 0 && !this.groupManager.isGroupDragged) {
-      this.el.nativeElement.classList.add(DomUtil.constants.unknownElementDraggingClass);
+      this.el.nativeElement.classList.add(UiUtil.constants.unknownElementDraggingClass);
     } else {
-      this.el.nativeElement.classList.add(DomUtil.constants.isDraggingOverClass);
-      this.el.nativeElement.classList.remove(DomUtil.constants.unknownElementDraggingClass);
+      this.el.nativeElement.classList.add(UiUtil.constants.isDraggingOverClass);
+      this.el.nativeElement.classList.remove(UiUtil.constants.unknownElementDraggingClass);
     }
   }
 
   @HostListener('dragleave')
   @HostListener('drop')
   public onDragLeave() {
-    this.el.nativeElement.classList.remove(DomUtil.constants.unknownElementDraggingClass);
-    this.el.nativeElement.classList.remove(DomUtil.constants.isDraggingOverClass);
+    this.el.nativeElement.classList.remove(UiUtil.constants.unknownElementDraggingClass);
+    this.el.nativeElement.classList.remove(UiUtil.constants.isDraggingOverClass);
   }
 
   constructor(

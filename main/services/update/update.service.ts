@@ -1,6 +1,6 @@
 import { app, ipcMain, IpcMainEvent } from 'electron';
 import { emptyDirSync, existsSync, mkdirSync, readdirSync, renameSync } from 'fs-extra';
-import { request, RequestOptions } from 'https';
+import { request } from 'https';
 import { arch, platform } from 'os';
 import { join } from 'path';
 import { IpcChannel, UpdateState } from '../../../shared-models';
@@ -43,11 +43,15 @@ export class UpdateService implements IUpdateService {
 
       this._windowService.getWindowByWebContentsId(event.sender.id)
         .browserWindow.webContents
-        .send(IpcChannel.UpdateState, this.updateState, this._updateInformation.version);
+        .send(IpcChannel.UpdateState, this.updateState, this._updateInformation?.version);
     });
 
     ipcMain.on(IpcChannel.CheckUpdate, (event: IpcMainEvent) => {
       this.checkForUpdates();
+    });
+
+    ipcMain.once(IpcChannel.UpdateAndRelaunch, () => {
+      this.updateAndRelaunch();
     });
   }
 
@@ -96,7 +100,7 @@ export class UpdateService implements IUpdateService {
             this.setUpdateState(UpdateState.Available);
     
             if (!this.isAnyValidUpdateFile()) {
-              this.getUpdate();
+              // this.getUpdate();
             }
           } else {
             this.setUpdateState(UpdateState.NotAvailable);

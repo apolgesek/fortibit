@@ -10,11 +10,11 @@
 	margin-right: 1rem;
 
 	&.new {
-		.dropbtn {
+		.dropdown-btn {
 			padding-left: 0.5rem;
 		}
 
-		.dropbtn .badge {
+		.dropdown-btn .badge {
 			margin-left: -1rem;
 			background-color: $red-orange;
 			height: 1.5rem;
@@ -54,13 +54,13 @@
 			align-items: center;
 
 			.version {
-				color: var(--border-color);
+				color: var(--secondary-text);
 				font-size: 1rem;
 			}
 		}
 	}
 
-	.dropbtn {
+	.dropdown-btn {
 		border-top-left-radius: 3px;
 		border-bottom-left-radius: 3px;
 		padding: 0;
@@ -68,10 +68,12 @@
 		background-color: transparent;
 		transition: color 200ms;
 		margin-left: auto;
+		transform: translateY(50%);
+		margin-bottom: 0.5rem;
 
 		&:hover {
 			i-feather {
-				color: var(--settings-button-bg-hover);
+				color: var(--settings-btn-bg--hover);
 			}
 		}
 
@@ -82,7 +84,7 @@
 		i-feather {
 			width: 1.5rem !important;
 			height: 1.5rem !important;
-			color: var(--settings-button-bg);
+			color: var(--settings-btn-bg);
 
 			&:before {
 				margin-right: 0;

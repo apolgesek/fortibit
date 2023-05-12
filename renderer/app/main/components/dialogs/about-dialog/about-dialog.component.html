@@ -13,14 +13,15 @@
   <div>
     <ul>
       <li>Version: {{ config.version }} ({{ config.commit }})</li>
-      <li>Electron version: {{ config.electronVersion }}</li>
-      <li>Node version: {{ config.nodeVersion }}</li>
+      <li>Electron: {{ config.electronVersion }}</li>
+      <li>Node: {{ config.nodeVersion }}</li>
+      <li>Chromium: {{ config.chromiumVersion }}</li>
       <li>OS: {{ config.os }}</li>
     </ul>
   </div>
   <div class="footer-container">
     <button
-      appAutofocus
+      #autofocus
       type="button"
       class="primary-btn"
       (click)="close()">

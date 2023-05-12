@@ -1,6 +1,6 @@
 <ng-container *ngIf="notifications$ | async as notifications">
   <div appDropdown class="settings dropdown" [ngClass]="{'new': notifications.length}">
-    <button appDropdownToggle appMenuItem class="icon-btn">
+    <button appDropdownToggle trigger="click" appMenuItem class="icon-btn" type="button">
       <span class="sr-only">Settings</span>
       <div *ngIf="notifications.length" class="badge">{{ notifications.length }} <span class="sr-only">notifications</span></div>
       <i-feather name="settings"></i-feather>

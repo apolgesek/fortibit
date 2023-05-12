@@ -3,7 +3,7 @@ import { ICommunicationService } from '@app/core/models';
 import { NotificationService } from '@app/core/services/notification.service';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { WorkspaceService, ModalRef, ElectronService } from '@app/core/services';
-import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+
 import { CommunicationService } from 'injection-tokens';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [
     CommonModule,
-    AutofocusDirective,
+    
     ModalComponent
   ]
 })

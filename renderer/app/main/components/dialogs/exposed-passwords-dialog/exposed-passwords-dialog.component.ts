@@ -1,11 +1,11 @@
-import { Component, ComponentRef, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, Inject } from '@angular/core';
 import { ICommunicationService } from '@app/core/models';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { combineLatest, from, take, timer } from 'rxjs';
-import { ModalRef, ModalService, NotificationService, ReportService, WorkspaceService } from '@app/core/services';
-import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+import { ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
+
 import { CommunicationService } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
 import { ReportType } from '@app/core/enums';
@@ -20,7 +20,7 @@ import { EntryRepository } from '@app/core/repositories';
   imports: [
     CommonModule,
     FeatherModule,
-    AutofocusDirective,
+    
     ModalComponent
   ]
 })
@@ -36,13 +36,12 @@ export class ExposedPasswordsDialogComponent implements IModal {
   showError = false;
   
   constructor(
+    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
     private readonly modalRef: ModalRef,
     private readonly reportService: ReportService,
-    private readonly workspaceService: WorkspaceService,
-    private readonly notificationService: NotificationService,
     private readonly modalService: ModalService,
     private readonly entryRepository: EntryRepository,
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService
+    private readonly notificationService: NotificationService
   ) { }
 
   close() {
@@ -69,8 +68,6 @@ export class ExposedPasswordsDialogComponent implements IModal {
         payload: result.data
       });
       
-      this.workspaceService.isSynced = null;
-      this.notificationService.add({ type: 'success', alive: 5000, message: 'New report generated' });
       await this.getLastReport();
       this.scanInProgress = false;
       
@@ -80,12 +77,21 @@ export class ExposedPasswordsDialogComponent implements IModal {
     }, error: () => this.scanInProgress = false });
   }
 
+  async saveReport() {
+    await this.communicationService.ipcRenderer.invoke(IpcChannel.SaveExposedPasswordsReport, this.exposedPasswordsFound);
+    this.notificationService.add({ type: 'success', alive: 5000, message: 'Report generated' });
+  }
+
   ngOnInit(): void {
     this.getLastReport();
   }
 
   openUrl(url: string) {
     this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, url);
+  }
+
+  public trackByFn(_: number, item: { id: number }) {
+    return item.id;
   }
 
   async editEntry(id: number) {

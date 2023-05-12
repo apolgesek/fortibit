@@ -10,8 +10,8 @@
 	cursor: pointer;
 	font-size: 1rem;
 	@include font-medium;
-	color: var(--primary-font);
-	background-color: var(--input-bg-secondary);
+	color: var(--primary-text);
+	background-color: var(--expandable-bg);
 	transition: background-color 150ms;
 
 	.pi {
@@ -19,7 +19,7 @@
 	}
 
 	&:hover, &:focus-visible {
-		background-color: var(--scrollbar-thumb);
+		background-color: var(--expandable-bg--hover);
 	}
 }
 

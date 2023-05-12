@@ -4,13 +4,13 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
 import { GroupId } from '@app/core/enums';
 import { ICommunicationService } from '@app/core/models';
 import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
-import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+
 import { IAdditionalData, IModal } from '@app/shared';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { CommunicationService } from 'injection-tokens';
-import { fromEvent, Subject } from 'rxjs';
+import { Subject, fromEvent } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
 import * as zxcvbn from 'zxcvbn';
 import { IAppConfig } from '../../../../../../app-config';
@@ -27,11 +27,10 @@ import { valueMatchValidator } from '../../../../shared/validators/value-match.v
     CommonModule,
     ReactiveFormsModule,
     FeatherModule,
-    AutofocusDirective,
+    
     ModalComponent,
-    DateMaskDirective
+    DateMaskDirective,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDestroy {
   @ViewChild('entryForm') entryForm: ElementRef;
@@ -61,21 +60,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     private readonly groupManager: GroupManager,
     private readonly notificationService: NotificationService,
     private readonly cdRef: ChangeDetectorRef
-  ) {
-    this.newEntryForm = this.fb.group({
-      id: [null],
-      title: [null, Validators.required],
-      username: [null],
-      passwords: this.fb.group({
-        password: [null, Validators.required],
-        repeatPassword: [null],
-      }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
-      url: [null],
-      notes: [null],
-      autotypeExp: [null],
-      creationDate: [null],
-    });
-  }
+  ) {}
 
   get header(): string {
     if (this.entryManager.editedEntry) {
@@ -133,25 +118,25 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
     this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
       this.config = config;
+      const passwordMask = new Array(this.additionalData?.payload?.decryptedPassword?.length
+        ?? Math.ceil(this.config.encryption.passwordLength / 2)).fill('*');
+
+      this.newEntryForm = this.fb.group({
+        id: [null],
+        title: [null, Validators.required],
+        username: [null],
+        passwords: this.fb.group({
+          password: [passwordMask, Validators.required],
+          repeatPassword: [passwordMask],
+        }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
+        url: [null],
+        notes: [null],
+        autotypeExp: [null],
+        creationDate: [null],
+      });
 
       this.prefillForm();
     });
-  }
-
-  private async prefillForm() {
-    if (this.entryManager.editedEntry) {
-      this.fillExistingEntry();
-    } else {
-      await this.fillNewEntry();
-    }
-
-    const password = this.newEntryForm.get('passwords.password')?.value;
-
-    if (password) {
-      this.passwordScore = zxcvbn(password).score;
-    }
-
-    this.cdRef.detectChanges();
   }
 
   ngAfterViewInit() {
@@ -275,6 +260,22 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
     this.saveLocked = false;
     this.close();
+  }
+
+  private async prefillForm() {
+    if (this.entryManager.editedEntry) {
+      this.fillExistingEntry();
+    } else {
+      await this.fillNewEntry();
+    }
+
+    const password = this.newEntryForm.get('passwords.password')?.value;
+
+    if (password) {
+      this.passwordScore = zxcvbn(password).score;
+    }
+
+    this.cdRef.detectChanges();
   }
 
   private getGroup(): number {

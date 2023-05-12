@@ -12,7 +12,6 @@ export class ConfigService {
   public readonly configLoadedSource$: Observable<IAppConfig>;
   private readonly configLoaded: Subject<IAppConfig> = new ReplaySubject(1);
   private config: IAppConfig | null = null;
-  private workspaceData: any;
 
   constructor(@Inject(CommunicationService) private readonly communicationService: ICommunicationService) { 
     this.configLoadedSource$ = this.configLoaded.asObservable();
@@ -23,10 +22,5 @@ export class ConfigService {
 
     this.config = {...this.config, ...config};
     this.configLoaded.next(this.config);
-  }
-
-  async getWorkspaceData(): Promise<string> {
-    this.workspaceData = await this.communicationService.ipcRenderer.invoke(IpcChannel.GetRecentFiles);
-    return this.workspaceData;
   }
 }

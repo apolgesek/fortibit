@@ -10,13 +10,13 @@
 
 	&:disabled {
 		cursor: default;
-		background-color: var(--add-entry-disabled-bg);
-		color: var(--toolbar-disabled-font);
+		background-color: var(--secondary-btn-bg--disabled);
+		color: var(--secondary-btn-text--disabled);
 	}
 
-	&:hover:not(:disabled) {
+	&:hover:not(:disabled), &:focus {
 		color: white;
-		background-color: var(--add-entry-cta-bg-hover);
+		background-color: var(--add-entry-cta-bg--hover);
 	}
 
 	i-feather {
@@ -27,8 +27,8 @@
 
 .save-db {
 	i-feather {
-		width: 15px !important;
-		height: 15px !important;
+		width: 16px !important;
+		height: 16px !important;
 	}
 }
 
@@ -44,29 +44,34 @@
 .main-nav {
 	width: 100%;
 	height: $toolbar-height;
-  background-color: var(--secondary-bg);
+  background-color: var(--primary-bg);
 	display: flex;
 	position: relative;
 	z-index: 3;
+	border-bottom: 1px solid var(--border-color);
+	border-top: 1px solid var(--border-color);
 
 	.menu-panel {
 		flex: 1;
 		text-align: left;
 		display: flex;
 		justify-content: flex-start;
-		align-items: center;
+		align-items: stretch;
+		padding: 1rem 0;
 	}
 
 	.searchbox {
 		display: flex;
 		align-items: center;
 		position: relative;
+		border: 1px solid var(--border-color);
+		border-radius: 0.25rem;
 	
 		.search {
 			font-size: 0.875rem;
 			border: none;
 			border-radius: 0.25rem;
-			padding: 0.913rem;
+			padding: 0 1rem;
 			height: 100%;
 			width: 10rem;
 			border-top-right-radius: 0;
@@ -86,87 +91,53 @@
 			align-items: center;
 			background-color: var(--input-bg);
 			height: 46px;
-			color: var(--primary-font);
+			color: var(--primary-text);
 			position: relative;
 			z-index: 100;
 			border-top-right-radius: 0.25rem;
 			border-bottom-right-radius: 0.25rem;
 
 			.clear-search {
+				width: 1rem !important;
+				height: 1rem !important;
+				border: 1px solid transparent;
+				border-radius: 2px;
+				outline: none;
 				cursor: pointer;
+
 				&::before {
 					margin: 0;
 				}
 
 				&:focus:not(:hover) {
-					outline: 3px solid $barberry;
-				}
-			}
-
-			.dropbtn {
-				@include font-medium;
-				color: $grey-400;
-				padding-top: 1rem;
-				padding-bottom: 0.9rem;
-				padding-left: 0.5rem;
-				padding-right: 0.5rem;
-				align-items: flex-end;
-				background-color: var(--input-bg);
-				text-transform: uppercase;
-				margin-left: 0.25rem;
-
-				&:hover {
-					color: var(--primary-font);
-					background-color: var(--toolbar-dropdown-bg);
-				}
-
-				&:focus, &.expanded {
-					background-color: var(--toolbar-dropdown-bg) !important;
-				}
-
-				&.expanded {
-					border-bottom-right-radius: 0;
-				}
-			}
-
-			.dropdown-content {
-				border-radius: 0.25rem;
-				border-top-left-radius: 0;
-				border-top-right-radius: 0;
-				background-color: var(--toolbar-dropdown-bg);
-
-				li {
-					&:hover, &:focus {
-						background-color: var(--toolbar-dropdown-item-hover);
-					}
+					border-color: $barberry;
 				}
 			}
 		}
 	}
 }
 
-.group-mode-btn {
-	border-top-right-radius: 0.25rem;
-	border-bottom-right-radius: 0.25rem;
+.global-search-icon {
+	border: 1px solid transparent;
+	width: 1rem !important;
+	height: 1rem !important;
+	margin-right: 1rem !important;
+	border-radius: 2px;
+	cursor: pointer;
+	outline: none;
 
-	&.expanded {
-		border-bottom-right-radius: 0;
-	}
-
-	i-feather {
-		width: 1rem !important;
-		height: 1rem !important;
-	}
-
-	&:hover, &:focus {
-		background-color: var(--list-item-active);
+	::ng-deep svg {
+		stroke: var(--dropdown-text--disabled);
 	}
 
 	&:focus:not(:hover) {
-		outline: 3px solid $barberry !important;
+		border-color: $barberry;
 	}
 
-	i-feather {
-		margin-left: 0.5rem;
+	&.active {
+		border: 1px solid var(--link-text);
+		::ng-deep svg {
+			stroke: var(--primary-text);
+		}
 	}
 }

@@ -3,7 +3,7 @@ import { GroupId } from '@app/core/enums';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { EntryManager, GroupManager, ModalRef } from '@app/core/services';
-import { AutofocusDirective } from '@app/main/directives/autofocus.directive';
+
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -13,10 +13,9 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [
     CommonModule,
-    AutofocusDirective,
+    
     ModalComponent
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DeleteEntryDialogComponent implements IModal, OnInit {
   public readonly ref!: ComponentRef<DeleteEntryDialogComponent>;

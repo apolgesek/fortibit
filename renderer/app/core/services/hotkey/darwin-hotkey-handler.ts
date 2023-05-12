@@ -54,9 +54,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
 
   public registerSaveDatabase(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 's' && event.metaKey) {
-      if (!this.workspaceService.file) {
-        this.modalService.openMasterPasswordWindow()
-      } else if (!this.workspaceService.isSynced) {
+      if (!this.workspaceService.isSynced) {
         this.workspaceService.saveDatabase();
       }
 

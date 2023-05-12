@@ -13,6 +13,7 @@ import { DropdownStateService } from '../services/dropdown-state.service';
 export class MenuItemDirective {
   @Input('appDropdownToggle') isDropdownToggle: string;
   @Input() closeOnSelect = true;
+  @Input() closeMode: 'tree' | 'subtree' = 'tree'
   @Input() public set disabled(value: boolean) {
     this._isDisabled = value;
   }
@@ -84,7 +85,14 @@ export class MenuItemDirective {
   public onEnterDown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       this.activate.emit();
-      this.dropdownState.closeAndFocusFirst();
+
+      if (this.closeOnSelect) {
+        if (this.closeMode === 'subtree') {
+          this.dropdownState.closeAndFocusFirst();
+        } else {
+          this.dropdownState.closeTree(this.dropdownState);
+        }
+      }
     }
   }
 

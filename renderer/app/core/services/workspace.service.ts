@@ -16,6 +16,7 @@ import { EntryManager } from "./managers/entry.manager";
 import { GroupManager } from "./managers/group.manager";
 import { ModalService } from "./modal.service";
 import { NotificationService } from "./notification.service";
+import { UiUtil } from "@app/utils";
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceService {
@@ -24,6 +25,7 @@ export class WorkspaceService {
   public isSynced?: boolean;
   public file?: { filePath: string, filename: string };
   public isLocked = true;
+  public isBiometricsAuthenticationInProgress = false;
 
   private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
   private readonly lockKeydownEvent = (event: KeyboardEvent) => event.preventDefault();
@@ -35,7 +37,6 @@ export class WorkspaceService {
 
   constructor(
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    @Inject(DOCUMENT) private readonly document: Document,
     private readonly configService: ConfigService,
     private readonly entryRepository: EntryRepository,
     private readonly entryManager: EntryManager,
@@ -56,6 +57,7 @@ export class WorkspaceService {
       this.groupManager.markDirtySource.pipe(startWith(null))
     ]).pipe(skip(1)).subscribe(() => {
       this.isSynced = null;
+      this.saveDatabaseSnapshot();
     });
 
     this.loadedDatabase$ = this.loadedDatabaseSource.asObservable();
@@ -93,6 +95,8 @@ export class WorkspaceService {
   }
 
   async createNew(): Promise<void> {
+    await this.router.navigate(['/master-password']);
+
     this.groupManager.selectedGroup = null;
     this.entryManager.entryHistory = null;
     this.entryManager.editedEntry = null;
@@ -124,8 +128,16 @@ export class WorkspaceService {
   unlock(): void {
     this.isLocked = false;
     this.communicationService.ipcRenderer.send(IpcChannel.Unlock);
-    this.router.navigate(['/workspace']).then(() => {
-      this.unlockInterface();
+    this.router.navigate(['/workspace']).then(async () => {
+      UiUtil.unlockInterface();
+      this.isBiometricsAuthenticationInProgress = false;
+
+      const path = await this.communicationService.ipcRenderer.invoke(IpcChannel.CheckRecoveryFile);
+      if (path) {
+        setTimeout(() => {
+          this.modalService.openRecoveryWindow(path);
+        }, 1000);
+      }
     });
   }
 
@@ -141,10 +153,22 @@ export class WorkspaceService {
     return true;
   }
 
+  async saveDatabaseSnapshot(): Promise<true | Error> {
+    const blob = await exportDB(this.db.context);
+
+    const fileReader = new FileReader();
+    fileReader.readAsText(blob);
+    fileReader.onloadend = () => {
+      this.communicationService.ipcRenderer.send(IpcChannel.DatabaseChanged, { database: fileReader.result });
+    };
+
+    return true;
+  }
+
   async loadDatabase(jsonString: string) {
     const blob = new Blob([jsonString]);
 
-    await importInto(this.db.context, blob, { acceptNameDiff: true, overwriteValues: true });
+    await importInto(this.db.context, blob, { acceptNameDiff: true, acceptVersionDiff: true, overwriteValues: true, clearTablesBeforeImport: true });
     await this.groupManager.getGroupsTree();
 
     this.setDatabaseLoaded();
@@ -201,16 +225,6 @@ export class WorkspaceService {
 
   toggleTheme() {
     this.communicationService.ipcRenderer.invoke(IpcChannel.ToggleTheme);
-  }
-
-  lockInterface() {
-    this.document.body.classList.add('lock');
-    window.addEventListener('keydown', this.lockKeydownEvent);
-  }
-
-  unlockInterface() {
-    this.document.body.classList.remove('lock');
-    window.removeEventListener('keydown', this.lockKeydownEvent);
   }
 
   private handleDatabaseLock() {

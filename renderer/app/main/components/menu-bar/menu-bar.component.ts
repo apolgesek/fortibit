@@ -116,7 +116,13 @@ export class MenuBarComponent implements OnInit, OnDestroy {
       this.recentFiles = config.workspaces.recentlyOpened;
     });
 
-    this.communicationService.ipcRenderer.on(IpcChannel.MaximizedRestored, (_event, isMaximized: boolean) => {
+    this.communicationService.ipcRenderer.on(IpcChannel.GetRecentFiles, (_, files: string[]) => {
+      this.zone.run(() => {
+        this.recentFiles = files;
+      });
+    });
+
+    this.communicationService.ipcRenderer.on(IpcChannel.MaximizedRestored, (_, isMaximized: boolean) => {
       this.zone.run(() => {
         this.isMaximized = isMaximized;
         this.maximizeIconPath = isMaximized ? `restore-${this.theme}` : `max-${this.theme}`;
@@ -141,6 +147,10 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     this.modalService.openWeakPasswordsWindow();
   }
 
+  openChangePasswordWindow() {
+    this.modalService.openPasswordChangeWindow();
+  }
+
   openFile(path?: string) {
     this.workspaceService.executeEvent().then(value => {
       if (value) {
@@ -158,13 +168,11 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   save() {  
-    !this.workspaceService.file
-      ? this.modalService.openMasterPasswordWindow()
-      : this.workspaceService.saveDatabase();
+    this.workspaceService.saveDatabase();
   }
 
   saveAs() {
-    this.modalService.openMasterPasswordWindow({ forceNew: true });
+    this.workspaceService.saveDatabase({ forceNew: true });
   }
 
   async import(handler: ImportHandler): Promise<void> {
@@ -209,7 +217,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     this.openUrl(AppConfig.urls.reportIssue);
   }
 
-  openAboutModal() {
+  openAboutWindow() {
     this.modalService.openAboutWindow();
   }
 

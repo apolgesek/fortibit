@@ -23,15 +23,14 @@ export class SingleInstanceServices extends ServiceCollection {
   }
 
   configureServices() {
-    this.set(IConfigService, new ConfigService());
+    this.set(INativeApiService, this.getNativeApiService());
+    this.set(ISendInputService, this.getSendInputService());
+    this.set(IConfigService, new ConfigService(this.get(INativeApiService)));
     this.set(IEncryptionEventWrapper, new EncryptionEventWrapper());
     this.set(IEncryptionEventService, new EncryptionEventService(this.get(IEncryptionEventWrapper)));
     this.set(IPerformanceService, new PerformanceService());
     this.set(IFileService, new FileService());
     this.set(IClipboardService, new ClipboardService(this.get(IConfigService)));
-
-    this.set(INativeApiService, this.getNativeApiService());
-    this.set(ISendInputService, this.getSendInputService());
 
     this.set(IWindowService, new WindowService(
       this.get(IConfigService),
@@ -66,6 +65,7 @@ export class SingleInstanceServices extends ServiceCollection {
       this.get(IIconService),
       this.get(IImportService),
       this.get(IExportService),
+      this.get(INativeApiService),
       this.get(IEncryptionEventService)
     ));
 

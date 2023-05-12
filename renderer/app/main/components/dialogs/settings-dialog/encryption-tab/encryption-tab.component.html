@@ -57,42 +57,5 @@
           <span class="slider"></span>
       </label>    
     </div>
-    <div class="section-header">
-      Lock database after inactive time
-    </div>
-    <div class="inputgroup">
-      <label class="label" for="idleTime">Inactive time in seconds:</label>
-      <input
-        id="idleTime"
-        type="number"
-        class="number"
-        formControlName="idleTime"
-        (input)="onNumberChange($event, 'idleTime', 4)">
-    </div>
-    <div
-      *ngIf="isControlInvalid(encryptionForm.get('idleTime'))"
-      class="validation-error">
-      Must be at least 60 seconds.
-    </div>
-    <div class="inputgroup checkbox">
-      <label class="label" for="lockOnSystemLock">Lock database when locking the computer:</label>
-      <label class="switch">
-        <input
-          id="lockOnSystemLock"
-          type="checkbox"
-          formControlName="lockOnSystemLock">
-          <span class="slider"></span>
-      </label>    
-    </div>
-    <div class="inputgroup checkbox">
-      <label class="label" for="lockOnSystemLock">Save database before it gets locked due to inactivity:</label>
-      <label class="switch">
-        <input
-          id="saveOnLock"
-          type="checkbox"
-          formControlName="saveOnLock">
-          <span class="slider"></span>
-      </label>    
-    </div>
   </form>
 </div>

@@ -22,7 +22,21 @@ import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
   ]
 })
 export class SecondaryMenuBarComponent {
-  public readonly closeIcon = 'assets/icons/close.png';
+  private theme: 'w' | 'k' = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'w' : 'k';
+  
+  public get closeIcons(): string {
+    return [
+      `assets/icons/close-${this.theme}-10.png 1x`,
+      `assets/icons/close-${this.theme}-12.png 1.25x`,
+      `assets/icons/close-${this.theme}-15.png 1.5x`,
+      `assets/icons/close-${this.theme}-15.png 1.75x`,
+      `assets/icons/close-${this.theme}-20.png 2x`,
+      `assets/icons/close-${this.theme}-20.png 2.25x`,
+      `assets/icons/close-${this.theme}-24.png 2.5x`,
+      `assets/icons/close-${this.theme}-30.png 3x`,
+      `assets/icons/close-${this.theme}-30.png 3.5x`
+    ].join(',');
+  }
 
   constructor(@Inject(CommunicationService) private readonly communicationService: ICommunicationService) { }
 

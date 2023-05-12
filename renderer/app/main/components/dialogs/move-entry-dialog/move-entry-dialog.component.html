@@ -1,7 +1,7 @@
 
 <app-modal bodyClass="move-entry-modal" data-prevent-entry-deselect>
   <div class="dialog-header">
-    <h2>Move entry to:</h2>
+    <h2>Move {{ selectedPasswordsLength > 1 ? 'entries' : 'entry' }} to:</h2>
     <a
       href="#"
       role="button"
@@ -12,7 +12,7 @@
   </div>
   <div>
     <div class="inputgroup search">
-      <input #searchPhrase appAutofocus type="text" placeholder="Search group..." />
+      <input #searchPhrase #autofocus type="text" placeholder="Search group..." />
     </div>
     <ng-container *ngIf="groups$ | async as groups">
       <div class="list" *ngIf="groups.length > 0; else notFound">

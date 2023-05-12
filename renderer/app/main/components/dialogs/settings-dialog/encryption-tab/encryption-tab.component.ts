@@ -38,10 +38,7 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
         lowercase: [config.encryption.lowercase],
         uppercase: [config.encryption.uppercase],
         specialChars: [config.encryption.specialChars],
-        numbers: [config.encryption.numbers],
-        idleTime: [config.idleSeconds, Validators.compose([Validators.required, Validators.min(60)])],
-        lockOnSystemLock: [config.lockOnSystemLock],
-        saveOnLock: [config.saveOnLock]
+        numbers: [config.encryption.numbers]
       });
 
       this.encryptionForm.valueChanges
@@ -50,22 +47,21 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
         distinctUntilChanged(),
         takeUntil(this.destroyed)
       ).subscribe((form) => {
-        if (this.encryptionForm.valid) {
-          const configPartial = {
-            encryption: {
-              passwordLength: form.passwordLength,
-              lowercase: form.lowercase,
-              uppercase: form.uppercase,
-              specialChars: form.specialChars,
-              numbers: form.numbers,
-            },
-            idleSeconds: form.idleTime,
-            lockOnSystemLock: form.lockOnSystemLock,
-            saveOnLock: form.saveOnLock
-          } as Partial<IProduct>;
-
-          this.configService.setConfig(configPartial);
+        if (this.encryptionForm.invalid) {
+          return;
         }
+        
+        const configPartial = {
+          encryption: {
+            passwordLength: form.passwordLength,
+            lowercase: form.lowercase,
+            uppercase: form.uppercase,
+            specialChars: form.specialChars,
+            numbers: form.numbers,
+          }
+        } as Partial<IProduct>;
+
+        this.configService.setConfig(configPartial);
       });
     });
   }
@@ -77,12 +73,12 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
     }, this.debounceTimeMs);
   }
 
-  onNumberChange(event: KeyboardEvent, controlName: string, maxLenght: number) {
+  onNumberChange(event: KeyboardEvent, controlName: string, maxLength: number) {
     const input = event.target as any;
     const value = input.value.toString();
 
-    if (value.length >= maxLenght) {
-      input.value = parseInt(value.slice(0, maxLenght));
+    if (value.length >= maxLength) {
+      input.value = parseInt(value.slice(0, maxLength));
       this.encryptionForm.get(controlName).setValue(input.value);
     }
   }

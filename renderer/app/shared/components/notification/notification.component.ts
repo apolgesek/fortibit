@@ -112,7 +112,7 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
     const runtime = timestamp - this.animationStartTime;
     let progress = (100 - ((runtime / duration) * 100)).toFixed(2);
 
-    element.style.background = `linear-gradient(90deg, ${this.successClass ? 'var(--notification-success-bg)' : 'var(--notification-error-bg)'} ${progress}%, var(--notification-bg) ${progress}% 100%)`;
+    element.style.background = `linear-gradient(90deg, ${this.successClass ? 'var(--notification-bg--success)' : 'var(--notification-bg--error)'} ${progress}%, var(--notification-bg) ${progress}% 100%)`;
 
     if (runtime < duration) {
       requestAnimationFrame((timestamp) => {

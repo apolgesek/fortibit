@@ -94,7 +94,7 @@ export class ReportService {
 
     const reportedEntries = entries.map(e => {
       return {
-        groupName: groups.find(x => x.id === e.groupId).name,
+        id: e.id,
         title: e.title,
         username: e.username,
         score: reportPayload.find(x => x.id === e.id).score
@@ -107,7 +107,7 @@ export class ReportService {
   async addReport(report: Partial<IReport>): Promise<number> {
     const reports = await this.reportRepository.getAllByPredicate(x => x.type === report.type);
 
-    if (reports.length >= 10) {
+    if (reports.length >= 1) {
       await this.reportRepository.delete(reports.shift().id);
     }
     

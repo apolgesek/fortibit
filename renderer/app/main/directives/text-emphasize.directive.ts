@@ -4,8 +4,8 @@ import { Directive, Input, ElementRef } from '@angular/core';
   standalone: true
 })
 export class TextEmphasizeDirective {
-  private readonly openingTag = '<strong>';
-  private readonly closingTag = '</strong>';
+  private readonly openingTag = '<span class="emp">';
+  private readonly closingTag = '</span>';
 
   private searchPhraseValue = '';
 

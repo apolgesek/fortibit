@@ -42,6 +42,8 @@
 				</div>
 				<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">Lock</li>
 				<div class="divider"><hr /></div>
+				<li appMenuItem (activate)="openChangePasswordWindow()" [disabled]="isLocked">Change password</li>
+				<div class="divider"><hr /></div>
 				<li appMenuItem (activate)="exit()">Exit</li>
 			</div>
 		</ul>
@@ -74,7 +76,7 @@
 				<div class="divider"><hr /></div>
 				<li appMenuItem (activate)="openReleaseNotes()">Release notes</li>
 				<li appMenuItem (activate)="openReportIssue()">Report issue</li>
-				<li appMenuItem (activate)="openAboutModal()">About</li>
+				<li appMenuItem (activate)="openAboutWindow()">About</li>
 			</div>
 		</ul>
 	</div>

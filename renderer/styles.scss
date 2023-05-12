@@ -24,6 +24,12 @@
 	url('~assets/fonts/roboto-bold.woff') format('woff');
 }
 
+@font-face {
+	font-family: 'roboto-black';
+	src: url('~assets/fonts/roboto-black.woff2') format('woff2'),
+	url('~assets/fonts/roboto-black.woff') format('woff');
+}
+
 html,
 body {
 	@include font-regular;
@@ -32,7 +38,7 @@ body {
 	height: 100%;
 	overflow: hidden;
 	background-color: var(--primary-bg); // keep in sync with window bg color!
-	color: var(--primary-font);
+	color: var(--primary-text);
 }
 
 body {
@@ -55,7 +61,7 @@ body {
 }
 
 a {
-	color: var(--link-font);
+	color: var(--link-text);
 	text-decoration: none;
 }
 
@@ -82,7 +88,7 @@ a {
 	position: relative;
 	z-index: 2;
 	padding: 0 1rem;
-	color: var(--primary-font);
+	color: var(--primary-text);
 	font-size: 0.875rem;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -94,7 +100,7 @@ a {
 }
 
 .validation-error {
-	color: var(--error-font);
+	color: var(--error-text);
 	font-size: 0.875rem;
 }
 
@@ -145,8 +151,12 @@ form [class*="-btn"] {
 
 .section-header {
   @include font-medium;
-	font-size: 1rem;
+	font-size: 1.25rem;
   padding-bottom: 0.5rem;
+
+	&:not(:first-child) {
+		margin-top: 3rem;
+	}
 }
 
 code {
@@ -160,4 +170,21 @@ code {
 
 .cdk-virtual-scrollable {
 	contain: layout !important;
+}
+
+.emp {
+	@include font-black;
+	color: $blue-250;
+}
+
+.info-box {
+	display: flex;
+	padding: 1rem;
+	background-color: var(--secondary-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 0.25rem;
+
+	i-feather {
+		width: 1.5rem !important;
+	}
 }

@@ -1,15 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ICommunicationService } from '@app/core/models';
-import { WorkspaceService, ConfigService, ModalService, NotificationService } from '@app/core/services';
+import { ConfigService, NotificationService, WorkspaceService } from '@app/core/services';
 import { MasterPasswordSetupComponent } from '@app/main/components/master-password-setup/master-password-setup.component';
-import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
-import { isControlInvalid, markAllAsDirty } from '@app/utils';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { isControlInvalid } from '@app/utils';
 import { FeatherModule } from 'angular-feather';
 import { CommunicationService } from 'injection-tokens';
-import { debounceTime, delay, distinctUntilChanged, from, map, Observable, Subject, take, takeUntil, tap } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, take, takeUntil } from 'rxjs';
 import { IAppConfig } from '../../../../../../../app-config';
 import { IProduct } from '../../../../../../../product';
 
@@ -32,26 +30,6 @@ export class PasswordChangeTabComponent implements OnInit, OnDestroy {
   private readonly destroyed: Subject<void> = new Subject();
   private readonly debounceTimeMs = 500;
 
-  get passwordsGroup(): FormGroup {
-    return this.passwordForm.get('newPassword') as FormGroup;
-  }
-
-  get passwordFormEnabled(): boolean {
-    if (!this.isSaved || this.isLocked) {
-      if (this.passwordForm.enabled) {
-        this.passwordForm.disable();
-      }
-
-      return false;
-    } else {
-      if (this.passwordForm.disabled) {
-        this.passwordForm.enable();
-      }
-
-      return true;
-    }
-  }
-
   get isLocked(): boolean {
     return this.workspaceService.isLocked;
   }
@@ -61,32 +39,58 @@ export class PasswordChangeTabComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    private readonly formBuilder: FormBuilder,
     @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly modalService: ModalService,
+    private readonly formBuilder: FormBuilder,
     private readonly notificationService: NotificationService,
     private readonly configService: ConfigService,
-    private readonly workspaceService: WorkspaceService) {}
+    private readonly workspaceService: WorkspaceService
+  ) {}
 
   ngOnInit() {
     this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
       this.passwordForm = this.formBuilder.group({
-        autoType: [config.autoTypeEnabled],
-        currentPassword: [null, { validators: [Validators.required], asyncValidators: [this.passwordValidator()], updateOn: 'blur' }],
-        newPassword: this.formBuilder.group({
-          password: [null, { validators: Validators.compose([Validators.required, Validators.minLength(6)]) }],
-          repeatPassword: [null]
-        }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
+        toggle: this.formBuilder.group({
+          autoType: [config.autoTypeEnabled],
+          lockOnSystemLock: [config.lockOnSystemLock],
+          saveOnLock: [config.saveOnLock],
+        }),
+        input: this.formBuilder.group({
+          idleTime: [config.idleSeconds, Validators.compose([Validators.required, Validators.min(60)])],
+          clipboardTime: [config.clipboardClearTimeMs / 1000, Validators.compose([Validators.required, Validators.min(0)])],
+        }),
       });
 
-      this.passwordForm.get('autoType').valueChanges
+      this.passwordForm.get('toggle').valueChanges
+      .pipe(
+        distinctUntilChanged(),
+        takeUntil(this.destroyed)
+      ).subscribe((form) => {
+        if (this.passwordForm.get('toggle').invalid) {
+          return;
+        }
+        
+        const configPartial = {
+          autoTypeEnabled: form.autoType,
+          lockOnSystemLock: form.lockOnSystemLock,
+          saveOnLock: form.saveOnLock,
+        } as Partial<IAppConfig>;
+
+        this.configService.setConfig(configPartial);
+      });
+
+      this.passwordForm.get('input').valueChanges
       .pipe(
         debounceTime(this.debounceTimeMs),
         distinctUntilChanged(),
         takeUntil(this.destroyed)
-      ).subscribe((value) => {
+      ).subscribe((form) => {
+        if (this.passwordForm.get('input').invalid) {
+          return;
+        }
+        
         const configPartial = {
-          autoTypeEnabled: value,
+          idleSeconds: form.idleTime,
+          clipboardClearTimeMs: form.clipboardTime * 1000,
         } as Partial<IAppConfig>;
 
         this.configService.setConfig(configPartial);
@@ -99,24 +103,6 @@ export class PasswordChangeTabComponent implements OnInit, OnDestroy {
     this.destroyed.complete();
   }
 
-  async savePassword() {
-    markAllAsDirty(this.passwordForm);
-
-    if (this.passwordForm.invalid) {
-      return;
-    }
-
-    const success = await this.workspaceService.saveNewDatabase(this.passwordForm.value.newPassword.password, { forceNew: false });
-    if (success) {
-      this.passwordForm.get('currentPassword').reset();
-      this.passwordForm.get('newPassword').reset();
-    }
-  }
-
-  saveFile() {
-    this.modalService.openMasterPasswordWindow();
-  }
-
   restoreDefaults() {
     const configPartial = {
       encryption: {
@@ -127,8 +113,11 @@ export class PasswordChangeTabComponent implements OnInit, OnDestroy {
         numbers: true,
       },
       idleSeconds: 600,
+      clipboardClearTimeMs: 15000,
       lockOnSystemLock: true,
-      displayIcons: true
+      displayIcons: true,
+      biometricsAuthenticationEnabled: false,
+      saveOnLock: false,
     } as Partial<IProduct>;
 
     this.configService.setConfig(configPartial);
@@ -140,19 +129,13 @@ export class PasswordChangeTabComponent implements OnInit, OnDestroy {
     });
   }
 
-  private passwordValidator(): ValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      const password = control.value;
+  onNumberChange(event: KeyboardEvent, controlName: string, maxLength: number) {
+    const input = event.target as any;
+    const value = input.value.toString();
 
-      return from(this.communicationService.ipcRenderer.invoke(IpcChannel.ValidatePassword, password))
-        .pipe(
-          tap(() => control.markAsPristine()),
-          delay(300),
-          tap(() => control.markAsDirty()),
-          map(x =>  {
-            return x ? null : { incorrectPassword: true }
-          })
-        );
-    };
+    if (value.length >= maxLength) {
+      input.value = parseInt(value.slice(0, maxLength));
+      this.passwordForm.get(controlName).setValue(input.value);
+    }
   }
 }

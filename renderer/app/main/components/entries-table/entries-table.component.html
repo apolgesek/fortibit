@@ -13,6 +13,7 @@
 	<ng-container *ngIf="passwordList$ | async as passwordList">
 		<cdk-virtual-scroll-viewport
 			*ngIf="passwordList.length > 0; else noPasswordsTemplate"
+			data-prevent-entry-deselect
 			itemSize="56"
 			role="rowgroup"
 			appFocusableList
@@ -21,7 +22,6 @@
 			class="table-viewport">
 			<ng-container *cdkVirtualFor="let item of passwordList; let i = index; trackBy: trackingTag; templateCacheSize: 0">
 				<div
-					data-prevent-entry-deselect
 					[appFocusableListItem]="item"
 					[appContextMenuItem]="getContextMenu(item)"
 					(click)="selectEntry($event, item)"
@@ -40,7 +40,7 @@
 						<div class="row title" [appTextEmphasize]="searchPhrase$ | async">
 							{{ item.title }}
 						</div>
-						<div class="row" [appTextEmphasize]="searchPhrase$ | async" (dblclick)="copyToClipboard(item, 'username')" style="color: #757575">
+						<div class="row username" [appTextEmphasize]="searchPhrase$ | async" (dblclick)="copyToClipboard(item, 'username')">
 							{{ item.username }}
 						</div>
 					</div>

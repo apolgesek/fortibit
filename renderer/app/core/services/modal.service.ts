@@ -9,10 +9,11 @@ import { EntryHistoryDialogComponent } from '@app/main/components/dialogs/entry-
 import { ExposedPasswordsDialogComponent } from '@app/main/components/dialogs/exposed-passwords-dialog/exposed-passwords-dialog.component';
 import { GroupDialogComponent } from '@app/main/components/dialogs/group-dialog/group-dialog.component';
 import { ImportDatabaseMetadataDialogComponent } from '@app/main/components/dialogs/import-database-metadata-dialog/import-database-metadata-dialog.component';
-import { MasterPasswordDialogComponent } from '@app/main/components/dialogs/master-password-dialog/master-password-dialog.component';
 import { MoveEntryDialogComponent } from '@app/main/components/dialogs/move-entry-dialog/move-entry-dialog.component';
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
 import { WeakPasswordsDialogComponent } from '@app/main/components/dialogs/weak-passwords-dialog/weak-passwords-dialog.component';
+import { FileRecoveryDialogComponent } from '@app/main/components/dialogs/file-recovery-dialog/file-recovery-dialog.component';
+import { PasswordChangeDialogComponent } from '@app/main/components/dialogs/password-change-dialog/password-change-dialog.component';
 import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { CommunicationService } from 'injection-tokens';
 import { ICommunicationService } from '../models';
@@ -63,10 +64,6 @@ export class ModalService {
     return this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword, config, historyEntry: entry }});
   }
 
-  openMasterPasswordWindow(config?: { forceNew?: boolean }) {
-    this.modalManager.open(MasterPasswordDialogComponent, { payload: config });
-  }
-
   openGroupWindow(mode: 'new' | 'edit' = 'new') {
     this.modalManager.open(GroupDialogComponent, { payload: { mode } });
   }
@@ -98,6 +95,14 @@ export class ModalService {
 
   openMoveEntryWindow() {
     this.modalManager.open(MoveEntryDialogComponent);
+  }
+
+  openRecoveryWindow(path: string) {
+    this.modalManager.open(FileRecoveryDialogComponent, { payload: { path } });
+  }
+
+  openPasswordChangeWindow() {
+    this.modalManager.open(PasswordChangeDialogComponent);
   }
 
   close<T>(ref: ComponentRef<T>) {

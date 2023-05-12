@@ -23,6 +23,9 @@
   "files": [
     "main.ts",
   ],
+  "include": [
+    "**/auth.service.ts"
+  ],
   "exclude": [
     "node_modules",
     "**/*.spec.ts",
