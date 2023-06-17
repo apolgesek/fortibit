@@ -6,9 +6,9 @@ import { Sort } from '../enums';
 type SortableEntryProp = keyof Pick<IPasswordEntry, 'title' | 'username' | 'creationDate'>;
 
 interface ISearchService {
-  reset() : void;
-  setSort(state: Sort, prop: SortableEntryProp) : void;
-  filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]) : IPasswordEntry[];
+  reset(): void;
+  setSort(state: Sort, prop: SortableEntryProp): void;
+  filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]): IPasswordEntry[];
 }
 
 @Injectable({
@@ -22,15 +22,6 @@ export class SearchService implements ISearchService {
   public sortOrder: Sort = Sort.Desc;
   public isSearching = false;
   public wasSearched = false;
-
-  set isGlobalSearchMode(value: boolean) {
-    this._isGlobalSearchMode = value;
-  }
-
-  get isGlobalSearchMode(): boolean {
-    return this._isGlobalSearchMode;
-  }
-
   private searchPhraseSource: BehaviorSubject<string> = new BehaviorSubject<string>('');
   private _isGlobalSearchMode = false;
 
@@ -54,6 +45,14 @@ export class SearchService implements ISearchService {
     ).subscribe();
   }
 
+  get isGlobalSearchMode(): boolean {
+    return this._isGlobalSearchMode;
+  }
+
+  set isGlobalSearchMode(value: boolean) {
+    this._isGlobalSearchMode = value;
+  }
+
   public reset() {
     this.searchPhraseValue = '';
     this.updateSearchResults();
@@ -67,7 +66,7 @@ export class SearchService implements ISearchService {
 
   public filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]): IPasswordEntry[] {
     if (!searchResults.length) {
-      let filteredPasswords = passwords.filter(p => { 
+      const filteredPasswords = passwords.filter(p => {
         if (phrase.length) {
           return p.title?.toLowerCase().includes(phrase.toLowerCase())
           || p.username?.toLowerCase().includes(phrase.toLowerCase());
@@ -99,12 +98,12 @@ export class SearchService implements ISearchService {
       if (this.sortProp === 'creationDate') {
         const firstProp = a[this.sortProp];
         const secondProp = b[this.sortProp];
-      
+
         return firstProp.getTime() - secondProp.getTime();
       } else if (this.sortProp === 'title' || this.sortProp === 'username') {
         const firstProp = a[this.sortProp];
         const secondProp = b[this.sortProp];
-  
+
         return firstProp.localeCompare(secondProp);
       }
     } else if (a[this.sortProp] && !b[this.sortProp]) {
@@ -119,7 +118,7 @@ export class SearchService implements ISearchService {
       if (this.sortProp === 'creationDate') {
         const firstProp = a[this.sortProp];
         const secondProp = b[this.sortProp];
-      
+
         return secondProp.getTime() - firstProp.getTime();
       } else if (this.sortProp === 'title' || this.sortProp === 'username') {
         const firstProp = a[this.sortProp];

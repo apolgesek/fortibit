@@ -1,14 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, NgZone } from '@angular/core';
+import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { ICommunicationService } from '@app/core/models';
+import { IMessageBroker } from '@app/core/models';
 import { WorkspaceService } from '@app/core/services';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
-import { CommunicationService } from 'injection-tokens';
+import { MessageBroker } from 'injection-tokens';
+
+interface IGetSaveSatus {
+  status: boolean;
+  message: string;
+  file: any;
+}
 
 @Component({
   selector: 'app-master-password-setup',
@@ -21,15 +26,15 @@ import { CommunicationService } from 'injection-tokens';
     FeatherModule
   ]
 })
-export class MasterPasswordSetupComponent {
-  public onGetSaveStatus: (_: any, { status, message, file }: {status: boolean, message: string, file: unknown}) => void;
+export class MasterPasswordSetupComponent implements OnInit, OnDestroy {
+  public onGetSaveStatus: (_: any, getSaveStatus: IGetSaveSatus) => void;
   public readonly minPasswordLength = 6;
   public readonly isControlInvalid = isControlInvalid;
 
   public masterPasswordForm: FormGroup;
 
   constructor(
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly workspaceService: WorkspaceService,
     private readonly zone: NgZone,
     private readonly fb: FormBuilder,
@@ -42,11 +47,11 @@ export class MasterPasswordSetupComponent {
     this.onGetSaveStatus = (_, { status })  => {
       this.zone.run(() => {
         if (status) {
-          this.workspaceService.unlock();       
+          this.workspaceService.unlock();
         }
       });
     };
-   }
+  }
 
   async saveNewDatabase() {
     markAllAsDirty(this.masterPasswordForm);
@@ -61,10 +66,10 @@ export class MasterPasswordSetupComponent {
   }
 
   ngOnInit(): void {
-    this.communicationService.ipcRenderer.on(IpcChannel.GetSaveStatus, this.onGetSaveStatus);
+    this.messageBroker.ipcRenderer.on(IpcChannel.GetSaveStatus, this.onGetSaveStatus);
   }
 
   ngOnDestroy(): void {
-    this.communicationService.ipcRenderer.off(IpcChannel.GetSaveStatus, this.onGetSaveStatus);
+    this.messageBroker.ipcRenderer.off(IpcChannel.GetSaveStatus, this.onGetSaveStatus);
   }
 }

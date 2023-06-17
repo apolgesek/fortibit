@@ -1,4 +1,4 @@
-import { IHotkeyConfiguration } from "./hotkey-configuration.model";
+import { IHotkeyConfiguration } from './hotkey-configuration.model';
 
 export interface IHotkeyHandler {
   configuration: IHotkeyConfiguration;

@@ -86,9 +86,20 @@ h2 {
 		}
 
 		.column {
-			min-width: calc((100% / 2) - 0.25rem);
+			min-width: 50%;
 			white-space: nowrap;
-			padding-left: 1rem;
+
+			&:first-child {
+				.row {
+					padding-left: 1rem;
+				}
+			}
+
+			&:last-child {
+				.row {
+					padding-right: 1rem;
+				}
+			}
 
 			.row {
 				text-overflow: ellipsis;

@@ -1,7 +1,7 @@
 <app-modal>
   <div
     class="dialog-header">
-    <h2>{{ header }}</h2>
+    <h2>{{ header }} <small>in {{ entryGroupName }}</small></h2>
     <a
       href="#"
       role="button"
@@ -13,12 +13,12 @@
   <div
     #entryForm
     id="entry-form"
-    style="position: relative; max-height: 100%; overflow: auto; padding-right: 1rem;"
     [formGroup]="newEntryForm">
-    <div>
       <div class="inputgroup" [ngClass]="{'readonly': isReadOnly}">
         <span class="inputgroup-addon"><i-feather name="bookmark"></i-feather></span>
         <input
+          [attr.aria-invalid]="isControlInvalid(title)"
+          aria-describedby="title-invalid"
           type="text"
           [readonly]="isReadOnly"
           id="entry-title"
@@ -28,6 +28,7 @@
       </div>
       <div
         *ngIf="isControlInvalid(title)"
+        id="title-invalid"
         class="validation-error">
         Title is required
       </div>
@@ -50,6 +51,8 @@
           <input
             #passwordInput
             type="password"
+            [attr.aria-invalid]="isControlInvalid(passwordsGroup.get('password'))"
+            aria-describedby="password-invalid"
             [readonly]="isReadOnly"
             id="entry-password"
             class="password"
@@ -69,6 +72,7 @@
         </div>
         <div
           *ngIf="isControlInvalid(passwordsGroup.get('password'))"
+          id="password-invalid"
           class="validation-error">
           Password is required
         </div>
@@ -78,6 +82,8 @@
           <input
             #passwordInput
             [readonly]="isReadOnly"
+            [attr.aria-invalid]="isControlInvalid(passwordsGroup)"
+            aria-describedby="password-repeat-invalid"
             type="password"
             id="entry-password-r"
             formControlName="repeatPassword"
@@ -85,6 +91,7 @@
         </div>
         <div
           *ngIf="isControlInvalid(passwordsGroup)"
+          id="password-repeat-invalid"
           class="validation-error">
           Passwords must match
         </div>
@@ -128,7 +135,6 @@
           </div>
         </ng-container>
       </div>
-    </div>
   </div>
   <div class="footer-container">
     <button

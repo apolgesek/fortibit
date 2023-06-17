@@ -1,16 +1,14 @@
-import { ChangeDetectionStrategy, Component, ComponentRef, Inject } from '@angular/core';
-import { ICommunicationService } from '@app/core/models';
+import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
+import { IMessageBroker } from '@app/core/models';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { combineLatest, from, take, timer } from 'rxjs';
-import { ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
-
-import { CommunicationService } from 'injection-tokens';
+import { EntryManager, ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
+import { MessageBroker } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
 import { ReportType } from '@app/core/enums';
 import { FeatherModule } from 'angular-feather';
-import { EntryRepository } from '@app/core/repositories';
 
 @Component({
   selector: 'app-exposed-passwords-dialog',
@@ -20,11 +18,10 @@ import { EntryRepository } from '@app/core/repositories';
   imports: [
     CommonModule,
     FeatherModule,
-    
     ModalComponent
   ]
 })
-export class ExposedPasswordsDialogComponent implements IModal {
+export class ExposedPasswordsDialogComponent implements IModal, OnInit {
   ref: ComponentRef<ExposedPasswordsDialogComponent>;
   additionalData?: IAdditionalData;
   result = [];
@@ -34,13 +31,13 @@ export class ExposedPasswordsDialogComponent implements IModal {
   lastReportLoaded = false;
   showDetails = false;
   showError = false;
-  
+
   constructor(
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly modalRef: ModalRef,
     private readonly reportService: ReportService,
     private readonly modalService: ModalService,
-    private readonly entryRepository: EntryRepository,
+    private readonly entryManager: EntryManager,
     private readonly notificationService: NotificationService
   ) { }
 
@@ -67,10 +64,10 @@ export class ExposedPasswordsDialogComponent implements IModal {
         type: ReportType.ExposedPasswords,
         payload: result.data
       });
-      
+
       await this.getLastReport();
       this.scanInProgress = false;
-      
+
       if (this.exposedPasswordsFound.length) {
         this.showDetails = true;
       }
@@ -78,8 +75,9 @@ export class ExposedPasswordsDialogComponent implements IModal {
   }
 
   async saveReport() {
-    await this.communicationService.ipcRenderer.invoke(IpcChannel.SaveExposedPasswordsReport, this.exposedPasswordsFound);
-    this.notificationService.add({ type: 'success', alive: 5000, message: 'Report generated' });
+    await this.messageBroker.ipcRenderer
+      .invoke(IpcChannel.SaveExposedPasswordsReport, this.exposedPasswordsFound);
+    this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Report generated' });
   }
 
   ngOnInit(): void {
@@ -87,7 +85,7 @@ export class ExposedPasswordsDialogComponent implements IModal {
   }
 
   openUrl(url: string) {
-    this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, url);
+    this.messageBroker.ipcRenderer.send(IpcChannel.OpenUrl, url);
   }
 
   public trackByFn(_: number, item: { id: number }) {
@@ -95,7 +93,7 @@ export class ExposedPasswordsDialogComponent implements IModal {
   }
 
   async editEntry(id: number) {
-    this.modalService.openEditEntryWindow(await this.entryRepository.get(id));
+    this.modalService.openEditEntryWindow(await this.entryManager.get(id));
   }
 
   private async getLastReport() {

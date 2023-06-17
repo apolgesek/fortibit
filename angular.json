@@ -1,7 +1,6 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "cli": {
-    "defaultCollection": "@angular-eslint/schematics",
     "analytics": false
   },
   "version": 1,
@@ -25,7 +24,10 @@
             "main": "renderer/main.ts",
             "tsConfig": "renderer/tsconfig.json",
             "polyfills": "renderer/polyfills.ts",
-            "allowedCommonJsDependencies": ["rxjs", "zxcvbn"],
+            "allowedCommonJsDependencies": [
+              "rxjs",
+              "zxcvbn"
+            ],
             "assets": [
               "renderer/assets",
               "renderer/manifest.json",
@@ -169,10 +171,9 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "eslintConfig": ".eslintrc.json",
             "lintFilePatterns": [
               "renderer/**/*.ts",
-              "main.ts"
+              "renderer/**/*.html"
             ]
           }
         }
@@ -197,7 +198,6 @@
       }
     }
   },
-  "defaultProject": "angular-electron",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",

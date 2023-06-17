@@ -1,10 +1,9 @@
 import { Component, ComponentRef, Inject } from '@angular/core';
-import { ICommunicationService } from '@app/core/models';
+import { IMessageBroker } from '@app/core/models';
 import { NotificationService } from '@app/core/services/notification.service';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
-import { WorkspaceService, ModalRef, ElectronService } from '@app/core/services';
-
-import { CommunicationService } from 'injection-tokens';
+import { WorkspaceService, ModalRef } from '@app/core/services';
+import { MessageBroker } from 'injection-tokens';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { CommonModule } from '@angular/common';
@@ -16,7 +15,6 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [
     CommonModule,
-    
     ModalComponent
   ]
 })
@@ -28,14 +26,15 @@ export class ImportDatabaseMetadataDialogComponent implements IModal {
   constructor(
     private readonly workspaceService: WorkspaceService,
     private readonly modalRef: ModalRef,
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly notificationService: NotificationService
   ) {}
 
   async confirm() {
     try {
       this.isConfirmButtonLocked = true;
-      const entries: string = await this.communicationService.ipcRenderer.invoke(IpcChannel.Import, this.additionalData?.payload.filePath, this.additionalData?.payload.type);
+      const entries: string = await this.messageBroker.ipcRenderer
+        .invoke(IpcChannel.Import, this.additionalData?.payload.filePath, this.additionalData?.payload.type);
       let deserializedEntries: IPasswordEntry[] = JSON.parse(entries);
       deserializedEntries = deserializedEntries.map(x => ({...x, creationDate: new Date()}));
 
@@ -45,7 +44,7 @@ export class ImportDatabaseMetadataDialogComponent implements IModal {
 
       await this.workspaceService.importDatabase(fileNameParts.join(''), deserializedEntries);
 
-      this.notificationService.add({ type: 'success', message: 'Passwords imported successfully', alive: 5000 });
+      this.notificationService.add({ type: 'success', message: 'Passwords imported', alive: 10 * 1000 });
       this.close();
     } catch (err) {
       this.isConfirmButtonLocked = false;
@@ -53,6 +52,6 @@ export class ImportDatabaseMetadataDialogComponent implements IModal {
   }
 
   close() {
-    this.modalRef.close()
+    this.modalRef.close();
   }
 }

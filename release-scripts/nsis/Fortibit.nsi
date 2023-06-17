@@ -1,4 +1,6 @@
 Unicode True
+
+!define MUI_ICON "..\..\build\icon.ico"
 !define APP_NAME "Fortibit"
 !define COMP_NAME "Arkadiusz Polgesek"
 !define VERSION "01.01.00.00"
@@ -11,7 +13,6 @@ Unicode True
 !define REG_ROOT "HKCU"
 !define REG_APP_PATH "Software\Microsoft\Windows\CurrentVersion\App Paths\${MAIN_APP_EXE}"
 !define UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
-
 !define REG_START_MENU "Start Menu Folder"
 
 ######################################################################
@@ -65,15 +66,10 @@ var SM_Folder
 !endif
 
 !insertmacro MUI_PAGE_INSTFILES
-
 !insertmacro MUI_PAGE_FINISH
-
 !insertmacro MUI_UNPAGE_CONFIRM
-
 !insertmacro MUI_UNPAGE_INSTFILES
-
 !insertmacro MUI_UNPAGE_FINISH
-
 !insertmacro MUI_LANGUAGE "English"
 
 ######################################################################

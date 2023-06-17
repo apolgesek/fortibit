@@ -1,20 +1,19 @@
 import { Directive, Input, ElementRef } from '@angular/core';
 @Directive({
   selector: '[appTextEmphasize]',
-  standalone: true
+  standalone: true,
 })
 export class TextEmphasizeDirective {
   private readonly openingTag = '<span class="emp">';
   private readonly closingTag = '</span>';
-
   private searchPhraseValue = '';
+
+  constructor(private readonly element: ElementRef) { }
 
   @Input('appTextEmphasize') set searchPhrase(value: string | null) {
     this.searchPhraseValue = value ? value.trim() : '';
     this.applyChanges();
   }
-
-  constructor(private readonly element: ElementRef) { }
 
   private applyChanges() {
     setTimeout(() => {
@@ -23,7 +22,7 @@ export class TextEmphasizeDirective {
       elementTextContent.innerHTML = elementTextContent.innerHTML
         .replaceAll(new RegExp(this.openingTag, 'g'), '')
         .replaceAll(new RegExp(this.closingTag, 'g'), '');
-      
+
       if (this.isSubstringNotFound(elementTextContent)) {
         return;
       }

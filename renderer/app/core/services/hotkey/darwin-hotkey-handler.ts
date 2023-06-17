@@ -45,7 +45,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
     this.registerSelectAllEntries(event);
     this.registerFindEntries(event);
     this.registerFindGlobalEntries(event);
-    this.registerLockDatabase(event)
+    this.registerLockDatabase(event);
     this.registerRenameGroup(event);
     this.registerAddGroup(event);
     this.registerMoveEntry(event);
@@ -61,7 +61,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
       event.preventDefault();
     }
   }
-  
+
   public registerDeleteEntry(event: KeyboardEvent) {
     if (event.metaKey && event.key === 'Backspace' && this.entryManager.selectedPasswords.length) {
       this.modalService.openDeleteEntryWindow();
@@ -88,7 +88,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
       event.preventDefault();
     }
   }
-  
+
   public registerEditEntry(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'e' && !event.metaKey && this.entryManager.selectedPasswords.length === 1) {
       this.modalService.openEditEntryWindow();
@@ -114,12 +114,17 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
   }
 
   public registerCopyUsername(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'u' && event.metaKey && event.shiftKey && this.entryManager.selectedPasswords.length === 1) {
+    if (
+      event.key.toLowerCase() === 'u'
+      && event.metaKey
+      && event.shiftKey
+      && this.entryManager.selectedPasswords.length === 1
+    ) {
       this.clipboardService.copyToClipboard(this.entryManager.selectedPasswords[0], 'username');
       event.preventDefault();
     }
   }
-  
+
   public registerAddEntry(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'i' && event.metaKey && this.groupManager.isAddAllowed) {
       this.modalService.openNewEntryWindow();
@@ -133,7 +138,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
       event.preventDefault();
     }
   }
-  
+
   public registerSelectAllEntries(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'a' && event.metaKey && this.entryManager.selectedPasswords.length) {
       this.entryManager.selectedPasswords = [];

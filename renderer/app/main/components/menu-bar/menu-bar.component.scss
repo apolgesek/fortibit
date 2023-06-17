@@ -1,5 +1,16 @@
 @import 'themes/light/variables';
 
+.overlay {
+	width: 100%;
+	height: $menu-bar-height;
+	-webkit-app-region: no-drag;
+	position: absolute;
+	z-index: 9999;
+	top: 0;
+	left: 2rem;
+	display: none;
+}
+
 .topbar {
 	height: $menu-bar-height;
 	width: 100%;
@@ -8,7 +19,20 @@
 	justify-content: space-between;
 	font-size: 0.875rem;
 	color: var(--primary-text);
+	user-select: none;
 	-webkit-app-region: drag;
+
+	&:host-context(.modal-open) {
+		pointer-events: none;
+
+		.overlay {
+			display: block;
+		}
+
+		.menu li {
+			color: var(--dropdown-text--disabled) !important;
+		}
+	}
 
 	.brand-logo {
 		width: 1rem;
@@ -61,49 +85,27 @@
 		}
 	}
 
-	.window-icons {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		height: 100%;
-		-webkit-app-region: no-drag;
-
-		ul {
-			height: 100%;
-			list-style-type: none;
-			display: flex;
-			align-items: center;
-			margin: 0;
-			padding: 0;
-
-			li {
-				display: flex;
-				width: 46px;
-				height: 32px;
-				align-items: center;
-				justify-content: center;
-				transition: all 150ms;
-
-				&:hover {
-					background-color: var(--list-item-bg--hover);
-				}
-
-				&.quit-icon {
-					&:hover {
-						background-color: $red-orange;
-
-						@media (prefers-color-scheme: light) {
-							img {
-								filter: invert(1);
-							}
-						}
-					}
-				}
-			}
-
-			img.icon {
-				width: 10px;
-				height: 10px;
+	ul.menu > .dropdown div:not(.submenu-container) {
+		border-bottom-left-radius: 0.25rem;
+		border-bottom-right-radius: 0.25rem;
+	
+		&.left {
+			left: 0rem;
+		}
+	
+		&.right {
+			right: 0rem;
+		}
+	
+		> li:last-of-type {
+			border-bottom-left-radius: 0.25rem;
+			border-bottom-right-radius: 0.25rem;
+		}
+	
+		&:has(+ *) {
+			> li {
+				border-bottom-left-radius: 0rem !important;
+				border-bottom-right-radius: 0rem !important;
 			}
 		}
 	}

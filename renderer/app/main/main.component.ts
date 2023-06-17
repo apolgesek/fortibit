@@ -1,93 +1,91 @@
 import {
-	animate,
-	query,
-	style,
-	transition,
-	trigger,
-} from "@angular/animations";
-import { CommonModule } from "@angular/common";
-import { Component, Inject, OnInit, ViewContainerRef } from "@angular/core";
-import { ChildrenOutletContexts, RouterModule } from "@angular/router";
-import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
-import { CommunicationService } from "injection-tokens";
-import { ICommunicationService } from "../core/models";
-import { AppViewContainer, WorkspaceService } from "../core/services";
-import { MenuBarComponent } from "../main/components/menu-bar/menu-bar.component";
+  animate,
+  query,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import { CommonModule } from '@angular/common';
+import { Component, Inject, OnInit, ViewContainerRef } from '@angular/core';
+import { ChildrenOutletContexts, RouterModule } from '@angular/router';
+import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { MessageBroker } from 'injection-tokens';
+import { IMessageBroker } from '../core/models';
+import { AppViewContainer, WorkspaceService } from '../core/services';
+import { MenuBarComponent } from '../main/components/menu-bar/menu-bar.component';
 
 const ONE_HOUR = 1000 * 60 * 60;
 
-export const routeAnimations = trigger("routeAnimations", [
-	transition("* => *", [
-		query(
-			":enter",
-			[style({ opacity: 0, position: "relative", width: "100%" })],
-			{
-				optional: true,
-			}
-		),
-		query(
-			":leave",
-			[
-				style({ opacity: 1 }),
-				animate(
-					100,
-					style({ opacity: 0, position: "relative", width: "100%" })
-				),
-			],
-			{ optional: true }
-		),
-		query(
-			":enter",
-			[
-				style({ opacity: 0 }),
-				animate(
-					100,
-					style({ opacity: 1, position: "relative", width: "100%" })
-				),
-			],
-			{ optional: true }
-		),
-	]),
+export const routeAnimations = trigger('routeAnimations', [
+  transition('* => *', [
+    query(
+      ':enter',
+      [style({ opacity: 0, position: 'relative', width: '100%' })],
+      {
+        optional: true,
+      }
+    ),
+    query(
+      ':leave',
+      [
+        style({ opacity: 1 }),
+        animate(
+          100,
+          style({ opacity: 0, position: 'relative', width: '100%' })
+        ),
+      ],
+      { optional: true }
+    ),
+    query(
+      ':enter',
+      [
+        style({ opacity: 0 }),
+        animate(
+          100,
+          style({ opacity: 1, position: 'relative', width: '100%' })
+        ),
+      ],
+      { optional: true }
+    ),
+  ]),
 ]);
 
 @Component({
-	selector: "app-main",
-	templateUrl: "./main.component.html",
-	standalone: true,
-	imports: [RouterModule, CommonModule, MenuBarComponent],
-	animations: [routeAnimations],
+  selector: 'app-main',
+  templateUrl: './main.component.html',
+  standalone: true,
+  imports: [RouterModule, CommonModule, MenuBarComponent],
+  animations: [routeAnimations],
 })
 export class MainComponent implements OnInit {
-	public isElectron = false;
-	public isDatabaseLoaded: boolean;
+  public isElectron = false;
+  public isDatabaseLoaded: boolean;
 
-	constructor(
-		@Inject(CommunicationService)
-		public readonly communicationService: ICommunicationService,
+  constructor(
+		@Inject(MessageBroker)
+		public readonly messageBroker: IMessageBroker,
 		private readonly contexts: ChildrenOutletContexts,
 		private readonly appViewContainer: AppViewContainer,
 		private readonly viewContainerRef: ViewContainerRef,
 		private readonly workspaceService: WorkspaceService
-	) {
-		this.isElectron = this.communicationService.platform != "web";
-		this.appViewContainer.appViewContainerRef = this.viewContainerRef;
-	}
+  ) {
+    this.isElectron = this.messageBroker.platform !== 'web';
+    this.appViewContainer.appViewContainerRef = this.viewContainerRef;
+  }
 
-	ngOnInit() {
-		this.workspaceService.loadedDatabase$.subscribe(() => {
-			this.isDatabaseLoaded = true;
-		});
-		this.workspaceService.setupDatabase();
-		this.communicationService.ipcRenderer.send(IpcChannel.CheckUpdate);
-		
-		setInterval(() => {
-			this.communicationService.ipcRenderer.send(IpcChannel.CheckUpdate);
-		}, ONE_HOUR);
-	}
+  ngOnInit() {
+    this.workspaceService.loadedDatabase$.subscribe(() => {
+      this.isDatabaseLoaded = true;
+    });
+    this.workspaceService.setupDatabase();
+    this.messageBroker.ipcRenderer.send(IpcChannel.CheckUpdate);
 
-	getRouteState(): string {
-		return this.contexts.getContext("primary")?.route?.snapshot?.data?.[
-			"state"
-		];
-	}
+    setInterval(() => {
+      this.messageBroker.ipcRenderer.send(IpcChannel.CheckUpdate);
+    }, ONE_HOUR);
+  }
+
+  getRouteState(): string {
+    return this.contexts.getContext('primary')?.route?.snapshot?.data?.state;
+  }
 }

@@ -1,17 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ComponentRef, DestroyRef, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupId } from '@app/core/enums';
-import { ICommunicationService } from '@app/core/models';
+import { IMessageBroker } from '@app/core/models';
 import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
-
 import { IAdditionalData, IModal } from '@app/shared';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
-import { CommunicationService } from 'injection-tokens';
-import { Subject, fromEvent } from 'rxjs';
-import { filter, take, takeUntil } from 'rxjs/operators';
+import { MessageBroker } from 'injection-tokens';
+import { fromEvent } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 import * as zxcvbn from 'zxcvbn';
 import { IAppConfig } from '../../../../../../app-config';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
@@ -27,7 +27,6 @@ import { valueMatchValidator } from '../../../../shared/validators/value-match.v
     CommonModule,
     ReactiveFormsModule,
     FeatherModule,
-    
     ModalComponent,
     DateMaskDirective,
   ],
@@ -47,12 +46,12 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   public readonly additionalData!: IAdditionalData;
   public readonly isControlInvalid = isControlInvalid;
 
-  private readonly destroyed$: Subject<void> = new Subject();
   private lastTrigger: 'click' | 'keydown';
 
   constructor(
+    private readonly destroyRef: DestroyRef,
     private readonly fb: FormBuilder,
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly configService: ConfigService,
     private readonly clipboardService: ClipboardService,
     private readonly modalRef: ModalRef,
@@ -64,7 +63,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   get header(): string {
     if (this.entryManager.editedEntry) {
-     if (!this.isReadOnly) {
+      if (!this.isReadOnly) {
         return 'Edit entry';
       } else {
         return 'Entry history';
@@ -72,6 +71,14 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     } else {
       return 'Add entry';
     }
+  }
+
+  get entryGroupName(): string {
+    return this.entryManager.editedEntry
+      ? this.entryManager.selectedPasswords[0]?.group
+      : this.groupManager.selectedGroup !== GroupId.AllItems
+        ? this.groupManager.selectedGroupName
+        : this.groupManager.groups.find(g => g.id === GroupId.Root).name;
   }
 
   get passwordLength(): number {
@@ -93,7 +100,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     case 3:
       return 'Strong';
     case 4:
-      return 'Very strong';    
+      return 'Very strong';
     default:
       return '';
     }
@@ -144,19 +151,21 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
       fromEvent(el.nativeElement, 'keydown')
         .pipe(
           filter((e: KeyboardEvent) => e.ctrlKey && e.key === 'z'),
-          takeUntil(this.destroyed$)
+          takeUntilDestroyed(this.destroyRef)
         )
         .subscribe((event: KeyboardEvent) => {
           event.preventDefault();
         });
     });
 
-    fromEvent(document, 'mousedown').pipe(takeUntil(this.destroyed$))
+    fromEvent(document, 'mousedown')
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.lastTrigger = 'click';
       });
 
-    fromEvent(document, 'keydown').pipe(takeUntil(this.destroyed$))
+    fromEvent(document, 'keydown')
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.lastTrigger = 'keydown';
       });
@@ -164,7 +173,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     fromEvent(this.entryForm.nativeElement, 'focusin')
       .pipe(
         filter(() => this.lastTrigger === 'keydown'),
-        takeUntil(this.destroyed$)
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((event: FocusEvent) => {
         const parentTop = (this.entryForm.nativeElement as HTMLElement).getBoundingClientRect().top;
@@ -175,14 +184,14 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
       });
   }
 
+  ngOnDestroy(): void {
+    this.newEntryForm.reset();
+    this.entryManager.editedEntry = null;
+  }
+
   onPasswordChange(event: Event) {
     const password = (event.target as HTMLInputElement).value;
     this.passwordScore = zxcvbn(password).score;
-  }
-
-  ngOnDestroy(): void {
-    this.destroyed$.next();
-    this.destroyed$.complete();
   }
 
   copyPassword() {
@@ -191,14 +200,14 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   async restore() {
     await this.entryManager.saveEntry({ ...this.entryManager.editedEntry, icon: null });
-    this.notificationService.add({ message: 'Entry has been restored', type: 'success', alive: 5000  });
+    this.notificationService.add({ message: 'Entry restored', type: 'success', alive: 10 * 1000  });
     this.close();
   }
 
   async delete() {
     const historyEntry = this.additionalData.payload.historyEntry as IHistoryEntry;
     await this.entryManager.deleteEntryHistory(historyEntry.id, historyEntry.entry);
-    this.notificationService.add({ message: 'Entry has been removed', type: 'success', alive: 5000  });
+    this.notificationService.add({ message: 'History entry removed', type: 'success', alive: 10 * 1000  });
     this.close();
   }
 
@@ -210,9 +219,10 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     markAllAsDirty(this.newEntryForm);
 
     if (this.newEntryForm.invalid) {
-      const el = (this.entryForm.nativeElement as HTMLElement).querySelector('input.ng-invalid, .form-group.ng-invalid');
+      const el = (this.entryForm.nativeElement as HTMLElement)
+        .querySelector('input.ng-invalid, .form-group.ng-invalid');
       const elToScroll = el.tagName.toLowerCase() === 'div' ? el : el.parentElement;
-      elToScroll.scrollIntoView({ block: "start", inline: "nearest" });
+      elToScroll.scrollIntoView({ block: 'start', inline: 'nearest' });
 
       return;
     }
@@ -220,7 +230,8 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     this.saveLocked = true;
     const date = new Date();
 
-    const encryptedPassword = await this.communicationService.ipcRenderer.invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
+    const encryptedPassword = await this.messageBroker.ipcRenderer
+      .invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
     const formData = this.newEntryForm.value;
 
     if (this.entryManager.editedEntry?.id) {
@@ -262,6 +273,21 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     this.close();
   }
 
+  async close() {
+    if (this.entryManager.editedEntry) {
+      const encrypted = await this.messageBroker.ipcRenderer
+        .invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
+
+      this.entryManager.editedEntry.password = encrypted;
+    }
+
+    this.modalRef.close();
+  }
+
+  closeReadOnly() {
+    this.modalRef.close();
+  }
+
   private async prefillForm() {
     if (this.entryManager.editedEntry) {
       this.fillExistingEntry();
@@ -286,29 +312,11 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     }
   }
 
-  async close() {
-    if (this.entryManager.editedEntry) {
-      const encrypted = await this.communicationService.ipcRenderer
-        .invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
-
-      this.entryManager.editedEntry.password = encrypted;
-    }
-
-    this.entryManager.editedEntry = null;
-    this.newEntryForm.reset();
-
-    this.modalRef.close()
-  }
-
-  closeReadOnly() {
-    this.modalRef.close();
-  }
-
   private async fillNewEntry() {
     const password = await this.generatePassword();
 
     this.newEntryForm.get('passwords')?.patchValue({
-      password: password,
+      password,
       repeatPassword: password
     });
   }
@@ -319,7 +327,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     this.newEntryForm.patchValue({
       ...this.entryManager.editedEntry,
       passwords: {
-        password: password,
+        password,
         repeatPassword: password
       }
     });

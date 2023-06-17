@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { IAdditionalData, IModal } from '@app/shared';
 import { EntryManager, GroupManager, ModalRef, ModalService, WorkspaceService } from '@app/core/services';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { ICommunicationService } from '@app/core/models';
-import { CommunicationService } from 'injection-tokens';
+import { IMessageBroker } from '@app/core/models';
+import { MessageBroker } from 'injection-tokens';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 
 @Component({
@@ -23,7 +23,7 @@ export class FileRecoveryDialogComponent implements IModal {
   showBackdrop?: boolean;
 
   constructor(
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly workspaceService: WorkspaceService,
     private readonly modalService: ModalService,
     private readonly entryManager: EntryManager,
@@ -32,17 +32,17 @@ export class FileRecoveryDialogComponent implements IModal {
   ) {}
 
   async recover() {
-    const recoveredDbContent = await this.communicationService.ipcRenderer.invoke(IpcChannel.RecoverFile);
+    const recoveredDbContent = await this.messageBroker.ipcRenderer.invoke(IpcChannel.RecoverFile);
     await this.workspaceService.loadDatabase(recoveredDbContent);
     await this.entryManager.setByGroup(this.groupManager.selectedGroup);
     await this.entryManager.updateEntriesSource();
     this.workspaceService.isSynced = false;
-    
+
     this.close();
   }
 
   async doNotRecover() {
-    await this.communicationService.ipcRenderer.invoke(IpcChannel.RemoveRecoveryFile);
+    await this.messageBroker.ipcRenderer.invoke(IpcChannel.RemoveRecoveryFile);
     this.close();
   }
 

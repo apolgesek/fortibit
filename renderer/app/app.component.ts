@@ -2,11 +2,11 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { NavigationStart, Router, RouterModule } from '@angular/router';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { CommunicationService } from 'injection-tokens';
-import { filter, fromEvent, take, tap } from 'rxjs';
+import { MessageBroker } from 'injection-tokens';
+import { filter, fromEvent, take } from 'rxjs';
 import { IAppConfig } from '../../app-config';
 import { AppConfig } from '../environments/environment';
-import { ICommunicationService } from './core/models';
+import { IMessageBroker } from './core/models';
 import { AppViewContainer, ComponentGridService, ConfigService, EntryManager, ModalManager, WorkspaceService } from './core/services';
 import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component';
 
@@ -24,13 +24,8 @@ export class AppComponent implements OnInit {
   public fontsLoaded = false;
   private config: IAppConfig;
 
-  @HostListener('document:dragenter', ['$event'])
-  private onDragEnter(event: MouseEvent) {
-    event.preventDefault();
-  }
-
   constructor(
-    @Inject(CommunicationService) public readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) public readonly messageBroker: IMessageBroker,
     private readonly router: Router,
     private readonly configService: ConfigService,
     private readonly modalManager: ModalManager,
@@ -39,25 +34,41 @@ export class AppComponent implements OnInit {
     private readonly workspaceService: WorkspaceService,
     private readonly entryManager: EntryManager,
     private readonly userInterfaceService: ComponentGridService,
-    @Inject(DOCUMENT) private document: Document,
+    @Inject(DOCUMENT) private readonly document: Document,
   ) {
     this.appViewContainer.appViewContainerRef = this.viewContainerRef;
   }
-  ngOnInit(): void {
+
+  @HostListener('document:dragenter', ['$event'])
+  private onDragEnter(event: MouseEvent) {
+    event.preventDefault();
+  }
+
+  async ngOnInit(): Promise<void> {
     this.closeModalsOnRouteChange();
-
-    this.preloadFonts().then(() => {
-      this.fontsLoaded = true;
-    });
-
     this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
       this.config = config;
       this.registerGlobalEvents();
     });
+
+    try {
+      await this.preloadFonts();
+      this.fontsLoaded = true;
+    } catch (err) {
+      console.log('Failed to fetch fonts');
+    }
+  }
+
+  private registerGlobalEvents() {
+    this.handleMouseClick();
+    this.onDragOverApp();
+    this.onFileDrop();
+    this.handleEntryDeselection();
+    this.handleAppExit();
   }
 
   private preloadFonts(): Promise<FontFace[]> {
-    const fontsArray = []
+    const fontsArray = [];
     document.fonts.forEach(x => fontsArray.push(x));
 
     return Promise.all(fontsArray.map(x => x.status === 'unloaded' && x.load()));
@@ -69,11 +80,14 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private registerGlobalEvents() {
-    this.onDragOverApp();
-    this.onFileDrop();
-    this.handleEntryDeselection();
-    this.handleAppExit();
+  private handleMouseClick() {
+    fromEvent(window, 'mouseup')
+      .subscribe(() => (event: MouseEvent) => {
+      // Block back/forward navigation mouse side buttons
+        if (event.button === 3 || event.button === 4) {
+          event.preventDefault();
+        }
+      });
   }
 
   private handleAppExit() {
@@ -92,39 +106,39 @@ export class AppComponent implements OnInit {
 
   private handleEntryDeselection() {
     fromEvent(this.document, 'mousedown')
-      .pipe(tap((event: MouseEvent) => {
+      .subscribe(() => (event: MouseEvent) => {
         if (this.isOutsideClick(event) && this.userInterfaceService.isIdle) {
           this.entryManager.selectedPasswords = [];
         }
-      })).subscribe();
+      });
   }
 
   private onFileDrop() {
     fromEvent(this.document, 'drop')
-      .pipe(tap((event: Event) => {
+      .subscribe(async (event: Event) => {
+        event.preventDefault();
         const dataTransfer = (event as DragEvent).dataTransfer as DataTransfer;
 
         if (dataTransfer.files.length) {
           const file = dataTransfer.files[0] as any;
 
-          if (file.path.endsWith(this.config.fileExtension)) {
-            this.workspaceService.executeEvent().then(value => {
-              if (value) {
-                this.communicationService.ipcRenderer.send(IpcChannel.DropFile, file.path);
-              }
-            });
+          if (!file.path.endsWith(this.config.fileExtension)) {
+            return;
+          }
+
+          const success = await this.workspaceService.executeEvent();
+          if (success) {
+            this.messageBroker.ipcRenderer.send(IpcChannel.DropFile, file.path);
           }
         }
-
-        event.preventDefault();
-      })).subscribe();
+      });
   }
 
   private onDragOverApp() {
     fromEvent(this.document, 'dragover')
-      .pipe(tap((event: Event) => {
+      .subscribe(() => (event: Event) => {
         (event as MouseEvent).preventDefault();
-      })).subscribe();
+      });
   }
 
   private isOutsideClick(event: MouseEvent) {

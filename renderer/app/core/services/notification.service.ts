@@ -1,7 +1,7 @@
 import { ApplicationRef, ComponentRef, EmbeddedViewRef, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { IToastModel } from '../models';
 import { AppViewContainer } from './app-view-container';
-import { NotificationComponent } from '../../shared/components/notification/notification.component'
+import { NotificationComponent } from '../../shared/components/notification/notification.component';
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +19,9 @@ export class NotificationService {
   }
 
   add(model: IToastModel) {
-    this.toasts.forEach((componentRef) => {
-      this.appRef.detachView(componentRef.hostView);
-      componentRef.destroy();
+    this.toasts.forEach((ref) => {
+      this.appRef.detachView(ref.hostView);
+      ref.destroy();
     });
 
     this.toasts = [];

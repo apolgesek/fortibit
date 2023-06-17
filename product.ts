@@ -5,6 +5,7 @@ export interface IProduct {
   temporaryFileExtension: string;
   commit: string;
   webUrl: string;
+  iconServiceUrl: string;
   updateUrl: string;
   signatureSubject: string;
   leakedPasswordsUrl: string;

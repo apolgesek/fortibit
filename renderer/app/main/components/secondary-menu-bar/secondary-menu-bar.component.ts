@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
-import { CommunicationService } from 'injection-tokens';
-import { ICommunicationService } from '@app/core/models';
+import { MessageBroker } from 'injection-tokens';
+import { IMessageBroker } from '@app/core/models';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
@@ -22,25 +22,9 @@ import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
   ]
 })
 export class SecondaryMenuBarComponent {
-  private theme: 'w' | 'k' = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'w' : 'k';
-  
-  public get closeIcons(): string {
-    return [
-      `assets/icons/close-${this.theme}-10.png 1x`,
-      `assets/icons/close-${this.theme}-12.png 1.25x`,
-      `assets/icons/close-${this.theme}-15.png 1.5x`,
-      `assets/icons/close-${this.theme}-15.png 1.75x`,
-      `assets/icons/close-${this.theme}-20.png 2x`,
-      `assets/icons/close-${this.theme}-20.png 2.25x`,
-      `assets/icons/close-${this.theme}-24.png 2.5x`,
-      `assets/icons/close-${this.theme}-30.png 3x`,
-      `assets/icons/close-${this.theme}-30.png 3.5x`
-    ].join(',');
-  }
-
-  constructor(@Inject(CommunicationService) private readonly communicationService: ICommunicationService) { }
+  constructor(@Inject(MessageBroker) private readonly messageBroker: IMessageBroker) { }
 
   quit() {
-    this.communicationService.ipcRenderer.send(IpcChannel.Close);
+    this.messageBroker.ipcRenderer.send(IpcChannel.Close);
   }
 }

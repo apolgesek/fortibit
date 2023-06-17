@@ -16,6 +16,8 @@
         <span class="inputgroup-addon"><i-feather name="bookmark"></i-feather></span>
         <input
           type="text"
+          aria-describedby="name-invalid"
+          [attr.aria-invalid]="isControlInvalid(name)"
           id="group-name"
           #autofocus
           formControlName="name"
@@ -23,7 +25,8 @@
       </div>
       <div
         *ngIf="isControlInvalid(name)"
-        class="validation-error">
+        class="validation-error"
+        id="name-invalid">
         <ng-container *ngIf="name.hasError('required')">
           Group name is required.
         </ng-container>

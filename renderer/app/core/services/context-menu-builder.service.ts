@@ -48,7 +48,7 @@ export class ContextMenuBuilderService {
 
     return this;
   }
-  
+
   buildRemoveEntryContextMenuItem(): this {
     this.contextMenuItems.push({
       label: this.hotkeyHandler.configuration.deleteLabel,

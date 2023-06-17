@@ -1,10 +1,10 @@
 <div
 	data-prevent-entry-deselect
 	class="topbar">
-	<div appMenu class="menu">
+	<ul appMenu class="menu">
 		<div class="brand-logo"></div>
 		<ul appDropdown class="dropdown">
-			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
+			<li appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
 				File
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
@@ -48,7 +48,7 @@
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
-			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
+			<li appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
 				Tools
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
@@ -65,10 +65,11 @@
 						</li>
 					</div>
 				</div>
+				<li appMenuItem (activate)="openMaintenanceWindow()">Maintenance</li>
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
-			<li role="button" appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
+			<li appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
 				Help
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
@@ -79,18 +80,7 @@
 				<li appMenuItem (activate)="openAboutWindow()">About</li>
 			</div>
 		</ul>
-	</div>
-	<div class="window-icons">
-		<ul>
-			<li (click)="minimizeWindow()" class="minimize-icon">
-				<img class="icon" [srcset]="minimizeIcons" draggable="false" />
-			</li>
-			<li (click)="maximizeWindow()" class="restore-icon">
-				<img class="icon" [srcset]="maximizeRestoreIcons" draggable="false" />
-			</li>
-			<li (click)="quit()" class="quit-icon">
-				<img class="icon" [srcset]="closeIcons" draggable="false" />
-			</li>
-		</ul>
-	</div>
+	</ul>
 </div>
+
+<div class="overlay"></div>

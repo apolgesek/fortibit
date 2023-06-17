@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, Inject, NgZone, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DbManager } from '@app/core/database';
-import { ICommunicationService } from '@app/core/models';
+import { IMessageBroker } from '@app/core/models';
 import { ConfigService, NotificationService, WorkspaceService } from '@app/core/services';
 import { ModalService } from '@app/core/services/modal.service';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
@@ -14,8 +15,7 @@ import { ImportHandler, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { exportDB } from 'dexie-export-import';
 import { AppConfig } from 'environments/environment';
-import { CommunicationService } from 'injection-tokens';
-import { Subject, takeUntil } from 'rxjs';
+import { MessageBroker } from 'injection-tokens';
 
 @Component({
   selector: 'app-menu-bar',
@@ -33,56 +33,20 @@ import { Subject, takeUntil } from 'rxjs';
     FileNamePipe
   ]
 })
-export class MenuBarComponent implements OnInit, OnDestroy {
+export class MenuBarComponent implements OnInit {
   public readonly importHandler = ImportHandler;
-  private readonly destroyed = new Subject<void>();
-
   public recentFiles: string[];
-  private theme: 'w' | 'k' = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'w' : 'k';
-  private maximizeIconPath: string = `max-${this.theme}`;
-  private isMaximized: boolean;
 
-  public get maximizeRestoreIcons(): string {
-    return [
-      `assets/icons/${this.maximizeIconPath}-10.png 1x`,
-      `assets/icons/${this.maximizeIconPath}-12.png 1.25x`,
-      `assets/icons/${this.maximizeIconPath}-15.png 1.5x`,
-      `assets/icons/${this.maximizeIconPath}-15.png 1.75x`,
-      `assets/icons/${this.maximizeIconPath}-20.png 2x`,
-      `assets/icons/${this.maximizeIconPath}-20.png 2.25x`,
-      `assets/icons/${this.maximizeIconPath}-24.png 2.5x`,
-      `assets/icons/${this.maximizeIconPath}-30.png 3x`,
-      `assets/icons/${this.maximizeIconPath}-30.png 3.5x`
-    ].join(',');
-  }
-
-  public get minimizeIcons(): string {
-    return [
-      `assets/icons/min-${this.theme}-10.png 1x`,
-      `assets/icons/min-${this.theme}-12.png 1.25x`,
-      `assets/icons/min-${this.theme}-15.png 1.5x`,
-      `assets/icons/min-${this.theme}-15.png 1.75x`,
-      `assets/icons/min-${this.theme}-20.png 2x`,
-      `assets/icons/min-${this.theme}-20.png 2.25x`,
-      `assets/icons/min-${this.theme}-24.png 2.5x`,
-      `assets/icons/min-${this.theme}-30.png 3x`,
-      `assets/icons/min-${this.theme}-30.png 3.5x`
-    ].join(',');
-  }
-
-  public get closeIcons(): string {
-    return [
-      `assets/icons/close-${this.theme}-10.png 1x`,
-      `assets/icons/close-${this.theme}-12.png 1.25x`,
-      `assets/icons/close-${this.theme}-15.png 1.5x`,
-      `assets/icons/close-${this.theme}-15.png 1.75x`,
-      `assets/icons/close-${this.theme}-20.png 2x`,
-      `assets/icons/close-${this.theme}-20.png 2.25x`,
-      `assets/icons/close-${this.theme}-24.png 2.5x`,
-      `assets/icons/close-${this.theme}-30.png 3x`,
-      `assets/icons/close-${this.theme}-30.png 3.5x`
-    ].join(',');
-  }
+  constructor(
+    private readonly zone: NgZone,
+    private readonly destroyRef: DestroyRef,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
+    private readonly configService: ConfigService,
+    private readonly workspaceService: WorkspaceService,
+    private readonly modalService: ModalService,
+    private readonly db: DbManager,
+    private readonly notificationService: NotificationService
+  ) {}
 
   get isDatabasePristine(): boolean {
     return !!this.workspaceService.isSynced;
@@ -96,47 +60,16 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     return this.workspaceService.isLocked;
   }
 
-  constructor(
-    private readonly zone: NgZone,
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly configService: ConfigService,
-    private readonly workspaceService: WorkspaceService,
-    private readonly modalService: ModalService,
-    private readonly db: DbManager,
-    private readonly notificationService: NotificationService
-  ) {}
-
   ngOnInit() {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-      this.theme = event.matches ? "w" : "k";
-      this.maximizeIconPath = this.isMaximized ? `restore-${this.theme}` : `max-${this.theme}`;
-    });
-
-    this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed)).subscribe(config => {
+    this.configService.configLoadedSource$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(config => {
       this.recentFiles = config.workspaces.recentlyOpened;
     });
 
-    this.communicationService.ipcRenderer.on(IpcChannel.GetRecentFiles, (_, files: string[]) => {
+    this.messageBroker.ipcRenderer.on(IpcChannel.GetRecentFiles, (_, files: string[]) => {
       this.zone.run(() => {
         this.recentFiles = files;
       });
     });
-
-    this.communicationService.ipcRenderer.on(IpcChannel.MaximizedRestored, (_, isMaximized: boolean) => {
-      this.zone.run(() => {
-        this.isMaximized = isMaximized;
-        this.maximizeIconPath = isMaximized ? `restore-${this.theme}` : `max-${this.theme}`;
-      });
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.destroyed.next();
-    this.destroyed.complete();
-  }
-
-  exit() {
-    this.quit();
   }
 
   openExposedPasswordsWindow() {
@@ -152,22 +85,21 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   openFile(path?: string) {
-    this.workspaceService.executeEvent().then(value => {
-      if (value) {
-        this.communicationService.ipcRenderer.send(IpcChannel.OpenFile, path);
-      }
-    });
+    const success = this.workspaceService.executeEvent();
+    if (success) {
+      this.messageBroker.ipcRenderer.send(IpcChannel.OpenFile, path);
+    }
   }
 
-  newFile() {
-    this.workspaceService.executeEvent().then(value => {
-      if (value) {
-        this.communicationService.ipcRenderer.invoke(IpcChannel.CreateNew).then(() => this.workspaceService.createNew());
-      }
-    });
+  async newFile() {
+    const success = await this.workspaceService.executeEvent();
+    if (success) {
+      await this.messageBroker.ipcRenderer.invoke(IpcChannel.CreateNew);
+      this.workspaceService.createNew();
+    }
   }
 
-  save() {  
+  save() {
     this.workspaceService.saveDatabase();
   }
 
@@ -176,8 +108,8 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   async import(handler: ImportHandler): Promise<void> {
-    const payload = await this.communicationService.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, handler);
-    
+    const payload = await this.messageBroker.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, handler);
+
     if (payload) {
       this.modalService.openImportedDbMetadataWindow(payload);
     }
@@ -189,20 +121,19 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     const fileReader = new FileReader();
     fileReader.readAsText(blob);
     fileReader.onloadend = async () => {
-      const exported = await this.communicationService.ipcRenderer.invoke(IpcChannel.Export, fileReader.result);
+      const exported = await this.messageBroker.ipcRenderer.invoke(IpcChannel.Export, fileReader.result);
 
       if (exported) {
-        this.notificationService.add({ type: 'success', alive: 5000, message: 'Database exported' });
+        this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Database exported' });
       }
     };
   }
 
-  lock() {
-    this.workspaceService.executeEvent().then(value => {
-      if (value) {
-        this.workspaceService.lock({ minimize: true });
-      }
-    });
+  async lock() {
+    const success = this.workspaceService.executeEvent();
+    if (success) {
+      this.workspaceService.lock({ minimize: true });
+    }
   }
 
   openKeyboardShortcuts() {
@@ -221,19 +152,15 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     this.modalService.openAboutWindow();
   }
 
-  minimizeWindow() {
-    this.communicationService.ipcRenderer.send(IpcChannel.Minimize);
+  openMaintenanceWindow() {
+    this.modalService.openMaintenanceWindow();
   }
 
-  maximizeWindow() {
-    this.communicationService.ipcRenderer.send(IpcChannel.Maximize);
-  }
-
-  quit() {
-    this.communicationService.ipcRenderer.send(IpcChannel.Close);
+  exit() {
+    this.messageBroker.ipcRenderer.send(IpcChannel.Close);
   }
 
   private openUrl(path: string) {
-    this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, AppConfig.urls.repositoryUrl + path);
+    this.messageBroker.ipcRenderer.send(IpcChannel.OpenUrl, AppConfig.urls.repositoryUrl + path);
   }
 }

@@ -1,13 +1,12 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ComponentRef, DestroyRef, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IPasswordGroup } from '@app/core/models';
 import { EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
-
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { IPasswordEntry } from '@shared-renderer/password-entry.model';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, fromEvent, map, Observable, of, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, fromEvent, map, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-move-entry-dialog',
@@ -17,30 +16,28 @@ import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, fro
   imports: [
     CommonModule,
     ModalComponent,
-    
     ScrollingModule
   ]
 })
-export class MoveEntryDialogComponent implements IModal, OnInit, OnDestroy {
+export class MoveEntryDialogComponent implements IModal, OnInit, AfterViewInit {
+  @ViewChild('searchPhrase') public searchText: ElementRef;
   public readonly ref: ComponentRef<unknown>;
   public readonly additionalData?: IAdditionalData;
-
   public groups$: Observable<IPasswordGroup[]>;
-  @ViewChild('searchPhrase') public searchText: ElementRef;
 
   private readonly searchPhrase: BehaviorSubject<string> = new BehaviorSubject('');
-  private readonly destroyed: Subject<void> = new Subject();
-
-  get selectedPasswordsLength(): number {
-    return this.entryManager.selectedPasswords.length;
-  }
 
   constructor(
+    private readonly destroyRef: DestroyRef,
     private readonly modalRef: ModalRef,
     private readonly groupManager: GroupManager,
     private readonly entryManager: EntryManager,
     private readonly notificationService: NotificationService
   ) { }
+
+  get selectedPasswordsLength(): number {
+    return this.entryManager.selectedPasswords.length;
+  }
 
   close() {
     this.modalRef.close();
@@ -62,22 +59,17 @@ export class MoveEntryDialogComponent implements IModal, OnInit, OnDestroy {
 
         return groups;
       }),
-      takeUntil(this.destroyed)
+      takeUntilDestroyed(this.destroyRef)
     );
   }
 
   ngAfterViewInit(): void {
     fromEvent(this.searchText.nativeElement, 'input')
-      .pipe(distinctUntilChanged(), debounceTime(500), takeUntil(this.destroyed))
+      .pipe(distinctUntilChanged(), debounceTime(500), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         const inputElement = this.searchText.nativeElement as HTMLInputElement;
         this.searchPhrase.next(inputElement.value);
       });
-  }
-
-  ngOnDestroy(): void {
-    this.destroyed.next();
-    this.destroyed.complete();
   }
 
   async moveTo(group: IPasswordGroup): Promise<void> {
@@ -88,7 +80,7 @@ export class MoveEntryDialogComponent implements IModal, OnInit, OnDestroy {
     this.notificationService.add({
       message: `${movedEntriesCount > 1 ? 'Entries' : 'Entry'} moved`,
       type: 'success',
-      alive: 5000
+      alive: 10 * 1000
     });
     this.close();
   }

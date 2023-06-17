@@ -22,6 +22,4 @@ export class TabService {
     this.activeTab = tab;
     this.activeTab.active = true;
   }
-
-  constructor() { }
 }

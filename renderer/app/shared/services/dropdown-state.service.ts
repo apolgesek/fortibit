@@ -14,16 +14,17 @@ export class DropdownStateService {
   public readonly stateChanges$: Observable<IMenuStateChange>;
   public readonly focusFirstItem$: Observable<void>;
 
-  private readonly _stateChangesSource: BehaviorSubject<IMenuStateChange> = new BehaviorSubject({ isOpen: false, notifyChanges: false });
+  private readonly _stateChangesSource: BehaviorSubject<IMenuStateChange> =
+    new BehaviorSubject({ isOpen: false, notifyChanges: false });
   private readonly _focusFirstSource: Subject<void> = new Subject();
-
-  get isOpen(): boolean {
-    return this._stateChangesSource.value.isOpen;
-  }
 
   constructor() {
     this.stateChanges$ = this._stateChangesSource.asObservable();
     this.focusFirstItem$ = this._focusFirstSource.asObservable();
+  }
+
+  get isOpen(): boolean {
+    return this._stateChangesSource.value.isOpen;
   }
 
   open(notifyChanges = true): void {
@@ -36,7 +37,7 @@ export class DropdownStateService {
 
   closeRecursive(node: DropdownStateService) {
     const child = node.child;
-  
+
     if (child) {
       child.closeRecursive(child);
     }
@@ -49,14 +50,6 @@ export class DropdownStateService {
     root.closeRecursive(root);
   }
 
-  private getTreeRoot(node: DropdownStateService): DropdownStateService {
-    if (node.parent) {
-      return this.getTreeRoot(node.parent);
-    } else {
-      return node;
-    }
-  }
-
   closeAndFocusFirst(): void {
     this.close();
 
@@ -67,5 +60,13 @@ export class DropdownStateService {
 
   focusFirstItem() {
     this._focusFirstSource.next();
+  }
+
+  private getTreeRoot(node: DropdownStateService): DropdownStateService {
+    if (node.parent) {
+      return this.getTreeRoot(node.parent);
+    } else {
+      return node;
+    }
   }
 }

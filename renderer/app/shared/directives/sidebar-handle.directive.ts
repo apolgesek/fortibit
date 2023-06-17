@@ -4,10 +4,10 @@ import { ComponentGridService } from '@app/core/services';
 
 @Directive({
   selector: '[appSidebarHandle]',
-  host: { 'class': 'handle' },
   standalone: true
 })
 export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('class') public readonly class = 'handle';
   @Input() public readonly position: 'left' | 'right' = 'left';
   @Input() public readonly minWidth = 240;
   public isDragged = false;
@@ -22,6 +22,16 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
     private readonly zone: NgZone,
     @Inject(DOCUMENT) private readonly document: Document,
   ) {}
+
+  @HostBinding('class.right')
+  get isLeftSidebar(): boolean {
+    return this.position === 'right';
+  }
+
+  @HostBinding('class.left')
+  get isRightSidebar(): boolean {
+    return this.position === 'left';
+  }
 
   ngOnInit() {
     this.componentGridService.registerResizableSidebar(this);
@@ -44,16 +54,6 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
     this.componentGridService.unregisterResizeableSidebar(this);
   }
 
-  @HostBinding('class.right')
-  get isLeftSidebar(): boolean {
-    return this.position === 'right';
-  }
-
-  @HostBinding('class.left')
-  get isRightSidebar(): boolean {
-    return this.position === 'left';
-  }
-
   private onMouseDown() {
     this.renderer.addClass(this.el.nativeElement, 'active');
     this.document.body.classList.add('sidebar-drag');
@@ -68,7 +68,7 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  private onWindowResize() {
+  private onWindowResize(): void {
     const availableSpace = this.getAvailableHorizontalSpace();
 
     if (availableSpace <= 0) {
@@ -77,7 +77,9 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private setMaxWidth() {
-    const otherHandle = this.isLeftSidebar ? this.componentGridService.rightSidebar : this.componentGridService.leftSidebar;
+    const otherHandle = this.isLeftSidebar
+      ? this.componentGridService.rightSidebar
+      : this.componentGridService.leftSidebar;
     const otherHandleWidth = (otherHandle.el.nativeElement as HTMLElement).parentElement.offsetWidth;
 
     this.maxWidth = this.document.body.clientWidth - otherHandleWidth - this.componentGridService.minMainContainerWidth;
@@ -136,10 +138,18 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
     if (adjustedSidebarWidth < this.minWidth) {
       const difference = this.minWidth - adjustedSidebarWidth;
       const otherHandleWidth = this.getOtherHandle().el.nativeElement.parentElement.offsetWidth;
-      this.renderer.setStyle(this.getOtherHandle().el.nativeElement.parentElement, 'width', (otherHandleWidth - difference) + 'px');
+      this.renderer.setStyle(
+        this.getOtherHandle().el.nativeElement.parentElement,
+        'width',
+        (otherHandleWidth - difference) + 'px'
+      );
     }
 
-    this.renderer.setStyle(this.el.nativeElement.parentElement, 'width', (adjustedSidebarWidth < this.minWidth ? this.minWidth : adjustedSidebarWidth) + 'px');
+    this.renderer.setStyle(
+      this.el.nativeElement.parentElement,
+      'width',
+      (adjustedSidebarWidth < this.minWidth ? this.minWidth : adjustedSidebarWidth) + 'px'
+    );
   }
 
   private getOtherHandle(): SidebarHandleDirective {

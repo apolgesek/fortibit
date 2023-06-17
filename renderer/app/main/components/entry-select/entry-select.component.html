@@ -6,7 +6,6 @@
 		 and press Enter.</p>
 	<cdk-virtual-scroll-viewport
 		itemSize="56"
-		role="rowgroup"
 		appFocusableList
 		(focused)="selectEntry($event.originalEvent, $event.item)"
 		(keydown.enter)="confirmEntry()"
@@ -17,11 +16,12 @@
 			<div
 				data-prevent-entry-deselect
 				[appFocusableListItem]="item"
-				role="row"
+				[attr.aria-setsize]="passwordList.length"
+				[attr.aria-posinset]="i + 1"
 				tabindex="0"
 				[ngClass]="{'selected': isEntrySelected(item)}"
 				class="row-entry">
-				<div class="column long-text">
+				<div class="column">
 					<div class="row">
 						{{ item.title }}
 					</div>
@@ -29,8 +29,10 @@
 						{{ item.username }}
 					</div>
 				</div>
-				<div class="row">
-					{{ item.url }}
+				<div class="column">
+					<div class="row">
+						{{ item.url }}
+					</div>
 				</div>
 			</div>
 		</ng-container>

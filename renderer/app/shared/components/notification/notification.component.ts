@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ComponentRef, ElementRef, HostBinding, HostListener, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, ComponentRef, ElementRef, HostBinding, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { NotificationService } from '@app/core/services/notification.service';
 import { IToastModel } from '@app/core/models';
 import { CommonModule } from '@angular/common';
@@ -14,11 +14,13 @@ import { FeatherModule } from 'angular-feather';
     FeatherModule
   ]
 })
-export class NotificationComponent implements AfterViewInit, OnDestroy {
+export class NotificationComponent implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('attr.role') public readonly role = 'alert';
+  @HostBinding('attr.aria-live') public readonly ariaLive = 'off';
+
   public model!: IToastModel;
   public componentRef!: ComponentRef<NotificationComponent>;
   public timeLeft = 0;
-
   private animationStartTime = 0;
   private timer: any;
 
@@ -26,11 +28,6 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
     private readonly element: ElementRef,
     private readonly notificationService: NotificationService,
   ) {}
-
-  @HostListener('click')
-  onClick() {
-    this.notificationService.remove(this.componentRef);
-  }
 
   @HostBinding('class.success')
   get successClass(): boolean {
@@ -40,6 +37,11 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
   @HostBinding('class.error')
   get errorClass(): boolean {
     return this.model.type === 'error';
+  }
+
+  @HostListener('click')
+  onClick() {
+    this.notificationService.remove(this.componentRef);
   }
 
   ngOnInit() {
@@ -99,24 +101,26 @@ export class NotificationComponent implements AfterViewInit, OnDestroy {
     let progress = runtime / duration;
     progress = Math.min(progress, 1);
 
-    element.style.transform = `translateX(50%) translateY(${(start - (distance * progress)).toFixed(2)}px)`;
+    element.style.transform = `translateX(50%) translateY(${(start - (distance * progress)).toFixed(2)}px) translateZ(0)`;
 
     if (runtime < duration) {
-      requestAnimationFrame((timestamp) => {
-        this.slideIn(element, timestamp, start, distance, duration);
+      requestAnimationFrame((time) => {
+        this.slideIn(element, time, start, distance, duration);
       });
     }
   }
 
   private progress(element: HTMLElement, timestamp: number, duration: number) {
     const runtime = timestamp - this.animationStartTime;
-    let progress = (100 - ((runtime / duration) * 100)).toFixed(2);
+    const progress = (100 - ((runtime / duration) * 100)).toFixed(2);
 
-    element.style.background = `linear-gradient(90deg, ${this.successClass ? 'var(--notification-bg--success)' : 'var(--notification-bg--error)'} ${progress}%, var(--notification-bg) ${progress}% 100%)`;
+    const bgClass = this.successClass ? 'var(--notification-bg--success)' : 'var(--notification-bg--error)';
+    element.style.background = `linear-gradient(90deg, ${bgClass} ${progress}%,`
+      + `var(--notification-bg) ${progress}% 100%)`;
 
     if (runtime < duration) {
-      requestAnimationFrame((timestamp) => {
-        this.progress(element, timestamp, duration);
+      requestAnimationFrame((time) => {
+        this.progress(element, time, duration);
       });
     }
   }

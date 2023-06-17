@@ -65,6 +65,10 @@
 	display: inline-flex;
 	align-items: center;
 
+	&:focus-visible {
+		outline: 2px solid $barberry !important;
+	}
+
 	i-feather {
 		width: 1.25rem !important;
 		height: 1.25rem !important;
@@ -72,10 +76,6 @@
 
 		&:hover {
 			color: $blue-300;
-		}
-
-		&:focus:not(:hover) {
-			outline: 3px solid $barberry !important;
 		}
 	}
 }

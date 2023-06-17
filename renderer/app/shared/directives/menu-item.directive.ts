@@ -3,37 +3,23 @@ import { DropdownStateService } from '../services/dropdown-state.service';
 
 @Directive({
   selector: '[appMenuItem]',
-  host: {
-    'role': 'menuitem',
-    'aria-hidden': 'true',
-    'tabindex': '0'
-  },
   standalone: true
 })
 export class MenuItemDirective {
+  @HostBinding('attr.role') public readonly role = 'menuitem';
+  @HostBinding('attr.aria-hidden') public readonly ariaHidden = 'true';
+  @HostBinding('attr.tabindex') public readonly tabindex = '0';
+  // eslint-disable-next-line @angular-eslint/no-input-rename
   @Input('appDropdownToggle') isDropdownToggle: string;
   @Input() closeOnSelect = true;
-  @Input() closeMode: 'tree' | 'subtree' = 'tree'
-  @Input() public set disabled(value: boolean) {
-    this._isDisabled = value;
-  }
-
+  @Input() closeMode: 'tree' | 'subtree' = 'tree';
   @Output() activate = new EventEmitter();
-
   private _isDisabled = false;
 
   constructor(
     private readonly dropdownState: DropdownStateService,
     private readonly el: ElementRef,
   ) { }
-
-  public get stateService(): DropdownStateService {
-    return this.dropdownState;
-  }
-
-  public get nativeElement(): HTMLElement {
-    return this.el.nativeElement;
-  }
 
   @HostBinding('class.disabled')
   @HostBinding('attr.aria-disabled')
@@ -42,11 +28,23 @@ export class MenuItemDirective {
   }
 
   @HostBinding('class.focused')
-  public get isFocused(): boolean {  
+  public get isFocused(): boolean {
     return (this.dropdownState.currentItem === this
       || (this.dropdownState.parent && this.dropdownState.parent.currentItem === this)
       || (this.dropdownState.isOpen && this.dropdownState.items && this === this.dropdownState.items[0]))
       && !this.dropdownState.closeOnSelect;
+  }
+
+  public get nativeElement(): HTMLElement {
+    return this.el.nativeElement;
+  }
+
+  public get stateService(): DropdownStateService {
+    return this.dropdownState;
+  }
+
+  @Input() public set disabled(value: boolean) {
+    this._isDisabled = value;
   }
 
   @HostListener('click', ['$event'])

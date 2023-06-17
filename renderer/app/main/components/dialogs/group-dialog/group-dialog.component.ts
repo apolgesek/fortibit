@@ -1,7 +1,6 @@
 import { Component, ComponentRef, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupManager, ModalRef, NotificationService } from '@app/core/services';
-
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
@@ -17,7 +16,6 @@ import { FeatherModule } from 'angular-feather';
     CommonModule,
     ReactiveFormsModule,
     FeatherModule,
-    
     ModalComponent
   ]
 })
@@ -29,10 +27,6 @@ export class GroupDialogComponent implements IModal, OnInit {
   public groupForm: FormGroup;
   public title: 'Add group' | 'Edit group' = 'Add group';
 
-  get name(): FormControl {
-    return this.groupForm.get('name') as FormControl;
-  }
-
   constructor(
     private readonly modalRef: ModalRef,
     private readonly fb: FormBuilder,
@@ -42,6 +36,10 @@ export class GroupDialogComponent implements IModal, OnInit {
     this.groupForm = this.fb.group({
       name: [null, [Validators.required, Validators.maxLength(20)]]
     });
+  }
+
+  get name(): FormControl {
+    return this.groupForm.get('name') as FormControl;
   }
 
   close() {
@@ -58,15 +56,19 @@ export class GroupDialogComponent implements IModal, OnInit {
     const name = this.groupForm.get('name').value;
 
     if (this.additionalData.payload.mode === 'new') {
-      await this.groupManager.addGroup({ name: name });
+      await this.groupManager.addGroup({ name });
     } else {
-      await this.groupManager.updateGroup({ id: this.groupManager.selectedGroup, name: name });
+      await this.groupManager.updateGroup({
+        id: this.groupManager.selectedGroup,
+        name,
+        lastModificationDate: new Date()
+      });
     }
 
-    this.notificationService.add({ type: 'success', alive: 5000, message: 'Group saved' });
+    this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Group saved' });
     this.close();
   }
-  
+
   ngOnInit(): void {
     const mode = this.additionalData?.payload?.mode;
 

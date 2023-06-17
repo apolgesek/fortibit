@@ -14,24 +14,25 @@ import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-d
 import { WeakPasswordsDialogComponent } from '@app/main/components/dialogs/weak-passwords-dialog/weak-passwords-dialog.component';
 import { FileRecoveryDialogComponent } from '@app/main/components/dialogs/file-recovery-dialog/file-recovery-dialog.component';
 import { PasswordChangeDialogComponent } from '@app/main/components/dialogs/password-change-dialog/password-change-dialog.component';
+import { MaintenanceDialogComponent } from '@app/main/components/dialogs/maintenance-dialog/maintenance-dialog.component';
 import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
-import { CommunicationService } from 'injection-tokens';
-import { ICommunicationService } from '../models';
+import { MessageBroker } from 'injection-tokens';
+import { IMessageBroker } from '../models';
 import { EntryManager } from './managers/entry.manager';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ModalService {
-  public get isAnyModalOpen(): boolean {
-    return this.modalManager.isAnyModalOpen;
-  }
-
   constructor(
     private readonly modalManager: ModalManager,
     private readonly entryManager: EntryManager,
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
   ) {}
+
+  public get isAnyModalOpen(): boolean {
+    return this.modalManager.isAnyModalOpen;
+  }
 
   openDeleteEntryWindow() {
     this.modalManager.open(DeleteEntryDialogComponent);
@@ -57,8 +58,8 @@ export class ModalService {
 
   async openHistoryEntryWindow(entry: IHistoryEntry, config?: { readonly: boolean }) {
     this.entryManager.editedEntry = entry.entry;
-  
-    const decryptedPassword = await this.communicationService.ipcRenderer
+
+    const decryptedPassword = await this.messageBroker.ipcRenderer
       .invoke(IpcChannel.DecryptPassword, this.entryManager.editedEntry.password);
 
     return this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword, config, historyEntry: entry }});
@@ -105,6 +106,10 @@ export class ModalService {
     this.modalManager.open(PasswordChangeDialogComponent);
   }
 
+  openMaintenanceWindow() {
+    this.modalManager.open(MaintenanceDialogComponent);
+  }
+
   close<T>(ref: ComponentRef<T>) {
     this.modalManager.close(ref);
   }
@@ -113,7 +118,7 @@ export class ModalService {
     let decryptedPassword;
 
     if (this.entryManager.editedEntry) {
-      decryptedPassword = await this.communicationService.ipcRenderer
+      decryptedPassword = await this.messageBroker.ipcRenderer
         .invoke(IpcChannel.DecryptPassword, this.entryManager.editedEntry.password);
     }
 

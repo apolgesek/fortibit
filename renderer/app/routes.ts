@@ -25,18 +25,18 @@ export const routes: Routes = [
       {
         path: 'pass',
         component: MasterPasswordComponent,
-        data: { state: "MasterPasswordComponent" }
+        data: { state: 'MasterPasswordComponent' }
       },
       {
         path: 'workspace',
         component: WorkspaceComponent,
-        data: { state: "WorkspaceComponent" },
+        data: { state: 'WorkspaceComponent' },
       },
       {
         path: 'master-password',
         component: MasterPasswordSetupComponent,
         canActivate: [WorkspaceGuard],
-        data: { state: "MasterPasswordSetupComponent" }
+        data: { state: 'MasterPasswordSetupComponent' }
       },
     ]
   }

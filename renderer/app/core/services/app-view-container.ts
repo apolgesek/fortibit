@@ -1,4 +1,5 @@
-import { Injectable, ViewContainerRef } from "@angular/core";
+/* eslint-disable no-underscore-dangle */
+import { Injectable, ViewContainerRef } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class AppViewContainer {

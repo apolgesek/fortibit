@@ -1,19 +1,21 @@
-import { Injectable } from "@angular/core";
-import { initialEntries } from "@app/core/database";
-import { GroupId } from "@app/core/enums";
-import { IPasswordGroup } from "@app/core/models";
-import { GroupRepository } from "@app/core/repositories";
-import { Subject } from "rxjs";
+import { Injectable, inject } from '@angular/core';
+import { DbManager, initialEntries } from '@app/core/database';
+import { GroupId } from '@app/core/enums';
+import { IPasswordGroup } from '@app/core/models';
+import { GroupRepository } from '@app/core/repositories';
+import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class GroupManager {
+  public readonly markDirtySource: Subject<void> = new Subject();
   public groups: IPasswordGroup[] = [];
   public builtInGroups: IPasswordGroup[] = [];
-  public markDirtySource: Subject<void>;
   public selectedGroup?: number;
   public selectedGroupName?: string;
   public contextSelectedGroup?: number;
   public isGroupDragged?: boolean;
+
+  private readonly groupRepository: GroupRepository = new GroupRepository(inject(DbManager));
 
   get isAddAllowed(): boolean {
     const selectedCategoryId = this.selectedGroup;
@@ -22,8 +24,12 @@ export class GroupManager {
       && selectedCategoryId !== GroupId.Starred;
   }
 
-  constructor(private readonly groupRepository: GroupRepository) {
-    this.markDirtySource = new Subject();
+  async getAll(): Promise<IPasswordGroup[]> {
+    return this.groupRepository.getAll();
+  }
+
+  async get(id: number): Promise<IPasswordGroup> {
+    return this.groupRepository.get(id);
   }
 
   async removeGroup() {
@@ -38,23 +44,17 @@ export class GroupManager {
     await this.groupRepository.update({
       id: group.id,
       name: group.name,
+      lastModificationDate: new Date()
     });
 
     this.getGroupsTree();
     this.markDirty();
   }
 
-  async moveGroup(from: number, to: number) {
-    const group = await this.groupRepository.get(from);
-    await this.groupRepository.update({ ...group, parent: to });
-
-    this.markDirty();
-  }
-
   async addGroup(model?: Partial<IPasswordGroup>): Promise<number> {
     const newGroup: IPasswordGroup = {
       name: model?.name ?? 'New group',
-      parent: null,
+      lastModificationDate: new Date()
     };
 
     if (model?.isImported) {
@@ -91,7 +91,9 @@ export class GroupManager {
     this.groups[0] = allGroups.find(g => g.id === GroupId.Root);
     this.builtInGroups = builtInGroups.map(g => initialEntries.find(x => x.id === g));
 
-    const rootGroups = allGroups.filter(x => !x.parent && !builtInGroups.includes(x.id)).sort((a, b) => a.name.localeCompare(b.name));
+    const rootGroups = allGroups
+      .filter(x => !builtInGroups.includes(x.id))
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     for (let index = 0; index < rootGroups.length; index++){
       this.groups[index + 1] = rootGroups[index];

@@ -1,10 +1,10 @@
-import { Injectable } from "@angular/core";
-import { ICommunicationService } from "@app/core/models";
-import { IpcChannel } from "@shared-renderer/ipc-channel.enum";
-import { IAppConfig } from "../../../../../app-config";
+import { Injectable } from '@angular/core';
+import { IMessageBroker } from '@app/core/models';
+import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IAppConfig } from '../../../../../app-config';
 
 @Injectable()
-export class WebService implements ICommunicationService {
+export class WebService implements IMessageBroker {
   ipcRenderer: any;
   platform: string;
 
@@ -26,7 +26,7 @@ export class WebService implements ICommunicationService {
           return Promise.resolve('test123');
         }
 
-        return Promise.resolve('')
+        return Promise.resolve('');
       },
 
       send: (channel: IpcChannel, ...args) => {},

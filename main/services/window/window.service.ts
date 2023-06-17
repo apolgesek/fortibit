@@ -69,6 +69,24 @@ export class WindowService implements IWindowService {
       win.browserWindow.close();
     });
 
+    ipcMain.handle(IpcChannel.ToggleTheme, () => {
+      if (nativeTheme.shouldUseDarkColors) {
+        nativeTheme.themeSource = 'light';
+        this._configService.set({theme: 'light'});
+      } else {
+        nativeTheme.themeSource = 'dark';
+        this._configService.set({theme: 'dark'});
+      }
+
+      if (this._configService.appConfig.theme === 'light') {
+        this.windows.forEach(w => w.browserWindow.setTitleBarOverlay({ color: '#fcfcfc', symbolColor: '#364f63' }));
+      } else {
+        this.windows.forEach(w => w.browserWindow.setTitleBarOverlay({ color: '#191d1e', symbolColor: '#dadada' }));
+      }
+
+      return nativeTheme.shouldUseDarkColors;
+    });
+
     ipcMain.handle(IpcChannel.RegenerateKey, (event: IpcMainEvent) => {
       this.getWindowByWebContentsId(event.sender.id).key = this.getSecureKey();
     });
@@ -96,10 +114,6 @@ export class WindowService implements IWindowService {
       resizable: true,
       title: this._configService.appConfig.name,
     });
-
-    if (this._isDevMode) {
-      window.webContents.openDevTools({ mode: 'detach' });
-    }
 
     window.once('closed', () => {
       this.removeWindow(window);
@@ -134,6 +148,7 @@ export class WindowService implements IWindowService {
     const window = this.createFromTemplate({
       width: 600,
       height: 400,
+      minWidth: 600,
       resizable: false,
       title: this._configService.appConfig.name + '- entry select',
       show: false
@@ -253,7 +268,7 @@ export class WindowService implements IWindowService {
   private createFromTemplate(options: Omit<Electron.BrowserWindowConstructorOptions, 'webPreferences'>): BrowserWindow {
     const template: Electron.BrowserWindowConstructorOptions = {
       frame: false,
-      backgroundColor: nativeTheme.shouldUseDarkColors ? '#191d1e' : '#fff',
+      backgroundColor: this._configService.appConfig.theme === 'light' ? '#fcfcfc' : '#191d1e',
       // shouldn't be changed for best security
       webPreferences: {
         sandbox: true,
@@ -269,6 +284,12 @@ export class WindowService implements IWindowService {
         enableWebSQL: false,
         spellcheck: false,
       },
+      titleBarStyle: 'hidden',
+      titleBarOverlay: {
+        color: this._configService.appConfig.theme === 'light' ? '#fcfcfc' : '#191d1e',
+        symbolColor: this._configService.appConfig.theme === 'light' ? '#191d1e' : '#fcfcfc',
+        height: 32,
+      }
     };
     const window = new BrowserWindow({ ...options, ...template });
 

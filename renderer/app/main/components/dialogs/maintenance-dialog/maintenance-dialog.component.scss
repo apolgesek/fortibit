@@ -1,0 +1,66 @@
+@import 'themes/light/variables';
+@import 'mixins';
+
+.container {
+  flex-direction: column;
+  flex: 1;
+  padding-right: 1.5rem;
+}
+
+.label {
+  margin-right: 2rem;
+}
+
+.inputgroup .number {
+  width: 2.5rem;
+}
+
+.validation-error {
+  margin-left: 0;
+}
+
+.inputgroup {
+  align-items: center;
+  background: none !important;
+  box-shadow: none !important;
+  padding: 0;
+
+  input {
+    padding: 0.25rem;
+    background-color: var(--input-modal-bg);
+  }
+}
+
+.description {
+  margin-top: 0;
+}
+
+.primary-btn {
+  margin-top: 2rem;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 2rem 0;
+  font-size: 1.25rem;
+  @include font-bold;
+
+  &.row {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .status {
+    display: inline-flex;
+  }
+
+  &.info {
+    color: var(--link-text);
+  }
+
+  &.success {
+    color: $jungle-green;
+  }
+}

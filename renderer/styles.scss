@@ -63,6 +63,11 @@ body {
 a {
 	color: var(--link-text);
 	text-decoration: none;
+	outline: none;
+
+	&:focus-visible {
+		outline: 2px solid $barberry;
+	}
 }
 
 .loader {
@@ -155,7 +160,7 @@ form [class*="-btn"] {
   padding-bottom: 0.5rem;
 
 	&:not(:first-child) {
-		margin-top: 3rem;
+		margin-top: 1.5rem;
 	}
 }
 
@@ -179,12 +184,14 @@ code {
 
 .info-box {
 	display: flex;
+	align-items: center;
 	padding: 1rem;
 	background-color: var(--secondary-bg);
 	border: 1px solid var(--border-color);
 	border-radius: 0.25rem;
 
 	i-feather {
-		width: 1.5rem !important;
+		min-width: 1.25rem !important;
+		min-height: 1.25rem !important;
 	}
 }

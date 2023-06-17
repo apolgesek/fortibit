@@ -163,12 +163,10 @@ export class AutotypeService implements IAutotypeService {
   }
 
   private changeEncryptionSettings(settings: Partial<IProduct>) {
-    if (settings.autoTypeEnabled !== this._configService.appConfig.autoTypeEnabled) {
-      if (settings.autoTypeEnabled) {
-        this.registerAutocompleteShortcut();
-      } else {
-        this.unregisterAutocompleteShortcut();
-      }
+    if (settings.autoTypeEnabled) {
+      this.registerAutocompleteShortcut();
+    } else {
+      this.unregisterAutocompleteShortcut();
     }
   
     this._configService.set(settings);

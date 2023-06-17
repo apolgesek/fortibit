@@ -159,7 +159,7 @@ $sidePanelOutDuration: 250ms;
 
 .list-cta {
 	text-align: center;
-	color: var(--secondary-text);
+	color: var(--primary-text);
 	font-size: 1rem;
 	user-select: none;
 	margin-top: 2rem;
@@ -229,4 +229,8 @@ $sidePanelOutDuration: 250ms;
 	&:hover {
 		background-color: var(--list-item-bg--hover);
 	}
+
+	&:focus:not(:hover) {
+    outline: 2px solid $barberry !important;
+  }
 }

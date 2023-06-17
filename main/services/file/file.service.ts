@@ -6,8 +6,8 @@ export class FileService implements IFileService {
   download(url: string, path: string, errorCallback: () => void, finishCallback: () => void): Promise<string> {
     return new Promise((resolve, reject) => {
       const req = request(url, response => {
-        if (response.statusCode && (response.statusCode > 400 && response.statusCode < 500)) {
-          reject('Failed to download a file.');
+        if (response.statusCode && (response.statusCode >= 400 && response.statusCode < 500)) {
+          reject({ message: 'Failed to download a file.', code: response.statusCode });
 
           return;
         }
@@ -22,14 +22,14 @@ export class FileService implements IFileService {
         response.on('error', (err) => {
           file.close();
           unlink(path, (err) => { console.log(err) });
-          reject('Error occured while downloading file.');
+          reject({ message: 'Error occured while downloading file.', code: null });
         });
 
         const stream = response.pipe(file);
 
         stream.on('error', (err) => {
           errorCallback && errorCallback();
-          reject('Error occured while saving file.');
+          reject({ message: 'Error occured while saving file.', code: null });
         });
     
         stream.on('finish', () => {
@@ -40,7 +40,7 @@ export class FileService implements IFileService {
 
       req.on('error', () => {
         errorCallback && errorCallback();
-        reject('Error occured while downloading file');
+        reject({ message: 'Error occured while downloading file.', code: null });
       });
   
       req.end();

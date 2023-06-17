@@ -1,74 +1,49 @@
 {
-    "root": true,
-    "ignorePatterns": [
-      "app/**/*", // ignore nodeJs files
-      "dist/**/*",
-      "release/**/*"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "*.ts"
+  "root": true,
+  "ignorePatterns": [
+    "main/**/*",
+    "dist/**/*",
+    "e2e/**/*"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/recommended",
+        "plugin:@angular-eslint/template/process-inline-templates"
+      ],
+      "rules": {
+        "@angular-eslint/directive-selector": [
+          "error",
+          {
+            "type": "attribute",
+            "prefix": "app",
+            "style": "camelCase"
+          }
         ],
-        "parserOptions": {
-          "project": [
-            "./tsconfig-serve.json",
-            "./renderer/tsconfig.json",
-          ],
-          "createDefaultProgram": true
-        },
-        "extends": [
-          "plugin:@angular-eslint/ng-cli-compat",
-          "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
-          "plugin:@angular-eslint/template/process-inline-templates"
-        ],
-        "rules": {
-          "prefer-arrow/prefer-arrow-functions": 0,
-          "@angular-eslint/directive-selector":  0,
-          "@angular-eslint/component-selector": [
-            "error",
-            {
-              "type": "element",
-              "prefix": "app",
-              "style": "kebab-case"
-            }
-          ]
-        }
-      },
-      {
-        "files": [
-          "*.html"
-        ],
-        "extends": [
-          "plugin:@angular-eslint/template/recommended"
-        ],
-        "rules": {
-            "@typescript-eslint/explicit-module-boundary-types": [
-                "off"
-            ],
-            "@typescript-eslint/member-ordering": [
-                "warn"
-            ],
-            "@typescript-eslint/no-var-requires": [
-                "warn"
-            ],
-            "indent": [
-                "warn",
-                2
-            ],
-            "linebreak-style": [
-                "warn",
-                "windows"
-            ],
-            "quotes": [
-                "warn",
-                "single"
-            ],
-            "semi": [
-                "warn",
-                "always"
-            ]
-        }
+        "@angular-eslint/component-selector": [
+          "error",
+          {
+            "type": "element",
+            "prefix": "app",
+            "style": "kebab-case"
+          }
+        ]
       }
-    ]
-  }
+    },
+    {
+      "files": [
+        "*.html"
+      ],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended",
+        "plugin:@angular-eslint/template/accessibility"
+      ],
+      "rules": {}
+    }
+  ]
+}

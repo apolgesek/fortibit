@@ -1,7 +1,7 @@
 import { AfterViewInit, Directive, ElementRef, Inject, Input } from '@angular/core';
-import { ICommunicationService } from '@app/core/models';
+import { IMessageBroker } from '@app/core/models';
 import { EntryManager } from '@app/core/services';
-import { CommunicationService } from 'injection-tokens';
+import { MessageBroker } from 'injection-tokens';
 import { IPasswordEntry, IpcChannel } from '../../../../shared-models';
 
 @Directive({
@@ -12,6 +12,12 @@ export class EntryIconDirective implements AfterViewInit {
   private _entry: IPasswordEntry;
   private iconExists = false;
 
+  constructor(
+    private readonly el: ElementRef,
+    private readonly entryManager: EntryManager,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker
+  ) { }
+
   @Input('appEntryIcon') set entry(value: IPasswordEntry) {
     if (this._entry && this.detailsChanged(value)) {
       this.updateIcon(value);
@@ -20,12 +26,6 @@ export class EntryIconDirective implements AfterViewInit {
     this._entry = value;
   };
 
-  constructor(
-    private readonly el: ElementRef,
-    private readonly entryManager: EntryManager,
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService
-  ) { }
-
   async ngAfterViewInit(): Promise<void> {
     // icon check can't be async to avoid load delay
     this.iconExists = Boolean(this._entry.icon);
@@ -33,7 +33,9 @@ export class EntryIconDirective implements AfterViewInit {
   }
 
   public async updateIcon(entry: IPasswordEntry) {
-    this.iconExists = entry.icon && (entry.icon.startsWith('data') || await this.communicationService.ipcRenderer.invoke(IpcChannel.CheckIconExists, entry.icon));
+    this.iconExists = entry.icon
+      && (entry.icon.startsWith('data')
+      || await this.messageBroker.ipcRenderer.invoke(IpcChannel.CheckIconExists, entry.icon));
     await this.setIcon(entry);
   }
 
@@ -46,16 +48,18 @@ export class EntryIconDirective implements AfterViewInit {
   }
 
   private detailsChanged(entry: IPasswordEntry): boolean {
-    return this._entry.icon != entry.icon || this._entry.title != entry.title;
+    return this._entry.icon !== entry.icon || this._entry.title !== entry.title;
   }
 
   private setImageIcon(entry: IPasswordEntry) {
-    (<HTMLImageElement>this.el.nativeElement).src = entry.icon.startsWith('data:image/png') ? entry.icon : 'file://' + entry.icon;
+    (this.el.nativeElement as HTMLImageElement).src = entry.icon.startsWith('data:image/png')
+      ? entry.icon
+      : 'file://' + entry.icon;
   }
 
   private setInitialIcon(entry: IPasswordEntry): Promise<number> {
     const dataUrl = this.getDefaultIcon(entry);
-    (<HTMLImageElement>this.el.nativeElement).src = dataUrl;
+    (this.el.nativeElement as HTMLImageElement).src = dataUrl;
 
     return this.entryManager.updateIcon(entry.id, dataUrl);
   }
@@ -74,14 +78,14 @@ export class EntryIconDirective implements AfterViewInit {
     const ratio = window.devicePixelRatio;
     const { bgColor, textColor } = this.getBackgroundColor(text);
 
-    var canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
 
     canvas.width = 32 * ratio;
     canvas.height = 32 * ratio;
     canvas.style.width = canvas.width + 'px';
     canvas.style.height = canvas.height + 'px';
 
-    var context = canvas.getContext('2d');
+    const context = canvas.getContext('2d');
     context.scale(ratio, ratio);
 
     // draw plane
@@ -99,19 +103,19 @@ export class EntryIconDirective implements AfterViewInit {
     return canvas;
   }
 
-  private getBackgroundColor(text: string): { bgColor: string, textColor: string } {
+  private getBackgroundColor(text: string): { bgColor: string; textColor: string } {
     switch (text.charCodeAt(0) % 3) {
-      case 0:
-        // green
-        return { bgColor: '#c7e3d0', textColor: '#376d48' };
-      case 1:
-        // red
-        return { bgColor: '#ff9bab', textColor: '#8f3d49'};
-      case 2:
-        // yellow
-        return { bgColor: '#eae48f', textColor: '#9e961d'};
-      default:
-        return { bgColor: '#ffffff', textColor: '#364f63'};
+    case 0:
+      // green
+      return { bgColor: '#c7e3d0', textColor: '#376d48' };
+    case 1:
+      // red
+      return { bgColor: '#ff9bab', textColor: '#8f3d49'};
+    case 2:
+      // yellow
+      return { bgColor: '#eae48f', textColor: '#9e961d'};
+    default:
+      return { bgColor: '#ffffff', textColor: '#364f63'};
     }
   }
 }

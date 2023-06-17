@@ -1,7 +1,6 @@
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
-import { Subject } from 'rxjs';
 import { WorkspaceService, EntryManager, GroupManager } from '@app/core/services';
 import { SettingsButtonComponent } from '../settings-button/settings-button.component';
 import { CommonModule } from '@angular/common';
@@ -32,15 +31,25 @@ import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
     TooltipDirective
   ]
 })
-export class ToolbarComponent implements OnDestroy {
-  @ViewChild('searchInput') public searchInput!: ElementRef; 
+export class ToolbarComponent {
+  @ViewChild('searchInput') public searchInput!: ElementRef;
 
   public searchModes = [
     { label: 'This group', value: false },
     { label: 'All groups', value: true }
   ];
 
-  private readonly destroyed$ = new Subject<void>();
+  constructor(
+    private readonly workspaceService: WorkspaceService,
+    private readonly entryManager: EntryManager,
+    private readonly groupManager: GroupManager,
+    private readonly searchService: SearchService,
+    private readonly modalService: ModalService,
+  ) {}
+
+  get searchMode(): string {
+    return this.isGlobalSearchMode ? 'Search all groups' : 'Search selected group';
+  }
 
   get isDatabaseInSync(): boolean {
     return this.workspaceService.isSynced;
@@ -66,14 +75,6 @@ export class ToolbarComponent implements OnDestroy {
     return this.entryManager.selectedPasswords.length;
   }
 
-  get searchPhrase(): string {
-    return this.searchService.searchPhraseValue;
-  }
-
-  set searchPhrase(value: string) {
-    this.searchService.searchInputSource.next(value);
-  }
-
   get isGlobalSearchMode(): boolean {
     return this.searchService.isGlobalSearchMode;
   }
@@ -82,17 +83,13 @@ export class ToolbarComponent implements OnDestroy {
     this.searchService.isGlobalSearchMode = value;
   }
 
-  constructor(
-    private readonly workspaceService: WorkspaceService,
-    private readonly entryManager: EntryManager,
-    private readonly groupManager: GroupManager,
-    private readonly searchService: SearchService,
-    private readonly modalService: ModalService,
-  ) {}
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  get searchPhrase(): string {
+    return this.searchService.searchPhraseValue;
+  }
 
-  ngOnDestroy() {
-    this.destroyed$.next();
-    this.destroyed$.complete();
+  set searchPhrase(value: string) {
+    this.searchService.searchInputSource.next(value);
   }
 
   openAddEntryWindow() {

@@ -13,10 +13,12 @@ import { IDatabaseService } from './services/database';
 import { IEncryptionEventWrapper, MessageEventType } from './services/encryption';
 import { IPerformanceService } from './services/performance/performance-service.model';
 import { IWindowService } from './services/window';
-import { spawn } from 'child_process';
+import { IClipboardService } from './services/clipboard';
 
 class MainProcess {
   private readonly _services: SingleInstanceServices;
+  private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
+
   private _fileArg: string;
 
   private get _databaseService(): IDatabaseService {
@@ -43,14 +45,16 @@ class MainProcess {
     return this._services.get(IAutotypeService);
   }
 
+  private get _clipboardService(): IClipboardService {
+    return this._services.get(IClipboardService);
+  }
+
   constructor() {
     this._services = new SingleInstanceServices();
     this._fileArg = process.argv.find(x => x.endsWith(this._services.get(IConfigService).appConfig.fileExtension));
   
     // https://www.electronjs.org/docs/latest/tutorial/performance#8-call-menusetapplicationmenunull-when-you-do-not-need-a-default-menu
     Menu.setApplicationMenu(null);
-    app.disableHardwareAcceleration();
-
     this.registerAppEvents();
   }
 
@@ -61,6 +65,13 @@ class MainProcess {
       this.setFile(windowRef, filePath);
 
       this._windowService.loadWindow(windowRef);
+    });
+
+    // disable creation of new windows for better security
+    app.on('web-contents-created', (_, contents) => {
+      contents.setWindowOpenHandler(() => {
+        return { action: 'deny' };
+      });
     });
 
     app.on('open-file', (event, path) => {
@@ -83,13 +94,14 @@ class MainProcess {
   private exitApp() {
     globalShortcut.unregisterAll();
     this._databaseService.onAppExit();
+    this._clipboardService.clear();
 
     app.exit();
   }
 
-  private onReady() {
-    const windowRef = this._windowService.createMainWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));
-    const entrySelectWindowRef = this._windowService.createEntrySelectWindow();
+  private async onReady() {
+    const mainWindow = this._windowService.createMainWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));
+    const entrySelectWindow = this._windowService.createEntrySelectWindow();
     this.registerIpcEventListeners();
 
     if (this._configService.appConfig.theme === 'dark') {
@@ -102,16 +114,25 @@ class MainProcess {
       this._autotypeService.registerAutocompleteShortcut();
     }
 
-    this.setFile(windowRef, this._fileArg);
+    this.setFile(mainWindow, this._fileArg);
+    await this._windowService.loadWindow(mainWindow);
 
-    const windowLoaded = this._windowService.loadWindow(windowRef);
-    const entrySelectWindowLoaded = this._windowService.loadWindow(entrySelectWindowRef, 'entry-select');
-    
-    windowLoaded.then(() => {
+    try {
       this._performanceService.mark('firstWindowLoaded');
-    }).catch(err => {
+    } catch (err) {
       console.log(err);
-    });
+    }
+
+    this.openDevTools(mainWindow);
+
+    await this._windowService.loadWindow(entrySelectWindow, 'entry-select');
+    this.openDevTools(entrySelectWindow);
+  }
+
+  private openDevTools(window: BrowserWindow) {
+    if (this._isDevMode) {
+      window.webContents.openDevTools({ mode: 'detach' });
+    }
   }
 
   private setFile(windowRef: BrowserWindow, filePath: string) {

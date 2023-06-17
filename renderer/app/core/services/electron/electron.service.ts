@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { ICommunicationService } from '@app/core/models';
+import { IMessageBroker } from '@app/core/models';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 
 @Injectable()
-export class ElectronService implements ICommunicationService {
+export class ElectronService implements IMessageBroker {
   ipcRenderer: any;
   platform: string;
 

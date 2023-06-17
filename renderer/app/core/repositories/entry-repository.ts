@@ -1,47 +1,39 @@
-import { Injectable } from '@angular/core';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { DbManager } from '../database/db-manager';
 import { GroupId } from '../enums';
-import { IEntryRepository, PredicateFn } from './index';
+import { IEntryRepository, EntryPredicateFn } from './index';
 
-@Injectable({providedIn: 'root'})
 export class EntryRepository implements IEntryRepository {
   constructor(private readonly db: DbManager) {}
 
   getAll(): Promise<IPasswordEntry[]> {
-    return this.db.context.transaction('r', this.db.entries, () => {
-      return this.db.entries.toArray();
-    });
+    return this.db.context.transaction('r', this.db.entries,
+      () => this.db.entries.toArray());
   }
 
   getAllByGroup(groupId: number): Promise<IPasswordEntry[]> {
-    return this.db.context.transaction('r', this.db.entries, () => {
-      return this.db.entries.where('groupId').equals(groupId).toArray();
-    });
+    return this.db.context.transaction('r', this.db.entries,
+      () => this.db.entries.where('groupId').equals(groupId).toArray());
   }
 
-  getAllByPredicate(fn: PredicateFn): Promise<IPasswordEntry[]> {
-    return this.db.context.transaction('r', this.db.entries, () => {
-      return this.db.entries.filter(x => fn(x)).toArray();
-    });
+  getAllByPredicate(fn: EntryPredicateFn): Promise<IPasswordEntry[]> {
+    return this.db.context.transaction('r', this.db.entries,
+      () => this.db.entries.filter(x => fn(x)).toArray());
   }
 
   get(id: number): Promise<IPasswordEntry | undefined> {
-    return this.db.context.transaction('r', this.db.entries, () => {
-      return this.db.entries.get(id);
-    });
+    return this.db.context.transaction('r', this.db.entries,
+      () => this.db.entries.get(id));
   }
 
   add(item: Partial<IPasswordEntry>): Promise<number> {
-    return this.db.context.transaction('rw', this.db.entries, () => {
-      return this.db.entries.add(item as IPasswordEntry);
-    });
+    return this.db.context.transaction('rw', this.db.entries,
+      () => this.db.entries.add(item as IPasswordEntry));
   }
 
   bulkAdd(items: IPasswordEntry[]): Promise<number> {
-    return this.db.context.transaction('rw', this.db.entries, () => {
-      return this.db.entries.bulkAdd(items);
-    });
+    return this.db.context.transaction('rw', this.db.entries,
+      () => this.db.entries.bulkAdd(items));
   }
 
   update(item: Partial<IPasswordEntry>): Promise<number> {
@@ -52,39 +44,40 @@ export class EntryRepository implements IEntryRepository {
 
       const originalItem = await this.get(item.id);
       const updatedItem = { ...originalItem, ...item };
-  
+
       return this.db.entries.put(updatedItem, item.id);
     });
   }
 
   delete(id: number): Promise<void> {
-    return this.db.context.transaction('rw', this.db.entries, () => {
-      return this.db.entries.delete(id);
-    });
+    return this.db.context.transaction('rw', this.db.entries,
+      () => this.db.entries.delete(id));
   }
 
   deleteAll(groupId: number): Promise<number> {
-    return this.db.context.transaction('rw', this.db.entries, () => {
-      return this.db.entries.where('groupId').equals(groupId).delete();
-    });
+    return this.db.context.transaction('rw', this.db.entries,
+      () => this.db.entries.where('groupId').equals(groupId).delete());
   }
 
   bulkDelete(ids: number[]): Promise<void> {
-    return this.db.context.transaction('rw', this.db.entries, () => {
-      return this.db.entries.bulkDelete(ids);
-    });
+    return this.db.context.transaction('rw', this.db.entries,
+      () => this.db.entries.bulkDelete(ids));
   }
 
   moveEntries(ids: number[], targetGroupId: number): Promise<number[]> {
-    return this.db.context.transaction('rw', this.db.entries, () => {
-      return Promise.all(ids.map(id => this.db.entries.update(id, { groupId: targetGroupId })));
-    });
+    return this.db.context.transaction('rw', this.db.entries,
+      () => Promise.all(
+        ids.map(id => this.db.entries.update(id, { groupId: targetGroupId }))
+      ));
   }
 
   softDelete(ids: number[]): Promise<number[]> {
-    return this.db.context.transaction('rw', this.db.entries, () => {
-      return Promise.all(ids.map(id => this.db.entries.update(id, { groupId: GroupId.RecycleBin, isStarred: false })));
-    });
+    return this.db.context.transaction('rw', this.db.entries,
+      () => Promise.all(ids.map(
+        id => this.db.entries.update(id,
+          { groupId: GroupId.RecycleBin, isStarred: false }
+        ))
+      ));
   }
 
   getSearchResults(searchPhrase: string): Promise<IPasswordEntry[]> {

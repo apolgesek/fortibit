@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ConfigService, WorkspaceService } from '@app/core/services';
 import { Subject, take, takeUntil } from 'rxjs';
 import { IProduct } from '../../../../../../../product';
 import { FeatherModule } from 'angular-feather';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-view-tab',
@@ -15,11 +16,11 @@ import { FeatherModule } from 'angular-feather';
     FeatherModule
   ]
 })
-export class ViewTabComponent implements OnInit, OnDestroy {
+export class ViewTabComponent implements OnInit {
   public viewForm: FormGroup;
-  private readonly destroyed: Subject<void> = new Subject();
 
   constructor(
+    private readonly destroyRef: DestroyRef,
     private readonly formBuilder: FormBuilder,
     private readonly workspaceService: WorkspaceService,
     private readonly configService: ConfigService,
@@ -33,21 +34,21 @@ export class ViewTabComponent implements OnInit, OnDestroy {
       });
 
       this.viewForm.valueChanges
-      .pipe(
-        takeUntil(this.destroyed)
-      ).subscribe((form) => {
-        if (this.viewForm.valid) {
-          const configPartial = {
-            displayIcons: form.displayIcons,
-            theme: form.darkTheme ? 'dark' : 'light'
-          } as Partial<IProduct>;
-  
-          this.configService.setConfig(configPartial);
-        }
-      });
+        .pipe(
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe((form) => {
+          if (this.viewForm.valid) {
+            const configPartial = {
+              displayIcons: form.displayIcons,
+              theme: form.darkTheme ? 'dark' : 'light'
+            } as Partial<IProduct>;
+
+            this.configService.setConfig(configPartial);
+          }
+        });
 
       this.viewForm.get('darkTheme').valueChanges
-        .pipe(takeUntil(this.destroyed))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           this.toggleTheme();
         });
@@ -56,10 +57,5 @@ export class ViewTabComponent implements OnInit, OnDestroy {
 
   toggleTheme() {
     this.workspaceService.toggleTheme();
-  }
-
-  ngOnDestroy(): void {
-    this.destroyed.next();
-    this.destroyed.complete();
   }
 }

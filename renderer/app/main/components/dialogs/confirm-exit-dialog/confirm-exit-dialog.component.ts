@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, ComponentRef, Inject } from '@angular/core';
+import { Component, ComponentRef, Inject } from '@angular/core';
 import { IpcChannel } from '@shared-renderer/index';
-import { ICommunicationService } from '@app/core/models';
+import { IMessageBroker } from '@app/core/models';
 import { WorkspaceService, ModalRef } from '@app/core/services';
 
-import { CommunicationService } from 'injection-tokens';
+import { MessageBroker } from 'injection-tokens';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
@@ -13,7 +13,6 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
   styleUrls: ['./confirm-exit-dialog.component.scss'],
   standalone: true,
   imports: [
-    
     ModalComponent
   ],
 })
@@ -22,19 +21,19 @@ export class ConfirmExitDialogComponent implements IModal {
   public readonly additionalData!: IAdditionalData;
 
   constructor(
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly workspaceService: WorkspaceService,
     private readonly modalRef: ModalRef
   ) { }
 
   async saveChanges() {
-      this.communicationService.ipcRenderer.once(IpcChannel.GetSaveStatus, () => {
-        setTimeout(() => {
-          this.executeTask();
-        }, 500);
-      });
+    this.messageBroker.ipcRenderer.once(IpcChannel.GetSaveStatus, () => {
+      setTimeout(() => {
+        this.executeTask();
+      }, 500);
+    });
 
-      await this.workspaceService.saveDatabase();
+    await this.workspaceService.saveDatabase();
   }
 
   executeTask() {

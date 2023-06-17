@@ -6,19 +6,19 @@ import { IConfigService } from "../config";
 import { IFileService } from "../file";
 import { IWindowService } from "../window";
 import { IIconService } from "./icon-service.model";
+import * as psl from 'psl';
+import { IAsyncQueue } from "./async-queue.model";
+import { AsyncQueue } from "./async-queue";
 
-interface QueueItem {
+interface Icon {
   windowId: number;
   id: number;
   url: string;
-  attempts: number;
 }
 
 export class IconService implements IIconService {
   private readonly iconDirectory: string;
-  private readonly iconQueue: QueueItem[] = [];
-  private readonly iconDownloadAttemptIntervalSeconds = 10;
-  private psl;
+  private readonly iconQueue: IAsyncQueue<Icon>;
 
   constructor(
     @IConfigService private readonly _configService: IConfigService,
@@ -30,58 +30,41 @@ export class IconService implements IIconService {
       mkdirSync(this.iconDirectory);
     }
 
-    ipcMain.on(IpcChannel.TryGetIcon, (event: IpcMainEvent, id: number, url: string) => {
-      this.tryGetIcon(url).then((iconPath: string) => {
-        const window = this._windowService.getWindowByWebContentsId(event.sender.id);
-        window.browserWindow.webContents.send(IpcChannel.UpdateIcon, id, iconPath);
-      }).catch(err => {});
+    ipcMain.on(IpcChannel.TryGetIcon, async (event: IpcMainEvent, id: number, url: string) => {
+      const iconPath = await this.tryGetIcon(url);
+      const window = this._windowService.getWindowByWebContentsId(event.sender.id);
+      window.browserWindow.webContents.send(IpcChannel.UpdateIcon, id, iconPath);
     });
 
-    ipcMain.on(IpcChannel.TryReplaceIcon, (event: IpcMainEvent, id: number, path: string, newUrl: string) => {
-      this.tryReplaceIcon(path, newUrl).then((iconPath: string) => {
-        const window = this._windowService.getWindowByWebContentsId(event.sender.id);
-        window.browserWindow.webContents.send(IpcChannel.UpdateIcon, id, iconPath);
-      }).catch(err => {});
+    ipcMain.on(IpcChannel.TryReplaceIcon, async (event: IpcMainEvent, id: number, path: string, newUrl: string) => {
+      const iconPath = await this.tryReplaceIcon(path, newUrl);
+      const window = this._windowService.getWindowByWebContentsId(event.sender.id);
+      window.browserWindow.webContents.send(IpcChannel.UpdateIcon, id, iconPath);
     });
 
-    ipcMain.on(IpcChannel.RemoveIcon, (event: IpcMainEvent, entry: IPasswordEntry) => {
-      this.removeIcon(entry.icon).then(() => {
-        const window = this._windowService.getWindowByWebContentsId(event.sender.id);
-        window.browserWindow.webContents.send(IpcChannel.UpdateIcon, entry.id);
-      }).catch(err => {});
+    ipcMain.on(IpcChannel.RemoveIcon, async (event: IpcMainEvent, entry: IPasswordEntry) => {
+      await this.removeIcon(entry.icon);
+      const window = this._windowService.getWindowByWebContentsId(event.sender.id);
+      window.browserWindow.webContents.send(IpcChannel.UpdateIcon, entry.id);
     });
 
     ipcMain.handle(IpcChannel.CheckIconExists, (_: IpcMainEvent, path: string) => {
       return existsSync(path);
     });
 
-    setInterval(() => {
-      if (this.iconQueue.length) {
-        for (let i = 0; i < this.iconQueue.length; i++) {
-          const event = this.iconQueue[i];
-      
-          this.getFile(event.url).then(path => {
-            this._windowService.getWindowByWebContentsId(event.windowId)
-              .browserWindow
-              .webContents
-              .send(IpcChannel.UpdateIcon, event.id, path);
-
-            this.iconQueue.shift();
-          }).catch(err => {
-            event.attempts++;
-            if (event.attempts === 3) {
-              this.iconQueue.shift();
-            }
-          }); 
-        }
-      }
-    }, this.iconDownloadAttemptIntervalSeconds * 1000);
+    this.iconQueue = new AsyncQueue<Icon, string>((item) => this.getFile(item.url), (item, result) => {
+      this._windowService.getWindowByWebContentsId(item.windowId)
+        .browserWindow
+        .webContents
+        .send(IpcChannel.UpdateIcon, item.id, result);
+    });
+    this.iconQueue.process();
   }
 
   getIcons(windowId: number, entries: IPasswordEntry[]) {
     for (const entry of entries) {
-      if (entry.url && !entry.icon) {
-        this.addToQueue({ windowId, id: entry.id, url: entry.url, attempts: 0 });
+      if (entry.url && (!entry.icon || entry.icon.startsWith('data:image/png'))) {
+        this.iconQueue.add({ windowId, id: entry.id, url: entry.url });
       }
     }
   }
@@ -113,16 +96,21 @@ export class IconService implements IIconService {
     return entries.map(entry => {
       if (entry.icon && !entry.icon.startsWith('data:image/png') && !existsSync(entry.icon)) {
         return { ...entry, icon: null };
-      } else {
-        return entry;
+      } else if (entry.url) {
+        const filePath = join(this.iconDirectory, this.getFileName(entry.url)) + '.png';
+        if (existsSync(filePath)) {
+          return { ...entry, icon: filePath };
+        }
       }
+
+      return entry;
     });
   }
 
   private async getFile(url: string): Promise<string> {
     const formattedHostname = await this.getFileName(url);
 
-    const fileUrl = this._configService.appConfig.webUrl + '/icon/' + formattedHostname + '.png';
+    const fileUrl = this._configService.appConfig.iconServiceUrl + '/icon/' + formattedHostname + '.png';
     const filePath = join(`${this.iconDirectory}`, `${formattedHostname}.png`);
 
     if (existsSync(filePath)) {
@@ -132,22 +120,12 @@ export class IconService implements IIconService {
     return this._fileService.download(fileUrl, filePath);
   }
 
-  private async getFileName(url: string): Promise<string> {
-    if (!this.psl) {
-      this.psl = await import('psl');
-    }
-
+  private getFileName(url: string): string {
     if (!/^https?:\/\//.test(url)) {
       url = 'https://' + url;
     }
 
-    return new Promise((resolve) => {
-      url = this.psl.parse(new URL(url).hostname).domain;
-      resolve(url.replaceAll('.', '-'));
-    });
-  }
-
-  private addToQueue(event: QueueItem) {
-    this.iconQueue.push(event);
+    url = psl.parse(new URL(url).hostname).domain;
+    return url.replaceAll('.', '-');
   }
 }

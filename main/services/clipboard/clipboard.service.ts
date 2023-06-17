@@ -13,12 +13,17 @@ export class ClipboardService implements IClipboardService {
     });
   }
 
+  clear() {
+    clipboard.clear();
+    this._clearClipboardTimeout = null;
+  }
+
   async write(content: string): Promise<boolean> {
     clearTimeout(this._clearClipboardTimeout);
     clipboard.writeText(content);
 
     this._clearClipboardTimeout = setTimeout(() => {
-      clipboard.clear();
+      this.clear();
     }, this._configService.appConfig.clipboardClearTimeMs);
 
     return true;

@@ -27,7 +27,7 @@ export class MenuService {
     }
 
     this.currentItem.state.closeRecursive(this.currentItem.state);
-  
+
     this.currentItem = this.items[currentItemIndex - 1];
     this.currentItem.openDropdown();
   }

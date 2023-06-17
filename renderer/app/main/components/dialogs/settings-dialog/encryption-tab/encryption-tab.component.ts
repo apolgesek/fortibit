@@ -33,8 +33,8 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
       this.encryptionForm = this.formBuilder.group({
         passwordLength: new FormControl(
           config.encryption.passwordLength, {
-          validators: Validators.compose([Validators.required, Validators.min(6), Validators.max(32)]),
-        }),
+            validators: Validators.compose([Validators.required, Validators.min(6), Validators.max(32)]),
+          }),
         lowercase: [config.encryption.lowercase],
         uppercase: [config.encryption.uppercase],
         specialChars: [config.encryption.specialChars],
@@ -42,27 +42,27 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
       });
 
       this.encryptionForm.valueChanges
-      .pipe(
-        debounceTime(this.debounceTimeMs),
-        distinctUntilChanged(),
-        takeUntil(this.destroyed)
-      ).subscribe((form) => {
-        if (this.encryptionForm.invalid) {
-          return;
-        }
-        
-        const configPartial = {
-          encryption: {
-            passwordLength: form.passwordLength,
-            lowercase: form.lowercase,
-            uppercase: form.uppercase,
-            specialChars: form.specialChars,
-            numbers: form.numbers,
+        .pipe(
+          debounceTime(this.debounceTimeMs),
+          distinctUntilChanged(),
+          takeUntil(this.destroyed)
+        ).subscribe((form) => {
+          if (this.encryptionForm.invalid) {
+            return;
           }
-        } as Partial<IProduct>;
 
-        this.configService.setConfig(configPartial);
-      });
+          const configPartial = {
+            encryption: {
+              passwordLength: form.passwordLength,
+              lowercase: form.lowercase,
+              uppercase: form.uppercase,
+              specialChars: form.specialChars,
+              numbers: form.numbers,
+            }
+          } as Partial<IProduct>;
+
+          this.configService.setConfig(configPartial);
+        });
     });
   }
 
@@ -74,11 +74,11 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
   }
 
   onNumberChange(event: KeyboardEvent, controlName: string, maxLength: number) {
-    const input = event.target as any;
+    const input = event.target as HTMLInputElement;
     const value = input.value.toString();
 
     if (value.length >= maxLength) {
-      input.value = parseInt(value.slice(0, maxLength));
+      input.valueAsNumber = parseInt(value.slice(0, maxLength), 10);
       this.encryptionForm.get(controlName).setValue(input.value);
     }
   }

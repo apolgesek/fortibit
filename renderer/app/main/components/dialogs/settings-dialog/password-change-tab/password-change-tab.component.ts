@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ICommunicationService } from '@app/core/models';
 import { ConfigService, NotificationService, WorkspaceService } from '@app/core/services';
 import { MasterPasswordSetupComponent } from '@app/main/components/master-password-setup/master-password-setup.component';
 import { isControlInvalid } from '@app/utils';
 import { FeatherModule } from 'angular-feather';
-import { CommunicationService } from 'injection-tokens';
-import { Subject, debounceTime, distinctUntilChanged, take, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { IAppConfig } from '../../../../../../../app-config';
 import { IProduct } from '../../../../../../../product';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-password-change-tab',
@@ -23,12 +22,19 @@ import { IProduct } from '../../../../../../../product';
     MasterPasswordSetupComponent
   ]
 })
-export class PasswordChangeTabComponent implements OnInit, OnDestroy {
+export class PasswordChangeTabComponent implements OnInit {
   public readonly isControlInvalid = isControlInvalid;
   public passwordForm!: FormGroup;
 
-  private readonly destroyed: Subject<void> = new Subject();
   private readonly debounceTimeMs = 500;
+
+  constructor(
+    private readonly destroyRef: DestroyRef,
+    private readonly formBuilder: FormBuilder,
+    private readonly notificationService: NotificationService,
+    private readonly configService: ConfigService,
+    private readonly workspaceService: WorkspaceService
+  ) {}
 
   get isLocked(): boolean {
     return this.workspaceService.isLocked;
@@ -38,16 +44,8 @@ export class PasswordChangeTabComponent implements OnInit, OnDestroy {
     return Boolean(this.workspaceService.file);
   }
 
-  constructor(
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
-    private readonly formBuilder: FormBuilder,
-    private readonly notificationService: NotificationService,
-    private readonly configService: ConfigService,
-    private readonly workspaceService: WorkspaceService
-  ) {}
-
   ngOnInit() {
-    this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
+    this.configService.configLoadedSource$.pipe().subscribe(config => {
       this.passwordForm = this.formBuilder.group({
         toggle: this.formBuilder.group({
           autoType: [config.autoTypeEnabled],
@@ -56,51 +54,49 @@ export class PasswordChangeTabComponent implements OnInit, OnDestroy {
         }),
         input: this.formBuilder.group({
           idleTime: [config.idleSeconds, Validators.compose([Validators.required, Validators.min(60)])],
-          clipboardTime: [config.clipboardClearTimeMs / 1000, Validators.compose([Validators.required, Validators.min(0)])],
+          clipboardTime: [
+            config.clipboardClearTimeMs / 1000,
+            Validators.compose([Validators.required, Validators.min(0)])
+          ],
         }),
       });
 
       this.passwordForm.get('toggle').valueChanges
-      .pipe(
-        distinctUntilChanged(),
-        takeUntil(this.destroyed)
-      ).subscribe((form) => {
-        if (this.passwordForm.get('toggle').invalid) {
-          return;
-        }
-        
-        const configPartial = {
-          autoTypeEnabled: form.autoType,
-          lockOnSystemLock: form.lockOnSystemLock,
-          saveOnLock: form.saveOnLock,
-        } as Partial<IAppConfig>;
+        .pipe(
+          distinctUntilChanged(),
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe((form) => {
+          if (this.passwordForm.get('toggle').invalid) {
+            return;
+          }
 
-        this.configService.setConfig(configPartial);
-      });
+          const configPartial = {
+            autoTypeEnabled: form.autoType,
+            lockOnSystemLock: form.lockOnSystemLock,
+            saveOnLock: form.saveOnLock,
+          } as Partial<IAppConfig>;
+
+          this.configService.setConfig(configPartial);
+        });
 
       this.passwordForm.get('input').valueChanges
-      .pipe(
-        debounceTime(this.debounceTimeMs),
-        distinctUntilChanged(),
-        takeUntil(this.destroyed)
-      ).subscribe((form) => {
-        if (this.passwordForm.get('input').invalid) {
-          return;
-        }
-        
-        const configPartial = {
-          idleSeconds: form.idleTime,
-          clipboardClearTimeMs: form.clipboardTime * 1000,
-        } as Partial<IAppConfig>;
+        .pipe(
+          debounceTime(this.debounceTimeMs),
+          distinctUntilChanged(),
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe((form) => {
+          if (this.passwordForm.get('input').invalid) {
+            return;
+          }
 
-        this.configService.setConfig(configPartial);
-      });
+          const configPartial = {
+            idleSeconds: form.idleTime,
+            clipboardClearTimeMs: form.clipboardTime * 1000,
+          } as Partial<IAppConfig>;
+
+          this.configService.setConfig(configPartial);
+        });
     });
-  }
-
-  ngOnDestroy() {
-    this.destroyed.next();
-    this.destroyed.complete();
   }
 
   restoreDefaults() {
@@ -117,6 +113,7 @@ export class PasswordChangeTabComponent implements OnInit, OnDestroy {
       lockOnSystemLock: true,
       displayIcons: true,
       biometricsAuthenticationEnabled: false,
+      autoTypeEnabled: true,
       saveOnLock: false,
     } as Partial<IProduct>;
 
@@ -124,17 +121,17 @@ export class PasswordChangeTabComponent implements OnInit, OnDestroy {
 
     this.notificationService.add({
       type: 'success',
-      alive: 5000,
+      alive: 10 * 1000,
       message: 'Default settings restored.'
     });
   }
 
   onNumberChange(event: KeyboardEvent, controlName: string, maxLength: number) {
-    const input = event.target as any;
+    const input = event.target as HTMLInputElement;
     const value = input.value.toString();
 
     if (value.length >= maxLength) {
-      input.value = parseInt(value.slice(0, maxLength));
+      input.valueAsNumber = parseInt(value.slice(0, maxLength), 10);
       this.passwordForm.get(controlName).setValue(input.value);
     }
   }

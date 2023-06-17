@@ -58,13 +58,13 @@ export class TableFiltersComponent {
   public selectedSortOption: ISortOption;
   public selectedSortDirection: ISortDirectionOption;
 
-  public get filtersCount(): number {
-    return 0;
-  }
-
   constructor(private readonly searchService: SearchService) {
     this.selectedSortOption = this.sortOptions.find(x => x.prop === this.searchService.sortProp);
     this.selectedSortDirection = this.sortDirectionOptions.find(x => x.state === this.searchService.sortOrder);
+  }
+
+  public get filtersCount(): number {
+    return 0;
   }
 
   setSort(option: ISortOption) {
@@ -78,14 +78,14 @@ export class TableFiltersComponent {
   }
 
   onChildDropdownOpen(dropdown: DropdownDirective) {
-    this.sortDropdowns.toArray().filter(x => x !== dropdown).forEach(dropdown => {
-      dropdown.state.close();
+    this.sortDropdowns.toArray().filter(x => x !== dropdown).forEach(x => {
+      x.state.close();
     });
   }
 
   onDropdownOpen(dropdown: DropdownDirective) {
-    this.filterDropdowns.toArray().filter(x => x !== dropdown).forEach(dropdown => {
-      dropdown.state.close();
+    this.filterDropdowns.toArray().filter(x => x !== dropdown).forEach(x => {
+      x.state.close();
     });
   }
 }

@@ -43,6 +43,7 @@
 				role="searchbox"
 				type="text"
 				[(ngModel)]="searchPhrase"
+				(keydown)="$event.stopPropagation()"
 				class="search"
 				[attr.placeholder]="isGlobalSearchMode ? 'Search all' : 'Search in group' " />
 			<div class="search-mode">
@@ -59,7 +60,8 @@
 					role="button"
 					tabindex="0"
 					name="globe"
-					appTooltip="Search all groups"
+					[attr.aria-label]="searchMode"
+					[appTooltip]="searchMode"
 					container="body"
 					class="global-search-icon"
 					[ngClass]="{'active': isGlobalSearchMode}"

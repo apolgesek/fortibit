@@ -15,9 +15,6 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class DateMaskDirective implements ControlValueAccessor {
   @Input() disabled = false;
 
-  onChange = (value: Date) => {};
-  onTouched = () => {};
-
   private readonly separator = '/';
   private readonly dateRegex = /[0-9]{2}\/[0-9]{2}\/[0-9]{4}/;
   private readonly mask = `dd${this.separator}mm${this.separator}yyyy`;
@@ -26,34 +23,6 @@ export class DateMaskDirective implements ControlValueAccessor {
 
   private get separatorIndexes(): number[] {
     return this.getAllIndexes(this.mask, this.separator);
-  }
-
-  writeValue(value: Date): void {
-    const input = this.el.nativeElement as HTMLInputElement;
-
-    if (!value) {
-      input.value = this.mask;
-
-      return;
-    }
-
-    const day = value.getDate().toString().padStart(2, '0');
-    const month = (value.getMonth() + 1).toString().padStart(2, '0');
-    const year = value.getFullYear();
-
-    input.value = `${day}${this.separator}${month}${this.separator}${year}`;
-  }
-
-  registerOnChange(fn: (value: Date) => void): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
   }
 
   @HostListener('paste', ['$event'])
@@ -66,7 +35,7 @@ export class DateMaskDirective implements ControlValueAccessor {
     for (let index = 0; index < this.mask.length; index++) {
       if (index === 2 || index === 5) {
         target.value = this.replaceAt(target.value, index, this.separator);
-        
+
         continue;
       }
 
@@ -85,8 +54,11 @@ export class DateMaskDirective implements ControlValueAccessor {
 
     const target = event.target as HTMLInputElement;
     const idx = target.selectionStart;
-    
-    if ((!event.key.match(/\d/) && !this.allowedKeys.includes(event.key)) || (idx === this.mask.length && !this.allowedKeys.includes(event.key))) {
+
+    if (
+      (!event.key.match(/\d/) && !this.allowedKeys.includes(event.key))
+        || (idx === this.mask.length && !this.allowedKeys.includes(event.key))
+    ) {
       event.preventDefault();
       return;
     }
@@ -148,15 +120,46 @@ export class DateMaskDirective implements ControlValueAccessor {
     });
   }
 
-  private replaceAt(string: string, index: number, replacement: string): string {
-    return string.substring(0, index) + replacement + string.substring(index + replacement.length);
+  onChange = (value: Date) => {};
+  onTouched = () => {};
+
+  writeValue(value: Date): void {
+    const input = this.el.nativeElement as HTMLInputElement;
+
+    if (!value) {
+      input.value = this.mask;
+
+      return;
+    }
+
+    const day = value.getDate().toString().padStart(2, '0');
+    const month = (value.getMonth() + 1).toString().padStart(2, '0');
+    const year = value.getFullYear();
+
+    input.value = `${day}${this.separator}${month}${this.separator}${year}`;
   }
 
-  private getAllIndexes(string: string, char: string) {
-    let indexes = [];
+  registerOnChange(fn: (value: Date) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
+
+  private replaceAt(text: string, index: number, replacement: string): string {
+    return text.substring(0, index) + replacement + text.substring(index + replacement.length);
+  }
+
+  private getAllIndexes(text: string, char: string) {
+    const indexes = [];
     let i = -1;
 
-    while ((i = string.indexOf(char, i + 1)) != -1) {
+    while ((i = text.indexOf(char, i + 1)) !== -1) {
       indexes.push(i);
     }
 

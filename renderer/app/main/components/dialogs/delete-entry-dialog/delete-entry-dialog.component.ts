@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, ComponentRef, OnInit } from '@angular/core';
+import { Component, ComponentRef, OnInit } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { EntryManager, GroupManager, ModalRef } from '@app/core/services';
-
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -13,7 +12,6 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [
     CommonModule,
-    
     ModalComponent
   ],
 })
@@ -22,15 +20,15 @@ export class DeleteEntryDialogComponent implements IModal, OnInit {
   public readonly additionalData!: IAdditionalData;
   public isInRecycleBin = false;
 
-  get selectedRowsCount(): number {
-    return this.entryManager.selectedPasswords.length;
-  }
-
   constructor(
     private readonly groupManager: GroupManager,
     private readonly entryManager: EntryManager,
     private readonly modalRef: ModalRef
   ) { }
+
+  get selectedRowsCount(): number {
+    return this.entryManager.selectedPasswords.length;
+  }
 
   ngOnInit() {
     this.isInRecycleBin = this.groupManager.selectedGroup === GroupId.RecycleBin;
@@ -43,6 +41,6 @@ export class DeleteEntryDialogComponent implements IModal, OnInit {
   }
 
   close() {
-    this.modalRef.close()
+    this.modalRef.close();
   }
 }

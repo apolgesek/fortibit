@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, OnDestroy, OnInit } from '@angular/core';
+import { Component, ComponentRef, DestroyRef, OnInit } from '@angular/core';
 import { EntryManager, ModalRef, ModalService } from '@app/core/services';
-
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { IHistoryEntry } from '@shared-renderer/history-entry.model';
-import { Subject, takeUntil } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-entry-history-dialog',
@@ -14,23 +13,22 @@ import { Subject, takeUntil } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-    
+
     ModalComponent
   ]
 })
-export class EntryHistoryDialogComponent implements IModal, OnInit, OnDestroy {
+export class EntryHistoryDialogComponent implements IModal, OnInit {
   public readonly ref: ComponentRef<EntryHistoryDialogComponent>;
   public readonly additionalData?: IAdditionalData;
-  public history: IHistoryEntry[]; 
-
-  private readonly destroyed: Subject<void> = new Subject();
+  public history: IHistoryEntry[];
 
   constructor(
+    private readonly destroyRef: DestroyRef,
     private readonly entryManager: EntryManager,
     private readonly modalService: ModalService,
     private readonly modalRef: ModalRef
   ) {}
-  
+
   close() {
     this.modalRef.close();
   }
@@ -39,15 +37,10 @@ export class EntryHistoryDialogComponent implements IModal, OnInit, OnDestroy {
     this.history = this.entryManager.entryHistory;
   }
 
-  ngOnDestroy(): void {
-    this.destroyed.next();
-    this.destroyed.complete();
-  }
-
   async openEntry(entry: IHistoryEntry) {
     const modalRef = await this.modalService.openHistoryEntryWindow(entry, { readonly: true });
-    
-    modalRef.onClose.pipe(takeUntil(this.destroyed)).subscribe(() => {
+
+    modalRef.onClose.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.getEntryHistory();
     });
   }

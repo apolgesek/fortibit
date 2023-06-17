@@ -1,7 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, DestroyRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import { IHotkeyHandler } from '@app/core/models';
 import { ConfigService, EntryManager, GroupManager, WorkspaceService } from '@app/core/services';
@@ -28,6 +28,7 @@ import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { TableFiltersComponent } from '../table-filters/table-filters.component';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-entries-table',
@@ -64,7 +65,7 @@ import { ToolbarComponent } from '../toolbar/toolbar.component';
     TableFiltersComponent,
   ]
 })
-export class EntriesTableComponent implements OnInit, OnDestroy {
+export class EntriesTableComponent implements OnInit {
   @ViewChild(CdkVirtualScrollViewport) public readonly scrollViewport: CdkVirtualScrollViewport | undefined;
 
   public passwordList$: Observable<IPasswordEntry[]>;
@@ -73,9 +74,8 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   public multiEntryMenuItems: MenuItem[] = [];
   public iconsEnabled: boolean;
 
-  private readonly destroyed$: Subject<void> = new Subject();
-
   constructor(
+    private readonly destroyRef: DestroyRef,
     private readonly workspaceService: WorkspaceService,
     private readonly entryManager: EntryManager,
     private readonly groupManager: GroupManager,
@@ -85,7 +85,7 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     private readonly contextMenuBuilderService: ContextMenuBuilderService,
     private readonly modalService: ModalService,
     @Inject(HotkeyHandler) private readonly hotkeyService: IHotkeyHandler,
-  ) { 
+  ) {
     this.passwordList$ = this.entryManager.entries$;
     this.searchPhrase$ = this.searchService.searchPhrase$;
   }
@@ -136,14 +136,9 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     this.multiEntryMenuItems = this.buildMultiEntryMenuItems();
     this.entryMenuItems = this.buildEntryMenuItems();
 
-    this.configService.configLoadedSource$.pipe(takeUntil(this.destroyed$)).subscribe((config) => {
+    this.configService.configLoadedSource$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((config) => {
       this.iconsEnabled = config.displayIcons;
     });
-  }
-
-  ngOnDestroy() {
-    this.destroyed$.next();
-    this.destroyed$.complete();
   }
 
   trackingTag(_: number, entry: IPasswordEntry): string {
@@ -167,7 +162,7 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
         this.selectedEntries.splice(foundIndex, 1);
         return;
       }
-  
+
       this.selectedEntries.push(entry);
     } else {
       this.entryManager.selectedPasswords = [entry];
@@ -196,9 +191,9 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
   }
 
   startDrag(event: DragEvent, item: IPasswordEntry) {
-    this.selectedEntries.length > 0
-      ? this.entryManager.movedEntries = this.selectedEntries.map(e => e.id)
-      : this.entryManager.movedEntries = [ item.id ];
+    this.entryManager.movedEntries = this.selectedEntries.length > 0
+      ? this.selectedEntries.map(e => e.id)
+      : [ item.id ];
 
     UiUtil.setDragGhost(event);
   }
@@ -207,17 +202,17 @@ export class EntriesTableComponent implements OnInit, OnDestroy {
     this.entryManager.movedEntries = [];
   }
 
-  getContextMenu(entry: IPasswordEntry): MenuItem[] {
+  getContextMenu(): MenuItem[] {
     if (this.selectedEntries.length === 1) {
       return this.entryMenuItems;
-     } else {
+    } else {
       return this.multiEntryMenuItems;
-     } 
+    }
   }
 
   private handleEntriesReload() {
     this.entryManager.reloadedEntries$
-      .pipe(takeUntil(this.destroyed$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.scrollViewport?.scrollTo({ top: 0 });
       });

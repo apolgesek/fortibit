@@ -15,7 +15,6 @@
 			*ngIf="passwordList.length > 0; else noPasswordsTemplate"
 			data-prevent-entry-deselect
 			itemSize="56"
-			role="rowgroup"
 			appFocusableList
 			(focused)="selectEntry($event.originalEvent, $event.item)"
 			[selected]="selectedEntries"
@@ -23,11 +22,12 @@
 			<ng-container *cdkVirtualFor="let item of passwordList; let i = index; trackBy: trackingTag; templateCacheSize: 0">
 				<div
 					[appFocusableListItem]="item"
-					[appContextMenuItem]="getContextMenu(item)"
+					[appContextMenuItem]="getContextMenu()"
 					(click)="selectEntry($event, item)"
 					(contextmenu)="showEntryContextMenu($event, item)"
 					[attr.draggable]="entriesDragEnabled"
-					role="row"
+					[attr.aria-setsize]="passwordList.length"
+					[attr.aria-posinset]="i + 1"
 					tabindex="0"
 					(dragstart)="startDrag($event, item)"
 					(dragend)="endDrag()"

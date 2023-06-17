@@ -1,8 +1,6 @@
 export interface IPasswordGroup {
+  lastModificationDate: Date;
+  name: string;
   id?: number;
-  name?: string;
-  parent?: number;
-  expanded?: boolean;
-  children?: IPasswordGroup[];
-  isImported? : boolean;
+  isImported?: boolean;
 }

@@ -1,4 +1,4 @@
-import { IEntry } from "./entry.model";
+import { IEntry } from './entry.model';
 
 export interface IPasswordEntry extends IEntry {
 	username: string;

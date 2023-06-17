@@ -47,7 +47,7 @@
 	}
 
 	&:focus:not(:hover) {
-    outline: 3px solid $barberry !important;
+    outline: 2px solid $barberry !important;
   }
 
 	&:active {
@@ -76,7 +76,7 @@
 	}
 
 	&:focus:not(:hover) {
-		outline: 3px solid $barberry !important;
+		outline: 2px solid $barberry !important;
 	}
 
 	&.expanded {

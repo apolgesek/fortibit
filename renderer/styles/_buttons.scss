@@ -156,8 +156,7 @@ button {
 	}
 
 	&:focus-visible:not(:hover) {
-		color: $barberry;
-		outline: 1px solid $barberry !important;
+		outline: 2px solid $barberry !important;
 	}
 }
 
@@ -195,7 +194,7 @@ button {
 	
 		&.icon-btn {
 			&:focus:not(:hover) {
-				outline: 3px solid $barberry !important;
+				outline: 2px solid $barberry !important;
 			}
 		}
 	

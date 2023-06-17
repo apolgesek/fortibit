@@ -1,0 +1,62 @@
+<app-modal>
+  <div class="dialog-header">
+    <h2>Database maintenance</h2>
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
+      class="close-dialog"
+      (click)="close(); false">&times;
+    </a> 
+  </div>
+  <div class="dialog-message">
+    <form [formGroup]="maintenanceForm" (ngSubmit)="delete()">
+      <div class="info-box"><i-feather name="info"></i-feather><div>If you want to delete all history entries type "0" in the input below</div></div>
+      <div class="inputgroup" style="margin-top: 2rem;">
+        <label class="label" for="historyDays">Delete history entries older than (days):</label>
+        <input
+          id="historyDays"
+          type="number"
+          [attr.aria-invalid]="isControlInvalid(maintenanceForm.get('historyDays'))"
+          aria-describedby="history-days-invalid"
+          class="number"
+          formControlName="historyDays"
+          (input)="onNumberChange($event, 'historyDays', 3)" />
+      </div>
+      <div
+        *ngIf="isControlInvalid(maintenanceForm.get('historyDays'))"
+        class="validation-error"
+        id="history-days-invalid">
+        Invalid value
+      </div>
+      <button
+        type="submit"
+        class="primary-btn"
+        [disabled]="cleaningInProgress">Delete</button>
+    </form>
+  </div>
+  <ng-container *ngIf="cleaningInProgress === false">
+    <div *ngIf="removedHistoryEntries > 0" class="result info">
+      <div class="status">
+        {{ removedHistoryEntries }} entries deleted
+      </div>
+    </div>
+    <div *ngIf="removedHistoryEntries === 0" class="result success">
+      <div class="status">No entry to delete found</div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="cleaningInProgress">
+    <div class="result row">
+      <div class="lds-ring"><div></div><div></div><div></div><div></div></div>Cleaning... Please wait.
+    </div>
+  </ng-container>
+  <div class="footer-container">
+    <button
+      #autofocus
+      type="button"
+      class="primary-btn"
+      (click)="close()">
+      Close
+    </button>
+  </div>
+</app-modal>

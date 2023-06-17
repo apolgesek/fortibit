@@ -21,7 +21,7 @@ import { ViewTabComponent } from './view-tab/view-tab.component';
     CommonModule,
     TabsetComponent,
     TabComponent,
-    
+
     ModalComponent,
     EncryptionTabComponent,
     ViewTabComponent,
@@ -38,6 +38,6 @@ export class SettingsDialogComponent implements IModal {
   ) { }
 
   close() {
-    this.modalRef.close()
+    this.modalRef.close();
   }
 }

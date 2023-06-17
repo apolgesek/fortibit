@@ -1,5 +1,5 @@
 import { AppViewContainer } from '@app/core/services';
-import { ApplicationRef, ComponentRef, Directive, ElementRef, EmbeddedViewRef, HostListener, Inject, Input, Renderer2 } from '@angular/core';
+import { ApplicationRef, ComponentRef, Directive, ElementRef, EmbeddedViewRef, HostBinding, HostListener, Inject, Input, Renderer2 } from '@angular/core';
 import { TooltipComponent } from '../components/tooltip/tooltip.component';
 import { DOCUMENT } from '@angular/common';
 
@@ -8,7 +8,7 @@ import { DOCUMENT } from '@angular/common';
   standalone: true
 })
 export class TooltipDirective {
-  @Input('appTooltip') public tooltipText: string; 
+  @Input('appTooltip') public tooltipText: string;
   // default is relative to parent positioning
   @Input() public container: 'default' | 'body' = 'default';
 
@@ -24,6 +24,7 @@ export class TooltipDirective {
     @Inject(DOCUMENT) private readonly document: Document
   ) {}
 
+  @HostListener('focusin', ['$event'])
   @HostListener('mouseenter', ['$event'])
   public onMouseEnter() {
     if (this.mouseEntered) {
@@ -40,6 +41,7 @@ export class TooltipDirective {
     }, 500);
   }
 
+  @HostListener('focusout', ['$event'])
   @HostListener('mouseleave', ['$event'])
   public onMouseLeave() {
     this.mouseEntered = false;
@@ -58,7 +60,9 @@ export class TooltipDirective {
     this.componentRef.instance.container = this.container;
 
     const componentNode = (this.componentRef.hostView as EmbeddedViewRef<TooltipComponent>).rootNodes[0] as HTMLElement;
-    const parent = this.container === 'default' ? (<HTMLElement>this.elRef.nativeElement).parentElement : this.document.body;
+    const parent = this.container === 'default'
+      ? (this.elRef.nativeElement as HTMLElement).parentElement
+      : this.document.body;
     this.renderer.appendChild(parent, componentNode);
   }
 

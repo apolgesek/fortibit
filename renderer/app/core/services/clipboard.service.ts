@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
 import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { NotificationService } from '@app/core/services/notification.service';
-import { ICommunicationService } from '../models';
-import { CommunicationService } from 'injection-tokens';
+import { IMessageBroker } from '../models';
+import { MessageBroker } from 'injection-tokens';
 import { ConfigService } from './config.service';
 import { IAppConfig } from '../../../../app-config';
 @Injectable({
@@ -12,12 +12,12 @@ import { IAppConfig } from '../../../../app-config';
 export class ClipboardService {
   private config: IAppConfig;
   constructor(
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly notificationService: NotificationService,
     private readonly configService: ConfigService
   ) {
     this.configService.configLoadedSource$.subscribe((config) => {
-      this.config = config
+      this.config = config;
     });
   }
 
@@ -25,10 +25,10 @@ export class ClipboardService {
     let value = entry[property];
 
     if (property === 'password') {
-      value = await this.communicationService.ipcRenderer.invoke(IpcChannel.DecryptPassword, entry[property]);
+      value = await this.messageBroker.ipcRenderer.invoke(IpcChannel.DecryptPassword, entry[property]);
     }
 
-    const isCopied = this.communicationService.ipcRenderer.invoke(IpcChannel.CopyCliboard, value);
+    const isCopied = this.messageBroker.ipcRenderer.invoke(IpcChannel.CopyCliboard, value);
 
     if (isCopied) {
       this.notificationService.add({

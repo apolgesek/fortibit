@@ -5,10 +5,6 @@ export class UiUtil {
     isDraggingOverClass: 'is-dragging-over'
   };
 
-  private static readonly lockKeydownEvent = (event: KeyboardEvent) => {
-    event.preventDefault();
-  };
-
   public static setDragGhost(event: DragEvent) {
     const dataTransfer = event.dataTransfer as DataTransfer;
     dataTransfer.setDragImage(new Image(), 0, 0);
@@ -23,4 +19,8 @@ export class UiUtil {
     window.removeEventListener('keydown', this.lockKeydownEvent);
     document.body.classList.remove('lock');
   }
+
+  private static readonly lockKeydownEvent = (event: KeyboardEvent) => {
+    event.preventDefault();
+  };
 }

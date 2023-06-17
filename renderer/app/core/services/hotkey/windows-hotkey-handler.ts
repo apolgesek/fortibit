@@ -5,7 +5,6 @@ import { ClipboardService } from '../clipboard.service';
 import { WorkspaceService } from '../workspace.service';
 import { EntryManager } from '../managers/entry.manager';
 import { GroupManager } from '../managers/group.manager';
-import { UiUtil } from '@app/utils';
 
 export class WindowsHotkeyHandler implements IHotkeyHandler {
   public configuration: IHotkeyConfiguration = {
@@ -46,13 +45,13 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
     this.registerSelectAllEntries(event);
     this.registerFindEntries(event);
     this.registerFindGlobalEntries(event);
-    this.registerLockDatabase(event)
+    this.registerLockDatabase(event);
     this.registerRenameGroup(event);
     this.registerAddGroup(event);
     this.registerMoveEntry(event);
     this.registerOpenSettings(event);
   }
-  
+
   public registerSaveDatabase(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 's' && event.ctrlKey) {
       if (!this.workspaceService.isSynced) {
@@ -62,7 +61,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
       event.preventDefault();
     }
   }
-  
+
   public registerDeleteEntry(event: KeyboardEvent) {
     if (event.key === 'Delete' && this.entryManager.selectedPasswords.length) {
       this.modalService.openDeleteEntryWindow();
@@ -89,7 +88,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
       event.preventDefault();
     }
   }
-  
+
   public registerEditEntry(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'e' && !event.ctrlKey && this.entryManager.selectedPasswords.length) {
       this.modalService.openEditEntryWindow();
@@ -115,12 +114,17 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
 
   public registerCopyUsername(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'u' && event.ctrlKey && event.shiftKey && this.entryManager.selectedPasswords.length === 1) {
+    if (
+      event.key.toLowerCase() === 'u'
+      && event.ctrlKey
+      && event.shiftKey
+      && this.entryManager.selectedPasswords.length === 1
+    ) {
       this.clipboardService.copyToClipboard(this.entryManager.selectedPasswords[0], 'username');
       event.preventDefault();
     }
   }
-  
+
   public registerAddEntry(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'i' && event.ctrlKey && this.groupManager.isAddAllowed) {
       this.modalService.openNewEntryWindow();
@@ -134,7 +138,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
       event.preventDefault();
     }
   }
-  
+
   public registerSelectAllEntries(event: KeyboardEvent) {
     if (event.key.toLowerCase() === 'a' && event.ctrlKey && this.entryManager.selectedPasswords.length) {
       this.entryManager.selectedPasswords = [];

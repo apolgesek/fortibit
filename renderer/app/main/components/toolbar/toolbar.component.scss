@@ -1,6 +1,14 @@
 @import 'themes/light/variables';;
 @import 'mixins';
 
+:host {
+	overflow-x: auto;
+	overflow-y: hidden;
+	border-top: 1px solid var(--border-color);
+	border-bottom: 1px solid var(--border-color);
+	@include scrollbar;
+}
+
 .add-entry {
 	@include toolbar-btn;
 	margin: 0 0.5rem 0 1rem;
@@ -48,8 +56,6 @@
 	display: flex;
 	position: relative;
 	z-index: 3;
-	border-bottom: 1px solid var(--border-color);
-	border-top: 1px solid var(--border-color);
 
 	.menu-panel {
 		flex: 1;
@@ -66,6 +72,7 @@
 		position: relative;
 		border: 1px solid var(--border-color);
 		border-radius: 0.25rem;
+		margin-right: 0.5rem;
 	
 		.search {
 			font-size: 0.875rem;
@@ -118,7 +125,7 @@
 }
 
 .global-search-icon {
-	border: 1px solid transparent;
+	border: 2px solid transparent;
 	width: 1rem !important;
 	height: 1rem !important;
 	margin-right: 1rem !important;
@@ -135,7 +142,7 @@
 	}
 
 	&.active {
-		border: 1px solid var(--link-text);
+		border: 2px solid var(--link-text);
 		::ng-deep svg {
 			stroke: var(--primary-text);
 		}

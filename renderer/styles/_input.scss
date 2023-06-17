@@ -61,12 +61,11 @@ input[type='number'] {
 	}
 }
 
-
 .switch {
   position: relative;
   display: inline-block;
-  width: 50px;
-  height: 28px;
+  width: 40px;
+  height: 24px;
   margin-left: 2rem;
 }
 
@@ -95,9 +94,9 @@ input[type='number'] {
   position: absolute;
   content: "";
   height: 18px;
-  width: 20px;
-  left: 4px;
-  bottom: 5px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
   background-color: $white;
   -webkit-transition: .4s;
   transition: .4s;
@@ -122,9 +121,7 @@ input:focus + .slider:before, input:focus:active + .slider:before {
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(22px);
-  -ms-transform: translateX(22px);
-  transform: translateX(22px);
+  transform: translateX(17px);
 }
 
 .readonly {

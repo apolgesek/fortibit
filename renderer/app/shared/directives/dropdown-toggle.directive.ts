@@ -8,15 +8,13 @@ enum TriggerType {
 
 @Directive({
   selector: '[appDropdownToggle]',
-  host: {
-    'class': 'dropdown-btn',
-    'aria-haspopup': 'true',
-  },
   standalone: true
 })
 export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
   @Input() public trigger: TriggerType = TriggerType.Click;
   @Input() public disabled = false;
+  @HostBinding('class') public readonly class = 'dropdown-btn';
+  @HostBinding('attr.aria-haspopup') public readonly ariaHaspopup = 'true';
 
   private listeners: (() => void)[] = [];
 
@@ -34,19 +32,23 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     switch (this.trigger) {
-      case TriggerType.Click:
-        this.handleClick();
-        break;
-      case TriggerType.Hover:
-        if (this.disabled) {
-          return;
-        }
-  
-        this.handleHover();
-        break;
-      default:
-        throw new Error('Unsupported trigger type');
+    case TriggerType.Click:
+      this.handleClick();
+      break;
+    case TriggerType.Hover:
+      if (this.disabled) {
+        return;
+      }
+
+      this.handleHover();
+      break;
+    default:
+      throw new Error('Unsupported trigger type');
     }
+  }
+
+  ngOnDestroy(): void {
+    this.listeners.forEach(unlisten => unlisten());
   }
 
   private handleHover() {
@@ -58,7 +60,8 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
       this.dropdownState.open();
     });
 
-    const mouseLeaveListener = this.renderer.listen(this.renderer.parentNode(this.element.nativeElement), 'mouseleave', () => {
+    const parent = this.renderer.parentNode(this.element.nativeElement);
+    const mouseLeaveListener = this.renderer.listen(parent, 'mouseleave', () => {
       if (this.dropdownState.isOpen) {
         this.dropdownState.close();
       }
@@ -69,7 +72,7 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
 
   private handleClick() {
     const enterKeydownListener = this.renderer.listen(this.element.nativeElement, 'keydown', (event: KeyboardEvent) => {
-      if (event.key == "Enter" && !this.dropdownState.isOpen) {
+      if (event.key === 'Enter' && !this.dropdownState.isOpen) {
         this.dropdownState.open();
         event.preventDefault();
       }
@@ -81,8 +84,6 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
       } else {
         this.dropdownState.open();
       }
-
-      event.stopPropagation();
     });
 
     const outsideClickListener = this.renderer.listen(window, 'click', (event: MouseEvent) => {
@@ -95,9 +96,5 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
     });
 
     this.listeners.push(enterKeydownListener, clickListener, outsideClickListener);
-  }
-
-  ngOnDestroy(): void {
-    this.listeners.forEach(unlisten => unlisten());
   }
 }

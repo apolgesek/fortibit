@@ -1,34 +1,43 @@
 import {
   ApplicationRef,
   ComponentRef,
+  Inject,
   Injectable,
   Injector,
+  Renderer2,
+  RendererFactory2,
   Type,
 } from '@angular/core';
 import { IAdditionalData, IModal } from '@app/shared';
 import { fromEvent, Subject, take } from 'rxjs';
 import { AppViewContainer } from './app-view-container';
 import { ModalRef } from './modal-ref';
+import { DOCUMENT } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class ModalManager {
   public openedModals: ComponentRef<any>[] = [];
-  private _isOpening = false;
+  private readonly renderer: Renderer2;
+  private readonly bodyClass = 'modal-open';
 
   constructor(
     private readonly appRef: ApplicationRef,
     private readonly appViewContainer: AppViewContainer,
+    private readonly rendererFactory: RendererFactory2,
+    @Inject(DOCUMENT) private readonly document: Document
   ) {
-    fromEvent(window, 'keydown')
-    .subscribe((event: Event) => {
-      if ((event as KeyboardEvent).key === 'Escape') {
-        if (this.openedModals.length === 0) {
-          return;
-        }
+    this.renderer = this.rendererFactory.createRenderer(null, null);
 
-        this.close(this.openedModals.pop());
-      }
-    });
+    fromEvent(window, 'keydown')
+      .subscribe((event: Event) => {
+        if ((event as KeyboardEvent).key === 'Escape') {
+          if (this.openedModals.length === 0) {
+            return;
+          }
+
+          this.close(this.openedModals.pop());
+        }
+      });
   }
 
   get isAnyModalOpen(): boolean {
@@ -44,7 +53,7 @@ export class ModalManager {
     });
   }
 
-  open<T extends IModal>(component: Type<T>, additionalData?: IAdditionalData) : ModalRef {
+  open<T extends IModal>(component: Type<T>, additionalData?: IAdditionalData): ModalRef {
     // prevent multi open if opens on promise fullfillment
     if (this.openedModals.some(x => x.componentType === component)) {
       return;
@@ -59,7 +68,7 @@ export class ModalManager {
       modalRef.showBackdrop = false;
     }
 
-    const componentRef = this.appViewContainer.getRootViewContainer().createComponent(component, { injector: injector });
+    const componentRef = this.appViewContainer.getRootViewContainer().createComponent(component, { injector });
     const componentInstance = componentRef.instance as T;
 
     modalRef.ref = componentRef;
@@ -68,6 +77,8 @@ export class ModalManager {
     // set component properties
     componentInstance.additionalData = additionalData;
     this.openedModals.push(componentRef);
+
+    this.renderer.addClass(this.document.body, this.bodyClass);
 
     return modalRef;
   }
@@ -80,6 +91,10 @@ export class ModalManager {
 
     if (modal) {
       this.openedModals.splice(this.openedModals.indexOf(modal), 1);
+    }
+
+    if (this.openedModals.length === 0) {
+      this.renderer.removeClass(this.document.body, this.bodyClass);
     }
   }
 }

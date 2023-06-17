@@ -18,13 +18,13 @@ export class TabsetComponent implements AfterContentInit {
   @ContentChildren(TabComponent) tabs: QueryList<TabComponent>;
   public headers: string[] = [];
 
-  public get activeTab(): TabComponent {
-    return this.tabService.activeTab;
-  }
-
   constructor(
     private readonly tabService: TabService,
   ) { }
+
+  public get activeTab(): TabComponent {
+    return this.tabService.activeTab;
+  }
 
   setTab(tab: TabComponent): void {
     this.tabService.setActiveTab(tab);

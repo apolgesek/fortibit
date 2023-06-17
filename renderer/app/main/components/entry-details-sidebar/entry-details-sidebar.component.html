@@ -41,7 +41,9 @@
 					<p>{{ entry?.username }}</p>
 				</div>
 				<div>
-					<a href="#" class="copy" (click)="copyToClipboard(entry, 'username'); false"><i-feather name="copy" appTooltip="Copy"></i-feather></a>
+					<a href="#" class="copy" (click)="copyToClipboard(entry, 'username'); false" appTooltip="Copy" container="body">
+						<i-feather name="copy"></i-feather>
+					</a>
 				</div>
 			</div>
 
@@ -51,7 +53,9 @@
 					<p>••••••</p>
 				</div>
 				<div>
-					<a href="#" class="copy" (click)="copyToClipboard(entry, 'password'); false"><i-feather name="copy" appTooltip="Copy"></i-feather></a>
+					<a href="#" class="copy" (click)="copyToClipboard(entry, 'password'); false" appTooltip="Copy" container="body">
+						<i-feather name="copy"></i-feather>
+					</a>
 				</div>
 			</div>
 

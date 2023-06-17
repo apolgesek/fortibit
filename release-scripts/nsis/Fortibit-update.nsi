@@ -1,5 +1,6 @@
 Unicode True
 
+!define MUI_ICON "..\..\build\icon.ico"
 !define APP_NAME "Fortibit"
 !define COMP_NAME "Arkadiusz Polgesek"
 !define VERSION "01.01.00.00"

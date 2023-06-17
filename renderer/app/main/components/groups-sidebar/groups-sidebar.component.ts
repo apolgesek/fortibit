@@ -1,6 +1,6 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import { IPasswordGroup } from '@app/core/models';
 import { WorkspaceService, EntryManager, GroupManager, ModalService } from '@app/core/services';
@@ -15,7 +15,6 @@ import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.di
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { IPasswordEntry } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
-import { Subject } from 'rxjs';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
 
 @Component({
@@ -36,7 +35,7 @@ import { ToolbarComponent } from '../toolbar/toolbar.component';
     ToolbarComponent
   ]
 })
-export class GroupsSidebarComponent implements OnInit, OnDestroy {
+export class GroupsSidebarComponent implements OnInit {
   public readonly groupIds = GroupId;
 
   public readonly builtInGroups = [
@@ -50,8 +49,6 @@ export class GroupsSidebarComponent implements OnInit, OnDestroy {
   public groupContextMenuBin: MenuItem[] = [];
   public folderTreeRootElement: HTMLElement | undefined;
   public treeRootElement: HTMLElement | undefined;
-
-  private readonly destroyed: Subject<void> = new Subject();
 
   constructor(
     private readonly workspaceService: WorkspaceService,
@@ -100,11 +97,6 @@ export class GroupsSidebarComponent implements OnInit, OnDestroy {
       .getResult();
   }
 
-  ngOnDestroy() {
-    this.destroyed.next();
-    this.destroyed.complete();
-  }
-
   groupTrackFn(group: any): number {
     return group.id;
   }
@@ -114,12 +106,7 @@ export class GroupsSidebarComponent implements OnInit, OnDestroy {
   }
 
   async selectGroup(id: number): Promise<number> {
-    if (id === this.selectedGroup) {
-      return id;
-    }
-    
     await this.entryManager.setByGroup(id);
-  
     this.searchService.reset();
     this.entryManager.updateEntriesSource();
     this.entryManager.reloadEntries();
@@ -131,14 +118,14 @@ export class GroupsSidebarComponent implements OnInit, OnDestroy {
 
   getContextMenu(id: number): MenuItem[] | undefined {
     switch (id) {
-      case GroupId.Root:
-      case GroupId.Starred:
-      case GroupId.AllItems:
-        return;
-      case GroupId.RecycleBin:
-        return this.groupContextMenuBin;
-      default:
-        return this.groupContextMenuItems;
+    case GroupId.Root:
+    case GroupId.Starred:
+    case GroupId.AllItems:
+      return;
+    case GroupId.RecycleBin:
+      return this.groupContextMenuBin;
+    default:
+      return this.groupContextMenuItems;
     }
   }
 

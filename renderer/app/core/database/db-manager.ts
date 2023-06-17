@@ -1,13 +1,19 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
 import { Injectable } from '@angular/core';
 import { IHistoryEntry, IPasswordEntry, IReport } from '@shared-renderer/index';
 import Dexie from 'dexie';
 import { IPasswordGroup } from '../models';
 
-interface IDbContext extends Dexie {}
-interface IDbTable<T, K> extends Dexie.Table {}
+export interface IDbContext extends Dexie {}
+export interface IDbTable<T, K> extends Dexie.Table<T, K> {}
 
 @Injectable({ providedIn: 'root' })
 export class DbManager {
+  entries: IDbTable<IPasswordEntry, number>;
+  groups: IDbTable<IPasswordGroup, number>;
+  reports: IDbTable<IReport, number>;
+  history: IDbTable<IHistoryEntry, number>;
+
   // name must be unique to ensure stable access with multiple vaults open at the same time
   private readonly name: string = 'main' + new Date().getTime();
   private instance: IDbContext;
@@ -15,11 +21,6 @@ export class DbManager {
   public get context(): IDbContext {
     return this.instance;
   }
-
-  entries: IDbTable<IPasswordEntry, number>;
-  groups: IDbTable<IPasswordGroup, number>;
-  reports: IDbTable<IReport, number>;
-  history: IDbTable<IHistoryEntry, number>;
 
   public create() {
     if (this.instance) {
@@ -29,9 +30,9 @@ export class DbManager {
     this.instance = new Dexie(this.name, { autoOpen: true });
     this.instance.version(1).stores({
       entries: '++id,groupId,title,username',
-      groups: '++id,parent',
+      groups: '++id',
       reports: '++id,type,creationDate',
-      history: '++id,entryId'
+      history: '++id,entryId,entry.lastModificationDate'
     });
 
     this.entries = this.instance.table('entries');
@@ -47,7 +48,7 @@ export class DbManager {
     return;
   }
 
-  public async reset(): Promise<void> {  
+  public async reset(): Promise<void> {
     if (this.instance) {
       await this.instance.delete();
       await this.instance.open();

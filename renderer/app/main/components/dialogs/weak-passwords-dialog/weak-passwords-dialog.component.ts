@@ -1,16 +1,14 @@
-import { Component, ComponentRef, Inject } from '@angular/core';
-import { ICommunicationService } from '@app/core/models';
+import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
+import { IMessageBroker } from '@app/core/models';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { combineLatest, from, take, timer } from 'rxjs';
-import { ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
-
-import { CommunicationService } from 'injection-tokens';
+import { EntryManager, ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
+import { MessageBroker } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
 import { ReportType } from '@app/core/enums';
 import { FeatherModule } from 'angular-feather';
-import { EntryRepository } from '@app/core/repositories';
 
 @Component({
   selector: 'app-weak-passwords-dialog',
@@ -20,11 +18,10 @@ import { EntryRepository } from '@app/core/repositories';
   imports: [
     CommonModule,
     FeatherModule,
-    
     ModalComponent
   ]
 })
-export class WeakPasswordsDialogComponent implements IModal {
+export class WeakPasswordsDialogComponent implements IModal, OnInit {
   ref: ComponentRef<WeakPasswordsDialogComponent>;
   additionalData?: IAdditionalData;
   result = [];
@@ -40,13 +37,13 @@ export class WeakPasswordsDialogComponent implements IModal {
     1: 'High',
     2: 'Medium'
   };
-  
+
   constructor(
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly modalRef: ModalRef,
     private readonly reportService: ReportService,
     private readonly modalService: ModalService,
-    private readonly entryRepository: EntryRepository,
+    private readonly entryManager: EntryManager,
     private readonly notificationService: NotificationService
   ) { }
 
@@ -73,10 +70,10 @@ export class WeakPasswordsDialogComponent implements IModal {
         type: ReportType.WeakPasswords,
         payload: result.data
       });
-      
+
       await this.getLastReport();
       this.scanInProgress = false;
-      
+
       if (this.weakPasswordsFound.length) {
         this.showDetails = true;
       }
@@ -84,11 +81,11 @@ export class WeakPasswordsDialogComponent implements IModal {
   }
 
   async saveReport() {
-    await this.communicationService.ipcRenderer.invoke(
+    await this.messageBroker.ipcRenderer.invoke(
       IpcChannel.SaveWeakPasswordsReport,
       this.weakPasswordsFound.map(x => ({ ...x, score: this.scoreMap[x.score] }))
     );
-    this.notificationService.add({ type: 'success', alive: 5000, message: 'Report generated' });
+    this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Report generated' });
   }
 
   ngOnInit(): void {
@@ -96,15 +93,15 @@ export class WeakPasswordsDialogComponent implements IModal {
   }
 
   openUrl(url: string) {
-    this.communicationService.ipcRenderer.send(IpcChannel.OpenUrl, url);
+    this.messageBroker.ipcRenderer.send(IpcChannel.OpenUrl, url);
   }
 
   public trackByFn(_: number, item: { id: number }) {
     return item.id;
   }
-  
+
   async editEntry(id: number) {
-    this.modalService.openEditEntryWindow(await this.entryRepository.get(id));
+    this.modalService.openEditEntryWindow(await this.entryManager.get(id));
   }
 
   private async getLastReport() {

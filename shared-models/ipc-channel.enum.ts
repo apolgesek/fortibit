@@ -51,7 +51,6 @@ export enum IpcChannel {
   GetRecentFiles = 'app:getRecentFiles',
   RegenerateKey = 'app:regenerateKey',
   ToggleTheme = 'app:toggleTheme',
-  SetSystemTheme = 'app:setSystemTheme',
   DatabaseChanged = 'app:databaseChanged',
   CheckRecoveryFile = 'app:checkRecoveryFile',
   RemoveRecoveryFile = 'app:removeRecoveryFile',

@@ -1,56 +1,57 @@
 <div class="sidebar">
 	<div class="header blur-groups">
-		<div class="file">{{ fileName }}</div>
+		<div class="label">{{ fileName }}</div>
 	</div>
-	<div
+	<ul
 		class="scroll-viewport"
 		cdkVirtualScrollingElement
 		appFocusableList
 		[selected]="[selectedGroup]"
 		(focused)="selectGroup($event.item)">
-		<div class="default-groups">
-			<div
-				*ngFor="let group of builtInGroups; trackBy: groupTrackFn"
+		<cdk-virtual-scroll-viewport
+			class="group-viewport"
+			itemSize="32">
+			<li
+				*ngFor="let group of builtInGroups; let i = index; trackBy: groupTrackFn"
+				[appFocusableListItem]="group.id"
+				[attr.aria-setsize]="builtInGroups.length + groups.length"
+				[attr.aria-posinset]="i + 1"
 				tabindex="0"
 				[appContextMenuItem]="getContextMenu(group.id)"
 				class="group-item"
 				[ngClass]="{'active': group.id === this.selectedGroup}"
-				(focus)="selectGroup(group.id)"
-				[appFocusableListItem]="group.id">
+				(focus)="selectGroup(group.id)">
 				<i-feather [name]="group.icon"></i-feather> <div class="group-name">{{ group.name }}</div>
-			</div>
-		</div>
-		<div class="divider">
-			<div>Folders</div>
-			<div class="quick-actions">
-				<button
-					tabindex="-1"
-					appTooltip="Add group"
-					container="body"
-					(click)="addGroup(); false">
-					<i-feather name="plus"></i-feather>
-				</button>
-			</div>
-		</div>
-		<cdk-virtual-scroll-viewport
-			class="group-viewport"
-			itemSize="32"
-			role="rowgroup">
-			<ng-container *cdkVirtualFor="let group of groups; let i = index; trackBy: groupTrackFn; templateCacheSize: 0">
-				<div
-					[appFocusableListItem]="group.id"
-					tabindex="0"
-					appDroppable
-					[appContextMenuItem]="getContextMenu(group.id)"
-					class="group-item"
-					[ngClass]="{'active': group.id === this.selectedGroup}"
-					(focus)="selectGroup(group.id)"
-					(drop)="onEntryDrop(group.id)">
-					<i-feather name="folder"></i-feather> <div class="group-name">{{ group.name }}</div>
+			</li>
+			<div class="separator" tabindex="0">
+				<span>Groups</span>
+				<div class="quick-actions">
+					<button
+						aria-label="Add group"
+						appTooltip="Add group"
+						class="add-group"
+						container="body"
+						(click)="addGroup(); false">
+						<i-feather name="plus"></i-feather>
+					</button>
 				</div>
-			</ng-container>
+			</div>
+			<li
+				*cdkVirtualFor="let group of groups; let i = index; trackBy: groupTrackFn; templateCacheSize: 0"
+				[appFocusableListItem]="group.id"
+				tabindex="0"
+				[attr.aria-setsize]="builtInGroups.length + groups.length"
+				[attr.aria-posinset]="i + 1 + builtInGroups.length"
+				appDroppable
+				[appContextMenuItem]="getContextMenu(group.id)"
+				class="group-item"
+				[ngClass]="{'active': group.id === this.selectedGroup}"
+				(focus)="selectGroup(group.id)"
+				(drop)="onEntryDrop(group.id)">
+				<i-feather name="folder"></i-feather> <div class="group-name">{{ group.name }}</div>
+			</li>
 		</cdk-virtual-scroll-viewport>
-	</div>
+	</ul>
 </div>
 
 <div

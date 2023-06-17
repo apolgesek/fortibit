@@ -1,7 +1,6 @@
-import { Component, ComponentRef } from '@angular/core';
+import { Component, ComponentRef, OnInit } from '@angular/core';
 import { ModalRef } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
-
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { take } from 'rxjs';
@@ -14,10 +13,9 @@ import { IAppConfig } from '../../../../../../app-config';
   standalone: true,
   imports: [
     ModalComponent,
-    
   ]
 })
-export class AboutDialogComponent implements IModal {
+export class AboutDialogComponent implements IModal, OnInit {
   public readonly ref!: ComponentRef<AboutDialogComponent>;
   public readonly additionalData!: IAdditionalData;
   public config: IAppConfig;

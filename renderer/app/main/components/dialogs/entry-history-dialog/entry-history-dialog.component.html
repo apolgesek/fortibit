@@ -9,7 +9,6 @@
       (click)="close(); false">&times;
     </a>
 	</div>
-	<div>
     <div class="table" *ngIf="history?.length > 0; else emptyHistory">
 			<div class="table-header">
 				<div class="cell index">#</div>
@@ -29,7 +28,6 @@
 		<ng-template #emptyHistory>
 			History is empty.
 		</ng-template>
-	</div>
 	<div class="footer-container">
     <button
 			type="button"

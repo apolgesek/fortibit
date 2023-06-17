@@ -6,8 +6,8 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { EntryIconDirective } from '@app/main/directives/entry-icon.directive';
 import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
 import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
-import { ICommunicationService } from '@app/core/models';
-import { CommunicationService } from 'injection-tokens';
+import { IMessageBroker } from '@app/core/models';
+import { MessageBroker } from 'injection-tokens';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
 
@@ -31,12 +31,12 @@ export class EntrySelectComponent implements OnInit {
   public passwordList: IPasswordEntry[];
 
   constructor(
-    @Inject(CommunicationService) private readonly communicationService: ICommunicationService,
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly zone: NgZone
   ) { }
 
   ngOnInit(): void {
-    this.communicationService.ipcRenderer.on(IpcChannel.SendMatchingEntries, (_, entries: IPasswordEntry[]) => {
+    this.messageBroker.ipcRenderer.on(IpcChannel.SendMatchingEntries, (_, entries: IPasswordEntry[]) => {
       this.zone.run(() => {
         this.passwordList = entries;
       });
@@ -48,7 +48,7 @@ export class EntrySelectComponent implements OnInit {
   }
 
   confirmEntry() {
-    this.communicationService.ipcRenderer.send(IpcChannel.AutotypeEntrySelected, this.selectedEntries[0]);
+    this.messageBroker.ipcRenderer.send(IpcChannel.AutotypeEntrySelected, this.selectedEntries[0]);
   }
 
   isEntrySelected(entry: IPasswordEntry): boolean {
