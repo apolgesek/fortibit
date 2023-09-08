@@ -1,6 +1,6 @@
-<ng-container *ngIf="isDatabaseLoaded">
+<ng-container>
   <app-menu-bar *ngIf="isElectron"></app-menu-bar>
-  <div [@routeAnimations]="getRouteState()" class="app-view">
+  <div class="app-view">
     <router-outlet></router-outlet>
   </div>
 </ng-container>

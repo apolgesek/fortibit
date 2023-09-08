@@ -1,8 +1,10 @@
-import { ImportHandler } from "../../../shared-models";
+import { ImportHandler } from "../../../shared";
 import { IEncryptionEventWrapper } from "../encryption";
 import { IWindowService } from "../window";
+import { BitwardenHandler } from "./handlers/bitwarden-handler";
 import { KeePassHandler } from "./handlers/keepass-handler";
-import { OnePassHandler } from "./handlers/onepass-handler";
+import { LastpassHandler } from "./handlers/lastpass-handler";
+import { OnePasswordHandler } from "./handlers/onepassword-handler";
 import { IImportHandler } from "./import-handler.model";
 import { IImportService } from "./import-service.model";
 
@@ -28,7 +30,13 @@ export class ImportService implements IImportService {
         handler = this.create(KeePassHandler);
         break;
       case ImportHandler.OnePassword:
-        handler = this.create(OnePassHandler);
+        handler = this.create(OnePasswordHandler);
+        break;
+      case ImportHandler.Bitwarden:
+        handler = this.create(BitwardenHandler);
+        break;
+      case ImportHandler.Lastpass:
+        handler = this.create(LastpassHandler);
         break;
       default:
         throw new Error('Unsupported import handler type.');

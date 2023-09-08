@@ -4,7 +4,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalRef, ModalService, WorkspaceService } from '@app/core/services';
 import { ValidatorFn, AbstractControl, ValidationErrors, FormBuilder, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IpcChannel } from '../../../../../../shared/ipc-channel.enum';
 import { Observable, from, tap, delay, map } from 'rxjs';
 import { IMessageBroker } from '@app/core/models';
 import { MessageBroker } from 'injection-tokens';

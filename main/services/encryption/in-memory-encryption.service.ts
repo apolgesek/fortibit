@@ -11,7 +11,7 @@ export class InMemoryEncryptionService implements IEncryptionService {
     return ciphertextAndNonce.toString('base64');
   }
     
-  public decryptString(base64CiphertextAndNonce: string, key: string): string {
+  public decryptString(base64CiphertextAndNonce: string, key: string): string {   
     const ciphertextAndNonce = Buffer.from(base64CiphertextAndNonce, 'base64'); 
     return this.decrypt(ciphertextAndNonce, Buffer.from(key, 'base64')).toString('utf8');
   }

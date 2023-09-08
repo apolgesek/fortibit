@@ -64,3 +64,15 @@
 		</ng-template>
 	</ng-container>
 </div>
+
+<div id="mask">
+	<div #dragImage id="drag-image" [ngClass]="{'multi': movedEntries.length > 1 }">
+		<div class="container">
+			<div class="image"></div>
+			<div class="content">
+				<div class="text-line"></div>
+				<div class="text-line"></div>
+			</div>
+		</div>
+	</div>
+</div>

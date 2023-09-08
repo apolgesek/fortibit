@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IMessageBroker, IHotkeyHandler } from '@app/core/models';
-import { ModalService, WorkspaceService } from '@app/core/services';
+import { ModalService } from '@app/core/services';
 import { slideDown } from '@app/shared';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
@@ -10,11 +10,11 @@ import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { UpdateState } from '@shared-renderer/update-state.model';
+import { IpcChannel } from '../../../../../shared/ipc-channel.enum';
+import { UpdateState } from '../../../../../shared/update-state.model';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker, HotkeyHandler } from 'injection-tokens';
-import { Observable, scan, startWith, Subject, takeUntil } from 'rxjs';
+import { Observable, scan, startWith, Subject } from 'rxjs';
 
 interface INotification {
   type: 'update';
@@ -52,7 +52,6 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
     private readonly destroyRef: DestroyRef,
     private readonly zone: NgZone,
     private readonly modalService: ModalService,
-    private readonly workspaceService: WorkspaceService,
   ) {
     this.notifications$ = this.notificationsSource.asObservable()
       .pipe(
@@ -93,11 +92,8 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
     this.modalService.openSettingsWindow();
   }
 
-  async updateAndRelaunch() {
-    const success = await this.workspaceService.executeEvent();
-    if (success) {
-      this.messageBroker.ipcRenderer.send(IpcChannel.UpdateAndRelaunch);
-    }
+  openAboutWindow() {
+    this.modalService.openAboutWindow();
   }
 
   ngOnInit(): void {

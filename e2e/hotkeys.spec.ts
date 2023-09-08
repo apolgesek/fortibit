@@ -19,49 +19,19 @@ test.describe('Hotkeys', async () => {
     await username.type('Username');
     await submitBtn.click();
   }
-  
-  async function addGroup() {
-    const general = await firstWindow.locator('.node-group:has-text("Database")');
-    await general.click({ button: 'right' });
-    const addGroup = await firstWindow.locator('.context-menu li:first-child');
-    await addGroup.click();
-    await firstWindow.locator('.rename-group').waitFor({ state: 'visible' });
-    await firstWindow.keyboard.press('Enter');
-  }
 
   test.beforeEach(async () => {
-    app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`] });
+    app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`], colorScheme: 'dark' });
     firstWindow = await app.firstWindow();
+    
     await firstWindow.waitForLoadState('domcontentloaded');
-
-    const createNew = await firstWindow.locator('.create-new');
-    await createNew.click();
+    await firstWindow.locator('.inputgroup.password input').focus();
+    await firstWindow.keyboard.insertText('test123');
+    await firstWindow.keyboard.press('Enter');
   });
 
-  test('Launch electron app', async () => {
-    const windowState: { isVisible: boolean; isDevToolsOpened: boolean; isCrashed: boolean } = await app.evaluate(async (process) => {
-      const mainWindow = process.BrowserWindow.getAllWindows()[0];
-
-      const getState = () => ({
-        isVisible: mainWindow.isVisible(),
-        isDevToolsOpened: mainWindow.webContents.isDevToolsOpened(),
-        isCrashed: mainWindow.webContents.isCrashed(),
-      });
-
-      return new Promise((resolve) => {
-        if (mainWindow.isVisible()) {
-          setTimeout(() => {
-            resolve(getState());
-          }, 1000);
-        } else {
-          mainWindow.once('ready-to-show', () => setTimeout(() => resolve(getState()), 1000));
-        }
-      });
-    });
-
-    expect(windowState.isVisible).toBeTruthy();
-    expect(windowState.isDevToolsOpened).toBeFalsy();
-    expect(windowState.isCrashed).toBeFalsy();
+  test.afterEach(async () => {
+    await app.evaluate(process => process.app.exit());
   });
 
   test('Check open new entry modal', async () => {
@@ -71,20 +41,22 @@ test.describe('Hotkeys', async () => {
     const header = await firstWindow.locator('.dialog-header h2').innerText();
 
     expect(modal).toBeDefined();
-    expect(header).toBe('Add entry');
+    expect(header).toBe('Add entry\nin General');
   });
 
   test('Check open edit entry modal', async () => {
     await addEntry();
+    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+
     const row = await firstWindow.locator('.row-entry');
     await row.click();
 
-    await firstWindow.keyboard.press('Control+E');
-    const modal = await firstWindow.locator('app-modal');
+    await firstWindow.keyboard.press('E');
+    const modal = await firstWindow.waitForSelector('app-modal', { state: 'attached' });
     const header = await firstWindow.locator('.dialog-header h2').innerText();
 
     expect(modal).not.toBeNull();
-    expect(header).toBe('Edit entry')
+    expect(header).toBe('Edit entry\nin General')
   });
 
   test('Check open delete entry modal', async () => {
@@ -100,9 +72,5 @@ test.describe('Hotkeys', async () => {
 
     expect(modal).not.toBeNull();
     expect(header).toBe('Remove entry')
-  });
-
-  test.afterEach(async () => {
-    await app.close();
   });
 });

@@ -40,6 +40,7 @@ export class ContextMenuBuilderService {
   buildEmptyRecycleBinContextMenuItem(): this {
     this.contextMenuItems.push({
       label: this.hotkeyHandler.configuration.emptyBinLabel,
+      disabled: this.entryManager.passwordEntries.length === 0,
       command: () => {
         this.entryManager.selectedPasswords = [...this.entryManager.passwordEntries];
         this.modalService.openDeleteEntryWindow();
@@ -64,7 +65,7 @@ export class ContextMenuBuilderService {
     this.contextMenuItems.push({
       label: this.hotkeyHandler.configuration.copyUsernameLabel,
       command: () => {
-        this.clipboardService.copyToClipboard(
+        this.clipboardService.copyEntryDetails(
           this.entryManager.selectedPasswords[0],
           'username'
         );
@@ -78,7 +79,7 @@ export class ContextMenuBuilderService {
     this.contextMenuItems.push({
       label: this.hotkeyHandler.configuration.copyPasswordLabel,
       command: () => {
-        this.clipboardService.copyToClipboard(
+        this.clipboardService.copyEntryDetails(
           this.entryManager.selectedPasswords[0],
           'password'
         );

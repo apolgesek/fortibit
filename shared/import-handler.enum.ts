@@ -1,4 +1,6 @@
 export enum ImportHandler {
   KeePass,
-  OnePassword
+  OnePassword,
+  Bitwarden,
+  Lastpass
 }

@@ -30,6 +30,7 @@ export enum IpcChannel {
   CheckUpdate = 'app:checkUpdate',
   UpdateState = 'app:updateState',
   GetUpdateState = 'app:getUpdateState',
+  UpdateProgress = 'app:updateProgress',
   ValidatePassword = 'app:validatePassword',
   ChangePassword = 'app:changePassword',
   Import = 'app:import',
@@ -57,5 +58,12 @@ export enum IpcChannel {
   RecoverFile = 'app:recoverFile',
   ToggleBiometricsUnlock = 'app:toggleBiometricsUnlock',
   SaveExposedPasswordsReport = 'app:saveExposedPasswordsReport',
-  SaveWeakPasswordsReport = 'app:saveWeakPasswordsReport'
+  SaveWeakPasswordsReport = 'app:saveWeakPasswordsReport',
+  ToggleOverlay = 'app:toggleOverlay',
+  ZoomIn = 'app:zoomIn',
+  ZoomOut = 'app:zoomOut',
+  ResetZoom = 'app:resetZoom',
+  ToggleFullscreen = 'app:toggleFullscreen',
+  RecalculateViewport = 'app:recalculateViewport',
+  ToggleViewportRecalculation = 'app:toggleViewportRecalculation'
 }

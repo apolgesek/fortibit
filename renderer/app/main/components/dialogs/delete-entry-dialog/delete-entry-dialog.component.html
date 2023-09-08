@@ -16,7 +16,7 @@
       Are you sure you want to <strong *ngIf="isInRecycleBin">permanently</strong> remove this entry?
     </ng-container>
     <ng-template #bulkRemove>
-      Are you sure you want to remove <strong>{{ selectedRowsCount }}</strong> entries?
+      Are you sure you want to <strong *ngIf="isInRecycleBin">permanently</strong> remove <strong>{{ selectedRowsCount }}</strong> entries?
     </ng-template>
   </div>
   <div

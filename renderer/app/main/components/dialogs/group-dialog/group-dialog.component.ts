@@ -1,11 +1,12 @@
-import { Component, ComponentRef, OnInit } from '@angular/core';
+import { Component, ComponentRef, DestroyRef, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { GroupManager, ModalRef, NotificationService } from '@app/core/services';
+import { GroupManager, ModalRef, ModalService, NotificationService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { CommonModule } from '@angular/common';
 import { FeatherModule } from 'angular-feather';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-group-dialog',
@@ -28,13 +29,15 @@ export class GroupDialogComponent implements IModal, OnInit {
   public title: 'Add group' | 'Edit group' = 'Add group';
 
   constructor(
+    private readonly destroyRef: DestroyRef,
     private readonly modalRef: ModalRef,
     private readonly fb: FormBuilder,
     private readonly groupManager: GroupManager,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly modalService: ModalService
   ) {
     this.groupForm = this.fb.group({
-      name: [null, [Validators.required, Validators.maxLength(20)]]
+      name: [null, [Validators.required, Validators.maxLength(40)]]
     });
   }
 
@@ -46,7 +49,7 @@ export class GroupDialogComponent implements IModal, OnInit {
     this.modalRef.close();
   }
 
-  async saveGroup() {
+  async saveGroup(): Promise<void> {
     markAllAsDirty(this.groupForm);
 
     if (this.groupForm.invalid) {
@@ -67,6 +70,13 @@ export class GroupDialogComponent implements IModal, OnInit {
 
     this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Group saved' });
     this.close();
+  }
+
+  async removeGroup() {
+    const modalRef = this.modalService.openDeleteGroupWindow();
+    modalRef.onActionResult.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.close();
+    });
   }
 
   ngOnInit(): void {

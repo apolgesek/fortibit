@@ -1,12 +1,12 @@
 import * as merge from 'deepmerge';
-import { app, ipcMain, nativeTheme } from 'electron';
+import { app, ipcMain } from 'electron';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { writeFileSync } from 'fs-extra';
 import * as os from 'os';
 import { join } from 'path';
 import { IAppConfig } from '../../../app-config';
 import { IProduct } from '../../../product';
-import { IpcChannel } from '../../../shared-models';
+import { IpcChannel, getDefaultConfig } from '../../../shared';
 import { INativeApiService } from '../native';
 import { IConfigService } from './index';
 
@@ -53,7 +53,7 @@ export class ConfigService implements IConfigService {
     const productInformation: IProduct = merge(JSON.parse(productFileContent), require(this._productPath));
     const workspacesInformation: any = require(this._workspacesPath);
 
-    this._appConfig = {
+    this._appConfig = merge(getDefaultConfig(process.platform), {
       version: app.getVersion(),
       electronVersion: process.versions.electron,
       nodeVersion: process.versions.node,
@@ -69,26 +69,27 @@ export class ConfigService implements IConfigService {
       iconServiceUrl: productInformation.iconServiceUrl,
       signatureSubject: productInformation.signatureSubject,
       leakedPasswordsUrl: productInformation.leakedPasswordsUrl,
-      compressionEnabled: productInformation.compressionEnabled ?? false,
-      autocompleteShortcut: productInformation.autocompleteShortcut ?? process.platform === 'win32' ? 'Alt+\\' : 'Option+\\',
-      autocompletePasswordOnlyShortcut: productInformation.autocompletePasswordOnlyShortcut ?? process.platform === 'win32' ? 'Ctrl+Alt+\\' : 'Command+Option+\\',
-      clipboardClearTimeMs: productInformation.clipboardClearTimeMs ?? 15000,
-      biometricsAuthenticationEnabled: productInformation.biometricsAuthenticationEnabled ?? false,
+      compressionEnabled: productInformation.compressionEnabled,
+      autocompleteShortcut: productInformation.autocompleteShortcut,
+      autocompleteUsernameOnlyShortcut: productInformation.autocompleteUsernameOnlyShortcut,
+      autocompletePasswordOnlyShortcut: productInformation.autocompletePasswordOnlyShortcut,
+      clipboardClearTimeMs: productInformation.clipboardClearTimeMs,
+      biometricsAuthenticationEnabled: productInformation.biometricsAuthenticationEnabled,
       encryption: {
-        lowercase: productInformation.encryption.lowercase ?? true,
-        numbers: productInformation.encryption.numbers ?? true,
-        uppercase: productInformation.encryption.uppercase ?? true,
-        specialChars: productInformation.encryption.specialChars ?? true,
-        passwordLength: productInformation.encryption.passwordLength ?? 15,
+        lowercase: productInformation.encryption.lowercase,
+        numbers: productInformation.encryption.numbers,
+        uppercase: productInformation.encryption.uppercase,
+        specialChars: productInformation.encryption.specialChars,
+        passwordLength: productInformation.encryption.passwordLength,
       },
-      idleSeconds: productInformation.idleSeconds ?? 600,
-      lockOnSystemLock: productInformation.lockOnSystemLock ?? true,
-      saveOnLock: productInformation.saveOnLock ?? false,
-      displayIcons: productInformation.displayIcons ?? true,
-      autoTypeEnabled: productInformation.autoTypeEnabled ?? true,
+      idleSeconds: productInformation.idleSeconds,
+      lockOnSystemLock: productInformation.lockOnSystemLock,
+      saveOnLock: productInformation.saveOnLock,
+      displayIcons: productInformation.displayIcons,
+      autoTypeEnabled: productInformation.autoTypeEnabled,
       theme: productInformation.theme ?? 'light',
       biometricsProtectedFiles: []
-    };
+    });
 
     ipcMain.handle(IpcChannel.GetAppConfig, async () => {
       const paths = await this._nativeApiService.listCredentials();

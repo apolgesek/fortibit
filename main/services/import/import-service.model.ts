@@ -1,4 +1,4 @@
-import { ImportHandler } from "../../../shared-models";
+import { ImportHandler } from "../../../shared";
 import { createServiceDecorator } from "../../dependency-injection";
 import { IImportHandler } from "./import-handler.model";
 

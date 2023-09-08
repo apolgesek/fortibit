@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IHistoryEntry } from '../../../../shared-models';
+import { IHistoryEntry } from '../../../../shared';
 import { DbManager } from '../database/db-manager';
 import { HistoryEntryPredicateFn, IHistoryRepository } from './history-repository.model';
 

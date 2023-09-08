@@ -5,9 +5,9 @@ export class UiUtil {
     isDraggingOverClass: 'is-dragging-over'
   };
 
-  public static setDragGhost(event: DragEvent) {
+  public static setDragGhost(event: DragEvent, element: HTMLElement) {
     const dataTransfer = event.dataTransfer as DataTransfer;
-    dataTransfer.setDragImage(new Image(), 0, 0);
+    dataTransfer.setDragImage(element, 0, 0);
   }
 
   public static lockInterface() {

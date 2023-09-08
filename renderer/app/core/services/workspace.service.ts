@@ -3,24 +3,25 @@ import { Router } from '@angular/router';
 import { DbManager } from '@app/core/database';
 import { IMessageBroker } from '@app/core/models';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { IPasswordEntry } from '@shared-renderer/password-entry.model';
+import { UiUtil } from '@app/utils';
 import { exportDB, importInto } from 'dexie-export-import';
 import { MessageBroker } from 'injection-tokens';
-import { combineLatest, Observable, skip, startWith, Subject } from 'rxjs';
+import { Observable, Subject, combineLatest, skip, startWith } from 'rxjs';
 import { IAppConfig } from '../../../../app-config';
+import { IpcChannel } from '../../../../shared/ipc-channel.enum';
+import { IPasswordEntry } from '../../../../shared/password-entry.model';
+import { GroupId } from '../enums';
 import { ConfigService } from './config.service';
 import { EntryManager } from './managers/entry.manager';
 import { GroupManager } from './managers/group.manager';
+import { HistoryManager } from './managers/history.manager';
 import { ModalService } from './modal.service';
 import { NotificationService } from './notification.service';
-import { UiUtil } from '@app/utils';
-import { HistoryManager } from './managers/history.manager';
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceService {
   public readonly loadedDatabase$: Observable<boolean>;
-  public isSynced?: boolean;
+  public isSynced = true;
   public file?: { filePath: string; filename: string };
   public isLocked = true;
   public isBiometricsAuthenticationInProgress = false;
@@ -184,12 +185,19 @@ export class WorkspaceService {
   async importDatabase(name: string, entries: IPasswordEntry[]): Promise<boolean> {
     try {
       const groupId = await this.groupManager.addGroup({ name, isImported: true });
-      const updated = entries.map(e => ({ ...e, groupId }));
-      await this.entryManager.bulkAddEntries(updated);
+      const mappedEntries = entries.map(e => ({ ...e, groupId }));
+      await this.entryManager.bulkAddEntries(mappedEntries);
       const entriesWithIds = await this.entryManager.getAllByGroup(groupId);
 
       for (const entry of entriesWithIds) {
         this.entryManager.getIconPath(entry);
+      }
+
+      // refresh All Items group after database import so new entries are visible on the list
+      // likely to be extended with Favorites group the same way in the future
+      if (this.groupManager.selectedGroup === GroupId.AllItems) {
+        await this.entryManager.setByGroup(GroupId.AllItems);
+        this.entryManager.updateEntriesSource();
       }
 
       return true;
@@ -213,9 +221,6 @@ export class WorkspaceService {
     if (!this.file) {
       await this.groupManager.setupGroups();
     }
-
-    this.setSynced();
-    this.setDatabaseLoaded();
   }
 
   setSynced() {
@@ -233,8 +238,6 @@ export class WorkspaceService {
   toggleTheme() {
     this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleTheme);
   }
-
-  private readonly lockKeydownEvent = (event: KeyboardEvent) => event.preventDefault();
 
   private handleDatabaseLock() {
     this.messageBroker.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {

@@ -48,6 +48,7 @@
 
   // ACTION ICON BUTTON
   --action-btn-text: #{$grey-200};
+  --action-btn-text--disabled: #{$grey-500};
   --action-btn-bg: #{$black-800};
 
   // TEXT BUTTON
@@ -74,7 +75,7 @@
   --dropdown-list-item-bg--hover: #{$grey-600};
 
   // NOTIFICATION
-  --notification-bg: #{$black-800};
+  --notification-bg: #{lighten($black-800, 5)};
   --notification-bg--success: #{$grey-600};
   --notification-bg--error: #{$grey-600};
 
@@ -82,10 +83,19 @@
   --expandable-bg: #{$black-900};
   --expandable-bg--hover: #{lighten($black-900, 2)};
 
+  // DRAG IMAGE
+  --drag-image-bg: #{$grey-600};
+  --drag-image-back-bg: #{darken($grey-600, 5)};
+  --drag-image-element-bg: #{$grey-500};
+
+  // PASSWORD METER
+  --password-meter-bg: #{$grey-600};
+  --password-meter-border-color: #{darken($grey-600, 5)};
+
   // MISC
   --link-text: #{$blue-250};
   --label-text: #{$blue-200};
-  --error-text: #{$red-orange};
+  --error-text: #{#ff7a7a};
   --border-color: #{$grey-600};
   --icon-secondary: #{$grey-200};
   --input-inset-shadow: #{$black-900};

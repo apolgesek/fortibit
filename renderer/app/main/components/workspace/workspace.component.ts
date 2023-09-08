@@ -1,12 +1,11 @@
-import { AfterViewInit, Component, DestroyRef, Inject } from '@angular/core';
-import { IHotkeyHandler } from '@app/core/models';
-import { HotkeyHandler } from 'injection-tokens';
-import { fromEvent, tap } from 'rxjs';
-import { EntriesTableComponent } from '../entries-table/entries-table.component';
+import { AfterViewInit, Component, DestroyRef, inject } from '@angular/core';
+import { EntriesTableComponent } from '../entries-list/entries-list.component';
 import { EntryDetailsSidebarComponent } from '../entry-details-sidebar/entry-details-sidebar.component';
 import { GroupsSidebarComponent } from '../groups-sidebar/groups-sidebar.component';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { fromEvent, tap } from 'rxjs';
+import { HotkeyHandler } from 'injection-tokens';
 
 @Component({
   selector: 'app-workspace',
@@ -21,10 +20,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   ]
 })
 export class WorkspaceComponent implements AfterViewInit {
-  constructor(
-    @Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler,
-    private readonly destroyRef: DestroyRef
-  ) {}
+  private readonly hotkeyHandler = inject(HotkeyHandler);
+  private readonly destroyRef = inject(DestroyRef);
 
   ngAfterViewInit(): void {
     fromEvent(window, 'keydown')

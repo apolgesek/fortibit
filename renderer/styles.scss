@@ -1,4 +1,4 @@
-@import "themes/light/variables";
+@import "themes/base-variables";
 @import "mixins";
 @import "input";
 @import "buttons";
@@ -95,16 +95,20 @@ a {
 	padding: 0 1rem;
 	color: var(--primary-text);
 	font-size: 0.875rem;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	overflow: hidden;
 	min-height: $workspace-header-height;
 	box-sizing: border-box;
 	user-select: none;
 	border-bottom: 1px solid var(--border-color);
+
+	span {
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+	}
 }
 
 .validation-error {
+	user-select: none;
 	color: var(--error-text);
 	font-size: 0.875rem;
 }
@@ -194,4 +198,12 @@ code {
 		min-width: 1.25rem !important;
 		min-height: 1.25rem !important;
 	}
+}
+
+.pretty-digit {
+	color: $barberry;
+}
+
+.pretty-special-char {
+	color: $blue-200;
 }

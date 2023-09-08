@@ -1,5 +1,4 @@
 import { app } from 'electron';
-import { performance } from 'perf_hooks';
 import { bootstrapApp } from './main/main';
 
 global['__perfStart'] = performance.now();

@@ -1,7 +1,7 @@
 import { globalShortcut, ipcMain, IpcMainEvent } from "electron";
 import { IAppConfig } from "../../../app-config";
 import { IProduct } from "../../../product";
-import { IPasswordEntry, IpcChannel } from "../../../shared-models";
+import { IPasswordEntry, IpcChannel } from "../../../shared";
 import { IConfigService } from "../config";
 import { IDatabaseService } from "../database";
 import { IEncryptionEventWrapper, MessageEventType } from "../encryption";
@@ -16,9 +16,15 @@ interface IAutotypeResult {
   windowId: number;
 }
 
+enum AutocompleteMode {
+  Full,
+  PasswordOnly,
+  UsernameOnly
+}
+
 export class AutotypeService implements IAutotypeService {
   private _result: IAutotypeResult[] = [];
-  private _passwordOnly = false;
+  private _autocompleteMode = AutocompleteMode.Full;
   private _processRunning = false;
 
   private get _windows(): IWindow[] {
@@ -45,21 +51,26 @@ export class AutotypeService implements IAutotypeService {
     });
   }
 
-  registerAutocompleteShortcut() {
-    globalShortcut.register(this._configService.appConfig.autocompleteShortcut, () => {
-      this._passwordOnly = false;
+  registerAutocompleteShortcut(shortcut: string, usernameOnlyShortcut: string, passwordOnlyShortcut: string) {
+    this.unregisterAutocompleteShortcut(
+      this._configService.appConfig.autocompleteShortcut,
+      this._configService.appConfig.autocompleteUsernameOnlyShortcut,
+      this._configService.appConfig.autocompletePasswordOnlyShortcut
+    );
+    globalShortcut.register(shortcut, () => {
+      this._autocompleteMode = AutocompleteMode.Full;
       this.autotypeEntry();
     });
 
-    globalShortcut.register(this._configService.appConfig.autocompletePasswordOnlyShortcut, () => {
-      this._passwordOnly = true;
+    globalShortcut.register(usernameOnlyShortcut, () => {
+      this._autocompleteMode = AutocompleteMode.UsernameOnly; 
       this.autotypeEntry();
     });
-  }
 
-  unregisterAutocompleteShortcut() {
-    globalShortcut.unregister(this._configService.appConfig.autocompleteShortcut);
-    globalShortcut.unregister(this._configService.appConfig.autocompletePasswordOnlyShortcut);
+    globalShortcut.register(passwordOnlyShortcut, () => {
+      this._autocompleteMode = AutocompleteMode.PasswordOnly;
+      this.autotypeEntry();
+    }); 
   }
 
   autotypeEntry() {
@@ -84,9 +95,20 @@ export class AutotypeService implements IAutotypeService {
       this.addWindowHandler(win);
     });
 
+    // stop active autotype if entry select window is close
+    this._windowService.getWindow(1).on('hide', () => {
+      this._processRunning = false;
+    });
+
     this._windows.forEach((win) => {
       win.browserWindow.webContents.send(IpcChannel.GetAutotypeFoundEntry, activeWindowTitle);
     });
+  }
+
+  private unregisterAutocompleteShortcut(shortcut: string, usernameOnlyShortcut: string, passwordOnlyShortcut: string) {
+    globalShortcut.unregister(shortcut);
+    globalShortcut.unregister(usernameOnlyShortcut);
+    globalShortcut.unregister(passwordOnlyShortcut);      
   }
 
   private addWindowHandler(win: IWindow) {
@@ -147,15 +169,24 @@ export class AutotypeService implements IAutotypeService {
     const payload = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, window.key) as { decrypted: string };
     await this._sendInputService.sleep(200);
 
-    if (entry.username && !this._passwordOnly) {
-      await this._sendInputService.typeWord(entry.username);
-      await this._sendInputService.pressKey(KeyCode.TAB);
-    }
-
-    await this._sendInputService.typeWord(payload.decrypted);
-
-    if (!this._passwordOnly) {
-      await this._sendInputService.pressKey(KeyCode.ENTER);
+    switch (this._autocompleteMode) {
+      case AutocompleteMode.Full:
+        if (entry.username) {
+          await this._sendInputService.typeWord(entry.username);
+        }
+        await this._sendInputService.pressKey(KeyCode.TAB);
+        await this._sendInputService.typeWord(payload.decrypted);
+        await this._sendInputService.pressKey(KeyCode.ENTER);
+        break;
+      case AutocompleteMode.UsernameOnly:
+        if (entry.username) {
+          await this._sendInputService.typeWord(entry.username);
+        }
+        break;
+      case AutocompleteMode.PasswordOnly:
+        await this._sendInputService.typeWord(payload.decrypted);
+      default:
+        break;
     }
 
     this._processRunning = false;
@@ -163,12 +194,25 @@ export class AutotypeService implements IAutotypeService {
   }
 
   private changeEncryptionSettings(settings: Partial<IProduct>) {
-    if (settings.autoTypeEnabled) {
-      this.registerAutocompleteShortcut();
+    if (settings.autoTypeEnabled ?? this._configService.appConfig.autoTypeEnabled) {
+      this.registerAutocompleteShortcut(
+        settings.autocompleteShortcut ?? this._configService.appConfig.autocompleteShortcut,
+        settings.autocompleteUsernameOnlyShortcut ?? this._configService.appConfig.autocompleteUsernameOnlyShortcut,
+        settings.autocompletePasswordOnlyShortcut ?? this._configService.appConfig.autocompletePasswordOnlyShortcut
+      );
     } else {
-      this.unregisterAutocompleteShortcut();
+      this.unregisterAutocompleteShortcut(
+        this._configService.appConfig.autocompleteShortcut,
+        this._configService.appConfig.autocompleteUsernameOnlyShortcut,
+        this._configService.appConfig.autocompletePasswordOnlyShortcut
+      );
     }
-  
-    this._configService.set(settings);
+
+    this._configService.set({
+      autoTypeEnabled: settings.autoTypeEnabled ?? this._configService.appConfig.autoTypeEnabled,
+      autocompleteShortcut: settings.autocompleteShortcut ?? this._configService.appConfig.autocompleteShortcut,
+      autocompleteUsernameOnlyShortcut: settings.autocompleteUsernameOnlyShortcut ?? this._configService.appConfig.autocompleteUsernameOnlyShortcut,
+      autocompletePasswordOnlyShortcut: settings.autocompletePasswordOnlyShortcut ?? this._configService.appConfig.autocompletePasswordOnlyShortcut
+    });
   }
 }

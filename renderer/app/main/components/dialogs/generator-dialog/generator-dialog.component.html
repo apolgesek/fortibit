@@ -1,0 +1,89 @@
+<app-modal>
+  <div class="dialog-header">
+    <h2>Generator</h2>
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
+      class="close-dialog"
+      (click)="close(); false">&times;
+    </a> 
+  </div>
+  <div class="dialog-message">
+    <div class="password-container">
+      <div class="password" [innerHTML]="password | prettyPassword"></div>
+      <button
+        type="button"
+        style="margin-right: 0.5rem;"
+        (click)="copy()"
+        aria-label="Copy"
+        appTooltip="Copy">
+        <i-feather name="copy"></i-feather>
+      </button>
+      <button
+        type="button"
+        (click)="generatePassword()"
+        aria-label="Regenerate"
+        appTooltip="Regenerate">
+        <i-feather name="refresh-cw"></i-feather>
+      </button>
+    </div>
+    <div style="margin-top: 2rem;">
+      <form [formGroup]="settingsForm">
+        <div class="inputgroup">
+          <label id="password-length" class="label" for="length">Password length:</label>
+          <app-value-slider labelId="password-length" formControlName="passwordLength"></app-value-slider>
+        </div>
+        <div class="inputgroup checkbox">
+          <label class="label" for="uppercase">Uppercase letters:</label>
+          <label class="switch">
+            <input
+              id="uppercase"
+              type="checkbox"
+              formControlName="uppercase">
+              <span class="slider"></span>
+          </label>    
+        </div>
+        <div class="inputgroup checkbox">
+          <label class="label" for="lowercase">Lowercase letters:</label>
+          <label class="switch">
+            <input
+              id="lowercase"
+              type="checkbox"
+              formControlName="lowercase">
+              <span class="slider"></span>
+          </label>    
+        </div>
+        <div class="inputgroup checkbox">
+          <label class="label" for="specialchars">Special characters:</label>
+          <label class="switch">
+            <input
+              id="specialChars"
+              type="checkbox"
+              formControlName="specialChars">
+              <span class="slider"></span>
+          </label>    
+        </div>
+        <div class="inputgroup checkbox">
+          <label class="label" for="numbers">Numbers:</label>
+          <label class="switch">
+            <input
+              id="numbers"
+              type="checkbox"
+              formControlName="numbers">
+              <span class="slider"></span>
+          </label>    
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="footer-container">
+    <button
+      #autofocus
+      type="button"
+      class="secondary-btn"
+      (click)="close()">
+      Close
+    </button>
+  </div>
+</app-modal>

@@ -118,4 +118,10 @@ export class ToolbarComponent {
     this.searchPhrase = '';
     (this.searchInput.nativeElement as HTMLInputElement).focus();
   }
+
+  handleSearchboxKeydown(event: KeyboardEvent) {
+    if (!event.ctrlKey) {
+      event.stopPropagation();
+    }
+  }
 }

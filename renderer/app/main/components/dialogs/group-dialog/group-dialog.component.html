@@ -31,7 +31,7 @@
           Group name is required.
         </ng-container>
         <ng-container *ngIf="name.hasError('maxlength')">
-          Group name must not exceed 20 characters.
+          Group name must not exceed 40 characters.
         </ng-container>
       </div>
     </div>
@@ -47,7 +47,15 @@
     </button>
     <button
       type="button"
-      id="entry-remove"
+      id="remove-group"
+      class="primary-btn"
+      (click)="removeGroup()"
+      (keyup.enter)="removeGroup()">
+      Remove
+    </button>
+    <button
+      type="button"
+      id="save-group"
       class="primary-btn"
       (click)="saveGroup()"
       (keyup.enter)="saveGroup()">

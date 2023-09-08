@@ -1,7 +1,8 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GroupId } from '@app/core/enums';
 import { IHotkeyHandler } from '@app/core/models';
 import { ConfigService, EntryManager, GroupManager, WorkspaceService } from '@app/core/services';
@@ -22,18 +23,17 @@ import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { UiUtil } from '@app/utils';
-import { IPasswordEntry } from '@shared-renderer/index';
 import { HotkeyHandler } from 'injection-tokens';
-import { Observable, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { IPasswordEntry } from '../../../../../shared/index';
 import { TableFiltersComponent } from '../table-filters/table-filters.component';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-entries-table',
-  templateUrl: './entries-table.component.html',
-  styleUrls: ['./entries-table.component.scss'],
+  selector: 'app-entries-list',
+  templateUrl: './entries-list.component.html',
+  styleUrls: ['./entries-list.component.scss'],
   animations: [
     trigger('slideIn', [
       transition(':enter', [
@@ -67,6 +67,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class EntriesTableComponent implements OnInit {
   @ViewChild(CdkVirtualScrollViewport) public readonly scrollViewport: CdkVirtualScrollViewport | undefined;
+  @ViewChild('dragImage') public readonly dragImage: ElementRef;
 
   public passwordList$: Observable<IPasswordEntry[]>;
   public searchPhrase$: Observable<string>;
@@ -96,6 +97,10 @@ export class EntriesTableComponent implements OnInit {
 
   get selectedEntries(): IPasswordEntry[] {
     return this.entryManager.selectedPasswords;
+  }
+
+  get movedEntries(): number[] {
+    return this.entryManager.movedEntries;
   }
 
   get passwordEntries(): IPasswordEntry[] {
@@ -151,7 +156,7 @@ export class EntriesTableComponent implements OnInit {
   }
 
   copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry) {
-    this.clipboardService.copyToClipboard(entry, property);
+    this.clipboardService.copyEntryDetails(entry, property);
   }
 
   selectEntry(event: MouseEvent, entry: IPasswordEntry) {
@@ -195,7 +200,8 @@ export class EntriesTableComponent implements OnInit {
       ? this.selectedEntries.map(e => e.id)
       : [ item.id ];
 
-    UiUtil.setDragGhost(event);
+    console.log(this.dragImage.nativeElement);
+    UiUtil.setDragGhost(event, this.dragImage.nativeElement);
   }
 
   endDrag() {

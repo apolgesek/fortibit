@@ -2,11 +2,8 @@
 @import 'mixins';
 
 :host {
-	overflow-x: auto;
-	overflow-y: hidden;
 	border-top: 1px solid var(--border-color);
 	border-bottom: 1px solid var(--border-color);
-	@include scrollbar;
 }
 
 .add-entry {
@@ -53,6 +50,7 @@
 	width: 100%;
 	height: $toolbar-height;
   background-color: var(--primary-bg);
+	box-sizing: border-box;
 	display: flex;
 	position: relative;
 	z-index: 3;
@@ -72,7 +70,7 @@
 		position: relative;
 		border: 1px solid var(--border-color);
 		border-radius: 0.25rem;
-		margin-right: 0.5rem;
+		margin-right: 1rem;
 	
 		.search {
 			font-size: 0.875rem;
@@ -80,7 +78,7 @@
 			border-radius: 0.25rem;
 			padding: 0 1rem;
 			height: 100%;
-			width: 10rem;
+			width: 8rem;
 			border-top-right-radius: 0;
 			border-bottom-right-radius: 0;
 			z-index: 100;
@@ -97,7 +95,7 @@
 			display: flex;
 			align-items: center;
 			background-color: var(--input-bg);
-			height: 46px;
+			height: 44px;
 			color: var(--primary-text);
 			position: relative;
 			z-index: 100;

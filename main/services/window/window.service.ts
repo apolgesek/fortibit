@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { randomBytes } from 'crypto';
-import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, nativeTheme, powerMonitor, safeStorage } from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, nativeTheme, powerMonitor, safeStorage, screen } from 'electron';
 import { join } from 'path';
 import { UrlObject } from 'url';
-import { IpcChannel } from '../../../shared-models';
+import { IpcChannel } from '../../../shared';
 import { ProcessArgument } from '../../process-argument.enum';
 import { IConfigService } from '../config';
 import { INativeApiService } from '../native';
 import { IPerformanceService } from '../performance/performance-service.model';
 import { IWindowService } from './';
 import { IWindow } from './window-model';
+import { nextTick } from 'process';
 
 const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
 const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
@@ -59,6 +60,27 @@ export class WindowService implements IWindowService {
       win.browserWindow.isMaximized() ? win.browserWindow.unmaximize() : win.browserWindow.maximize();
     });
 
+    ipcMain.on(IpcChannel.ZoomIn, (event: IpcMainEvent) => {
+      let currentFactor = event.sender.getZoomFactor();
+      currentFactor === 1 ? currentFactor += 0.1 : currentFactor += 0.25;
+      event.sender.setZoomFactor(currentFactor);
+    });
+
+    ipcMain.on(IpcChannel.ZoomOut, (event: IpcMainEvent) => {
+      let currentFactor = event.sender.getZoomFactor();
+      currentFactor === 1.25 ? currentFactor -= 0.15 : currentFactor -= 0.25;
+      event.sender.setZoomFactor(currentFactor);
+    });
+
+    ipcMain.on(IpcChannel.ResetZoom, (event: IpcMainEvent) => {
+      event.sender.setZoomFactor(1);
+    });
+
+    ipcMain.on(IpcChannel.ToggleFullscreen, (event: IpcMainEvent) => {
+      const browserWindow = this.getWindowByWebContentsId(event.sender.id).browserWindow;
+      browserWindow.setFullScreen(!browserWindow.isFullScreen());
+    });
+
     ipcMain.on(IpcChannel.Close, (event: IpcMainEvent) => {
       const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
     
@@ -106,11 +128,15 @@ export class WindowService implements IWindowService {
   }
 
   createMainWindow(): BrowserWindow {
+    screen.on('display-metrics-changed', () => {
+      this.windows.forEach(w => w.browserWindow.webContents.send(IpcChannel.RecalculateViewport));
+    });
+
     const window = this.createFromTemplate({
       width: 960,
-      height: 600,
-      minHeight: 520,
-      minWidth: 800,
+      height: 580,
+      minHeight: 300,
+      minWidth: 788,
       resizable: true,
       title: this._configService.appConfig.name,
     });
@@ -271,7 +297,7 @@ export class WindowService implements IWindowService {
       backgroundColor: this._configService.appConfig.theme === 'light' ? '#fcfcfc' : '#191d1e',
       // shouldn't be changed for best security
       webPreferences: {
-        sandbox: true,
+        sandbox: false,
         nodeIntegration: false,
         contextIsolation: true,
         nodeIntegrationInSubFrames: false,
@@ -292,6 +318,16 @@ export class WindowService implements IWindowService {
       }
     };
     const window = new BrowserWindow({ ...options, ...template });
+
+    window.on('move', () => {
+      window.webContents.send(IpcChannel.RecalculateViewport);
+    });
+
+    window.on('restore', () => {
+      nextTick(() => {
+        window.webContents.send(IpcChannel.RecalculateViewport);
+      });
+    })
 
     window.webContents.on('will-navigate', (e) => {
       e.preventDefault();

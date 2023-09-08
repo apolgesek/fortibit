@@ -1,4 +1,4 @@
-import { IPasswordEntry } from "../../../shared-models";
+import { IPasswordEntry } from "../../../shared";
 import { createServiceDecorator } from "../../dependency-injection";
 
 export const IIconService = createServiceDecorator<IIconService>('iconService');

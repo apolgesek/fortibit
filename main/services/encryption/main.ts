@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { IPasswordEntry } from '../../../shared-models';
+import { IPasswordEntry } from '../../../shared';
 import { ExposedPasswordsService } from '../exposed-passwords/exposed-passwords.service';
 import { WeakPasswordsService } from '../weak-passwords/weak-passwords.service';
 import { IEncryptionService } from './encryption-service.model';
@@ -134,7 +134,7 @@ class Main {
         };
       });
 
-      const leaks = await this._exposedPasswordsService.findLeaks(entries);
+      const leaks = await this._exposedPasswordsService.findLeaks(entries, process.env.BASEDIR);
       process.send({ data: JSON.stringify(leaks) });
     } catch (err) {
       process.send({ error: err });

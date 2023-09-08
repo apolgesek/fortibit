@@ -30,8 +30,7 @@
             ],
             "assets": [
               "renderer/assets",
-              "renderer/manifest.json",
-              "renderer/content-script.js"
+              "renderer/preload.js"
             ],
             "styles": [
               "renderer/styles.scss"

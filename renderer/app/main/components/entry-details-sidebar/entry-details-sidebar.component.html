@@ -2,35 +2,49 @@
 	data-prevent-entry-deselect
 	class="details-container"
 	[ngClass]="{ 'database-summary': !isEntrySelected }">
-	<ng-container *ngIf="isEntrySelected; else databaseDetails">
-		<div class="header">{{ group?.name }} <ng-container *ngIf="entry?.title"><i-feather name="chevron-right"></i-feather> {{ entry.title }}</ng-container></div>
-		<div class="content">
-			<div *ngIf="shouldDisplayToolbar" class="section quick-actions">
+	<ng-container *ngIf="isEntrySelected && group; else databaseDetails">
+		<div class="header">
+			<span [title]="group?.name">{{ group?.name }}</span>
+			<ng-container *ngIf="entry?.title">
+				<i-feather name="chevron-right"></i-feather> <span [title]="entry.title">{{ entry.title }}</span>
+			</ng-container>
+		</div>
+		<div class="content entry-details">
+			<div class="section quick-actions">
 				<button
+					[disabled]="isReadonlyEntry"
 					#toggleStarBtn
 					[attr.aria-label]="entry?.isStarred ? 'Remove from favorites' : 'Add to favorites'"
 					appTooltip="Favorite"
+					id="add-favorites-btn"
 					class="action-btn"
 					[ngClass]="{ 'active': entry?.isStarred }"
 					(click)="toggleStarred(entry)">
 					<i-feather [@star]="isFavoriteAnimationInProgress" (@star.done)="isFavoriteAnimationInProgress = false" name="star"></i-feather>
 				</button>
-				<button aria-label="Entry history" appTooltip="History" (click)="openEntryHistory()" class="action-btn">
+				<button appTooltip="History" aria-label="Entry history" (click)="openEntryHistory()" class="action-btn" id="open-history-btn">
 					<i-feather name="book"></i-feather>
 				</button>
 				<button
 					*ngIf="entry.url"
-					attr.aria-label="'Open {{ isUnsecured ? 'insecure' : '' }} link"
 					appTooltip="Open {{ isUnsecured ? 'insecure' : '' }} link"
+					[attr.aria-label]="'Open ' + (isUnsecured ? 'insecure' : '') + ' link'"
 					(click)="openUrl(entry.url)"
+					id="open-url-btn"
 					class="action-btn">
-					<i-feather name="external-link"></i-feather>
+					<i-feather name="link"></i-feather>
 				</button>
+				<!-- <button
+					aria-label="Share"
+					appTooltip="Share"
+					class="action-btn">
+					<i-feather name="share"></i-feather>
+				</button> -->
 			</div>
 
 			<div *ngIf="entry?.url" class="section">
 				<div class="subsection">
-					<p class="label">URL <i-feather appTooltip="http:// protocol is not secure. Use https if possible" *ngIf="isUnsecured" name="alert-circle" class="url-alert-icon"></i-feather></p>
+					<p class="label">URL <i-feather appTooltip="http:// protocol is not secure Use https if possible" *ngIf="isUnsecured" name="alert-circle" class="url-alert-icon"></i-feather></p>
 					<p class="word-wrap"><span class="url-protocol">{{ isUnsecured ? 'http://' : 'https://' }}</span><a (click)="openUrl(entry?.url)" href="#">{{ entry?.url | link }}</a></p>
 				</div>
 			</div>
@@ -41,7 +55,7 @@
 					<p>{{ entry?.username }}</p>
 				</div>
 				<div>
-					<a href="#" class="copy" (click)="copyToClipboard(entry, 'username'); false" appTooltip="Copy" container="body">
+					<a href="#" class="copy" (click)="copyToClipboard(entry, 'username'); false" appTooltip="Copy" aria-label="Copy" container="body">
 						<i-feather name="copy"></i-feather>
 					</a>
 				</div>
@@ -53,7 +67,7 @@
 					<p>••••••</p>
 				</div>
 				<div>
-					<a href="#" class="copy" (click)="copyToClipboard(entry, 'password'); false" appTooltip="Copy" container="body">
+					<a href="#" class="copy" (click)="copyToClipboard(entry, 'password'); false" appTooltip="Copy" aria-label="Copy" container="body">
 						<i-feather name="copy"></i-feather>
 					</a>
 				</div>
@@ -93,22 +107,20 @@
 		</div>
 		<div class="section">
 			<div class="subsection">
-				<p class="label">Autotype shortcut</p>
+				<p class="label">Autotype</p>
 				<p>
-				 {{ config.autocompleteShortcut }}
+				 <span class="subtype">Full:</span> {{ config.autocompleteShortcut }}
 				 <span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
 				 <i-feather name="info" (click)="openAutotypeInformation()"></i-feather>
-			 </p>
-			</div>
-		</div>
-		<div class="section">
-			<div class="subsection">
-				<p class="label">Password only autotype shortcut</p>
+			 	</p>
+				 <p>
+					<span class="subtype">Username:</span> {{ config.autocompleteUsernameOnlyShortcut }}
+					<span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
+				</p>
 				<p>
-				 {{ config.autocompletePasswordOnlyShortcut }}
-				 <span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
-				 <i-feather name="info" (click)="openAutotypeInformation()"></i-feather>
-			 </p>
+					<span class="subtype">Password:</span> {{ config.autocompletePasswordOnlyShortcut }}
+					<span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
+					</p>
 			</div>
 		</div>
 	</div>

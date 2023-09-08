@@ -37,6 +37,15 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    // prevent close button focus when modal shows
+    const closeDialogButton = (this.el.nativeElement as HTMLElement).querySelector('.close-dialog');
+    if (closeDialogButton) {
+      closeDialogButton.setAttribute('tabindex', '-1');
+      setTimeout(() => {
+        closeDialogButton.setAttribute('tabindex', '0');
+      });
+    }
+    
     if (this.options?.closeOnBackdropClick) {
       fromEvent(this.backdrop.nativeElement, 'click')
         .pipe(takeUntilDestroyed(this.destroyRef))

@@ -3,7 +3,7 @@ import { emptyDirSync, existsSync, mkdirSync, readdirSync, renameSync } from 'fs
 import { request } from 'https';
 import { arch, platform } from 'os';
 import { join } from 'path';
-import { IpcChannel, UpdateState } from '../../../shared-models';
+import { IpcChannel, UpdateState } from '../../../shared';
 import { IConfigService } from '../config/config-service.model';
 import { IFileService } from '../file/file-service.model';
 import { INativeApiService } from '../native/native-api.model';
@@ -36,18 +36,21 @@ export class UpdateService implements IUpdateService {
   ) {
     this.updateDirectory = join(app.getPath('appData'), this._configService.appConfig.name.toLowerCase(), 'update');
 
-    ipcMain.on(IpcChannel.GetUpdateState, (event: IpcMainEvent) => {
+    ipcMain.on(IpcChannel.GetUpdateState, async (event: IpcMainEvent) => {
       if (!this.updateState) {
         return;
       }
 
+      await this.sleep(1000);
       this._windowService.getWindowByWebContentsId(event.sender.id)
         .browserWindow.webContents
         .send(IpcChannel.UpdateState, this.updateState, this._updateInformation?.version);
     });
 
     ipcMain.on(IpcChannel.CheckUpdate, (event: IpcMainEvent) => {
-      this.checkForUpdates();
+      this.checkForUpdates().catch(err => {
+        this.setUpdateState(UpdateState.ConnectionFailed);
+      });
     });
 
     ipcMain.once(IpcChannel.UpdateAndRelaunch, () => {
@@ -100,7 +103,7 @@ export class UpdateService implements IUpdateService {
             this.setUpdateState(UpdateState.Available);
     
             if (!this.isAnyValidUpdateFile()) {
-              // this.getUpdate();
+              this.getUpdate();
             }
           } else {
             this.setUpdateState(UpdateState.NotAvailable);
@@ -156,10 +159,16 @@ export class UpdateService implements IUpdateService {
 
     const onFinish = () => {
       renameSync(this._updateDestinationPath, this.getExecutablePath(this._updateDestinationPath));
-      this.isAnyValidUpdateFile();
+      setTimeout(() => {
+        this.isAnyValidUpdateFile();
+      });
     };
 
-    return this._fileService.download(this._updateInformation.url, this._updateDestinationPath, onError, onFinish);
+    const onDownload = (progress: string) => {
+      this._windowService.windows.forEach(w => w.browserWindow.webContents.send(IpcChannel.UpdateProgress, progress));
+    };
+
+    return this._fileService.download(this._updateInformation.url, this._updateDestinationPath, onError, onFinish, onDownload);
   }
 
   private cleanup() {
@@ -195,5 +204,9 @@ export class UpdateService implements IUpdateService {
     this._windowService.windows.forEach(window => {
       window.browserWindow.webContents.send(IpcChannel.UpdateState, this.updateState, this._updateInformation?.version);
     });
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(() => resolve(), ms));
   }
 }

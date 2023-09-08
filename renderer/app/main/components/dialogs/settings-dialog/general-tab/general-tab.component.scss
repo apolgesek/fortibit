@@ -45,9 +45,9 @@
 
   .restore-btn {
     display: flex;
-    margin-left: 0.25rem;
     align-items: center;
     margin-top: 0.5rem;
+    margin-left: 0.25rem;
 
     i-feather {
       margin-right: 0.5rem;
@@ -83,6 +83,7 @@
   input {
     padding: 0.25rem;
     background-color: var(--input-modal-bg);
+    height: 1rem;
   }
 }
 

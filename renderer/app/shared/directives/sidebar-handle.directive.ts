@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { AfterViewInit, Directive, ElementRef, HostBinding, Inject, Input, NgZone, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { ComponentGridService } from '@app/core/services';
+import { take } from 'rxjs';
 
 @Directive({
   selector: '[appSidebarHandle]',
@@ -9,7 +10,7 @@ import { ComponentGridService } from '@app/core/services';
 export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') public readonly class = 'handle';
   @Input() public readonly position: 'left' | 'right' = 'left';
-  @Input() public readonly minWidth = 240;
+  @Input() public readonly minWidth = 200;
   public isDragged = false;
 
   private unlisteners: (() => void)[] = [];
@@ -34,6 +35,10 @@ export class SidebarHandleDirective implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngOnInit() {
+    this.componentGridService.sidebarsRegistered$.pipe(take(1)).subscribe(() => {
+      this.onWindowResize();
+    });
+
     this.componentGridService.registerResizableSidebar(this);
   }
 

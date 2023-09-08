@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
-import { IpcChannel } from '@shared-renderer/index';
+import { IpcChannel } from '../../../../shared/index';
 import { MessageBroker } from 'injection-tokens';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -33,8 +33,6 @@ export class WorkspaceGuard implements CanActivate {
               return true;
             }
           }
-
-          this.workspaceService.isLocked = false;
 
           return true;
         }));

@@ -9,7 +9,7 @@ import { ConfigService } from '@app/core/services/config.service';
 import { AutofocusDirective } from '@app/shared/directives/autofocus.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { UiUtil } from '@app/utils';
-import { IpcChannel } from '@shared-renderer/index';
+import { IpcChannel } from '../../../../../shared/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { from } from 'rxjs';

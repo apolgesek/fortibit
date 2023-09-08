@@ -82,6 +82,15 @@
   --expandable-bg: #{$grey-100};
   --expandable-bg--hover: #{darken($grey-100, 5)};
 
+  // DRAG IMAGE
+  --drag-image-bg: #{$grey-200};
+  --drag-image-back-bg: #{darken($grey-200, 5)};
+  --drag-image-element-bg: #{$white};
+
+  // PASSWORD METER
+  --password-meter-bg: #{$grey-300};
+  --password-meter-border-color: #{darken($grey-300, 5)};
+
   // MISC
   --link-text: #{$blue-300};
   --label-text: #{#47639e};

@@ -17,6 +17,7 @@ export interface IProduct {
   displayIcons: boolean;
   autoTypeEnabled: boolean;
   autocompleteShortcut: string;
+  autocompleteUsernameOnlyShortcut: string;
   autocompletePasswordOnlyShortcut: string;
   biometricsAuthenticationEnabled: boolean;
   theme: 'dark' | 'light';

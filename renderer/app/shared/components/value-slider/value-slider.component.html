@@ -1,0 +1,19 @@
+<div style="display: flex; align-items: center; user-select: none;">
+  <div style="width: 50px;">{{ value }}</div>
+  <div #sliderBar class="slider-bar">
+    <div
+      #sliderFill
+      class="slider-fill">
+    </div>
+    <div
+      #sliderHandle
+      tabindex="0"
+      class="slider-handle"
+      role="slider"
+      [attr.aria-valuenow]="value"
+      [attr.aria-valuemin]="minValue"
+      [attr.aria-valuemax]="maxValue"
+      [attr.aria-labelledby]="labelId">
+    </div>
+  </div>
+</div>

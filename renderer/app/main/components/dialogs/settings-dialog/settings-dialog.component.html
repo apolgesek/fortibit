@@ -13,7 +13,7 @@
   <div class="dialog-message">
     <app-tabset>
       <app-tab header="General" #generalTab>
-        <app-password-change-tab *ngIf="generalTab.active"></app-password-change-tab>
+        <app-general-tab *ngIf="generalTab.active"></app-general-tab>
       </app-tab>
       <app-tab header="Encryption" #encryptionTab>
         <app-encryption-tab *ngIf="encryptionTab.active"></app-encryption-tab>

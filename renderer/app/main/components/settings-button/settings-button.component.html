@@ -17,8 +17,8 @@
       *appDropdownMenu
       class="dropdown-content right"
       @slideDown>
-      <li *ngIf="updateAvailable" appMenuItem (activate)="updateAndRelaunch()" class="update-btn">
-        Update and restart <span class="version">{{ updateAvailable }}</span>
+      <li *ngIf="updateAvailable" appMenuItem (activate)="openAboutWindow()" class="update-btn">
+        Update is available <span class="version">{{ updateAvailable }}</span>
       </li>
       <li appMenuItem (activate)="openSettings()">{{ settingsLabel }}</li>
     </ul>

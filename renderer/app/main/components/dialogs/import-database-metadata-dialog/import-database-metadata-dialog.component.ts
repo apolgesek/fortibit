@@ -1,7 +1,7 @@
 import { Component, ComponentRef, Inject } from '@angular/core';
 import { IMessageBroker } from '@app/core/models';
 import { NotificationService } from '@app/core/services/notification.service';
-import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { IPasswordEntry, IpcChannel } from '../../../../../../shared/index';
 import { WorkspaceService, ModalRef } from '@app/core/services';
 import { MessageBroker } from 'injection-tokens';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -47,6 +47,7 @@ export class ImportDatabaseMetadataDialogComponent implements IModal {
       this.notificationService.add({ type: 'success', message: 'Passwords imported', alive: 10 * 1000 });
       this.close();
     } catch (err) {
+      this.notificationService.add({ type: 'error', message: err, alive: 8000 });
       this.isConfirmButtonLocked = false;
     }
   }

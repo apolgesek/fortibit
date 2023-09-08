@@ -1,7 +1,7 @@
 import { app, ipcMain, IpcMainEvent } from "electron";
 import { existsSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
-import { IPasswordEntry, IpcChannel } from "../../../shared-models";
+import { IPasswordEntry, IpcChannel } from "../../../shared";
 import { IConfigService } from "../config";
 import { IFileService } from "../file";
 import { IWindowService } from "../window";

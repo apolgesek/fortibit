@@ -1,4 +1,4 @@
-import { IPasswordEntry } from '@shared-renderer/index';
+import { IPasswordEntry } from '../../../../shared/index';
 import { DbManager } from '../database/db-manager';
 import { GroupId } from '../enums';
 import { IEntryRepository, EntryPredicateFn } from './index';

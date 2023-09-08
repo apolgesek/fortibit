@@ -13,7 +13,7 @@ import { FocusableListItemDirective } from '@app/shared/directives/focusable-lis
 import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
 import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
-import { IPasswordEntry } from '@shared-renderer/index';
+import { IPasswordEntry } from '../../../../../shared/index';
 import { FeatherModule } from 'angular-feather';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
 
@@ -112,16 +112,17 @@ export class GroupsSidebarComponent implements OnInit {
     this.entryManager.reloadEntries();
 
     await this.groupManager.selectGroup(id);
+    await this.entryManager.selectEntry(null);
 
     return id;
   }
 
-  getContextMenu(id: number): MenuItem[] | undefined {
+  getContextMenu(id: number): MenuItem[] {
     switch (id) {
     case GroupId.Root:
     case GroupId.Starred:
     case GroupId.AllItems:
-      return;
+      return [];
     case GroupId.RecycleBin:
       return this.groupContextMenuBin;
     default:
@@ -131,5 +132,9 @@ export class GroupsSidebarComponent implements OnInit {
 
   addGroup() {
     this.modalService.openGroupWindow();
+  }
+
+  editGroup() {
+    this.modalService.openGroupWindow('edit');
   }
 }

@@ -1,7 +1,7 @@
 <app-modal>
   <div
     class="dialog-header">
-    <h2>{{ header }} <small>in {{ entryGroupName }}</small></h2>
+    <h2>{{ header }} <small *ngIf="!isReadOnly">in {{ entryGroupName }}</small></h2>
     <a
       href="#"
       role="button"
@@ -45,12 +45,12 @@
       </div>
       <div formGroupName="passwords" class="form-group">
         <div
-          class="inputgroup required"
+          class="inputgroup required pw"
           [ngClass]="{'readonly': isReadOnly}">
           <span class="inputgroup-addon"><i-feather name="key"></i-feather></span>
           <input
             #passwordInput
-            type="password"
+            [type]="passwordVisible ? 'text' : 'password'"
             [attr.aria-invalid]="isControlInvalid(passwordsGroup.get('password'))"
             aria-describedby="password-invalid"
             [readonly]="isReadOnly"
@@ -59,21 +59,34 @@
             formControlName="password"
             placeholder="Password (required)"
             (input)="onPasswordChange($event)">
-            <div *ngIf="!isReadOnly; else readonly" class="password-strength">
-              <div
-                [ngClass]="{'active': passwordLength > 0}"
-                [class]="passwordScore >= 0 ? 'text s-' + passwordScore : 'text'">
-                {{ textDescription }}
+            <div *ngIf="!isReadOnly; else readonly" class="password-tools">
+              <div class="actions">
+                <i-feather
+                  appTooltip="Show password"
+                  aria-label="Show password"
+                  container="body"
+                  (click)="togglePasswordVisibility()"
+                  [name]="passwordVisible ? 'eye-off' : 'eye'"
+                  [ngClass]="{ active: passwordVisible }">
+                </i-feather>
+                <i-feather
+                  appTooltip="Generate password"
+                  aria-label="Generate password"
+                  container="body"
+                  (click)="regeneratePassword()"
+                  name="refresh-cw">
+                </i-feather>
               </div>
             </div>
             <ng-template #readonly>
               <a href="#" (click)="copyPassword(); false" class="copy-password">Copy</a>
             </ng-template>
         </div>
+        <app-password-strength-meter [score]="passwordScore"></app-password-strength-meter>
         <div
           *ngIf="isControlInvalid(passwordsGroup.get('password'))"
           id="password-invalid"
-          class="validation-error">
+          class="validation-error pw-validation">
           Password is required
         </div>
         <div
@@ -84,7 +97,7 @@
             [readonly]="isReadOnly"
             [attr.aria-invalid]="isControlInvalid(passwordsGroup)"
             aria-describedby="password-repeat-invalid"
-            type="password"
+            [type]="passwordVisible ? 'text' : 'password'"
             id="entry-password-r"
             formControlName="repeatPassword"
             placeholder="Repeat password (required)">

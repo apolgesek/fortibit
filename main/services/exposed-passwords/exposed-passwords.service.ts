@@ -1,17 +1,16 @@
 import { request } from "https";
+import { join } from "path";
 
 export class ExposedPasswordsService {
-  private readonly _apiUrl: string;
+  private _apiUrl: string;
 
-  constructor() {
-    const productPath = '../../../product.json';
-    const product = require(productPath);
-
-    this._apiUrl = product.leakedPasswordsUrl;
-  }
-
-  public async findLeaks(entries: { id: any, hash: string }[]): Promise<{ id: any, occurrences: number }[]> {
+  public async findLeaks(entries: { id: any, hash: string }[], basedir: string): Promise<{ id: any, occurrences: number }[]> {
     try {
+      if (!this._apiUrl) {
+        const product = require(join(basedir, 'product.json'));
+        this._apiUrl = product.leakedPasswordsUrl;
+      }
+
       const result = await Promise.all(entries.map((e) => this.find(e)));
       return Promise.resolve(result.flat());
     } catch (err) {

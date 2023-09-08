@@ -9,48 +9,50 @@ interface IEntryModel {
   username: string
 }
 
+let app: ElectronApplication;
+let firstWindow: Page;
+
+async function addEntry(model?: IEntryModel) {
+  await firstWindow.click('#add-entry', { force: true });
+
+  const title = firstWindow.locator('#entry-title');
+  const username = firstWindow.locator('#entry-username');
+  const submitBtn = firstWindow.locator('#entry-submit');
+
+  await title.type(model?.title ?? 'Title');
+  await username.type(model?.username ?? 'Username');
+  await submitBtn.click();
+}
+
+async function addGroup() {
+  await firstWindow.locator('.separator').hover();
+  await firstWindow.locator('.add-group').waitFor({ state: 'visible' });
+  await firstWindow.locator('.add-group').click();
+  await firstWindow.locator('#group-name').waitFor({ state: 'attached' });
+  await firstWindow.locator('#group-name').focus();
+  await firstWindow.keyboard.insertText('newgroup');
+  await firstWindow.locator('.primary-btn').click();
+  await firstWindow.locator('app-group-dialog').waitFor({ state: 'detached' });
+}
+
+test.beforeEach(async () => {
+  app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`], colorScheme: 'dark' });
+  firstWindow = await app.firstWindow();
+  
+  await firstWindow.waitForLoadState('domcontentloaded');
+  await firstWindow.locator('.inputgroup.password input').focus();
+  await firstWindow.keyboard.insertText('test123');
+  await firstWindow.keyboard.press('Enter');
+});
+
+test.afterEach(async () => {
+  await app.evaluate(process => process.app.exit());
+});
+
 test.describe('Entry/group', async () => {
-  let app: ElectronApplication;
-  let firstWindow: Page;
-
-  async function addEntry(model?: IEntryModel) {
-    await firstWindow.click('#add-entry', { force: true });
-  
-    const title = await firstWindow.locator('#entry-title');
-    const username = await firstWindow.locator('#entry-username');
-    const submitBtn = await firstWindow.locator('#entry-submit');
-  
-    await title.type(model?.title ?? 'Title');
-    await username.type(model?.username ?? 'Username');
-    await submitBtn.click();
-  }
-  
-  async function addGroup() {
-    const general = await firstWindow.locator('.node-group:has-text("Database")');
-    await general.click({ button: 'right' });
-    const addGroup = await firstWindow.locator('.context-menu li:first-child');
-    await addGroup.click();
-    await firstWindow.locator('.rename-group').waitFor({ state: 'attached' });
-    await firstWindow.keyboard.press('Enter');
-  }
-
-  test.beforeEach(async () => {
-    app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`] });
-    firstWindow = await app.firstWindow();
-    
-    await firstWindow.waitForLoadState('domcontentloaded');
-
-    const createNew = await firstWindow.locator('.create-new');
-    await createNew.click();
-  });
-
-  test.afterEach(async () => {
-    await app.close();
-  });
-
   test('Launch electron app', async () => {
     const windowState: { isVisible: boolean; isDevToolsOpened: boolean; isCrashed: boolean } = await app.evaluate(async (process) => {
-      const mainWindow = process.BrowserWindow.getAllWindows()[0];
+      const mainWindow = process.BrowserWindow.getAllWindows()[1];
 
       const getState = () => ({
         isVisible: mainWindow.isVisible(),
@@ -81,7 +83,7 @@ test.describe('Entry/group', async () => {
   });
 
   test('Check entry modal opened', async () => {
-    const addEntryBtn = await firstWindow.locator('#add-entry');
+    const addEntryBtn = firstWindow.locator('#add-entry');
     await addEntryBtn.click();
     const modal = await firstWindow.waitForSelector('.modal-body', { state: 'attached' });
   
@@ -101,12 +103,12 @@ test.describe('Entry/group', async () => {
     await addEntry();
     await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
 
-    const newEntry = await firstWindow.locator('.row-entry');
+    const newEntry = firstWindow.locator('.row-entry');
 
     await newEntry.click();
     await firstWindow.keyboard.press('E');
 
-    const modal = await firstWindow.locator('.modal-body');
+    const modal = firstWindow.locator('.modal-body');
     await modal.waitFor({ state: 'visible' });
 
     expect(await firstWindow.locator('#entry-title').inputValue()).toBe('Title');
@@ -114,24 +116,25 @@ test.describe('Entry/group', async () => {
   });
 
   test('Check entry modal closed', async () => {
-    let modal = await firstWindow.locator('.modal-body');
+    await firstWindow.click('#add-entry', { force: true });
+    await firstWindow.locator('app-modal').waitFor({ state: 'attached' });
+
     await firstWindow.keyboard.press('Escape');
+    let modal = firstWindow.locator('.modal-body');
+    await modal.waitFor({ state: 'detached' });
 
-    await modal.waitFor({ state: 'detached'  });
-
-    expect(true).toBeTruthy();
+    expect(modal).toBeAttached({ attached: false });
   });
 
   test('Check entry removed', async () => {
     await addEntry();
-    const newEntry = await firstWindow.locator('.row-entry');
-
+    const newEntry = firstWindow.locator('.row-entry');
     await newEntry.click();
 
     await firstWindow.keyboard.press('Delete');
 
-    const modal = await firstWindow.locator('.modal-body');
-    const removeBtn = await firstWindow.locator('#entry-remove');
+    const modal = firstWindow.locator('.modal-body');
+    const removeBtn = firstWindow.locator('#entry-remove');
   
     await removeBtn.click();
     await modal.waitFor({ state: 'detached' });
@@ -147,7 +150,7 @@ test.describe('Entry/group', async () => {
     await addEntry();
     await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
 
-    const entries = await firstWindow.locator('.row-entry');
+    const entries = firstWindow.locator('.row-entry');
     const firstEntry = await entries.nth(0);
     const secondEntry = await entries.nth(1);
 
@@ -156,9 +159,8 @@ test.describe('Entry/group', async () => {
 
     await firstWindow.keyboard.press('Delete');
 
-    const modal = await firstWindow.locator('app-modal');
-
-    const removeBtn = await firstWindow.locator('#entry-remove');
+    const modal = firstWindow.locator('app-modal');
+    const removeBtn = firstWindow.locator('#entry-remove');
     await removeBtn.click();
 
     await modal.waitFor({ state: 'detached' });
@@ -171,9 +173,9 @@ test.describe('Entry/group', async () => {
     await addEntry();
     await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
 
-    await firstWindow.dragAndDrop('.row-entry', '#group-3');
+    await firstWindow.dragAndDrop('.row-entry', '.group-item:nth-child(6)');
 
-    await firstWindow.locator('#group-3').click();
+    await firstWindow.locator('.group-item:nth-child(6)').click();
     await firstWindow.locator('.row-entry').waitFor({ state: 'visible' });
     const entriesCount = await firstWindow.locator('.row-entry').count();
 
@@ -181,12 +183,13 @@ test.describe('Entry/group', async () => {
   });
 
   test('Check entries moved', async () => {
+    await firstWindow.click('.group-item:nth-child(5)');
     await addEntry();
     await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
     await addEntry();
     await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
 
-    const rowEntries = await firstWindow.locator('.row-entry');
+    const rowEntries = firstWindow.locator('.row-entry');
     await rowEntries.nth(0).click();
 
     const boundingBoxSource = await rowEntries.nth(1).boundingBox();
@@ -197,8 +200,7 @@ test.describe('Entry/group', async () => {
     await firstWindow.mouse.up();
     await firstWindow.keyboard.up('Control');
 
-    await firstWindow.dragAndDrop('.row-entry', '#group-3');
-
+    await firstWindow.dragAndDrop('.row-entry', '.group-item:nth-child(6)');
     const entriesCount = await firstWindow.locator('.row-entry').count();
 
     expect(entriesCount).toBe(0);
@@ -208,9 +210,9 @@ test.describe('Entry/group', async () => {
     await addEntry();
     await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
 
-    const entryPassword = await firstWindow.locator('.row-entry .column:last-child');
+    const entryPassword = firstWindow.locator('.row-entry .column:last-child');
     await entryPassword.dblclick();
-    const notification = await firstWindow.locator('app-notification');
+    const notification = firstWindow.locator('app-notification');
 
     expect(notification).toBeTruthy();
     expect(await notification.innerText()).toMatch('Password copied');
@@ -218,82 +220,48 @@ test.describe('Entry/group', async () => {
 
   test('Check group added', async () => {
     await firstWindow.waitForSelector('app-groups-sidebar', { state: 'visible' });
-    const groupCountBefore = await firstWindow.locator('.node-group').count();
+    const groupCountBefore = await firstWindow.locator('.group-item').count();
     await addGroup();    
-    const groupCountAfter = await firstWindow.locator('.node-group').count();
+    const groupCountAfter = await firstWindow.locator('.group-item').count();
 
     expect(groupCountAfter).toEqual(groupCountBefore + 1);
   });
 
   test('Check group name changed', async () => {
-    const emailGroup = await firstWindow.locator('.node-group:has-text("Email")');
+    const emailGroup = firstWindow.locator('.group-item:has-text("Banking")');
     await emailGroup.click({ button: 'right' });
-    const renameOption = await firstWindow.locator('.context-menu li:has-text("Rename")');
+    const renameOption = firstWindow.locator('.context-menu li:has-text("Rename")');
     await renameOption.click();
-    const input = await firstWindow.locator('.rename-group input');
+    await firstWindow.locator('#group-name').focus();
+    await firstWindow.keyboard.insertText('example');
+    await firstWindow.locator('.primary-btn').click();
+    await firstWindow.locator('app-group-dialog').waitFor({ state: 'detached' });
+    const changedNameGroup = firstWindow.locator('.group-item:has-text("example")');
 
-    expect(input).toBeDefined();
-
-    await firstWindow.keyboard.press('Enter');
-  });
-
-  test('Check group moved', async () => {
-    await firstWindow.waitForSelector('#group-3', { state: 'visible' });
-    await firstWindow.waitForSelector('#group-4', { state: 'visible' });
-
-    await firstWindow.dragAndDrop('#group-3', '#group-4', { timeout: 0 });
-    const expander = await firstWindow.locator('.tree-node-level-2 .toggle-children-wrapper-collapsed');
-    await expander.click();
-
-    const workGroup = await firstWindow.locator('#group-3');
-    const level = await workGroup.getAttribute('aria-level');
-    expect(level).toBe("3");
+    expect(changedNameGroup).toBeDefined();
   });
 
   test('Check group deleted', async() => {
     await firstWindow.waitForSelector('app-groups-sidebar', { state: 'visible' });
-    const groupCountBefore = await firstWindow.locator('.node-group').count();
+    const groupCountBefore = await firstWindow.locator('.group-item').count();
 
-    const group = await firstWindow.locator('.node-group:has-text("Banking")');
+    const group = firstWindow.locator('.group-item:has-text("Banking")');
     await group.click({ button: 'right' });
-    const deleteOption = await firstWindow.locator('.context-menu li:last-child');
+    const deleteOption = firstWindow.locator('.context-menu li:has-text("Delete")');
     await deleteOption.click();
-    const modal = await firstWindow.locator('.modal-body');
-    const confirmDelete = await modal.locator('.primary-btn');
+    const modal = firstWindow.locator('.modal-body');
+    const confirmDelete = modal.locator('.primary-btn');
     await confirmDelete.click();
 
     await modal.waitFor({ state: 'detached' });
-    const groupCountAfter = await firstWindow.locator('.node-group').count();
+    const groupCountAfter = await firstWindow.locator('.group-item').count();
 
     expect(groupCountAfter).toEqual(groupCountBefore - 1);
   });
 
-  test('Check grouped cannot be moved', async () => {
-    const trashSelector = `#group-${Number.MIN_SAFE_INTEGER}`
-    const starredSelector = `#group-${Number.MIN_SAFE_INTEGER + 1}`;
-
-    await firstWindow.waitForSelector(trashSelector, { state: 'visible' });
-    await firstWindow.waitForSelector(starredSelector, { state: 'visible' });
-
-    await firstWindow.dragAndDrop(trashSelector, '#group-2', { timeout: 0 });
-    await firstWindow.dragAndDrop(starredSelector, '#group-2', { timeout: 0 });
-
-    const trashGroup = firstWindow.locator(trashSelector);
-    const starredGroup = firstWindow.locator(starredSelector);
-
-    const trashGroupLevel = await trashGroup.getAttribute('aria-level');
-    const starredGroupLevel = await starredGroup.getAttribute('aria-level');
-
-    expect(trashGroupLevel).toBe("1");
-    expect(starredGroupLevel).toBe("1");
-  });
-
   test('Check add entry button disabled/hidden when built-in group active', async () => {
-    const trashSelector = `#group-${Number.MIN_SAFE_INTEGER}`
-    const starredSelector = `#group-${Number.MIN_SAFE_INTEGER + 1}`;
-
-    const trashGroup = firstWindow.locator(trashSelector);
-    const starredGroup = firstWindow.locator(starredSelector);
+    const trashGroup = firstWindow.locator('.group-item:nth-child(3)');
+    const starredGroup = firstWindow.locator('.group-item:nth-child(2)');
 
     await trashGroup.click();
     let addNewButton = firstWindow.locator('#add-entry-list');
@@ -318,36 +286,32 @@ test.describe('Entry/group', async () => {
     await addEntry({ title: 'Aaaa', username: 'Bbbb' });
     await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
 
-    const searchInput = await firstWindow.locator('.search');
+    await firstWindow.locator('.search').focus();
     const searchPhrase = 'User';
 
-    await searchInput.type(searchPhrase);
+    await firstWindow.keyboard.insertText(searchPhrase);
     const resultsBadge = await firstWindow.waitForSelector('.results-badge');
     const resultsBadgeText = await resultsBadge.innerText();
-    const row = await firstWindow.locator('.row-entry');
+    const row = firstWindow.locator('.row-entry .username');
     const rowHTML = await row.innerHTML();
 
     expect(resultsBadge).toBeDefined();
     expect(resultsBadgeText).toMatch('1');
-    expect(rowHTML).toMatch(`<strong>${searchPhrase}</strong>`);
+    expect(rowHTML).toMatch(`<span class="emp">${searchPhrase}</span>`);
   });
 
   test('Check entry global search', async () => {
     await addEntry();
     await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
 
-    const group = await firstWindow.locator('.node-group:has-text("Email")');
+    const group = firstWindow.locator('.group-item:has-text("Email")');
     await group.click();
 
     await addEntry();
 
-    const groupToggle = await firstWindow.locator('.group-mode-btn');
-    await groupToggle.click();
-    const globalBtn = await firstWindow.locator('.dropdown-content a');
-    await globalBtn.click();
+    await firstWindow.locator('.global-search-icon').click();
 
-    const searchInput = await firstWindow.locator('.search');
-    await searchInput.type('User');
+    await firstWindow.locator('.search').type('User');
     const resultsBadge = await firstWindow.waitForSelector('.results-badge');
     const resultsBadgeText = await resultsBadge.innerText();
 
@@ -357,14 +321,129 @@ test.describe('Entry/group', async () => {
 
   test('Check entry details', async () => {
     await addEntry();
+    const group = await firstWindow.locator('h2 small').innerText();
+    const title = await firstWindow.locator('#entry-title').inputValue();
+
     await firstWindow.locator('.modal-body').waitFor({ state: 'detached' });
-    const row = await firstWindow.locator('.row-entry');
-    await row.click();
-    const details = await firstWindow.locator('.details-container');
+    await firstWindow.locator('.row-entry').click();
+    await firstWindow.locator('.entry-details').waitFor({ state: 'attached' });
+
+    const details = firstWindow.locator('.details-container');
     const header = await details.locator('.header').innerText();
     const sectionsCount = await details.locator('.section').count();
 
-    expect(header).toBe('Entry details');
+    expect(header).toBe(`${group.substring('in '.length)}\n${title}`);
     expect(sectionsCount).toBe(5);
   });
+
+  test('Check weak passwords found', async () => {
+    await addEntry();
+    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.getByText('Tools').click();
+    await firstWindow.getByText('Report').hover();
+    await firstWindow.getByText('Weak passwords').click();
+    await firstWindow.locator('app-modal').waitFor({ state: 'attached' });
+    await firstWindow.getByRole('button', { name: 'Scan' }).click();
+    const lastScanDetails = firstWindow.getByText('Last scan');
+    await lastScanDetails.waitFor({ state: 'attached' });
+
+    expect(lastScanDetails).toBeAttached();
+  });
+
+  test('Check entry context menu displayed', async () => {
+    await addEntry();
+    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+    await firstWindow.locator('.row-entry').click({ button: 'right' });
+    const contextMenu = firstWindow.locator('.context-menu');
+    await contextMenu.waitFor({ state: 'attached' });
+    const menuItemsCount = await contextMenu.locator('li').count();
+    
+    expect(contextMenu).toBeVisible();
+    expect(menuItemsCount).toBe(5);
+  });
+
+  test('Check group context menu displayed', async () => {
+    await firstWindow.locator('.group-item:nth-child(6)').click({ button: 'right' });
+    const contextMenu = firstWindow.locator('.context-menu');
+    await contextMenu.waitFor({ state: 'attached' });
+    const menuItemsCount = await contextMenu.locator('li').count();
+    
+    expect(contextMenu).toBeVisible();
+    expect(menuItemsCount).toBe(2);
+  });
 });
+
+test.describe('Entry/history', async () => {
+  async function addHistoryEntry() {
+    const newEntry = firstWindow.locator('.row-entry');
+
+    await newEntry.click();
+    await firstWindow.keyboard.press('E');
+
+    const modal = firstWindow.locator('app-modal');
+    await modal.waitFor({ state: 'attached' });
+
+    const entryTitleInput = firstWindow.locator('#entry-title');
+    await entryTitleInput.focus();
+    await entryTitleInput.type('Aaaaa');
+
+    const submitBtn = firstWindow.locator('#entry-submit');
+    submitBtn.click();
+
+    await modal.waitFor({ state: 'detached' });
+    await firstWindow.locator('#open-history-btn').click();
+    await firstWindow.locator('app-modal').waitFor({ state: 'attached' });
+  }
+
+  test('Check history entry added', async () => {
+    await addEntry();
+    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+
+    await addHistoryEntry();
+    const historyEntry = firstWindow.locator('.history-entry');
+    const entriesCount = await historyEntry.count();
+    const historyCell = historyEntry.locator('.cell');
+    const index = await historyCell.nth(0).innerText();
+    const title = await historyCell.nth(1).innerText();
+    const username = await historyCell.nth(2).innerText();
+
+    expect(entriesCount).toBe(1);
+    expect(index).toBe('#1');
+    expect(title).toBe('Title');
+    expect(username).toBe('Username');
+  });
+
+  test('Check history entry restored', async () => {
+    await addEntry();
+    const modal = await firstWindow.locator('app-modal');
+    await modal.nth(0).waitFor({ state: 'detached' });
+
+    await addHistoryEntry();
+    await firstWindow.locator('.history-entry a').click();
+    await modal.nth(1).waitFor({ state: 'attached' });
+    await modal.nth(1).locator('.restore').click();
+    await modal.nth(1).waitFor({ state: 'detached' });
+    await firstWindow.keyboard.press('Escape');
+    await modal.nth(0).waitFor({ state: 'detached' });
+    await firstWindow.keyboard.press('E');
+    const entryTitle = await modal.nth(0).locator('#entry-title').inputValue();
+
+    expect(entryTitle).toBe('Title');
+  });
+
+  test('Check history entry removed', async () => {
+    await addEntry();
+    const modal = await firstWindow.locator('app-modal');
+    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
+
+    await addHistoryEntry();
+    await firstWindow.locator('.history-entry a').click();
+    await modal.nth(1).waitFor({ state: 'attached' });
+    await modal.nth(1).locator('.delete').click();
+    await modal.nth(1).waitFor({ state: 'detached' });
+    const text = await modal.nth(0).innerText();
+    
+    expect(text).toContain('History is empty.');
+  });
+});
+

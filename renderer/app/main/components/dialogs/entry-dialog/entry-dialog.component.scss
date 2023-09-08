@@ -1,9 +1,17 @@
 @import 'themes/light/variables';;
 @import 'mixins';
 
+$password-padding-right: 50px;
+
 .inputgroup {
+  &.pw {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
   .password {
-    padding-right: 100px;
+    padding-right: $password-padding-right;
   }
 }
 
@@ -15,26 +23,43 @@
   margin-top: 1rem;
 }
 
-.password-strength {
+.password-tools {
   display: flex;
-  width: 100px;
+  width: $password-padding-right;
   text-align: center;
   height: 1rem;
   position: absolute;
   justify-content: flex-end;
   transition: color 50ms;
-  right: 0;
+  right: 0.5rem;
+
+  .actions {
+    column-gap: 0.5rem;
+    display: flex;
+    padding-left: 1rem;
+    border-left: 1px solid var(--border-color);
+  }
+
+  i-feather {
+    cursor: pointer;
+    color: var(--icon-secondary);
+
+    &:hover {
+			color: $blue-300;
+		}
+  }
 
   .text {
     @include font-medium;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
     width: 100%;
     height: 100%;
     font-size: 0.875rem;
     color: $white;
+    user-select: none;
+    padding-right: 0.5rem;
 
     &.active {
       &.s-0 {
@@ -79,4 +104,12 @@ a.copy-password {
 
 .restore {
   margin-right: 1rem;
+}
+
+.pw-validation {
+  margin-top: 0.5rem;
+}
+
+.active {
+  color: $blue-300 !important;
 }

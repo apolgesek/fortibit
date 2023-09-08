@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { IpcChannel } from '../../../shared-models';
+import { IpcChannel } from '../../../shared';
 import { IConfigService } from '../config';
 import { IClipboardService } from './clipboard-service.model';
 import { clipboard } from 'electron';

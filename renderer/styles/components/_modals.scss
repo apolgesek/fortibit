@@ -11,6 +11,7 @@
 		flex-direction: column;
 		background: var(--modal-bg);
 		min-width: 600px;
+		max-width: 80vw;
 		max-height: calc(100% - 10rem);
 		padding: 2rem;
 		position: absolute;

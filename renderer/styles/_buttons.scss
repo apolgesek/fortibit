@@ -158,6 +158,15 @@ button {
 	&:focus-visible:not(:hover) {
 		outline: 2px solid $barberry !important;
 	}
+
+	&:disabled {
+		pointer-events: none;
+		opacity: 0.7;
+
+		i-feather {
+			color: var(--action-btn-text--disabled) !important;
+		}
+	}
 }
 
 .dropdown-btn {

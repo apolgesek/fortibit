@@ -2,7 +2,7 @@ import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
 import { IMessageBroker } from '@app/core/models';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IpcChannel } from '../../../../../../shared/ipc-channel.enum';
 import { combineLatest, from, take, timer } from 'rxjs';
 import { EntryManager, ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
 import { MessageBroker } from 'injection-tokens';

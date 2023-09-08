@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { IpcChannel } from '@shared-renderer/index';
+import { IpcChannel } from '../../../../shared/index';
 import { MessageBroker } from 'injection-tokens';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { IAppConfig } from '../../../../app-config';

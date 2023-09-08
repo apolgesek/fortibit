@@ -4,6 +4,14 @@
   padding: 0;
 }
 
+.update-check {
+  display: flex;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  align-items: center;
+  user-select: none;
+}
+
 ul {
   list-style-type: none;
   padding-left: 0;

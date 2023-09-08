@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IReport } from '@shared-renderer/report.model';
+import { IReport } from '../../../../shared/report.model';
 import { DbManager } from '../database/db-manager';
 import { ReportType } from '../enums';
 import { IReportRepository, PredicateFn } from './report-repository.model';

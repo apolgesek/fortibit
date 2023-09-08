@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Inject, NgZone, OnInit } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, ElementRef, Inject, NgZone, OnInit, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DbManager } from '@app/core/database';
 import { IMessageBroker } from '@app/core/models';
@@ -11,11 +11,12 @@ import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
-import { ImportHandler, IpcChannel } from '@shared-renderer/index';
+import { ImportHandler, IpcChannel } from '../../../../../shared/index';
 import { FeatherModule } from 'angular-feather';
 import { exportDB } from 'dexie-export-import';
 import { AppConfig } from 'environments/environment';
 import { MessageBroker } from 'injection-tokens';
+import { Observable, fromEvent, merge } from 'rxjs';
 
 @Component({
   selector: 'app-menu-bar',
@@ -33,7 +34,10 @@ import { MessageBroker } from 'injection-tokens';
     FileNamePipe
   ]
 })
-export class MenuBarComponent implements OnInit {
+export class MenuBarComponent implements OnInit, AfterViewInit {
+  @ViewChild('topbar') public readonly topbar!: ElementRef;
+  @ViewChild('overlay') public readonly overlay!: ElementRef; 
+
   public readonly importHandler = ImportHandler;
   public recentFiles: string[];
 
@@ -68,6 +72,22 @@ export class MenuBarComponent implements OnInit {
     this.messageBroker.ipcRenderer.on(IpcChannel.GetRecentFiles, (_, files: string[]) => {
       this.zone.run(() => {
         this.recentFiles = files;
+      });
+    });
+  }
+
+  ngAfterViewInit() {
+    this.fixMenuSize();
+    this.zone.runOutsideAngular(() => {
+      const windowMove$ = new Observable<void>(subscriber => {
+        this.messageBroker.ipcRenderer.on(IpcChannel.RecalculateViewport, () => {
+          subscriber.next();
+        });
+      });
+
+      merge(fromEvent(window, 'resize'), windowMove$)
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        this.fixMenuSize();
       });
     });
   }
@@ -108,10 +128,14 @@ export class MenuBarComponent implements OnInit {
   }
 
   async import(handler: ImportHandler): Promise<void> {
-    const payload = await this.messageBroker.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, handler);
+    try {
+      const payload = await this.messageBroker.ipcRenderer.invoke(IpcChannel.GetImportedDatabaseMetadata, handler);
 
-    if (payload) {
-      this.modalService.openImportedDbMetadataWindow(payload);
+      if (payload) {
+        this.modalService.openImportedDbMetadataWindow(payload);
+      }
+    } catch (err) {
+      this.notificationService.add({ type: 'error', message: err, alive: 8000 });
     }
   }
 
@@ -156,8 +180,49 @@ export class MenuBarComponent implements OnInit {
     this.modalService.openMaintenanceWindow();
   }
 
+  openGeneratorWindow() {
+    this.modalService.openGeneratorWindow();
+  }
+
   exit() {
     this.messageBroker.ipcRenderer.send(IpcChannel.Close);
+  }
+
+  zoomIn() {
+    this.messageBroker.ipcRenderer.send(IpcChannel.ZoomIn);
+  }
+
+  zoomOut() {
+    this.messageBroker.ipcRenderer.send(IpcChannel.ZoomOut);
+  }
+
+  resetZoom() {
+    this.messageBroker.ipcRenderer.send(IpcChannel.ResetZoom);
+  }
+
+  fullscreen() {
+    this.messageBroker.ipcRenderer.send(IpcChannel.ToggleFullscreen);
+  }
+
+  private fixMenuSize() {
+    this.topbar.nativeElement.style.height = this.getViewportHeightUnit(2);
+    this.overlay.nativeElement.style.height = this.getViewportHeightUnit(2);
+
+    this.topbar.nativeElement.querySelectorAll('.menu-bar-item').forEach((e: HTMLElement) => {
+      e.style.fontSize = this.getViewportHeightUnit(0.875);
+      e.style.paddingLeft = this.getViewportHeightUnit(0.5);
+      e.style.paddingRight = this.getViewportHeightUnit(0.5);
+    });
+    
+    const logo: HTMLElement = this.topbar.nativeElement.querySelector('.brand-logo');
+    logo.style.height = this.getViewportHeightUnit(1);
+    logo.style.width = this.getViewportHeightUnit(1);
+    logo.style.marginLeft = this.getViewportHeightUnit(0.5);
+    logo.style.marginRight = this.getViewportHeightUnit(0.5);
+  }
+
+  private getViewportHeightUnit(rem: number): string {
+    return (rem * 16 / window.outerHeight) * 100 + 'vh';
   }
 
   private openUrl(path: string) {

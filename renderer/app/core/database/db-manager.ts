@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import { Injectable } from '@angular/core';
-import { IHistoryEntry, IPasswordEntry, IReport } from '@shared-renderer/index';
+import { IHistoryEntry, IPasswordEntry, IReport } from '../../../../shared/index';
 import Dexie from 'dexie';
 import { IPasswordGroup } from '../models';
 

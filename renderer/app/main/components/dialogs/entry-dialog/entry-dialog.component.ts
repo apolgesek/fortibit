@@ -6,8 +6,9 @@ import { GroupId } from '@app/core/enums';
 import { IMessageBroker } from '@app/core/models';
 import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
+import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
-import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { IHistoryEntry, IPasswordEntry, IpcChannel } from '../../../../../../shared/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { fromEvent } from 'rxjs';
@@ -17,6 +18,7 @@ import { IAppConfig } from '../../../../../../app-config';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { DateMaskDirective } from '../../../../shared/directives/date-mask.directive';
 import { valueMatchValidator } from '../../../../shared/validators/value-match.validator';
+import { PasswordStrengthMeterComponent } from '@app/shared/components/password-strength-meter/password-strength-meter.component';
 
 @Component({
   selector: 'app-entry-dialog',
@@ -29,6 +31,8 @@ import { valueMatchValidator } from '../../../../shared/validators/value-match.v
     FeatherModule,
     ModalComponent,
     DateMaskDirective,
+    TooltipDirective,
+    PasswordStrengthMeterComponent
   ],
 })
 export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDestroy {
@@ -41,6 +45,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   public saveLocked = false;
   public isVisible = true;
   public isReadOnly = false;
+  public passwordVisible = false;
 
   public readonly ref!: ComponentRef<EntryDialogComponent>;
   public readonly additionalData!: IAdditionalData;
@@ -83,27 +88,6 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   get passwordLength(): number {
     return this.newEntryForm.get('passwords.password')?.value?.length;
-  }
-
-  get textDescription(): string {
-    if (this.passwordLength === 0) {
-      return '';
-    }
-
-    switch (this.passwordScore) {
-    case 0:
-      return 'Very weak';
-    case 1:
-      return 'Weak';
-    case 2:
-      return 'Medium';
-    case 3:
-      return 'Strong';
-    case 4:
-      return 'Very strong';
-    default:
-      return '';
-    }
   }
 
   get passwordsGroup(): FormGroup {
@@ -195,7 +179,11 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   }
 
   copyPassword() {
-    this.clipboardService.copyToClipboard(this.entryManager.editedEntry, 'password');
+    this.clipboardService.copyEntryDetails(this.entryManager.editedEntry, 'password');
+  }
+
+  togglePasswordVisibility() {
+    this.passwordVisible = !this.passwordVisible;
   }
 
   async restore() {
@@ -288,6 +276,12 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     this.modalRef.close();
   }
 
+  async regeneratePassword(): Promise<void> {
+    await this.fillNewEntry();
+    this.passwordScore = zxcvbn(this.newEntryForm.get('passwords.password').value).score;
+    this.notificationService.add({ type: 'success', alive: 5000, message: 'Password regenerated' });
+  }
+
   private async prefillForm() {
     if (this.entryManager.editedEntry) {
       this.fillExistingEntry();
@@ -336,7 +330,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   private generatePassword(): Promise<string> {
     const settings = this.config.encryption;
 
-    return (window as any).api.invoke(IpcChannel.GeneratePassword, {
+    return this.messageBroker.ipcRenderer.invoke(IpcChannel.GeneratePassword, {
       length: settings.passwordLength,
       lowercase: settings.lowercase,
       uppercase: settings.uppercase,

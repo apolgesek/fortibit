@@ -1,4 +1,3 @@
-@import 'themes/light/variables';
 @import 'mixins';
 
 .text-right {
@@ -20,6 +19,9 @@
 
 .cell {
   flex: 1;
+  max-width: 25%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   padding: 0.5rem;
 
   &.index {

@@ -1,5 +1,6 @@
 <div
 	data-prevent-entry-deselect
+	#topbar
 	class="topbar">
 	<ul appMenu class="menu">
 		<div class="brand-logo"></div>
@@ -28,8 +29,10 @@
 						Import <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.KeePass)">KeePass (.xml)</li>
-						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.OnePassword)">1Password (.csv)</li>
+						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.KeePass)">KeePass &bull; XML</li>
+						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.OnePassword)">1Password &bull; CSV</li>
+						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.Bitwarden)">Bitwarden &bull; CSV</li>
+						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.Lastpass)">Lastpass &bull; CSV</li>
 					</div>
 				</div>
 				<div appDropdown class="dropdown" style="width: 100%;">
@@ -49,9 +52,23 @@
 		</ul>
 		<ul appDropdown class="dropdown">
 			<li appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
+				View
+			</li>
+			<div *appDropdownMenu class="dropdown-content left">
+				<li appMenuItem (activate)="zoomIn()">Zoom in</li>
+				<li appMenuItem (activate)="zoomOut()">Zoom out</li>
+				<li appMenuItem (activate)="resetZoom()">Reset zoom</li>
+				<div class="divider"><hr /></div>
+				<li appMenuItem (activate)="fullscreen()">Fullscreen mode</li>
+			</div>
+		</ul>
+		<ul appDropdown class="dropdown">
+			<li appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
 				Tools
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
+				<li appMenuItem (activate)="openGeneratorWindow()">Generator</li>
+				<div class="divider"><hr /></div>
 				<div appDropdown class="dropdown" style="width: 100%;">
 					<li appDropdownToggle trigger="hover" appMenuItem class="submenu-open" [disabled]="isLocked">
 						Report <i-feather name="chevron-right"></i-feather>
@@ -65,7 +82,7 @@
 						</li>
 					</div>
 				</div>
-				<li appMenuItem (activate)="openMaintenanceWindow()">Maintenance</li>
+				<li appMenuItem (activate)="openMaintenanceWindow()" [disabled]="isLocked">Maintenance</li>
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
@@ -83,4 +100,4 @@
 	</ul>
 </div>
 
-<div class="overlay"></div>
+<div #overlay class="overlay"></div>

@@ -28,10 +28,12 @@ export class DeleteGroupDialogComponent implements IModal {
   async removeGroup() {
     await this.groupManager.removeGroup();
     await this.entryManager.setByGroup(GroupId.AllItems);
-
     this.searchService.reset();
     this.entryManager.updateEntriesSource();
     this.entryManager.reloadEntries();
+
+    this.modalRef.onActionResult.next(true);
+    this.modalRef.onActionResult.complete();
 
     this.close();
   }

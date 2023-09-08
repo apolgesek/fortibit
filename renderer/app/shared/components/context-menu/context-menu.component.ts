@@ -39,10 +39,14 @@ export class ContextMenuComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    this.selected = [this.model[0]];
+    this.selected = [this.model?.[0] ?? null];
   }
 
   ngAfterViewInit() {
+    if (this.model?.length === 0) {
+      return;
+    }
+    
     this.positionElement(this.element.nativeElement);
     this.element.nativeElement.style.visibility = 'visible';
     this.items.first.elRef.nativeElement.focus();

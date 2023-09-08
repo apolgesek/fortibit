@@ -24,7 +24,8 @@ export class EncryptionEventWrapper implements IEncryptionEventWrapper {
       silent: !this._isDevMode,
       env: {
         ELECTRON_RUN_AS_NODE: '1',
-        ENCRYPTION_KEY: this.decryptKey(encryptedKey)
+        ENCRYPTION_KEY: this.decryptKey(encryptedKey),
+        BASEDIR: global['__basedir']
       }
     });
   }

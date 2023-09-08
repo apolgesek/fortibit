@@ -1,4 +1,4 @@
-@import 'themes/light/variables';;
+@import 'themes/light/variables';
 @import 'mixins';
 
 $sidePanelInDuration: 300ms;
@@ -162,7 +162,7 @@ $sidePanelOutDuration: 250ms;
 	color: var(--primary-text);
 	font-size: 1rem;
 	user-select: none;
-	margin-top: 2rem;
+	padding-top: 2rem;
 
 	p {
 		margin: 2rem 0;
@@ -233,4 +233,79 @@ $sidePanelOutDuration: 250ms;
 	&:focus:not(:hover) {
     outline: 2px solid $barberry !important;
   }
+}
+
+#mask {
+	position: absolute;
+	z-index: -999;
+}
+
+#drag-image {
+	width: 100px;
+	height: 50px;
+	position: relative;
+	z-index: 0;
+
+	.container {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		height: 100%;
+		background: var(--drag-image-bg);
+		border-radius: 4px;
+		z-index: 2;
+		position: absolute;
+
+		.image {
+			width: 18px;
+			height:18px;
+			background: var(--drag-image-element-bg);
+			border-radius: 2px;
+			margin: 0 8px;
+		}
+
+		.content {
+			flex: 1;
+
+			.text-line {
+				height: 7px;
+				background: var(--drag-image-element-bg);
+				margin-right: 1rem;
+
+				&:first-child {
+					margin-bottom: 4px;
+				}
+			}
+		}
+	}
+}
+
+.multi {
+	&::before {
+		content: '';
+		position: absolute;
+		top: -12px;
+		left: 12px;
+		display: block;
+		width: 100px;
+		height: 50px;
+		z-index: 0;
+		border-radius: 4px;
+		background: var(--drag-image-back-bg);
+		border: 1px solid var(--drag-image-bg);
+	}
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: -6px;
+		left: 6px;
+		display: block;
+		width: 100px;
+		height: 50px;
+		z-index: 1;
+		border-radius: 4px;
+		background: var(--drag-image-back-bg);
+		border: 1px solid var(--drag-image-bg);
+	}
 }

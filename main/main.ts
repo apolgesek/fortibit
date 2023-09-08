@@ -4,7 +4,7 @@ import { app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeTheme, shell }
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { platform } from 'os';
 import { basename } from 'path';
-import { IpcChannel } from '../shared-models';
+import { IpcChannel } from '../shared';
 import { SingleInstanceServices } from './dependency-injection';
 import { ProcessArgument } from './process-argument.enum';
 import { IAutotypeService } from './services/autotype';
@@ -18,6 +18,7 @@ import { IClipboardService } from './services/clipboard';
 class MainProcess {
   private readonly _services: SingleInstanceServices;
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
+  private readonly _isTestMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E));
 
   private _fileArg: string;
 
@@ -89,6 +90,10 @@ class MainProcess {
     ['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach(event => {
       process.once(event, () => this.exitApp());
     });
+
+    process.on('unhandledRejection', (reason, promise) => {
+      console.log('Unhandled promise rejection: ', reason);
+    });
   }
 
   private exitApp() {
@@ -111,7 +116,11 @@ class MainProcess {
     }
 
     if (this._configService.appConfig.autoTypeEnabled) {
-      this._autotypeService.registerAutocompleteShortcut();
+      this._autotypeService.registerAutocompleteShortcut(
+        this._configService.appConfig.autocompleteShortcut,
+        this._configService.appConfig.autocompleteUsernameOnlyShortcut,
+        this._configService.appConfig.autocompletePasswordOnlyShortcut
+      );
     }
 
     this.setFile(mainWindow, this._fileArg);
@@ -146,6 +155,10 @@ class MainProcess {
 
       const workspace = readFileSync(this._configService.workspacesPath, 'utf8');
       const path = JSON.parse(workspace);
+
+      if (this._isTestMode) {
+        path.workspace = 'C:\\Users\\icema\\Desktop\\test.fbit';
+      }
 
       if (path.workspace && existsSync(path.workspace)) {
         this._databaseService.setDatabaseEntry(windowRef.webContents.id, path.workspace);

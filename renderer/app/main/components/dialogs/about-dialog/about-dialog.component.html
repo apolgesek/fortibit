@@ -1,4 +1,3 @@
-
 <app-modal>
   <div class="dialog-header">
     <h2>About fortibit</h2>
@@ -11,6 +10,26 @@
     </a> 
   </div>
   <div>
+    <div class="update-check" [ngSwitch]="state">
+      <ng-container *ngSwitchCase="updateState.Downloaded">
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="margin-bottom: 0.5rem">Update is available. Relaunch to finish updating.</div>
+            <div style="color: #707070;">{{ version }}</div>
+          </div>
+          <button type="button" (click)="updateAndRelaunch()" class="primary-btn">Relaunch</button>
+        </div>
+      </ng-container>
+      <ng-container *ngSwitchCase="updateState.NotAvailable">You have the latest version</ng-container>
+      <ng-container *ngSwitchCase="updateState.ConnectionFailed">Error occured when checking for update</ng-container>
+      <ng-container *ngSwitchCase="updateState.Available">
+        <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+          <div style="margin-bottom: 0.5rem; display: flex; flex-direction: row;"><div class="lds-ring"><div></div><div></div><div></div><div></div></div> Downloading ({{ progress }}%)</div>
+          <div style="color:#707070;">{{ version }}</div>
+        </div>
+      </ng-container>
+      <ng-container *ngSwitchDefault><div class="lds-ring"><div></div><div></div><div></div><div></div></div>Checking for updates</ng-container>
+    </div>
     <ul>
       <li>Version: {{ config.version }} ({{ config.commit }})</li>
       <li>Electron: {{ config.electronVersion }}</li>
@@ -23,7 +42,7 @@
     <button
       #autofocus
       type="button"
-      class="primary-btn"
+      class="secondary-btn"
       (click)="close()">
       Close
     </button>

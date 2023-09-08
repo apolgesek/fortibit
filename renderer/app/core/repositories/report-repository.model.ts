@@ -1,4 +1,4 @@
-import { IReport } from '@shared-renderer/report.model';
+import { IReport } from '../../../../shared/report.model';
 
 export type PredicateFn = (entry: IReport) => boolean;
 

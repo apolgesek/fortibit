@@ -5,7 +5,7 @@ import { EntryManager, GroupManager, ModalRef, ModalService, WorkspaceService } 
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { IMessageBroker } from '@app/core/models';
 import { MessageBroker } from 'injection-tokens';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IpcChannel } from '../../../../../../shared/ipc-channel.enum';
 
 @Component({
   selector: 'app-file-recovery-dialog',

@@ -34,6 +34,33 @@
           <span class="slider"></span>
       </label>    
     </div>
+    <div formGroupName="input" class="inputgroup">
+      <label class="label" for="autotypeShortcut">Autotype hotkey:</label>
+      <input
+        style="width: 160px"
+        appHotkeyBinder
+        id="autotypeShortcut"
+        type="text"
+        formControlName="autotypeShortcut">
+    </div>
+    <div formGroupName="input" class="inputgroup">
+      <label class="label" for="autotypeUsernameOnlyShortcut">Autotype username only<br/> hotkey:</label>
+      <input
+        style="width: 160px"
+        appHotkeyBinder
+        id="autotypeUsernameOnlyShortcut"
+        type="text"
+        formControlName="autotypeUsernameOnlyShortcut">
+    </div>
+    <div formGroupName="input" class="inputgroup">
+      <label class="label" for="autotypePasswordOnlyShortcut">Autotype password only<br/> hotkey:</label>
+      <input
+        style="width: 160px"
+        appHotkeyBinder
+        id="autotypePasswordOnlyShortcut"
+        type="text"
+        formControlName="autotypePasswordOnlyShortcut">
+    </div>
     <div class="section-header">
       Lock database after inactive time
     </div>
@@ -78,7 +105,9 @@
       Restore default settings
     </div>
     <div class="restore">
-      <button (click)="restoreDefaults()" class="restore-btn primary-btn"><i-feather name="refresh-ccw"></i-feather>Restore defaults</button>
+      <button (click)="restoreDefaults()" class="restore-btn primary-btn">
+        <i-feather name="refresh-ccw"></i-feather>Restore defaults
+      </button>
     </div>
   </div>
 </form>

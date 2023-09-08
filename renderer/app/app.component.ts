@@ -1,7 +1,7 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, HostListener, Inject, NgZone, OnInit, ViewContainerRef } from '@angular/core';
 import { NavigationStart, Router, RouterModule } from '@angular/router';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IpcChannel } from '../../shared/ipc-channel.enum';
 import { MessageBroker } from 'injection-tokens';
 import { filter, fromEvent, take } from 'rxjs';
 import { IAppConfig } from '../../app-config';
@@ -34,6 +34,7 @@ export class AppComponent implements OnInit {
     private readonly workspaceService: WorkspaceService,
     private readonly entryManager: EntryManager,
     private readonly userInterfaceService: ComponentGridService,
+    private readonly zone: NgZone,
     @Inject(DOCUMENT) private readonly document: Document,
   ) {
     this.appViewContainer.appViewContainerRef = this.viewContainerRef;

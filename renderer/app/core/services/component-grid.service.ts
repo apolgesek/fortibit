@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.directive';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -7,6 +8,7 @@ import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.di
 /** Grid component accessor used by directives to adjust html element dimensions, i.e sidebar handles */
 export class ComponentGridService {
   public readonly minMainContainerWidth = 320;
+  public readonly sidebarsRegistered$ = new Subject<void>();
 
   private _leftSidebar: SidebarHandleDirective;
   private _rightSidebar: SidebarHandleDirective;
@@ -39,17 +41,19 @@ export class ComponentGridService {
       }
 
       this._leftSidebar = handle;
-      return true;
     } else if (handle.isRightSidebar) {
       if (this.rightSidebar) {
         throw new Error('Sidebar has been already registered (right).');
       }
 
       this._rightSidebar = handle;
-      return true;
     }
 
-    return false;
+    if (this.leftSidebar && this.rightSidebar) {
+      this.sidebarsRegistered$.next();
+    }
+
+    return true;
   }
 
   unregisterResizeableSidebar(handle: SidebarHandleDirective) {

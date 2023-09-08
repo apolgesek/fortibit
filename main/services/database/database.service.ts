@@ -1,10 +1,10 @@
 import { app, dialog, FileFilter, ipcMain, IpcMainEvent, IpcMainInvokeEvent, powerMonitor, safeStorage, session } from 'electron';
-import { copyFile, existsSync, mkdirSync, rename, unlink, unlinkSync, writeFile } from 'fs';
+import { copyFile, copyFileSync, existsSync, mkdirSync, rename, unlink, unlinkSync, writeFile } from 'fs';
 import { emptyDirSync, readFileSync, writeFileSync } from 'fs-extra';
 import { generate } from 'generate-password';
 import { basename, join } from 'path';
 import { IProduct } from '../../../product';
-import { ImportHandler, IpcChannel } from '../../../shared-models';
+import { ImportHandler, IpcChannel } from '../../../shared';
 import { CsvWriter, getHashCode } from '../../util';
 import { IConfigService } from '../config';
 import { IEncryptionEventService } from '../encryption/encryption-event-service.model';
@@ -15,8 +15,10 @@ import { IWindowService } from '../window';
 import { IDatabaseService } from './database-service.model';
 import { ISaveFilePayload } from './save-file-payload';
 import { INativeApiService } from '../native';
+import { ProcessArgument } from '../../process-argument.enum';
 
 export class DatabaseService implements IDatabaseService {
+  private readonly _isTestMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E));
   private readonly _fileFilters: { filters: FileFilter[] };
   private readonly _tmpDirectoryPath: string;
   private readonly _fileMap: Map<number, { file: string, password?: Buffer }> = new Map<number, { file: string, password?: Buffer }>();
@@ -30,6 +32,10 @@ export class DatabaseService implements IDatabaseService {
   };
 
   setPassword(value: string, windowId: number) {
+    if (windowId === this._windowService.getWindow(1).id) {
+      return;
+    }
+  
     const fileEntry = this._fileMap.get(windowId);
 
     if (!value) {
@@ -114,13 +120,8 @@ export class DatabaseService implements IDatabaseService {
     });
 
     ipcMain.handle(IpcChannel.GetImportedDatabaseMetadata, async (_: IpcMainEvent, type: ImportHandler) => {
-      try {
-        this._importService.setHandler(type);
-        const payload = await this._importService.getHandler().getMetadata();
-        return payload;
-      } catch (error) {
-        return undefined;
-      }
+      this._importService.setHandler(type);
+      return await this._importService.getHandler().getMetadata();
     });
 
     ipcMain.handle(IpcChannel.Import, async (event: IpcMainEvent, filePath: string, type: ImportHandler) => {
@@ -206,6 +207,10 @@ export class DatabaseService implements IDatabaseService {
     });
 
     ipcMain.on(IpcChannel.DatabaseChanged, (event: IpcMainEvent, payload: ISaveFilePayload) => {
+      if (this._isTestMode) {
+        return;
+      }
+
       this.saveDatabaseSnapshot(event, payload);
     });
 
@@ -288,36 +293,36 @@ export class DatabaseService implements IDatabaseService {
     try {
       const temporaryPath = this.createTemporaryPathFrom(finalFilePath);
 
-      writeFile(temporaryPath,  payload.encrypted, { encoding: 'base64' }, (err) => {
-        if (err) {
-          unlink(temporaryPath, (err) => { if (err) throw err; });
-          return;
-        }
+      try {
+        writeFileSync(temporaryPath,  payload.encrypted, { encoding: 'base64' });
+      } catch (err) {
+        unlink(temporaryPath, (err) => { if (err) throw err; });
+        return;
+      }
 
-        copyFile(temporaryPath, finalFilePath, (err) => {
-          if (err) {
-            rename(temporaryPath, finalFilePath, (err) => { if (err) throw err; });
-            return;
-          }
+      try {
+        copyFileSync(temporaryPath, finalFilePath);
+      } catch (err) {
+        rename(temporaryPath, finalFilePath, (err) => { if (err) throw err; });
+        return;
+      }
 
-          unlink(temporaryPath, (err) => { if (err) throw err; });
+      unlink(temporaryPath, (err) => { if (err) throw err; });
 
-          this._fileMap.get(event.sender.id).file = finalFilePath;
-          this._windowService.setTitle(event.sender.id, basename(finalFilePath));
-          this.removeRecoveryFile(event.sender.id);
-          
-          event.reply(IpcChannel.GetSaveStatus, {
-            status: true,
-            file: finalFilePath,
-            notify: saveFilePayload.config?.notify ?? true
-          });
-
-          this._windowService.windows.forEach(
-            w => w.browserWindow.webContents
-              .send(IpcChannel.GetRecentFiles, this._configService.appConfig.workspaces.recentlyOpened)
-          );
-        });
+      this._fileMap.get(event.sender.id).file = finalFilePath;
+      this._windowService.setTitle(event.sender.id, basename(finalFilePath));
+      this.removeRecoveryFile(event.sender.id);
+      
+      event.reply(IpcChannel.GetSaveStatus, {
+        status: true,
+        file: finalFilePath,
+        notify: saveFilePayload.config?.notify ?? true
       });
+
+      this._windowService.windows.forEach(
+        w => w.browserWindow.webContents
+          .send(IpcChannel.GetRecentFiles, this._configService.appConfig.workspaces.recentlyOpened)
+      );
     } catch (err) {
       event.reply(IpcChannel.GetSaveStatus, { status: false, error: err });
       throw new Error(err);
@@ -417,7 +422,14 @@ export class DatabaseService implements IDatabaseService {
 
   private changeEncryptionSettings(settings: Partial<IProduct>) {
     this.handleScreenLockSettingChange(settings);
-    this._configService.set(settings);
+    const {
+      autocompleteShortcut,
+      autocompleteUsernameOnlyShortcut,
+      autocompletePasswordOnlyShortcut,
+      autoTypeEnabled,
+      ...filteredSettings
+    } = settings;
+    this._configService.set(filteredSettings);
   }
 
   private handleScreenLockSettingChange(settings: Partial<IProduct>) {

@@ -1,6 +1,7 @@
 import { animate, keyframes, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GroupId } from '@app/core/enums';
 import { IMessageBroker, IPasswordGroup } from '@app/core/models';
 import { ClipboardService, EntryManager, GroupManager, ModalService, NotificationService, WorkspaceService } from '@app/core/services';
@@ -10,12 +11,12 @@ import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.di
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { LinkPipe } from '@app/shared/pipes/link.pipe';
 import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
-import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { AppConfig } from 'environments/environment';
 import { MessageBroker } from 'injection-tokens';
+import { animationFrameScheduler, observeOn } from 'rxjs';
 import { IAppConfig } from '../../../../../app-config';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { IPasswordEntry, IpcChannel } from '../../../../../shared/index';
 
 @Component({
   selector: 'app-entry-details-sidebar',
@@ -47,7 +48,7 @@ export class EntryDetailsSidebarComponent implements OnInit {
   @ViewChild('toggleStarBtn') public readonly toggleStarBtn: ElementRef;
   public group: IPasswordGroup;
   public config: IAppConfig;
-  public shouldDisplayToolbar = true;
+  public isReadonlyEntry = true;
   public isFavoriteAnimationInProgress = false;
 
   constructor(
@@ -91,9 +92,14 @@ export class EntryDetailsSidebarComponent implements OnInit {
       this.config = config;
     });
 
-    this.entryManager.selectEntry$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(entry => {
+    this.entryManager.selectEntry$.pipe(observeOn(animationFrameScheduler), takeUntilDestroyed(this.destroyRef)).subscribe(entry => {
+      if (!entry) {
+        this.group = null;
+        return;
+      }
+
       this.group = [...this.groupManager.groups, ...this.groupManager.builtInGroups].find(x => x.id === entry.groupId);
-      this.shouldDisplayToolbar = this.group.id !== GroupId.RecycleBin;
+      this.isReadonlyEntry = this.group.id === GroupId.RecycleBin;
     });
   }
 
@@ -112,7 +118,7 @@ export class EntryDetailsSidebarComponent implements OnInit {
   }
 
   copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry) {
-    this.clipboardService.copyToClipboard(entry, property);
+    this.clipboardService.copyEntryDetails(entry, property);
   }
 
   async toggleStarred(entry: IPasswordEntry) {

@@ -21,7 +21,7 @@ import {
   WorkspaceService,
 } from '@app/core/services';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IpcChannel } from '../shared/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
 import {
   AlertCircle,
@@ -34,7 +34,8 @@ import {
   Code,
   Copy,
   Edit,
-  ExternalLink,
+  Edit2,
+  Link,
   Eye,
   EyeOff,
   FilePlus,
@@ -45,6 +46,7 @@ import {
   Key,
   Plus,
   PlusCircle,
+  RefreshCw,
   RefreshCcw,
   Save,
   Settings,
@@ -54,7 +56,8 @@ import {
   XCircle,
   ArrowDown,
   ArrowUp,
-  ArrowRight
+  ArrowRight,
+  Share
 } from 'angular-feather/icons';
 import { MessageBroker, HotkeyHandler } from 'injection-tokens';
 import 'zone.js';
@@ -88,6 +91,7 @@ const isElectron = () => true;
 
 const icons = {
   Edit,
+  Edit2,
   Trash,
   Save,
   PlusCircle,
@@ -104,6 +108,7 @@ const icons = {
   Settings,
   FilePlus,
   CheckCircle,
+  RefreshCw,
   RefreshCcw,
   ChevronRight,
   ChevronDown,
@@ -111,13 +116,14 @@ const icons = {
   XCircle,
   AlertCircle,
   Copy,
-  ExternalLink,
+  Link,
   Book,
   Eye,
   EyeOff,
   ArrowDown,
   ArrowUp,
-  ArrowRight
+  ArrowRight,
+  Share
 };
 
 bootstrapApplication(AppComponent, {

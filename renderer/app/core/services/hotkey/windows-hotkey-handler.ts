@@ -108,7 +108,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
       && event.ctrlKey
       && event.shiftKey
       && this.entryManager.selectedPasswords.length === 1) {
-      this.clipboardService.copyToClipboard(this.entryManager.selectedPasswords[0], 'password');
+      this.clipboardService.copyEntryDetails(this.entryManager.selectedPasswords[0], 'password');
       event.preventDefault();
     }
   }
@@ -120,7 +120,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
       && event.shiftKey
       && this.entryManager.selectedPasswords.length === 1
     ) {
-      this.clipboardService.copyToClipboard(this.entryManager.selectedPasswords[0], 'username');
+      this.clipboardService.copyEntryDetails(this.entryManager.selectedPasswords[0], 'username');
       event.preventDefault();
     }
   }
@@ -148,7 +148,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
 
   public registerFindEntries(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'f' && event.ctrlKey && !event.shiftKey) {
+    if (event.key.toLowerCase() === 'f' && event.ctrlKey) {
       this.entryManager.isGlobalSearch = false;
       this.entryManager.selectedPasswords = [];
       (document.querySelector('.search') as HTMLInputElement).focus();
@@ -157,7 +157,7 @@ export class WindowsHotkeyHandler implements IHotkeyHandler {
   }
 
   public registerFindGlobalEntries(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'f' && event.ctrlKey && event.shiftKey) {
+    if (event.key.toLowerCase() === 'g' && event.ctrlKey) {
       this.entryManager.isGlobalSearch = true;
       this.entryManager.selectedPasswords = [];
       (document.querySelector('.search') as HTMLInputElement).focus();

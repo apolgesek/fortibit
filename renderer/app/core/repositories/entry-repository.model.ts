@@ -1,4 +1,4 @@
-import { IPasswordEntry } from '@shared-renderer/index';
+import { IPasswordEntry } from '../../../../shared/index';
 import { IRepository } from './index';
 
 export type EntryPredicateFn = (entry: IPasswordEntry) => boolean;

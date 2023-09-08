@@ -10,6 +10,7 @@ export interface IEncryptionSettings {
 
 export interface IAppConfig extends Partial<IProduct> {
   autocompleteShortcut: string;
+  autocompleteUsernameOnlyShortcut: string;
   autocompletePasswordOnlyShortcut: string;
   fileExtension: string;
   workspaces: any;

@@ -1,6 +1,6 @@
 <div class="sidebar">
 	<div class="header blur-groups">
-		<div class="label">{{ fileName }}</div>
+		<span [title]="fileName">{{ fileName }}</span>
 	</div>
 	<ul
 		class="scroll-viewport"
@@ -27,8 +27,8 @@
 				<span>Groups</span>
 				<div class="quick-actions">
 					<button
-						aria-label="Add group"
 						appTooltip="Add group"
+						aria-label="Add group"
 						class="add-group"
 						container="body"
 						(click)="addGroup(); false">
@@ -48,7 +48,17 @@
 				[ngClass]="{'active': group.id === this.selectedGroup}"
 				(focus)="selectGroup(group.id)"
 				(drop)="onEntryDrop(group.id)">
-				<i-feather name="folder"></i-feather> <div class="group-name">{{ group.name }}</div>
+				<i-feather name="folder"></i-feather> 
+				<div class="group-name">
+					{{ group.name }} 
+				</div>
+				<i-feather
+					*ngIf="group.id === this.selectedGroup && group.id !== groupIds.Root"
+					(click)="editGroup()"
+					tabindex="0"
+					name="edit-2"
+					class="edit-icon">
+				</i-feather>
 			</li>
 		</cdk-virtual-scroll-viewport>
 	</ul>

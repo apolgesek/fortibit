@@ -1,7 +1,7 @@
 
 <app-modal bodyClass="move-entry-modal" data-prevent-entry-deselect>
   <div class="dialog-header">
-    <h2>Move {{ selectedPasswordsLength > 1 ? 'entries' : 'entry' }} to:</h2>
+    <h2>Move {{ selectedPasswordsLength > 1 ? (selectedPasswordsLength + ' entries') : 'entry' }} to:</h2>
     <a
       href="#"
       role="button"

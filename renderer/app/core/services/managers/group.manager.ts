@@ -64,7 +64,7 @@ export class GroupManager {
     const groupId = await this.groupRepository.add(newGroup);
 
     if (groupId > 0) {
-      this.getGroupsTree();
+      await this.getGroupsTree();
     }
 
     this.markDirty();

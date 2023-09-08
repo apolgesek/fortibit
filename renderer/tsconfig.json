@@ -12,7 +12,7 @@
         "assets/*"
       ],
       "@shared-renderer/*": [
-        "../shared-models/*"
+        "../shared/*"
       ]
     },
   },

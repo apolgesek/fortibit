@@ -16,14 +16,6 @@
   height: 100%;
   width: 100%;
 
-  .label {
-    flex: 1;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    height: inherit;
-  }
-
   .separator {
     .quick-actions {
       margin-left: auto;
@@ -177,9 +169,9 @@
     background-color: var(--list-item-bg--active);
   }
 
-  .pi {
-    margin-right: 0.5rem;
-    margin-top: 1px;
+  i-feather {
+    min-width: 0.875rem !important;
+    min-height: 0.875rem !important;
   }
 }
 
@@ -209,11 +201,27 @@
   .group-item {
     margin: 0.25rem;
     margin-right: 1.25rem;
-
+    display: flex;
 
     .group-name {
+      flex: 1;
       overflow: hidden;
+      align-items: center;
       text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .edit-icon {
+      margin-left: 0.5rem;
+      margin-right: 0 !important;
+
+      &:hover {
+        color: $blue-200;
+      }
+
+      &:focus {
+        outline: 2px solid $barberry;
+      }
     }
   }
 }
@@ -227,6 +235,7 @@
 
 .is-dragging-over {
 	background-color: var(--list-item-bg--hover) !important;
+  outline: 1px solid #484848;
 
   // fix flickering - dragleave event being triggered when dragging over child element
   * {

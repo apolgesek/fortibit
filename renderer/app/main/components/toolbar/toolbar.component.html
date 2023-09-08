@@ -43,7 +43,7 @@
 				role="searchbox"
 				type="text"
 				[(ngModel)]="searchPhrase"
-				(keydown)="$event.stopPropagation()"
+				(keydown)="handleSearchboxKeydown($event)"
 				class="search"
 				[attr.placeholder]="isGlobalSearchMode ? 'Search all' : 'Search in group' " />
 			<div class="search-mode">

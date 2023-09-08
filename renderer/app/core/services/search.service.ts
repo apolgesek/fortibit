@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IPasswordEntry } from '@shared-renderer/index';
+import { IPasswordEntry } from '../../../../shared/index';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, map, Observable, Subject, tap } from 'rxjs';
 import { Sort } from '../enums';
 

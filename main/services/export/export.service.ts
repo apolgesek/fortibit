@@ -1,5 +1,5 @@
 import { dialog } from "electron";
-import { IPasswordEntry } from "../../../shared-models";
+import { IPasswordEntry } from "../../../shared";
 import { IEncryptionEventWrapper, MessageEventType } from "../encryption";
 import { IWindow } from "../window/window-model";
 import { IExportService } from "./export-service.model";

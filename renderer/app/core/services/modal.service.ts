@@ -7,18 +7,20 @@ import { DeleteGroupDialogComponent } from '@app/main/components/dialogs/delete-
 import { EntryDialogComponent } from '@app/main/components/dialogs/entry-dialog/entry-dialog.component';
 import { EntryHistoryDialogComponent } from '@app/main/components/dialogs/entry-history-dialog/entry-history-dialog.component';
 import { ExposedPasswordsDialogComponent } from '@app/main/components/dialogs/exposed-passwords-dialog/exposed-passwords-dialog.component';
+import { FileRecoveryDialogComponent } from '@app/main/components/dialogs/file-recovery-dialog/file-recovery-dialog.component';
+import { GeneratorDialogComponent } from '@app/main/components/dialogs/generator-dialog/generator-dialog.component';
 import { GroupDialogComponent } from '@app/main/components/dialogs/group-dialog/group-dialog.component';
 import { ImportDatabaseMetadataDialogComponent } from '@app/main/components/dialogs/import-database-metadata-dialog/import-database-metadata-dialog.component';
+import { MaintenanceDialogComponent } from '@app/main/components/dialogs/maintenance-dialog/maintenance-dialog.component';
 import { MoveEntryDialogComponent } from '@app/main/components/dialogs/move-entry-dialog/move-entry-dialog.component';
+import { PasswordChangeDialogComponent } from '@app/main/components/dialogs/password-change-dialog/password-change-dialog.component';
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
 import { WeakPasswordsDialogComponent } from '@app/main/components/dialogs/weak-passwords-dialog/weak-passwords-dialog.component';
-import { FileRecoveryDialogComponent } from '@app/main/components/dialogs/file-recovery-dialog/file-recovery-dialog.component';
-import { PasswordChangeDialogComponent } from '@app/main/components/dialogs/password-change-dialog/password-change-dialog.component';
-import { MaintenanceDialogComponent } from '@app/main/components/dialogs/maintenance-dialog/maintenance-dialog.component';
-import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
+import { IHistoryEntry, IPasswordEntry, IpcChannel } from '../../../../shared/index';
 import { IMessageBroker } from '../models';
 import { EntryManager } from './managers/entry.manager';
+import { ModalRef } from './modal-ref';
 
 @Injectable({
   providedIn: 'root'
@@ -34,29 +36,29 @@ export class ModalService {
     return this.modalManager.isAnyModalOpen;
   }
 
-  openDeleteEntryWindow() {
-    this.modalManager.open(DeleteEntryDialogComponent);
+  openDeleteEntryWindow(): ModalRef {
+    return this.modalManager.open(DeleteEntryDialogComponent);
   }
 
-  openDeleteGroupWindow() {
-    this.modalManager.open(DeleteGroupDialogComponent);
+  openDeleteGroupWindow(): ModalRef {
+    return this.modalManager.open(DeleteGroupDialogComponent);
   }
 
   async openConfirmExitWindow(): Promise<boolean> {
     return this.modalManager.openPrompt(ConfirmExitDialogComponent);
   }
 
-  async openNewEntryWindow() {
+  async openNewEntryWindow(): Promise<ModalRef> {
     this.entryManager.editedEntry = null;
-    await this.openEntryWindow();
+    return this.openEntryWindow();
   }
 
-  async openEditEntryWindow(entry?: IPasswordEntry) {
+  async openEditEntryWindow(entry?: IPasswordEntry): Promise<ModalRef> {
     this.entryManager.editedEntry = entry ?? this.entryManager.selectedPasswords[0];
-    this.openEntryWindow();
+    return this.openEntryWindow();
   }
 
-  async openHistoryEntryWindow(entry: IHistoryEntry, config?: { readonly: boolean }) {
+  async openHistoryEntryWindow(entry: IHistoryEntry, config?: { readonly: boolean }): Promise<ModalRef> {
     this.entryManager.editedEntry = entry.entry;
 
     const decryptedPassword = await this.messageBroker.ipcRenderer
@@ -65,56 +67,60 @@ export class ModalService {
     return this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword, config, historyEntry: entry }});
   }
 
-  openGroupWindow(mode: 'new' | 'edit' = 'new') {
-    this.modalManager.open(GroupDialogComponent, { payload: { mode } });
+  openGroupWindow(mode: 'new' | 'edit' = 'new'): ModalRef {
+    return this.modalManager.open(GroupDialogComponent, { payload: { mode } });
   }
 
-  openAboutWindow() {
-    this.modalManager.open(AboutDialogComponent);
+  openAboutWindow(): ModalRef {
+    return this.modalManager.open(AboutDialogComponent);
   }
 
-  openSettingsWindow() {
-    this.modalManager.open(SettingsDialogComponent);
+  openSettingsWindow(): ModalRef {
+    return this.modalManager.open(SettingsDialogComponent);
   }
 
-  openImportedDbMetadataWindow(metadata: any) {
-    this.modalManager.open(ImportDatabaseMetadataDialogComponent, { payload: metadata });
+  openImportedDbMetadataWindow<T>(metadata: T): ModalRef {
+    return this.modalManager.open(ImportDatabaseMetadataDialogComponent, { payload: metadata });
   }
 
-  openExposedPasswordsWindow() {
-    this.modalManager.open(ExposedPasswordsDialogComponent);
+  openExposedPasswordsWindow(): ModalRef {
+    return this.modalManager.open(ExposedPasswordsDialogComponent);
   }
 
-  openWeakPasswordsWindow() {
-    this.modalManager.open(WeakPasswordsDialogComponent);
+  openWeakPasswordsWindow(): ModalRef {
+    return this.modalManager.open(WeakPasswordsDialogComponent);
   }
 
-  openEntryHistoryWindow(id: number) {
+  openEntryHistoryWindow(id: number): ModalRef {
     this.entryManager.editedEntry = this.entryManager.selectedPasswords[0];
-    this.modalManager.open(EntryHistoryDialogComponent, { payload: { id } });
+    return this.modalManager.open(EntryHistoryDialogComponent, { payload: { id } });
   }
 
-  openMoveEntryWindow() {
-    this.modalManager.open(MoveEntryDialogComponent);
+  openMoveEntryWindow(): ModalRef {
+    return this.modalManager.open(MoveEntryDialogComponent);
   }
 
-  openRecoveryWindow(path: string) {
-    this.modalManager.open(FileRecoveryDialogComponent, { payload: { path } });
+  openRecoveryWindow(path: string): ModalRef {
+    return this.modalManager.open(FileRecoveryDialogComponent, { payload: { path } });
   }
 
-  openPasswordChangeWindow() {
-    this.modalManager.open(PasswordChangeDialogComponent);
+  openPasswordChangeWindow(): ModalRef {
+    return this.modalManager.open(PasswordChangeDialogComponent);
   }
 
-  openMaintenanceWindow() {
-    this.modalManager.open(MaintenanceDialogComponent);
+  openMaintenanceWindow(): ModalRef {
+    return this.modalManager.open(MaintenanceDialogComponent);
+  }
+
+  openGeneratorWindow(): ModalRef {
+    return this.modalManager.open(GeneratorDialogComponent);
   }
 
   close<T>(ref: ComponentRef<T>) {
     this.modalManager.close(ref);
   }
 
-  private async openEntryWindow() {
+  private async openEntryWindow(): Promise<ModalRef> {
     let decryptedPassword;
 
     if (this.entryManager.editedEntry) {
@@ -122,7 +128,7 @@ export class ModalService {
         .invoke(IpcChannel.DecryptPassword, this.entryManager.editedEntry.password);
     }
 
-    this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword } });
+    return this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword } });
   }
 }
 

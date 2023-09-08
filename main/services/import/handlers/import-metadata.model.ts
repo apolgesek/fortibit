@@ -1,4 +1,4 @@
-import { ImportHandler } from "../../../../shared-models";
+import { ImportHandler } from "../../../../shared";
 
 export interface IImportMetadata {
   filePath: string;

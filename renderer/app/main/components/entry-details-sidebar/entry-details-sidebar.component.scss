@@ -86,7 +86,6 @@
 	margin: 0.5rem 0;
 	word-break: break-all;
 	color: var(--primary-text);
-	margin-right: 0.75rem;
 
 	.pre-wrap {
 		white-space: pre-wrap;
@@ -104,6 +103,10 @@
 
 	a {
 		color: var(--link-text);
+	}
+
+	.subtype {
+		color: $grey-500;
 	}
 }
 
@@ -136,6 +139,10 @@
 	p:last-child {
 		margin-bottom: 0 !important;
 	}
+}
+
+.header span {
+  max-width: 50%;
 }
 
 .header i-feather {

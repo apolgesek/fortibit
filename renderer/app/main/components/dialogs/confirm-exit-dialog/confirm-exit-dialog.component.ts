@@ -1,5 +1,5 @@
 import { Component, ComponentRef, Inject } from '@angular/core';
-import { IpcChannel } from '@shared-renderer/index';
+import { IpcChannel } from '../../../../../../shared/index';
 import { IMessageBroker } from '@app/core/models';
 import { WorkspaceService, ModalRef } from '@app/core/services';
 
@@ -38,11 +38,15 @@ export class ConfirmExitDialogComponent implements IModal {
 
   executeTask() {
     this.modalRef.onActionResult.next(true);
+    this.modalRef.onActionResult.complete();
+    
     this.modalRef.close();
   }
 
   close() {
     this.modalRef.onActionResult.next(false);
+    this.modalRef.onActionResult.complete();
+
     this.modalRef.close();
   }
 }

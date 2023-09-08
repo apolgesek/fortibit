@@ -3,8 +3,8 @@ import { GroupId } from '@app/core/enums';
 import { IMessageBroker } from '@app/core/models';
 import { EntryRepository, EntryPredicateFn } from '@app/core/repositories';
 import { IHistoryEntry } from '@shared-renderer/history-entry.model';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { IPasswordEntry } from '@shared-renderer/password-entry.model';
+import { IpcChannel } from '../../../../../shared/ipc-channel.enum';
+import { IPasswordEntry } from '../../../../../shared/password-entry.model';
 import { MessageBroker } from 'injection-tokens';
 import { BehaviorSubject, combineLatest, from, map, Observable, of, shareReplay, Subject, switchMap } from 'rxjs';
 import { NotificationService } from '../notification.service';
@@ -66,13 +66,12 @@ export class EntryManager {
 
     this.messageBroker.ipcRenderer.on(IpcChannel.UpdateIcon, (_, id: number, iconPath: string) => {
       this.zone.run(async () => {
-        await this.entryRepository.update({ id, icon: iconPath });
-
         const entry = this.passwordEntries.find(x => x.id === id);
         if (!entry) {
           return;
         }
 
+        await this.entryRepository.update({ id, icon: iconPath });
         entry.lastModificationDate = new Date();
         entry.icon = iconPath;
 
@@ -148,17 +147,19 @@ export class EntryManager {
 
   async deleteEntry(): Promise<void> {
     if (this.groupManager.selectedGroup === GroupId.RecycleBin) {
-      for await (const entry of this.selectedPasswords) {
-        this.removeIconPath(entry);
-      }
-
       await this.historyManager.bulkDelete(this.selectedPasswords.map(x => x.id));
       await this.entryRepository.bulkDelete(this.selectedPasswords.map(p => p.id));
+
+      this.passwordEntries = await this.getEntries();
+
+      // icons must be removed only after removal of entries
+      for (const entry of this.selectedPasswords) {
+        this.removeIconPath(entry);
+      }
     } else {
       await this.entryRepository.softDelete(this.selectedPasswords.map(p => p.id) as number[]);
+      this.passwordEntries = await this.getEntries();
     }
-
-    this.passwordEntries = await this.getEntries();
 
     this.selectedPasswords = [];
     this.markDirty();
@@ -187,10 +188,12 @@ export class EntryManager {
   }
 
   async selectEntry(entry: IPasswordEntry): Promise<void> {
-    this.entryHistory = await this.getEntryHistory(entry.id);
-    entry.group = this.groupManager.groups.find(x => x.id === entry.groupId)?.name
-      // could be Recycle bin
-      ?? this.groupManager.builtInGroups.find(g => g.id === entry.groupId).name;
+    if (entry) {
+      this.entryHistory = await this.getEntryHistory(entry.id);
+      entry.group = this.groupManager.groups.find(x => x.id === entry.groupId)?.name
+        // could be Recycle bin
+        ?? this.groupManager.builtInGroups.find(g => g.id === entry.groupId).name;
+    }
 
     this.entrySelectedSource.next(entry);
   }

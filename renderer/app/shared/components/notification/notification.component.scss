@@ -50,10 +50,10 @@
 	}
 
 	&.error {
-		color: $bright-red;
+		color: var(--error-text);
 
 		.seconds-left {
-			background: $bright-red;
+			background: var(--error-text);
 		}
 	}
 

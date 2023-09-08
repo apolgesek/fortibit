@@ -3,18 +3,20 @@ import { Component, DestroyRef, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { IMessageBroker } from '@app/core/models';
 import { ConfigService, WorkspaceService } from '@app/core/services';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IpcChannel } from '../../../../../../../shared/ipc-channel.enum';
 import { MessageBroker } from 'injection-tokens';
 import { take } from 'rxjs';
 import { IProduct } from '../../../../../../../product';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-integration-tab',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FeatherModule
   ],
   templateUrl: './integration-tab.component.html',
   styleUrls: ['./integration-tab.component.scss']

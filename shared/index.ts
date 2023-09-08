@@ -1,4 +1,4 @@
-export * from './database-type.enum';
+export * from './default-config';
 export * from './entry.model';
 export * from './history-entry.model';
 export * from './import-handler.enum';

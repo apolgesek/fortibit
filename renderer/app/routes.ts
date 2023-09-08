@@ -16,7 +16,7 @@ export const routes: Routes = [
     path: 'entry-select',
     pathMatch: 'full',
     component: EntrySelectComponent,
-    canDeactivate: [false]
+    canDeactivate: [() => false]
   },
   {
     path: '',

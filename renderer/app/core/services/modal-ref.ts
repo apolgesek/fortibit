@@ -15,6 +15,8 @@ export class ModalRef {
 
   close() {
     this.onClose.next();
+    this.onClose.complete();
+    
     this.modalManager.close(this.ref);
   }
 }

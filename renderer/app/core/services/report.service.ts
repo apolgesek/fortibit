@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { IReport } from '@shared-renderer/report.model';
+import { IpcChannel } from '../../../../shared/ipc-channel.enum';
+import { IReport } from '../../../../shared/report.model';
 import { exportDB } from 'dexie-export-import';
 import { MessageBroker } from 'injection-tokens';
 import { DbManager } from '../database';

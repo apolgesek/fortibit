@@ -5,7 +5,7 @@ import { IMessageBroker } from '@app/core/models';
 import { WorkspaceService } from '@app/core/services';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IpcChannel } from '../../../../../shared/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 
@@ -47,6 +47,7 @@ export class MasterPasswordSetupComponent implements OnInit, OnDestroy {
     this.onGetSaveStatus = (_, { status })  => {
       this.zone.run(() => {
         if (status) {
+          this.workspaceService.setDatabaseLoaded();
           this.workspaceService.unlock();
         }
       });
