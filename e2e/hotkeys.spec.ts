@@ -1,33 +1,20 @@
 import { expect, test } from '@playwright/test';
 import { ElectronApplication, Page, _electron as electron } from 'playwright-core';
 import { ProcessArgument } from '../main/process-argument.enum';
+import { addEntry } from './helpers/add-entry';
+import { authenticate } from './helpers/auth';
 
 const PATH = require('path');
 
-test.describe('Hotkeys', async () => {
+test.describe('Hotkeys after auth', async () => {
   let app: ElectronApplication;
   let firstWindow: Page;
 
-  async function addEntry() {
-    await firstWindow.click('#add-entry', { force: true });
-  
-    const title = await firstWindow.locator('#entry-title');
-    const username = await firstWindow.locator('#entry-username');
-    const submitBtn = await firstWindow.locator('#entry-submit');
-  
-    await title.type('Title');
-    await username.type('Username');
-    await submitBtn.click();
-  }
-
   test.beforeEach(async () => {
-    app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`], colorScheme: 'dark' });
+    app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`], colorScheme: 'dark', env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' } });
     firstWindow = await app.firstWindow();
-    
-    await firstWindow.waitForLoadState('domcontentloaded');
-    await firstWindow.locator('.inputgroup.password input').focus();
-    await firstWindow.keyboard.insertText('test123');
-    await firstWindow.keyboard.press('Enter');
+    await authenticate(firstWindow);
+    await firstWindow.getByRole('banner').waitFor({ state: 'visible' });
   });
 
   test.afterEach(async () => {
@@ -35,42 +22,78 @@ test.describe('Hotkeys', async () => {
   });
 
   test('Check open new entry modal', async () => {
-    await firstWindow.waitForSelector('app-workspace', { state: 'visible' });
     await firstWindow.keyboard.press('Control+I');
-    const modal = await firstWindow.waitForSelector('app-modal', { state: 'attached' });
-    const header = await firstWindow.locator('.dialog-header h2').innerText();
-
-    expect(modal).toBeDefined();
-    expect(header).toBe('Add entry\nin General');
+    await firstWindow.getByText(/add entry in general/i).waitFor({ state: 'visible' });
   });
 
   test('Check open edit entry modal', async () => {
-    await addEntry();
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
-
-    const row = await firstWindow.locator('.row-entry');
-    await row.click();
-
+    await addEntry(firstWindow, { config: { close: true } });
+    await firstWindow.getByText(/username1/i).click();
     await firstWindow.keyboard.press('E');
-    const modal = await firstWindow.waitForSelector('app-modal', { state: 'attached' });
-    const header = await firstWindow.locator('.dialog-header h2').innerText();
-
-    expect(modal).not.toBeNull();
-    expect(header).toBe('Edit entry\nin General')
+    await firstWindow.getByText(/edit entry in general/i).waitFor({ state: 'visible' });
   });
 
   test('Check open delete entry modal', async () => {
-    await addEntry();
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
-
-    const row = await firstWindow.locator('.row-entry');
-    await row.click();
-
+    await addEntry(firstWindow, { config: { close: true } });
+    await firstWindow.getByText(/username1/i).click();
     await firstWindow.keyboard.press('Delete');
-    const modal = await firstWindow.locator('app-modal');
-    const header = await firstWindow.locator('.dialog-header h2').innerText();
+    await firstWindow.getByText(/remove entry/i).waitFor({ state: 'visible' });
+  });
 
-    expect(modal).not.toBeNull();
-    expect(header).toBe('Remove entry')
+  test('Check open add group modal', async () => {
+    await firstWindow.keyboard.press('Control+O');
+    await firstWindow.getByRole('dialog').getByText(/add group/i).waitFor({ state: 'visible' });
+  });
+
+  test('Check lock database', async () => {
+    await addEntry(firstWindow, { config: { close: true } });
+    await firstWindow.keyboard.press('Control+L');
+    await firstWindow.getByPlaceholder(/password/i).waitFor({ state: 'visible' });
+  });
+
+  test('Check copy username', async () => {
+    await addEntry(firstWindow, { config: { close: true } });
+    await firstWindow.getByText(/username1/i).click();
+    await firstWindow.keyboard.press('Control+Shift+U');
+    const notification = await firstWindow.getByRole('alert').innerText();
+
+    expect(notification).toMatch(/username copied/i);
+  });
+
+  test('Check copy password', async () => {
+    await addEntry(firstWindow, { config: { close: true } });
+    await firstWindow.getByText(/username1/i).click();
+    await firstWindow.keyboard.press('Control+Shift+C');
+    const notification = await firstWindow.getByRole('alert').innerText();
+
+    expect(notification).toMatch(/password copied/i);
+  });
+});
+
+test.describe('Hotkeys before auth', async () => {
+  let app: ElectronApplication;
+  let firstWindow: Page;
+
+  test.beforeEach(async () => {
+    app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`], colorScheme: 'dark' });
+    firstWindow = await app.firstWindow();
+    await firstWindow.getByPlaceholder(/password/i).waitFor({ state: 'visible' });
+  });
+
+  test.afterEach(async () => {
+    await app.evaluate(process => process.app.exit());
+  });
+
+  test('Check should not open new entry modal', async () => {
+    await firstWindow.keyboard.press('Control+I');
+    const dialog = firstWindow.getByRole('dialog');
+
+    expect(dialog).not.toBeAttached();
+  });
+
+  test('Check should open settings modal', async () => {
+    await firstWindow.keyboard.press('Control+.');
+    const dialog = firstWindow.getByRole('dialog').getByText(/^Settings$/);
+    await dialog.waitFor({ state: 'visible' });
   });
 });

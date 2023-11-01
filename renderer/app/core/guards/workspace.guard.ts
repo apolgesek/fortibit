@@ -1,40 +1,35 @@
-import { Inject, Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
-import { IpcChannel } from '../../../../shared/index';
+import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { from, Observable } from 'rxjs';
+import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IMessageBroker } from '../models';
 import { WorkspaceService } from '../services';
 
-@Injectable({providedIn: 'root'})
-export class WorkspaceGuard implements CanActivate {
-  constructor(
-    @Inject(MessageBroker)
-    private readonly messageBroker: IMessageBroker,
-    private readonly workspaceService: WorkspaceService,
-    private readonly router: Router,
-    private readonly fileNamePipe: FileNamePipe
-  ) {}
+export function workspaceGuard(): CanActivateFn {
+  return () => {
+    const messageBroker = inject(MessageBroker);
+    const workspaceService = inject(WorkspaceService);
+    const fileNamePipe = inject(FileNamePipe);
+    const router = inject(Router);
 
-  canActivate(): Observable<boolean> {
-    return from(this.messageBroker.ipcRenderer.invoke(IpcChannel.CheckOpenMode))
-      .pipe(
-        map((filePath: string) => {
-          if (filePath) {
-            this.workspaceService.file = { filePath, filename: this.fileNamePipe.transform(filePath) };
+    return from(messageBroker.ipcRenderer.invoke(IpcChannel.CheckOpenMode))
+    .pipe(
+      map((filePath: string) => {
+        if (filePath) {
+          workspaceService.file = { filePath, filename: fileNamePipe.transform(filePath) };
 
-            if (this.workspaceService.isLocked) {
-              this.router.navigate(['/pass']);
+          if (workspaceService.isLocked) {
+            router.navigate(['/pass']);
 
-              return false;
-            } else {
-              return true;
-            }
+            return false;
+          } else {
+            return true;
           }
+        }
 
-          return true;
-        }));
+        return true;
+      }));
   }
 }

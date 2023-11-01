@@ -21,7 +21,7 @@
       <app-tab header="View" #viewTab>
         <app-view-tab *ngIf="viewTab.active"></app-view-tab>
       </app-tab>
-      <app-tab header="Integration" #integrationTab>
+      <app-tab header="Integration" #integrationTab *ngIf="shouldIncludeTab(tab.Integration)">
         <app-integration-tab *ngIf="integrationTab.active"></app-integration-tab>
       </app-tab>
     </app-tabset>

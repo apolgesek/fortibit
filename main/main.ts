@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+import { IpcChannel } from '@shared-renderer/index';
 import { app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeTheme, shell } from 'electron';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { platform } from 'os';
-import { basename } from 'path';
-import { IpcChannel } from '../shared';
+import { basename, resolve } from 'path';
 import { SingleInstanceServices } from './dependency-injection';
 import { ProcessArgument } from './process-argument.enum';
 import { IAutotypeService } from './services/autotype';
+import { IClipboardService } from './services/clipboard';
 import { IConfigService } from './services/config';
 import { IDatabaseService } from './services/database';
 import { IEncryptionEventWrapper, MessageEventType } from './services/encryption';
 import { IPerformanceService } from './services/performance/performance-service.model';
 import { IWindowService } from './services/window';
-import { IClipboardService } from './services/clipboard';
 
 class MainProcess {
   private readonly _services: SingleInstanceServices;
@@ -60,12 +60,12 @@ class MainProcess {
   }
 
   private registerAppEvents() {
-    app.on('second-instance', (event: Electron.Event, argv) => {
-      const windowRef = this._windowService.createMainWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve)));
+    app.on('second-instance', (_: Electron.Event, argv) => {
       const filePath = argv.find(x => x.endsWith(this._configService.appConfig.fileExtension));
+      const windowRef = this._windowService.createMainWindow();
       this.setFile(windowRef, filePath);
 
-      this._windowService.loadWindow(windowRef);
+      this._windowService.loadWindow(windowRef, null);
     });
 
     // disable creation of new windows for better security
@@ -105,7 +105,7 @@ class MainProcess {
   }
 
   private async onReady() {
-    const mainWindow = this._windowService.createMainWindow(Boolean(app.commandLine.hasSwitch(ProcessArgument.PerfLog)));
+    const mainWindow = this._windowService.createMainWindow();
     const entrySelectWindow = this._windowService.createEntrySelectWindow();
     this.registerIpcEventListeners();
 
@@ -124,7 +124,7 @@ class MainProcess {
     }
 
     this.setFile(mainWindow, this._fileArg);
-    await this._windowService.loadWindow(mainWindow);
+    await this._windowService.loadWindow(mainWindow, null);
 
     try {
       this._performanceService.mark('firstWindowLoaded');
@@ -157,7 +157,8 @@ class MainProcess {
       const path = JSON.parse(workspace);
 
       if (this._isTestMode) {
-        path.workspace = 'C:\\Users\\icema\\Desktop\\test.fbit';
+        const absolutePath = resolve('..\\e2e\\files\\test.fbit');
+        path.workspace = absolutePath.slice(0, 1).toUpperCase() + absolutePath.slice(1);
       }
 
       if (path.workspace && existsSync(path.workspace)) {

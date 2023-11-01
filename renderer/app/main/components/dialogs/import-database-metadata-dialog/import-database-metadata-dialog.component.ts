@@ -1,12 +1,18 @@
+import { CommonModule } from '@angular/common';
 import { Component, ComponentRef, Inject } from '@angular/core';
 import { IMessageBroker } from '@app/core/models';
+import { ModalRef, WorkspaceService } from '@app/core/services';
 import { NotificationService } from '@app/core/services/notification.service';
-import { IPasswordEntry, IpcChannel } from '../../../../../../shared/index';
-import { WorkspaceService, ModalRef } from '@app/core/services';
-import { MessageBroker } from 'injection-tokens';
 import { IAdditionalData, IModal } from '@app/shared';
-import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { CommonModule } from '@angular/common';
+import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { IPasswordEntry, ImportHandler, IpcChannel } from '@shared-renderer/index';
+import { MessageBroker } from 'injection-tokens';
+
+export interface IImportDatabaseMetadataDialogDataPayload {
+  filePath: string;
+  size: number;
+  type: ImportHandler;
+}
 
 @Component({
   selector: 'app-import-database-metadata-dialog',
@@ -20,7 +26,7 @@ import { CommonModule } from '@angular/common';
 })
 export class ImportDatabaseMetadataDialogComponent implements IModal {
   ref!: ComponentRef<ImportDatabaseMetadataDialogComponent>;
-  additionalData?: IAdditionalData | undefined;
+  additionalData?: IAdditionalData<IImportDatabaseMetadataDialogDataPayload>;
   isConfirmButtonLocked = false;
 
   constructor(

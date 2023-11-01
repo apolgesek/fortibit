@@ -2,6 +2,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "declaration": false,
+    "baseUrl": "./",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -11,8 +12,11 @@
       "node"
     ],
     "paths": {
-      "@shared-models/*": [
-        "../shared-models"
+      "@shared-renderer/*": [
+        "shared/*"
+      ],
+      "@root/*": [
+        "./*"
       ]
     },
     "lib": [

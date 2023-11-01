@@ -1,11 +1,9 @@
-import { Inject, Injectable } from '@angular/core';
-import { IpcChannel } from '../../../../shared/ipc-channel.enum';
-import { IReport } from '../../../../shared/report.model';
+import { Injectable, inject } from '@angular/core';
+import { IReport, IpcChannel } from '@shared-renderer/index';
 import { exportDB } from 'dexie-export-import';
 import { MessageBroker } from 'injection-tokens';
 import { DbManager } from '../database';
 import { ReportType } from '../enums';
-import { IMessageBroker } from '../models';
 import { ReportRepository } from '../repositories';
 import { EntryManager } from './managers/entry.manager';
 import { GroupManager } from './managers/group.manager';
@@ -14,13 +12,11 @@ import { GroupManager } from './managers/group.manager';
   providedIn: 'root'
 })
 export class ReportService {
-  constructor(
-    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-    private readonly db: DbManager,
-    private readonly reportRepository: ReportRepository,
-    private readonly entryManager: EntryManager,
-    private readonly groupManager: GroupManager,
-  ) {}
+  private readonly messageBroker = inject(MessageBroker);
+  private readonly db = inject(DbManager);
+  private readonly reportRepository = inject(ReportRepository);
+  private readonly entryManager = inject(EntryManager);
+  private readonly groupManager = inject(GroupManager);
 
   async scanForLeaks(): Promise<any> {
     return new Promise(async (resolve, reject) => {

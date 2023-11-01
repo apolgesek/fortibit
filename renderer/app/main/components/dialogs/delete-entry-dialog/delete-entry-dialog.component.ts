@@ -1,4 +1,4 @@
-import { Component, ComponentRef, OnInit } from '@angular/core';
+import { Component, ComponentRef, OnInit, inject } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
@@ -20,11 +20,9 @@ export class DeleteEntryDialogComponent implements IModal, OnInit {
   public readonly additionalData!: IAdditionalData;
   public isInRecycleBin = false;
 
-  constructor(
-    private readonly groupManager: GroupManager,
-    private readonly entryManager: EntryManager,
-    private readonly modalRef: ModalRef
-  ) { }
+  private readonly groupManager = inject(GroupManager);
+  private readonly entryManager = inject(EntryManager);
+  private readonly modalRef = inject(ModalRef);
 
   get selectedRowsCount(): number {
     return this.entryManager.selectedPasswords.length;

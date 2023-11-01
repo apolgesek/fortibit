@@ -44,7 +44,7 @@
         formControlName="autotypeShortcut">
     </div>
     <div formGroupName="input" class="inputgroup">
-      <label class="label" for="autotypeUsernameOnlyShortcut">Autotype username only<br/> hotkey:</label>
+      <label class="label" for="autotypeUsernameOnlyShortcut">Autotype username only hotkey:</label>
       <input
         style="width: 160px"
         appHotkeyBinder
@@ -53,13 +53,26 @@
         formControlName="autotypeUsernameOnlyShortcut">
     </div>
     <div formGroupName="input" class="inputgroup">
-      <label class="label" for="autotypePasswordOnlyShortcut">Autotype password only<br/> hotkey:</label>
+      <label class="label" for="autotypePasswordOnlyShortcut">Autotype password only hotkey:</label>
       <input
         style="width: 160px"
         appHotkeyBinder
         id="autotypePasswordOnlyShortcut"
         type="text"
         formControlName="autotypePasswordOnlyShortcut">
+    </div>
+    <div class="section-header">
+      Links
+    </div>
+    <div formGroupName="toggle" class="inputgroup checkbox">
+      <label class="label" for="insecureUrl">Show insecure url prompt:</label>
+      <label class="switch">
+        <input
+          id="insecureUrl"
+          type="checkbox"
+          formControlName="showInsecureUrlPrompt">
+          <span class="slider"></span>
+      </label>
     </div>
     <div class="section-header">
       Lock database after inactive time
@@ -98,6 +111,19 @@
           id="saveOnLock"
           type="checkbox"
           formControlName="saveOnLock">
+          <span class="slider"></span>
+      </label>    
+    </div>
+    <div class="section-header">
+      Other
+    </div>
+    <div formGroupName="toggle" class="inputgroup checkbox">
+      <label class="label" for="protectWindowsFromCapture">Do not allow window screenshots:</label>
+      <label class="switch">
+        <input
+          id="protectWindowsFromCapture"
+          type="checkbox"
+          formControlName="protectWindowsFromCapture">
           <span class="slider"></span>
       </label>    
     </div>

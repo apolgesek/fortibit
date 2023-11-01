@@ -1,24 +1,31 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, ComponentRef, DestroyRef, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ComponentRef, DestroyRef, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupId } from '@app/core/enums';
-import { IMessageBroker } from '@app/core/models';
 import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { PasswordStrengthMeterComponent } from '@app/shared/components/password-strength-meter/password-strength-meter.component';
+import { DateMaskDirective } from '@app/shared/directives/date-mask.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
+import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
-import { IHistoryEntry, IPasswordEntry, IpcChannel } from '../../../../../../shared/index';
+import { IAppConfig } from '@config/app-config';
+import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { fromEvent } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import * as zxcvbn from 'zxcvbn';
-import { IAppConfig } from '../../../../../../app-config';
-import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { DateMaskDirective } from '../../../../shared/directives/date-mask.directive';
-import { valueMatchValidator } from '../../../../shared/validators/value-match.validator';
-import { PasswordStrengthMeterComponent } from '@app/shared/components/password-strength-meter/password-strength-meter.component';
+
+export interface IEntryDialogDataPayload {
+  decryptedPassword: string;
+  config?: {
+    readonly: boolean
+  };
+  historyEntry?: IHistoryEntry;
+}
 
 @Component({
   selector: 'app-entry-dialog',
@@ -48,23 +55,21 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   public passwordVisible = false;
 
   public readonly ref!: ComponentRef<EntryDialogComponent>;
-  public readonly additionalData!: IAdditionalData;
+  public readonly additionalData!: IAdditionalData<IEntryDialogDataPayload>;
   public readonly isControlInvalid = isControlInvalid;
 
-  private lastTrigger: 'click' | 'keydown';
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly fb = inject(FormBuilder);
+  private readonly messageBroker = inject(MessageBroker);
+  private readonly configService = inject(ConfigService);
+  private readonly clipboardService = inject(ClipboardService);
+  private readonly modalRef = inject(ModalRef);
+  private readonly entryManager = inject(EntryManager);
+  private readonly groupManager = inject(GroupManager);
+  private readonly notificationService = inject(NotificationService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
-  constructor(
-    private readonly destroyRef: DestroyRef,
-    private readonly fb: FormBuilder,
-    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-    private readonly configService: ConfigService,
-    private readonly clipboardService: ClipboardService,
-    private readonly modalRef: ModalRef,
-    private readonly entryManager: EntryManager,
-    private readonly groupManager: GroupManager,
-    private readonly notificationService: NotificationService,
-    private readonly cdRef: ChangeDetectorRef
-  ) {}
+  private lastTrigger: 'click' | 'keydown';
 
   get header(): string {
     if (this.entryManager.editedEntry) {
@@ -80,7 +85,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
   get entryGroupName(): string {
     return this.entryManager.editedEntry
-      ? this.entryManager.selectedPasswords[0]?.group
+      ? this.entryManager.editedEntry?.group
       : this.groupManager.selectedGroup !== GroupId.AllItems
         ? this.groupManager.selectedGroupName
         : this.groupManager.groups.find(g => g.id === GroupId.Root).name;
@@ -109,7 +114,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
 
     this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
       this.config = config;
-      const passwordMask = new Array(this.additionalData?.payload?.decryptedPassword?.length
+      const passwordMask = new Array(this.additionalData?.payload.decryptedPassword?.length
         ?? Math.ceil(this.config.encryption.passwordLength / 2)).fill('*');
 
       this.newEntryForm = this.fb.group({

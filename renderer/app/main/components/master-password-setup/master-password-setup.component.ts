@@ -5,14 +5,13 @@ import { IMessageBroker } from '@app/core/models';
 import { WorkspaceService } from '@app/core/services';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
-import { IpcChannel } from '../../../../../shared/ipc-channel.enum';
+import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 
 interface IGetSaveSatus {
   status: boolean;
   message: string;
-  file: any;
 }
 
 @Component({

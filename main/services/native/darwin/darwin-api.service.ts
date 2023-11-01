@@ -1,19 +1,28 @@
 import { execSync } from 'child_process';
 import { INativeApiService } from '../native-api.model';
+import { systemPreferences } from 'electron';
 
 export class DarwinApiService implements INativeApiService {
-  listCredentials(): Promise<string[]> {
-    throw new Error('Method not implemented.');
-  }
+  setWindowAffinity(handle: Buffer, enabled: boolean): void {}
 
-  getPassword(windowHandleHex: Buffer, dbPath: string): Promise<string> {
-    throw new Error('Method not implemented.');
+  async getPassword(windowHandleHex: Buffer, dbPath: string): Promise<string> {
+    try {
+      await systemPreferences.promptTouchID('asd');
+      return 'test'
+    } catch(err) {
+      console.log('Could not verify identity with Touch ID.');
+    }
   }
 
   saveCredential(dbPath: string, password: string): void {
     throw new Error('Method not implemented.');
   }
+    
   removeCredential(dbPath: string): void {
+    throw new Error('Method not implemented.');
+  }
+
+  listCredentials(): Promise<string[]> {
     throw new Error('Method not implemented.');
   }
 
@@ -35,11 +44,11 @@ export class DarwinApiService implements INativeApiService {
 
   getActiveWindowTitle(): string {
     try {
-        const title = execSync('osascript GetActiveWindowTitle.scpt', { cwd: __dirname });
+      const title = execSync('osascript GetActiveWindowTitle.scpt', { cwd: __dirname });
 
-        return title.toString('utf-8')
+      return title.toString('utf-8')
     } catch (error) {
-        console.log(error);
+      console.log(error);
     }
   }
 

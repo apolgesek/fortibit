@@ -1,5 +1,5 @@
 import { AppViewContainer } from '@app/core/services';
-import { ApplicationRef, ComponentRef, Directive, ElementRef, EmbeddedViewRef, HostBinding, HostListener, Inject, Input, Renderer2 } from '@angular/core';
+import { ApplicationRef, ComponentRef, Directive, ElementRef, EmbeddedViewRef, HostListener, Inject, Input, Renderer2 } from '@angular/core';
 import { TooltipComponent } from '../components/tooltip/tooltip.component';
 import { DOCUMENT } from '@angular/common';
 
@@ -15,13 +15,14 @@ export class TooltipDirective {
   private componentRef!: ComponentRef<TooltipComponent>;
   private timeout: any;
   private mouseEntered = false;
+  private observer: MutationObserver;
 
   constructor(
     private readonly appViewContainer: AppViewContainer,
     private readonly elRef: ElementRef,
     private readonly renderer: Renderer2,
     private readonly appRef: ApplicationRef,
-    @Inject(DOCUMENT) private readonly document: Document
+    @Inject(DOCUMENT) private readonly document: Document,
   ) {}
 
   @HostListener('focusin', ['$event'])
@@ -64,6 +65,21 @@ export class TooltipDirective {
       ? (this.elRef.nativeElement as HTMLElement).parentElement
       : this.document.body;
     this.renderer.appendChild(parent, componentNode);
+
+    this.observer = new MutationObserver((mutationsList) => {
+      mutationsList.forEach((mutation) => {
+        mutation.removedNodes.forEach((removedNode) => {
+          if (removedNode.contains(this.elRef.nativeElement)) {
+            if (this.componentRef) {
+              this.destroyTooltipComponent();
+            }
+            this.observer.disconnect();
+          }
+        });
+      });
+    });
+
+    this.observer.observe(this.document.body, { subtree: true, childList: true });
   }
 
   destroyTooltipComponent() {

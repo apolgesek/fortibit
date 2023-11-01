@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@angular/core';
-import { IPasswordEntry, IpcChannel } from '../../../../shared/index';
 import { NotificationService } from '@app/core/services/notification.service';
-import { IMessageBroker } from '../models';
+import { IAppConfig } from '@config/app-config';
+import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
+import { IMessageBroker } from '../models';
 import { ConfigService } from './config.service';
-import { IAppConfig } from '../../../../app-config';
 
 interface ICopyTextModel {
   value: string;

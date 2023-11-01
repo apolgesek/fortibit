@@ -1,12 +1,12 @@
+import { IAppConfig } from '@root/app-config';
+import { IProduct } from '@root/product';
+import { IpcChannel, getDefaultConfig } from '@shared-renderer/index';
 import * as merge from 'deepmerge';
-import { app, ipcMain } from 'electron';
+import { IpcMainEvent, app, ipcMain } from 'electron';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { writeFileSync } from 'fs-extra';
 import * as os from 'os';
 import { join } from 'path';
-import { IAppConfig } from '../../../app-config';
-import { IProduct } from '../../../product';
-import { IpcChannel, getDefaultConfig } from '../../../shared';
 import { INativeApiService } from '../native';
 import { IConfigService } from './index';
 
@@ -61,6 +61,7 @@ export class ConfigService implements IConfigService {
       os: `${os.type()} ${os.release()}`,
       fileExtension: 'fbit',
       temporaryFileExtension: 'tmp',
+      e2eFilesPath: process.env.E2E_FILES_PATH,
       workspaces: workspacesInformation,
       name: productInformation.name,
       commit: productInformation.commit,
@@ -88,8 +89,10 @@ export class ConfigService implements IConfigService {
       displayIcons: productInformation.displayIcons,
       autoTypeEnabled: productInformation.autoTypeEnabled,
       theme: productInformation.theme ?? 'light',
-      biometricsProtectedFiles: []
-    });
+      showInsecureUrlPrompt: productInformation.showInsecureUrlPrompt,
+      biometricsProtectedFiles: [],
+      protectWindowsFromCapture: productInformation.protectWindowsFromCapture
+    } as IAppConfig);
 
     ipcMain.handle(IpcChannel.GetAppConfig, async () => {
       const paths = await this._nativeApiService.listCredentials();
@@ -97,6 +100,10 @@ export class ConfigService implements IConfigService {
 
       return this.appConfig;
     });
+
+    ipcMain.on(IpcChannel.ConfigChanged, (_: IpcMainEvent, config: Partial<IAppConfig>) => {
+      this.set(config);
+    })
   }
 
   set(settings: Partial<IAppConfig>) {
@@ -109,7 +116,8 @@ export class ConfigService implements IConfigService {
       'os',
       'fileExtension',
       'temporaryFileExtension',
-      'workspaces'
+      'workspaces',
+      'e2eFilesPath'
     ];
     writeFileSync(this._productPath, JSON.stringify(this._appConfig, (key: keyof IAppConfig, value) => {
       if (excludedKeys.includes(key)) {

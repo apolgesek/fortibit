@@ -122,25 +122,26 @@ button {
 	border-radius: 0.25rem;
 	position: relative;
 
+	&.star {
+		&.active {
+			svg {
+				fill: $barberry;
+				stroke: $barberry;
+			}
+	
+			&.is-animating svg {
+				animation-duration: calc(var(--base-animation-duration) * 1ms);
+				animation-timing-function: ease-in;
+				animation-name: star;
+			}
+		}
+	}
+
 	i-feather {
 		color: var(--primary-text) !important;
 		width: 1.25rem !important;
 		height: 1.25rem !important;
 		margin: 0 !important;
-	}
-
-	&.active {
-		background: $blue-200;
-
-		&:hover,&:focus {
-			i-feather {
-				color: var(--primary-btn-text) !important;
-			}
-		}
-
-		i-feather {
-			color: var(--primary-btn-text) !important;
-		}
 	}
 
 	&:first-child {
@@ -211,4 +212,12 @@ button {
 			color: var(--primary-text);
 		}
 	}
+}
+
+@keyframes star {
+	0%	{transform: scale(1);}
+	20%	{transform: scale(1.5);}
+	40%	{transform: scale(0.9);}
+	80%	{transform: scale(1.2);}
+	100%	{transform: scale(1);}
 }

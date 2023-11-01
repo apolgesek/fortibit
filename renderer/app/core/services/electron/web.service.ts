@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IMessageBroker } from '@app/core/models';
-import { IpcChannel } from '../../../../../shared/ipc-channel.enum';
-import { IAppConfig } from '../../../../../app-config';
+import { IAppConfig } from '@config/app-config';
+import { IpcChannel } from '@shared-renderer/index';
 
 @Injectable()
 export class WebService implements IMessageBroker {
@@ -35,6 +35,7 @@ export class WebService implements IMessageBroker {
   }
 
   getPlatform(): Promise<string> {
-    return Promise.resolve('web');
+    this.platform = 'web';
+    return Promise.resolve(this.platform);
   }
 }

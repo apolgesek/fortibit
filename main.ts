@@ -1,3 +1,9 @@
+var moduleAlias = require('module-alias');
+moduleAlias.addAliases({
+  '@root': __dirname,
+  '@shared-renderer': __dirname + '/shared',
+});
+
 import { app } from 'electron';
 import { bootstrapApp } from './main/main';
 

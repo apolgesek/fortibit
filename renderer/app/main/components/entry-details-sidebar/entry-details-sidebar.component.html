@@ -17,35 +17,34 @@
 					[attr.aria-label]="entry?.isStarred ? 'Remove from favorites' : 'Add to favorites'"
 					appTooltip="Favorite"
 					id="add-favorites-btn"
-					class="action-btn"
-					[ngClass]="{ 'active': entry?.isStarred }"
+					class="action-btn star"
+					[ngClass]="{ 'active': entry?.isStarred, 'is-animating': isAnimating }"
 					(click)="toggleStarred(entry)">
-					<i-feather [@star]="isFavoriteAnimationInProgress" (@star.done)="isFavoriteAnimationInProgress = false" name="star"></i-feather>
+					<i-feather name="star"></i-feather>
 				</button>
-				<button appTooltip="History" aria-label="Entry history" (click)="openEntryHistory()" class="action-btn" id="open-history-btn">
+				<button
+					appTooltip="History"
+					aria-label="Entry history"
+					(click)="openEntryHistory()"
+					id="open-history-btn"
+					class="action-btn">
 					<i-feather name="book"></i-feather>
 				</button>
 				<button
 					*ngIf="entry.url"
 					appTooltip="Open {{ isUnsecured ? 'insecure' : '' }} link"
 					[attr.aria-label]="'Open ' + (isUnsecured ? 'insecure' : '') + ' link'"
-					(click)="openUrl(entry.url)"
+					(click)="openUrl(entry.url); false;"
 					id="open-url-btn"
 					class="action-btn">
 					<i-feather name="link"></i-feather>
 				</button>
-				<!-- <button
-					aria-label="Share"
-					appTooltip="Share"
-					class="action-btn">
-					<i-feather name="share"></i-feather>
-				</button> -->
 			</div>
 
 			<div *ngIf="entry?.url" class="section">
 				<div class="subsection">
 					<p class="label">URL <i-feather appTooltip="http:// protocol is not secure Use https if possible" *ngIf="isUnsecured" name="alert-circle" class="url-alert-icon"></i-feather></p>
-					<p class="word-wrap"><span class="url-protocol">{{ isUnsecured ? 'http://' : 'https://' }}</span><a (click)="openUrl(entry?.url)" href="#">{{ entry?.url | link }}</a></p>
+					<p class="word-wrap"><span class="url-protocol">{{ isUnsecured ? 'http://' : 'https://' }}</span><a (click)="openUrl(entry?.url); false" href="#">{{ entry?.url | link }}</a></p>
 				</div>
 			</div>
 
@@ -55,7 +54,13 @@
 					<p>{{ entry?.username }}</p>
 				</div>
 				<div>
-					<a href="#" class="copy" (click)="copyToClipboard(entry, 'username'); false" appTooltip="Copy" aria-label="Copy" container="body">
+					<a
+						href="#"
+						class="copy"
+						(click)="copyToClipboard(entry, 'username'); false"
+						appTooltip="Copy"
+						aria-label="Copy"
+						container="body">
 						<i-feather name="copy"></i-feather>
 					</a>
 				</div>
@@ -67,7 +72,13 @@
 					<p>••••••</p>
 				</div>
 				<div>
-					<a href="#" class="copy" (click)="copyToClipboard(entry, 'password'); false" appTooltip="Copy" aria-label="Copy" container="body">
+					<a
+						href="#"
+						class="copy"
+						(click)="copyToClipboard(entry, 'password'); false"
+						appTooltip="Copy"
+						aria-label="Copy"
+						container="body">
 						<i-feather name="copy"></i-feather>
 					</a>
 				</div>
@@ -113,14 +124,14 @@
 				 <span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
 				 <i-feather name="info" (click)="openAutotypeInformation()"></i-feather>
 			 	</p>
-				 <p>
+				<p>
 					<span class="subtype">Username:</span> {{ config.autocompleteUsernameOnlyShortcut }}
 					<span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
 				</p>
 				<p>
 					<span class="subtype">Password:</span> {{ config.autocompletePasswordOnlyShortcut }}
 					<span *ngIf="!config.autoTypeEnabled" class="validation-error">(disabled)</span>
-					</p>
+				</p>
 			</div>
 		</div>
 	</div>

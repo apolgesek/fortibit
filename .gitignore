@@ -57,3 +57,5 @@ main/services/native/**/build
 /test-results/
 /playwright-report/
 /playwright/.cache/
+e2e/*.fbit
+__tests__/output

@@ -15,6 +15,9 @@
   --tooltip-bg: #{#000000b3};
   --context-menu-bg: #{$white};
 
+  // BRAND
+  --brand-color: #{#1b81d7};
+
   // LIST ITEM
   --list-item-bg--hover: #{$grey-100};
   --list-item-bg--active: #{lighten($blue-100, 7)};
@@ -98,4 +101,6 @@
   --border-color: #{$grey-200};
   --input-inset-shadow: #{darken($grey-100, 1)};
   --icon-secondary: #{$grey-400};
+
+  --base-animation-duration: #{$base-animation-duration};
 }

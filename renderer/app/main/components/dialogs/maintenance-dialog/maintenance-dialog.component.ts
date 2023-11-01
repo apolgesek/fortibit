@@ -74,4 +74,8 @@ export class MaintenanceDialogComponent implements IModal, OnInit {
       this.maintenanceForm.get(controlName).setValue(input.value);
     }
   }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (/^[-e\.+\s]$/.test(event.key)) event.preventDefault();
+  }
 }

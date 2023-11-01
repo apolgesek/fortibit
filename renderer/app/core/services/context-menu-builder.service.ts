@@ -1,22 +1,18 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
 import { MenuItem } from '@app/shared';
 import { HotkeyHandler } from 'injection-tokens';
 import { ClipboardService, EntryManager } from '.';
-import { IHotkeyHandler } from '../models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContextMenuBuilderService {
+  private readonly modalService = inject(ModalService);
+  private readonly clipboardService = inject(ClipboardService);
+  private readonly entryManager = inject(EntryManager);
+  private readonly hotkeyHandler = inject(HotkeyHandler);
   private contextMenuItems: MenuItem[] = [];
-
-  constructor(
-    private readonly modalService: ModalService,
-    private readonly clipboardService: ClipboardService,
-    private readonly entryManager: EntryManager,
-    @Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler
-  ) {}
 
   buildGroupContextMenuItems(configuration: { isRoot: boolean } = { isRoot: false }): this {
     this.contextMenuItems = [

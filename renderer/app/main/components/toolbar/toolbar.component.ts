@@ -48,7 +48,7 @@ export class ToolbarComponent {
   ) {}
 
   get searchMode(): string {
-    return this.isGlobalSearchMode ? 'Search all groups' : 'Search selected group';
+    return this.isGlobalSearchMode ? 'Search selected group' : 'Search all groups';
   }
 
   get isDatabaseInSync(): boolean {

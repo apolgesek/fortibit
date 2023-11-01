@@ -3,8 +3,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfigService } from '@app/core/services';
 import { isControlInvalid } from '@app/utils';
-import { debounceTime, distinctUntilChanged, Subject, take, takeUntil } from 'rxjs';
-import { IProduct } from '../../../../../../../product';
+import { IProduct } from '@config/product';
+import { Subject, debounceTime, distinctUntilChanged, take, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-encryption-tab',

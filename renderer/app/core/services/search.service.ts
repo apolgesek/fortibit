@@ -99,7 +99,11 @@ export class SearchService implements ISearchService {
         const firstProp = a[this.sortProp];
         const secondProp = b[this.sortProp];
 
-        return firstProp.getTime() - secondProp.getTime();
+        if (firstProp instanceof Date && secondProp instanceof Date) {
+          return firstProp.getTime() - secondProp.getTime();
+        } else {
+          return (firstProp as number) - (secondProp as number);
+        }
       } else if (this.sortProp === 'title' || this.sortProp === 'username') {
         const firstProp = a[this.sortProp];
         const secondProp = b[this.sortProp];
@@ -119,7 +123,11 @@ export class SearchService implements ISearchService {
         const firstProp = a[this.sortProp];
         const secondProp = b[this.sortProp];
 
-        return secondProp.getTime() - firstProp.getTime();
+        if (firstProp instanceof Date && secondProp instanceof Date) {
+          return secondProp.getTime() - firstProp.getTime();
+        } else {
+          return (secondProp as number) - (firstProp as number);
+        }
       } else if (this.sortProp === 'title' || this.sortProp === 'username') {
         const firstProp = a[this.sortProp];
         const secondProp = b[this.sortProp];

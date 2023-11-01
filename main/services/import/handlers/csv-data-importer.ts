@@ -1,7 +1,9 @@
+import { getDefaultPath, getFileFilter } from '@root/main/util';
 import * as csv from 'csv-parser';
 import { dialog } from 'electron';
 import { createReadStream } from 'fs-extra';
 import { IPasswordEntry, ImportHandler } from '../../../../shared';
+import { IConfigService } from '../../config';
 import { IEncryptionEventWrapper, MessageEventType } from '../../encryption';
 import { IWindowService } from '../../window';
 import { IImportHandler } from '../import-handler.model';
@@ -14,13 +16,16 @@ export abstract class CsvDataImporter<T> implements IImportHandler {
 
   constructor(
     protected readonly _windowService: IWindowService,
-    protected readonly _encryptionEventWrapper: IEncryptionEventWrapper) {
+    protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
+    protected readonly _configService: IConfigService
+  ) {
   }
 
   async getMetadata(): Promise<IImportMetadata> {
     const fileObj = await dialog.showOpenDialog({
       properties: ['openFile'],
-      filters: [{ name: 'Comma Separated Values File', extensions: ['csv'] }]
+      defaultPath: getDefaultPath(this._configService.appConfig, ''),
+      filters: [getFileFilter(this._configService.appConfig, 'csv')]
     });
 
     if (fileObj.canceled) {
@@ -110,7 +115,7 @@ export abstract class CsvDataImporter<T> implements IImportHandler {
       if (Object.prototype.hasOwnProperty.call(object, key)) {
         const element = object[key];
         if (typeof element !== typeof this.mock[key]) {
-          if (typeof this.mock[key] === 'number' && Number.isInteger(parseInt(element as string))) {
+          if (typeof this.mock[key] === 'number' && Number.isInteger(parseInt(element as unknown as string))) {
             continue;
           }
 

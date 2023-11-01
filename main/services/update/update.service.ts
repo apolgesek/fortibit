@@ -1,9 +1,9 @@
+import { IpcChannel, UpdateState } from '@shared-renderer/index';
 import { app, ipcMain, IpcMainEvent } from 'electron';
 import { emptyDirSync, existsSync, mkdirSync, readdirSync, renameSync } from 'fs-extra';
 import { request } from 'https';
 import { arch, platform } from 'os';
 import { join } from 'path';
-import { IpcChannel, UpdateState } from '../../../shared';
 import { IConfigService } from '../config/config-service.model';
 import { IFileService } from '../file/file-service.model';
 import { INativeApiService } from '../native/native-api.model';
@@ -41,7 +41,6 @@ export class UpdateService implements IUpdateService {
         return;
       }
 
-      await this.sleep(1000);
       this._windowService.getWindowByWebContentsId(event.sender.id)
         .browserWindow.webContents
         .send(IpcChannel.UpdateState, this.updateState, this._updateInformation?.version);

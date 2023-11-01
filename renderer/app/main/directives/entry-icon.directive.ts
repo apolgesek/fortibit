@@ -1,8 +1,8 @@
 import { AfterViewInit, Directive, ElementRef, Inject, Input } from '@angular/core';
 import { IMessageBroker } from '@app/core/models';
 import { EntryManager } from '@app/core/services';
+import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { IPasswordEntry, IpcChannel } from '../../../../shared';
 
 @Directive({
   selector: '[appEntryIcon]',

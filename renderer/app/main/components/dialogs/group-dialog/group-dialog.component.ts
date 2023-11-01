@@ -8,6 +8,10 @@ import { CommonModule } from '@angular/common';
 import { FeatherModule } from 'angular-feather';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+export interface IGroupDialogDataPayload {
+  mode: 'new' | 'edit';
+}
+
 @Component({
   selector: 'app-group-dialog',
   templateUrl: './group-dialog.component.html',
@@ -22,7 +26,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class GroupDialogComponent implements IModal, OnInit {
   public readonly ref!: ComponentRef<GroupDialogComponent>;
-  public readonly additionalData!: IAdditionalData;
+  public readonly additionalData!: IAdditionalData<IGroupDialogDataPayload>;
   public readonly isControlInvalid = isControlInvalid;
 
   public groupForm: FormGroup;
@@ -64,7 +68,6 @@ export class GroupDialogComponent implements IModal, OnInit {
       await this.groupManager.updateGroup({
         id: this.groupManager.selectedGroup,
         name,
-        lastModificationDate: new Date()
       });
     }
 
@@ -80,9 +83,7 @@ export class GroupDialogComponent implements IModal, OnInit {
   }
 
   ngOnInit(): void {
-    const mode = this.additionalData?.payload?.mode;
-
-    if (mode === 'edit') {
+    if (this.additionalData?.payload?.mode === 'edit') {
       this.title = 'Edit group';
       this.groupForm.get('name').setValue(this.groupManager.selectedGroupName);
     }

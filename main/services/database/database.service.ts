@@ -1,25 +1,24 @@
-import { app, dialog, FileFilter, ipcMain, IpcMainEvent, IpcMainInvokeEvent, powerMonitor, safeStorage, session } from 'electron';
-import { copyFile, copyFileSync, existsSync, mkdirSync, rename, unlink, unlinkSync, writeFile } from 'fs';
+import { CsvWriter, getDefaultPath, getFileFilter, getHashCode } from '@root/main/util';
+import { IProduct } from '@root/product';
+import { ImportHandler, IpcChannel } from '@shared-renderer/index';
+import { IpcMainEvent, IpcMainInvokeEvent, app, dialog, ipcMain, powerMonitor, safeStorage, session } from 'electron';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, unlinkSync } from 'fs';
 import { emptyDirSync, readFileSync, writeFileSync } from 'fs-extra';
 import { generate } from 'generate-password';
 import { basename, join } from 'path';
-import { IProduct } from '../../../product';
-import { ImportHandler, IpcChannel } from '../../../shared';
-import { CsvWriter, getHashCode } from '../../util';
+import { ProcessArgument } from '../../process-argument.enum';
 import { IConfigService } from '../config';
 import { IEncryptionEventService } from '../encryption/encryption-event-service.model';
 import { IExportService } from '../export';
 import { IIconService } from '../icon';
 import { IImportService } from '../import';
+import { INativeApiService } from '../native';
 import { IWindowService } from '../window';
 import { IDatabaseService } from './database-service.model';
 import { ISaveFilePayload } from './save-file-payload';
-import { INativeApiService } from '../native';
-import { ProcessArgument } from '../../process-argument.enum';
 
 export class DatabaseService implements IDatabaseService {
   private readonly _isTestMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E));
-  private readonly _fileFilters: { filters: FileFilter[] };
   private readonly _tmpDirectoryPath: string;
   private readonly _fileMap: Map<number, { file: string, password?: Buffer }> = new Map<number, { file: string, password?: Buffer }>();
   private readonly _screenLockHandler = () => {
@@ -64,10 +63,6 @@ export class DatabaseService implements IDatabaseService {
     @INativeApiService private readonly _nativeApiService: INativeApiService,
     @IEncryptionEventService private readonly _encryptionEventService: IEncryptionEventService
   ) {
-    this._fileFilters = {
-      filters: [{ name: 'Fortibit database file', extensions: [ this._configService.appConfig.fileExtension ] }]
-    };
-
     this._tmpDirectoryPath = join(app.getPath('appData'), this._configService.appConfig.name.toLowerCase(), 'tmp');
     if (!existsSync(this._tmpDirectoryPath)) {
       mkdirSync(this._tmpDirectoryPath);
@@ -142,8 +137,11 @@ export class DatabaseService implements IDatabaseService {
       const saveReturnValue = await dialog.showSaveDialog(
         this._windowService.getWindowByWebContentsId(event.sender.id).browserWindow,
         {
-          defaultPath: `exposed_passwords_report_${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`,
-          filters: [{ name: 'Comma Separated Values File', extensions: ['csv'] }]
+          defaultPath: getDefaultPath(
+            this._configService.appConfig,
+            `exposed_passwords_report_${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
+          ),
+          filters: [getFileFilter(this._configService.appConfig, 'csv')],
         }
       );
       
@@ -157,8 +155,11 @@ export class DatabaseService implements IDatabaseService {
       const saveReturnValue = await dialog.showSaveDialog(
         this._windowService.getWindowByWebContentsId(event.sender.id).browserWindow,
         {
-          defaultPath: `weak_passwords_report_${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`,
-          filters: [{ name: 'Comma Separated Values File', extensions: ['csv'] }]
+          defaultPath: getDefaultPath(
+            this._configService.appConfig,
+            `weak_passwords_report_${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
+          ),
+          filters: [getFileFilter(this._configService.appConfig, 'csv')]
         }
       );
 
@@ -182,7 +183,7 @@ export class DatabaseService implements IDatabaseService {
       this.removeRecoveryFile(event.sender.id);
     });
 
-    ipcMain.on(IpcChannel.ChangeEncryptionSettings, (_: IpcMainEvent, form: Partial<IProduct>) => {
+    ipcMain.handle(IpcChannel.ChangeScreenLockSettings, (_: IpcMainEvent, form: Partial<IProduct>) => {
       this.changeEncryptionSettings(form);
     });
 
@@ -217,6 +218,19 @@ export class DatabaseService implements IDatabaseService {
     if (this._configService.appConfig.lockOnSystemLock) {
       powerMonitor.addListener('lock-screen', this._screenLockHandler);
     }
+
+    if (this._isTestMode) {
+      ipcMain.handle(IpcChannel.TestCleanup, (_: IpcMainEvent) => {
+        try {
+          const files = readdirSync(this._configService.appConfig.e2eFilesPath);
+          files.filter(f => /test_\d+\.(fbit|csv)/.test(f)).forEach(f => unlinkSync(join(this._configService.appConfig.e2eFilesPath, f)));
+  
+          return true;
+        } catch (err) {
+          return false;
+        }
+      });
+    }
   }
 
   public async biometricsDecrypt(event: IpcMainEvent): Promise<void> {
@@ -247,7 +261,7 @@ export class DatabaseService implements IDatabaseService {
 
   public setDatabaseEntry(windowId: number, filePath: string) {
     this._fileMap.set(windowId, { file: filePath });
-    const workspaces = this._configService.appConfig.workspaces;
+    const workspaces: { recentlyOpened: string[] } = this._configService.appConfig.workspaces;
     const fileIndex = workspaces.recentlyOpened.findIndex(x => x === filePath);
 
     if (fileIndex > -1) {
@@ -260,7 +274,11 @@ export class DatabaseService implements IDatabaseService {
       workspaces.recentlyOpened.length = 10;
     }
 
-    writeFileSync(this._configService.workspacesPath, JSON.stringify({ workspace: filePath, recentlyOpened: workspaces.recentlyOpened }), { encoding: 'utf8' });  
+    writeFileSync(
+      this._configService.workspacesPath,
+      JSON.stringify({ workspace: filePath, recentlyOpened: workspaces.recentlyOpened }),
+      { encoding: 'utf8' }
+    );  
   }
 
   public getFilePath(windowId: number): string {
@@ -272,7 +290,10 @@ export class DatabaseService implements IDatabaseService {
     const window = this._windowService.getWindowByWebContentsId(event.sender.id);
 
     if (saveFilePayload.config?.forceNew || (!this.getPassword(event.sender.id) && saveFilePayload.password)) {
-      savePath = await dialog.showSaveDialog(window.browserWindow, this._fileFilters);
+      savePath = await dialog.showSaveDialog(window.browserWindow, {
+        defaultPath: getDefaultPath(this._configService.appConfig, ''),
+        filters: [getFileFilter(this._configService.appConfig, 'vaultExt')]
+      });
 
       if (savePath.canceled) {
         event.reply(IpcChannel.GetSaveStatus, { status: false });
@@ -285,7 +306,8 @@ export class DatabaseService implements IDatabaseService {
       this._windowService.setIdleTimer();
     }
 
-    const payload = await this._encryptionEventService.saveDatabase(saveFilePayload.database, saveFilePayload.password ?? this.getPassword(event.sender.id) , window.key);
+    const password = saveFilePayload.password ?? this.getPassword(event.sender.id);
+    const payload = await this._encryptionEventService.saveDatabase(saveFilePayload.database, password, window.key);
     const finalFilePath = savePath.filePath.endsWith(this._configService.appConfig.fileExtension)
       ? savePath.filePath
       : this.appendExtension(savePath.filePath);
@@ -294,24 +316,28 @@ export class DatabaseService implements IDatabaseService {
       const temporaryPath = this.createTemporaryPathFrom(finalFilePath);
 
       try {
-        writeFileSync(temporaryPath,  payload.encrypted, { encoding: 'base64' });
+        writeFileSync(temporaryPath, payload.encrypted, { encoding: 'base64' });
       } catch (err) {
-        unlink(temporaryPath, (err) => { if (err) throw err; });
+        unlinkSync(temporaryPath);
         return;
       }
 
       try {
         copyFileSync(temporaryPath, finalFilePath);
       } catch (err) {
-        rename(temporaryPath, finalFilePath, (err) => { if (err) throw err; });
+        renameSync(temporaryPath, finalFilePath);
         return;
       }
 
-      unlink(temporaryPath, (err) => { if (err) throw err; });
+      unlinkSync(temporaryPath);
 
       this._fileMap.get(event.sender.id).file = finalFilePath;
       this._windowService.setTitle(event.sender.id, basename(finalFilePath));
       this.removeRecoveryFile(event.sender.id);
+
+      if (this._configService.appConfig.biometricsProtectedFiles.includes(finalFilePath)) {
+        this._nativeApiService.saveCredential(finalFilePath, password);
+      }
       
       event.reply(IpcChannel.GetSaveStatus, {
         status: true,
@@ -343,7 +369,8 @@ export class DatabaseService implements IDatabaseService {
     if (!path) {
       openDialogReturnValue = await dialog.showOpenDialog({
         properties: ['openFile'],
-        filters: [{  name: 'Fortibit database file', extensions: [this._configService.appConfig.fileExtension] }]
+        defaultPath: getDefaultPath(this._configService.appConfig, ''),
+        filters: [getFileFilter(this._configService.appConfig, 'vaultExt')]
       });
     }
 
@@ -375,7 +402,7 @@ export class DatabaseService implements IDatabaseService {
     }
   }
 
-  public async decryptDatabase(event: { sender: { id: number } }, password: string): Promise<void> {
+  public async decryptDatabase(event: { sender: { id: number } }, password: string): Promise<void> {    
     const window = this._windowService.getWindowByWebContentsId(event.sender.id);
     const key = this._windowService.getSecureKey();
 
@@ -387,22 +414,17 @@ export class DatabaseService implements IDatabaseService {
         window.key = key;
         this.setPassword(password, event.sender.id);
         const parsedDb = JSON.parse(payload.decrypted);
-        const stores = parsedDb.data.data;
-        const entriesStore = stores.find(x => x.tableName === 'entries');
-        entriesStore.rows = this._iconService.fixIcons(entriesStore.rows);
+        parsedDb.entries = this._iconService.fixIcons(parsedDb.entries);
         payload.decrypted = JSON.stringify(parsedDb);
-        this._iconService.getIcons(window.browserWindow.id, entriesStore.rows);
+        this._iconService.getIcons(window.browserWindow.id, parsedDb.entries);
         this._windowService.setIdleTimer();
 
-        this._windowService.getWindowByWebContentsId(event.sender.id)
-          .browserWindow.webContents.send(IpcChannel.DecryptedContent, { decrypted: payload.decrypted });
+        window.browserWindow.webContents.send(IpcChannel.DecryptedContent, { decrypted: payload.decrypted });
       } else {
-        this._windowService.getWindowByWebContentsId(event.sender.id)
-        .browserWindow.webContents.send(IpcChannel.DecryptedContent, { error: 'Password is invalid' });
+        window.browserWindow.webContents.send(IpcChannel.DecryptedContent, { error: 'Password is invalid' });
       }
     } catch {
-      this._windowService.getWindowByWebContentsId(event.sender.id)
-      .browserWindow.webContents.send(IpcChannel.DecryptedContent, { error: 'An error occured reading the file' });
+      window.browserWindow.webContents.send(IpcChannel.DecryptedContent, { error: 'An error occured reading the file' });
     }
   }
 
@@ -421,18 +443,6 @@ export class DatabaseService implements IDatabaseService {
   }
 
   private changeEncryptionSettings(settings: Partial<IProduct>) {
-    this.handleScreenLockSettingChange(settings);
-    const {
-      autocompleteShortcut,
-      autocompleteUsernameOnlyShortcut,
-      autocompletePasswordOnlyShortcut,
-      autoTypeEnabled,
-      ...filteredSettings
-    } = settings;
-    this._configService.set(filteredSettings);
-  }
-
-  private handleScreenLockSettingChange(settings: Partial<IProduct>) {
     if (settings.lockOnSystemLock !== this._configService.appConfig.lockOnSystemLock) {
       if (settings.lockOnSystemLock) {
         powerMonitor.addListener('lock-screen', this._screenLockHandler);

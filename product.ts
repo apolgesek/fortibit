@@ -1,4 +1,10 @@
-import { IEncryptionSettings } from "./app-config";
+interface IEncryptionSettings {
+  passwordLength: number;
+  lowercase: boolean;
+  uppercase: boolean;
+  numbers: boolean;
+  specialChars: boolean;
+}
 
 export interface IProduct {
   name: string;
@@ -22,4 +28,8 @@ export interface IProduct {
   biometricsAuthenticationEnabled: boolean;
   theme: 'dark' | 'light';
   clipboardClearTimeMs: number;
+  biometricsProtectedFiles: string[];
+  workspaces: any;
+  showInsecureUrlPrompt: boolean;
+  protectWindowsFromCapture: boolean;
 }

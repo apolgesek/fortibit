@@ -10,7 +10,9 @@
       class="icon-btn"
       type="button">
         <span class="sr-only">Settings</span>
-        <div *ngIf="notifications.length" class="badge">{{ notifications.length }} <span class="sr-only">notifications</span></div>
+        <div *ngIf="notifications.length" class="badge" [ngClass]="getNotificationTypeColor(notifications)">
+          <span class="sr-only">{{ notifications.length }} notifications</span>
+        </div>
         <i-feather name="settings"></i-feather>
     </button>
     <ul

@@ -13,7 +13,10 @@
     <form [formGroup]="maintenanceForm" (ngSubmit)="delete()">
       <div class="info-box"><i-feather name="info"></i-feather><div>If you want to delete all history entries type "0" in the input below.</div></div>
       <div class="inputgroup" style="margin-top: 2rem;">
-        <label class="label" for="historyDays">Delete history entries older than (days):</label>
+        <div style="display: flex; flex-direction: column;">
+          <label class="label" for="historyDays">Delete history entries older than (days):</label>
+          <span style="color: #63797d">Range: 0-999</span>
+        </div>
         <input
           id="historyDays"
           type="number"
@@ -21,6 +24,8 @@
           aria-describedby="history-days-invalid"
           class="number"
           formControlName="historyDays"
+          (keydown)="onKeyDown($event)"
+          (paste)="$event.preventDefault()"
           (input)="onNumberChange($event, 'historyDays', 3)" />
       </div>
       <div
@@ -38,7 +43,11 @@
   <ng-container *ngIf="cleaningInProgress === false">
     <div *ngIf="removedHistoryEntries > 0" class="result info">
       <div class="status">
-        {{ removedHistoryEntries }} entries deleted
+        {{ removedHistoryEntries }} 
+        <ng-container [ngPlural]="removedHistoryEntries">
+          <ng-template ngPluralCase="=1">entry</ng-template>
+          <ng-template ngPluralCase="few">entries</ng-template>
+        </ng-container> deleted
       </div>
     </div>
     <div *ngIf="removedHistoryEntries === 0" class="result success">

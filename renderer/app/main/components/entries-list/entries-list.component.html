@@ -34,13 +34,20 @@
 					[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
 					class="row-entry">
 					<div *ngIf="iconsEnabled" class="column-icon">
-						<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" [appEntryIcon]="item" width="28" height="28"/>
+						<img
+							src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+							[appEntryIcon]="item"
+							width="28"
+							height="28"/>
 					</div>
 					<div class="column long-text">
 						<div class="row title" [appTextEmphasize]="searchPhrase$ | async">
 							{{ item.title }}
 						</div>
-						<div class="row username" [appTextEmphasize]="searchPhrase$ | async" (dblclick)="copyToClipboard(item, 'username')">
+						<div
+							class="row username"
+							[appTextEmphasize]="searchPhrase$ | async"
+							(dblclick)="copyToClipboard(item, 'username')">
 							{{ item.username }}
 						</div>
 					</div>
@@ -58,7 +65,14 @@
 				</ng-container>
 				<ng-template #noEntriesTemplate>
 					<p class="no-entries">There are no entries in this group</p>
-					<a href="#" *ngIf="isAddPossible" id="add-entry-list" class="add-entry-list-button" (click)="addNewEntry(); false">Add entry</a>
+					<a
+						*ngIf="isAddPossible"
+						id="add-entry-list"
+						href="#" 
+						class="add-entry-list-button"
+						(click)="addNewEntry(); false">
+						Add entry
+					</a>
 				</ng-template>
 			</div>
 		</ng-template>

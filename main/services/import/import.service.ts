@@ -1,7 +1,9 @@
 import { ImportHandler } from "../../../shared";
+import { IConfigService } from "../config";
 import { IEncryptionEventWrapper } from "../encryption";
 import { IWindowService } from "../window";
 import { BitwardenHandler } from "./handlers/bitwarden-handler";
+import { FortibitHandler } from './handlers/fortibit-handler';
 import { KeePassHandler } from "./handlers/keepass-handler";
 import { LastpassHandler } from "./handlers/lastpass-handler";
 import { OnePasswordHandler } from "./handlers/onepassword-handler";
@@ -15,6 +17,7 @@ export class ImportService implements IImportService {
   constructor(
     @IWindowService private readonly _windowService: IWindowService,
     @IEncryptionEventWrapper private readonly _encryptionEventWrapper: IEncryptionEventWrapper,
+    @IConfigService private readonly _configService: IConfigService
   ) {}
 
   setHandler(type: ImportHandler) {
@@ -26,6 +29,9 @@ export class ImportService implements IImportService {
     let handler: IImportHandler;
 
     switch (type) {
+      case ImportHandler.Fortibit:
+        handler = this.create(FortibitHandler);
+        break;
       case ImportHandler.KeePass:
         handler = this.create(KeePassHandler);
         break;
@@ -50,7 +56,7 @@ export class ImportService implements IImportService {
     return this._handler;
   }
 
-  create<T extends IImportHandler>(c: new (windowService: IWindowService, encryptionProcess: IEncryptionEventWrapper) => T): IImportHandler {
-    return new c(this._windowService, this._encryptionEventWrapper);
+  create<T extends IImportHandler>(c: new (windowService: IWindowService, encryptionProcess: IEncryptionEventWrapper, configService: IConfigService) => T): IImportHandler {
+    return new c(this._windowService, this._encryptionEventWrapper, this._configService);
   }
 }

@@ -1,4 +1,5 @@
 import { ImportHandler } from '../../../../shared';
+import { IConfigService } from '../../config';
 import { IEncryptionEventWrapper } from '../../encryption';
 import { IWindowService } from '../../window';
 import { CsvDataImporter } from './csv-data-importer';
@@ -43,8 +44,9 @@ export class LastpassHandler extends CsvDataImporter<ILastpassEntry> {
 
   constructor(
     protected readonly _windowService: IWindowService,
-    protected readonly _encryptionEventWrapper: IEncryptionEventWrapper
+    protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
+    protected readonly _configService: IConfigService
   ) {
-    super(_windowService, _encryptionEventWrapper);
+    super(_windowService, _encryptionEventWrapper, _configService);
   }
 }

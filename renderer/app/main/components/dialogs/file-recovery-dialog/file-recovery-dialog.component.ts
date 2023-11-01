@@ -1,11 +1,15 @@
-import { Component, ComponentRef, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IAdditionalData, IModal } from '@app/shared';
-import { EntryManager, GroupManager, ModalRef, ModalService, WorkspaceService } from '@app/core/services';
-import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { Component, ComponentRef, Inject } from '@angular/core';
 import { IMessageBroker } from '@app/core/models';
+import { EntryManager, GroupManager, ModalRef, ModalService, WorkspaceService } from '@app/core/services';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { IpcChannel } from '../../../../../../shared/ipc-channel.enum';
+
+export interface IFileRecoveryDialogDataPayload {
+  path: string;
+}
 
 @Component({
   selector: 'app-file-recovery-dialog',
@@ -19,7 +23,7 @@ import { IpcChannel } from '../../../../../../shared/ipc-channel.enum';
 })
 export class FileRecoveryDialogComponent implements IModal {
   ref: ComponentRef<FileRecoveryDialogComponent>;
-  additionalData?: IAdditionalData;
+  additionalData?: IAdditionalData<IFileRecoveryDialogDataPayload>;
   showBackdrop?: boolean;
 
   constructor(

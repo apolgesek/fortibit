@@ -20,6 +20,7 @@
 	font-size: 0.875rem;
 	color: var(--primary-text);
 	user-select: none;
+	border-bottom: 1px solid var(--border-color);
 	-webkit-app-region: drag;
 
 	&:host-context(.modal-open) {
@@ -61,6 +62,7 @@
 			}
 
 			li {
+				display: flex;
 				color: var(--primary-text);
 				background-color: var(--dropdown-bg);
 				align-items: center;
@@ -74,6 +76,11 @@
 				&.disabled {
 					color: var(--dropdown-text--disabled);
 					background-color: var(--dropdown-bg);
+				}
+
+				.secondary {
+					margin-left: auto;
+					color: var(--dropdown-text--disabled);
 				}
 			}
 

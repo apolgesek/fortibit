@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { IpcChannel } from '@shared-renderer/index';
 import { randomBytes } from 'crypto';
 import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, nativeTheme, powerMonitor, safeStorage, screen } from 'electron';
 import { join } from 'path';
+import { nextTick } from 'process';
 import { UrlObject } from 'url';
-import { IpcChannel } from '../../../shared';
 import { ProcessArgument } from '../../process-argument.enum';
 import { IConfigService } from '../config';
 import { INativeApiService } from '../native';
 import { IPerformanceService } from '../performance/performance-service.model';
 import { IWindowService } from './';
 import { IWindow } from './window-model';
-import { nextTick } from 'process';
+import { IAppConfig } from '@root/app-config';
 
 const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
 const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
@@ -76,11 +77,6 @@ export class WindowService implements IWindowService {
       event.sender.setZoomFactor(1);
     });
 
-    ipcMain.on(IpcChannel.ToggleFullscreen, (event: IpcMainEvent) => {
-      const browserWindow = this.getWindowByWebContentsId(event.sender.id).browserWindow;
-      browserWindow.setFullScreen(!browserWindow.isFullScreen());
-    });
-
     ipcMain.on(IpcChannel.Close, (event: IpcMainEvent) => {
       const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
     
@@ -89,6 +85,22 @@ export class WindowService implements IWindowService {
       }
 
       win.browserWindow.close();
+    });
+
+    ipcMain.handle(IpcChannel.ToggleFullscreen, (event: IpcMainEvent) => {
+      const browserWindow = this.getWindowByWebContentsId(event.sender.id).browserWindow;
+      const fullscreenMode = !browserWindow.isFullScreen();
+      browserWindow.setFullScreen(fullscreenMode);
+
+      return fullscreenMode;
+    });
+
+    ipcMain.handle(IpcChannel.ChangeWindowsCaptureProtection, (event: IpcMainEvent, config: Partial<IAppConfig>) => {
+      const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
+
+      if (config.protectWindowsFromCapture !== this._configService.appConfig.protectWindowsFromCapture) {
+        this._nativeApiService.setWindowAffinity(win.browserWindow.getNativeWindowHandle(), config.protectWindowsFromCapture);
+      }
     });
 
     ipcMain.handle(IpcChannel.ToggleTheme, () => {
@@ -133,10 +145,10 @@ export class WindowService implements IWindowService {
     });
 
     const window = this.createFromTemplate({
-      width: 960,
+      width: 860,
       height: 580,
       minHeight: 300,
-      minWidth: 788,
+      minWidth: 660,
       resizable: true,
       title: this._configService.appConfig.name,
     });
@@ -155,6 +167,10 @@ export class WindowService implements IWindowService {
     window.on('unmaximize', () => {
       window.webContents.send(IpcChannel.MaximizedRestored, false);
     });
+
+    if (this._configService.appConfig.protectWindowsFromCapture) {
+      this._nativeApiService.setWindowAffinity(window.getNativeWindowHandle(), true);
+    }
 
     this._windows.push({ browserWindow: window, key: null });
 
@@ -194,6 +210,10 @@ export class WindowService implements IWindowService {
       this.removeWindow(window);
     })
 
+    if (this._configService.appConfig.protectWindowsFromCapture) {
+      this._nativeApiService.setWindowAffinity(window.getNativeWindowHandle(), true);
+    }
+    
     this._windows.push({ browserWindow: window, key: null });
     return window;
   }
@@ -309,6 +329,7 @@ export class WindowService implements IWindowService {
         v8CacheOptions: 'code',
         enableWebSQL: false,
         spellcheck: false,
+        textAreasAreResizable: false,
       },
       titleBarStyle: 'hidden',
       titleBarOverlay: {

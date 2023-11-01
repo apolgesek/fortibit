@@ -1,14 +1,14 @@
 import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
 import { IMessageBroker } from '@app/core/models';
 import { IAdditionalData, IModal } from '@app/shared';
-import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { IpcChannel } from '../../../../../../shared/ipc-channel.enum';
+import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { combineLatest, from, take, timer } from 'rxjs';
 import { EntryManager, ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
 import { MessageBroker } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
 import { ReportType } from '@app/core/enums';
 import { FeatherModule } from 'angular-feather';
+import { IpcChannel } from '@shared-renderer/index';
 
 @Component({
   selector: 'app-exposed-passwords-dialog',
@@ -93,7 +93,8 @@ export class ExposedPasswordsDialogComponent implements IModal, OnInit {
   }
 
   async editEntry(id: number) {
-    this.modalService.openEditEntryWindow(await this.entryManager.get(id));
+    const entry = await this.entryManager.get(id);
+    this.modalService.openEditEntryWindow(entry);
   }
 
   private async getLastReport() {

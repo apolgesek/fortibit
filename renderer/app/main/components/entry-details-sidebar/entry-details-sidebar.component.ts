@@ -1,6 +1,5 @@
-import { animate, keyframes, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, DestroyRef, Inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GroupId } from '@app/core/enums';
 import { IMessageBroker, IPasswordGroup } from '@app/core/models';
@@ -11,12 +10,11 @@ import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.di
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { LinkPipe } from '@app/shared/pipes/link.pipe';
 import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
+import { IAppConfig } from '@config/app-config';
+import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { AppConfig } from 'environments/environment';
 import { MessageBroker } from 'injection-tokens';
-import { animationFrameScheduler, observeOn } from 'rxjs';
-import { IAppConfig } from '../../../../../app-config';
-import { IPasswordEntry, IpcChannel } from '../../../../../shared/index';
 
 @Component({
   selector: 'app-entry-details-sidebar',
@@ -31,25 +29,13 @@ import { IPasswordEntry, IpcChannel } from '../../../../../shared/index';
     TooltipComponent,
     LinkPipe,
     TimeRemainingPipe,
-  ],
-  animations: [
-    trigger('star', [
-      transition('false => true', animate(250, keyframes([
-        style({ scale: 1, offset: 0 }),
-        style({ scale: 1.5, offset: 0.25 }),
-        style({ scale: 0.9, offset: 0.5 }),
-        style({ scale: 1.2, offset: 0.75 }),
-        style({ scale: 1, offset: 1 })
-      ])))
-    ])
   ]
 })
 export class EntryDetailsSidebarComponent implements OnInit {
-  @ViewChild('toggleStarBtn') public readonly toggleStarBtn: ElementRef;
   public group: IPasswordGroup;
   public config: IAppConfig;
   public isReadonlyEntry = true;
-  public isFavoriteAnimationInProgress = false;
+  public isAnimating = false;
 
   constructor(
     private readonly destroyRef: DestroyRef,
@@ -88,11 +74,15 @@ export class EntryDetailsSidebarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.configService.configLoadedSource$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(config => {
+    this.configService.configLoadedSource$
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe(config => {
       this.config = config;
     });
 
-    this.entryManager.selectEntry$.pipe(observeOn(animationFrameScheduler), takeUntilDestroyed(this.destroyRef)).subscribe(entry => {
+    this.entryManager.selectEntry$
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe(entry => {
       if (!entry) {
         this.group = null;
         return;
@@ -100,12 +90,21 @@ export class EntryDetailsSidebarComponent implements OnInit {
 
       this.group = [...this.groupManager.groups, ...this.groupManager.builtInGroups].find(x => x.id === entry.groupId);
       this.isReadonlyEntry = this.group.id === GroupId.RecycleBin;
+      this.entryManager.getEntryHistory(entry.id);
     });
   }
 
-  openUrl(url: string): false {
-    this.messageBroker.ipcRenderer.send(IpcChannel.OpenUrl, url);
-    return false;
+  async openUrl(url: string): Promise<boolean> {
+    let result = true;
+    if (this.isUnsecured && this.config.showInsecureUrlPrompt) {
+      result = await this.modalService.openConfirmOpenUrlWindow();
+    }
+
+    if (result) {
+      this.messageBroker.ipcRenderer.send(IpcChannel.OpenUrl, url);
+    }
+
+    return result;
   }
 
   openEntryHistory() {
@@ -125,10 +124,14 @@ export class EntryDetailsSidebarComponent implements OnInit {
     await this.entryManager.saveEntry({ ...entry, isStarred: !entry.isStarred});
 
     if (!entry.isStarred) {
-      this.isFavoriteAnimationInProgress = true;
-      this.notificationService.add({ message: 'Added to favourites', type: 'success', alive: 10 * 1000 });
+      this.isAnimating = true;
+      this.notificationService.add({ message: 'Added to favorites', type: 'success', alive: 10 * 1000 });
+
+      setTimeout(() => {
+        this.isAnimating = false;
+      }, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--base-animation-duration')));
     } else {
-      this.notificationService.add({ message: 'Removed from favourites', type: 'success', alive: 10 * 1000 });
+      this.notificationService.add({ message: 'Removed from favorites', type: 'success', alive: 10 * 1000 });
     }
   }
 }

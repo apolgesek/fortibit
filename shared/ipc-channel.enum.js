@@ -41,6 +41,8 @@ var IpcChannel;
     IpcChannel["GetImportedDatabaseMetadata"] = "app:getImportedDatabaseMetadata";
     IpcChannel["ScanLeaks"] = "app:scanLeaks";
     IpcChannel["ChangeEncryptionSettings"] = "app:changeEncryptionSettings";
+    IpcChannel["ChangeScreenLockSettings"] = "app:changeScreenLockSettings";
+    IpcChannel["ChangeWindowsCaptureProtection"] = "app:changeWindowsCaptureProtection";
     IpcChannel["CheckIconExists"] = "app:checkIconExists";
     IpcChannel["TryGetIcon"] = "app:tryGetIcon";
     IpcChannel["TryReplaceIcon"] = "app:tryReplaceIcon";
@@ -70,5 +72,8 @@ var IpcChannel;
     IpcChannel["ToggleFullscreen"] = "app:toggleFullscreen";
     IpcChannel["RecalculateViewport"] = "app:recalculateViewport";
     IpcChannel["ToggleViewportRecalculation"] = "app:toggleViewportRecalculation";
+    IpcChannel["SendInput"] = "app:sendInput";
+    IpcChannel["TestCleanup"] = "app:testCleanup";
+    IpcChannel["ConfigChanged"] = "app:configChanged";
 })(IpcChannel = exports.IpcChannel || (exports.IpcChannel = {}));
 //# sourceMappingURL=ipc-channel.enum.js.map

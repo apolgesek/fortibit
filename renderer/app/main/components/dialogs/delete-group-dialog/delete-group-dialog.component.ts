@@ -1,4 +1,4 @@
-import { Component, ComponentRef } from '@angular/core';
+import { Component, ComponentRef, inject } from '@angular/core';
 import { EntryManager, GroupManager, ModalRef, SearchService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
@@ -18,12 +18,10 @@ export class DeleteGroupDialogComponent implements IModal {
   public readonly ref!: ComponentRef<DeleteGroupDialogComponent>;
   public readonly additionalData!: IAdditionalData;
 
-  constructor(
-    private readonly groupManager: GroupManager,
-    private readonly entryManager: EntryManager,
-    private readonly searchService: SearchService,
-    private readonly modalRef: ModalRef
-  ) { }
+  private readonly groupManager = inject(GroupManager);
+  private readonly entryManager = inject(EntryManager);
+  private readonly searchService = inject(SearchService);
+  private readonly modalRef = inject(ModalRef);
 
   async removeGroup() {
     await this.groupManager.removeGroup();

@@ -88,7 +88,7 @@ namespace NativeAuth
     cred.Type = CRED_TYPE_GENERIC;
     cred.TargetName = allocateAndCopyWideString(stringToWString(filePath).c_str());
     cred.CredentialBlobSize = cbCreds;
-    cred.CredentialBlob = (LPBYTE) password.c_str();
+    cred.CredentialBlob = (LPBYTE)password.c_str();
     cred.Persist = CRED_PERSIST_LOCAL_MACHINE;
 
     BOOL ok = ::CredWriteW (&cred, 0);
@@ -114,7 +114,9 @@ namespace NativeAuth
     PCREDENTIALW pcred;
     BOOL ok = ::CredReadW(stringToWString(filePath).c_str(), CRED_TYPE_GENERIC, 0, &pcred);
 
-    Local<String> result = String::NewFromUtf8(isolate, (const char *)pcred->CredentialBlob).ToLocalChecked();
+    std::string password(pcred->CredentialBlob, pcred->CredentialBlob + pcred->CredentialBlobSize);
+    Local<String> result = String::NewFromUtf8(isolate, password.c_str()).ToLocalChecked();
+
     args.GetReturnValue().Set(result);
     ::CredFree(pcred);
   }

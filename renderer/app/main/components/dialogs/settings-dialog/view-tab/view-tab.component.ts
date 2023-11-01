@@ -1,10 +1,10 @@
-import { Component, DestroyRef, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ConfigService, WorkspaceService } from '@app/core/services';
-import { Subject, take, takeUntil } from 'rxjs';
-import { IProduct } from '../../../../../../../product';
+import { IProduct } from '@config/product';
 import { FeatherModule } from 'angular-feather';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-view-tab',

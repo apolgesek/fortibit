@@ -54,10 +54,14 @@ export class SingleInstanceServices extends ServiceCollection {
 
     this.set(IImportService, new ImportService(
       this.get(IWindowService),
-      this.get(IEncryptionEventWrapper)
+      this.get(IEncryptionEventWrapper),
+      this.get(IConfigService)
     ));
 
-    this.set(IExportService, new ExportService(this.get(IEncryptionEventWrapper)));
+    this.set(IExportService, new ExportService(
+      this.get(IEncryptionEventWrapper),
+      this.get(IConfigService)
+    ));
   
     this.set(IDatabaseService, new DatabaseService(
       this.get(IConfigService),

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ContentChild, DestroyRef, ElementRef, Input, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, ContentChild, DestroyRef, ElementRef, HostBinding, Input, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ModalRef } from '@app/core/services';
 import { ModalManager } from '@app/core/services/modal-manager';
@@ -19,6 +19,8 @@ import { fromEvent } from 'rxjs';
   encapsulation: ViewEncapsulation.None,
 })
 export class ModalComponent implements AfterViewInit, OnDestroy {
+  @HostBinding('attr.role') public readonly role = 'dialog';
+
   @Input() public options!: IAdditionalData;
   @Input() public bodyClass!: string;
   @ViewChild('backdrop') public backdrop!: ElementRef;

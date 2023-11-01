@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, Inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { IMessageBroker } from '@app/core/models';
 import { ConfigService, WorkspaceService } from '@app/core/services';
-import { IpcChannel } from '../../../../../../../shared/ipc-channel.enum';
+import { IProduct } from '@config/product';
+import { IpcChannel } from '@shared-renderer/index';
+import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { take } from 'rxjs';
-import { IProduct } from '../../../../../../../product';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FeatherModule } from 'angular-feather';
 
 @Component({
   selector: 'app-integration-tab',

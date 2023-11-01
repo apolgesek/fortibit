@@ -1,0 +1,38 @@
+<app-modal>
+  <div class="dialog-header">
+    <h2>Open URL</h2>
+    <a
+      href="#"
+      role="button"
+      aria-label="Close"
+      class="close-dialog"
+      (click)="close(); false">&times;
+    </a>
+  </div>
+  <div class="dialog-message">
+    Are you sure you want to open this URL?
+    <div style="display: flex; align-items: center; margin-top: 1rem;">
+      <input
+        id="disableDialog"
+        type="checkbox"
+        (change)="disableDialog($event)"
+        style="margin-left: 0;">
+      <label class="label" for="disableDialog">Do not show this message again</label>
+    </div>
+  </div>
+  <div class="footer-container">
+    <button
+      type="button"
+      class="text-btn"
+      (click)="confirm()">
+      Confirm
+    </button>
+    <button
+      #autofocus
+      type="button"
+      class="primary-btn"
+      (click)="close()">
+      Cancel
+    </button>
+  </div>
+</app-modal>

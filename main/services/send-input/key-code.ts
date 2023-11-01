@@ -4,7 +4,7 @@ export enum Key {
 }
 
 export class KeyCode {
-	public static TAB = this.getKeyCode(Key.Tab);
+	public static TAB = KeyCode.getKeyCode(Key.Tab);
 	public static ENTER = KeyCode.getKeyCode(Key.Enter);
 
 	private static _keyMap: { [key: number]: number };

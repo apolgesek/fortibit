@@ -93,6 +93,7 @@
 	cursor: pointer;
 	transition: transform 100ms;
   text-transform: uppercase;
+  justify-content: center;
 
 	&:hover:not(:disabled) {
     background-color: var(--toolbar-dropdown-bg);

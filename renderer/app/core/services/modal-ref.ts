@@ -1,4 +1,4 @@
-import { ComponentRef, Injectable } from '@angular/core';
+import { ComponentRef, Injectable, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { ModalManager } from './modal-manager';
 
@@ -11,7 +11,7 @@ export class ModalRef {
   public onClose: Subject<void>;
   public onActionResult: Subject<boolean>;
 
-  constructor(private readonly modalManager: ModalManager) { }
+  private readonly modalManager = inject(ModalManager);
 
   close() {
     this.onClose.next();

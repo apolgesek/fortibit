@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
-import { IpcChannel } from '../../../../shared/index';
+import { IAppConfig } from '@config/app-config';
+import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { IAppConfig } from '../../../../app-config';
+import { Observable, ReplaySubject, Subject, forkJoin, from } from 'rxjs';
 import { IMessageBroker } from '../models';
 
 @Injectable({
@@ -18,9 +18,15 @@ export class ConfigService {
   }
 
   setConfig(config: Partial<IAppConfig>) {
-    this.messageBroker.ipcRenderer.send(IpcChannel.ChangeEncryptionSettings, config);
+    forkJoin([
+      from(this.messageBroker.ipcRenderer.invoke(IpcChannel.ChangeEncryptionSettings, config)),
+      from(this.messageBroker.ipcRenderer.invoke(IpcChannel.ChangeScreenLockSettings, config)),
+      from(this.messageBroker.ipcRenderer.invoke(IpcChannel.ChangeWindowsCaptureProtection, config))
+    ]).subscribe(() => {
+      this.config = {...this.config, ...config};
+      this.messageBroker.ipcRenderer.send(IpcChannel.ConfigChanged, config);
 
-    this.config = {...this.config, ...config};
-    this.configLoaded.next(this.config);
+      this.configLoaded.next(this.config);
+    });
   }
 }

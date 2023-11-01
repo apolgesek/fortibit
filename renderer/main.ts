@@ -21,7 +21,6 @@ import {
   WorkspaceService,
 } from '@app/core/services';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
-import { IpcChannel } from '../shared/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
 import {
   AlertCircle,
@@ -65,6 +64,8 @@ import { WebService } from './app/core/services/electron/web.service';
 import { DarwinHotkeyHandler } from './app/core/services/hotkey/darwin-hotkey-handler';
 import { routes } from './app/routes';
 import { AppConfig } from './environments/environment';
+import { IpcChannel } from '@shared-renderer/index';
+import isElectron from 'is-electron';
 
 function initializeApp(
   db: DbManager,
@@ -72,9 +73,15 @@ function initializeApp(
   configService: ConfigService
 ): () => Promise<void> {
   return async () => {
-    await (window as any).api.loadChannels();
-    await messageBroker.getPlatform();
+    if (isElectron()) {
+      await (window as any).api.loadChannels();
+    } else {
+      (window as any).api = {
+        loadChannels: () => {}
+      };
+    }
 
+    await messageBroker.getPlatform();
     const config = await messageBroker.ipcRenderer.invoke(IpcChannel.GetAppConfig);
     configService.setConfig(config);
 
@@ -86,8 +93,6 @@ function initializeApp(
 if (AppConfig.production) {
   enableProdMode();
 }
-
-const isElectron = () => true;
 
 const icons = {
   Edit,

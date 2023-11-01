@@ -6,7 +6,7 @@ const attempts = Symbol('attempts');
 const toRetry = Symbol('toRetry');
 
 interface Queue {
-  [key: symbol]: any;
+  [key: string]: any;
 }
 
 type Queueable<T> = Queue & T;
@@ -45,8 +45,8 @@ export class AsyncQueue<T,K> implements IAsyncQueue<T> {
             this.onFulfilled(batch[j], result.value);
           } else {
             if (!result.reason.code) {
-              batch[j] = { ...batch[j], [attempts]: batch[j][attempts] + 1 };
-              if (batch[j][attempts] < this.maxRetries) {
+              batch[j] = { ...batch[j], [attempts]: batch[j][attempts as unknown as string] + 1 };
+              if (batch[j][attempts as unknown as string] < this.maxRetries) {
                 this.add({ ...batch[j], [toRetry]: true });
               }
             }

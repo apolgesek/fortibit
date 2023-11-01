@@ -3,8 +3,6 @@ import { GroupId } from '@app/core/enums';
 import { IMessageBroker } from '@app/core/models';
 import { EntryRepository, EntryPredicateFn } from '@app/core/repositories';
 import { IHistoryEntry } from '@shared-renderer/history-entry.model';
-import { IpcChannel } from '../../../../../shared/ipc-channel.enum';
-import { IPasswordEntry } from '../../../../../shared/password-entry.model';
 import { MessageBroker } from 'injection-tokens';
 import { BehaviorSubject, combineLatest, from, map, Observable, of, shareReplay, Subject, switchMap } from 'rxjs';
 import { NotificationService } from '../notification.service';
@@ -12,6 +10,7 @@ import { SearchService } from '../search.service';
 import { GroupManager } from './group.manager';
 import { DbManager } from '@app/core/database';
 import { HistoryManager } from './history.manager';
+import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 
 interface SearchResultsModel {
   passwords: IPasswordEntry[];
@@ -132,7 +131,7 @@ export class EntryManager {
     this.passwordEntries = await this.getEntries(id);
   }
 
-  async bulkAddEntries(entries: IPasswordEntry[]): Promise<number> {
+  async bulkAdd(entries: IPasswordEntry[]): Promise<number> {
     const addedEntries = await this.entryRepository.bulkAdd(entries);
 
     if (entries.some(x => x.groupId === this.groupManager.selectedGroup)) {
@@ -189,7 +188,6 @@ export class EntryManager {
 
   async selectEntry(entry: IPasswordEntry): Promise<void> {
     if (entry) {
-      this.entryHistory = await this.getEntryHistory(entry.id);
       entry.group = this.groupManager.groups.find(x => x.id === entry.groupId)?.name
         // could be Recycle bin
         ?? this.groupManager.builtInGroups.find(g => g.id === entry.groupId).name;

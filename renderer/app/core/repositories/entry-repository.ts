@@ -22,8 +22,13 @@ export class EntryRepository implements IEntryRepository {
   }
 
   get(id: number): Promise<IPasswordEntry | undefined> {
-    return this.db.context.transaction('r', this.db.entries,
-      () => this.db.entries.get(id));
+    return this.db.context.transaction('r', this.db.entries, this.db.groups,
+      async () => {
+        const entry = await this.db.entries.get(id);
+        const group = await this.db.groups.get(entry.groupId);
+        
+        return { ...entry, group: group.name };
+      });
   }
 
   add(item: Partial<IPasswordEntry>): Promise<number> {
@@ -37,7 +42,7 @@ export class EntryRepository implements IEntryRepository {
   }
 
   update(item: Partial<IPasswordEntry>): Promise<number> {
-    return this.db.context.transaction('rw', this.db.entries, async () => {
+    return this.db.context.transaction('rw', this.db.entries, this.db.groups, async () => {
       if (!item.id) {
         throw new Error('No id provided for the entry to update');
       }

@@ -7,7 +7,7 @@ export const IWindowService = createServiceDecorator<IWindowService>('windowServ
 export interface IWindowService {
   windows: IWindow[];
   getWindowByWebContentsId(id: number): IWindow;
-  createMainWindow(isDevMode: boolean): BrowserWindow;
+  createMainWindow(): BrowserWindow;
   createEntrySelectWindow(): BrowserWindow;
   loadWindow(windowRef: BrowserWindow, path?: string): Promise<void>;
   getWindow(index: number): BrowserWindow;

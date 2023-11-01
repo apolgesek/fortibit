@@ -1,14 +1,14 @@
-import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
-import { IMessageBroker } from '@app/core/models';
-import { IAdditionalData, IModal } from '@app/shared';
-import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { IpcChannel } from '../../../../../../shared/ipc-channel.enum';
-import { combineLatest, from, take, timer } from 'rxjs';
-import { EntryManager, ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
-import { MessageBroker } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
+import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
 import { ReportType } from '@app/core/enums';
+import { IMessageBroker } from '@app/core/models';
+import { EntryManager, ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
+import { MessageBroker } from 'injection-tokens';
+import { combineLatest, from, take, timer } from 'rxjs';
 
 @Component({
   selector: 'app-weak-passwords-dialog',
@@ -101,7 +101,8 @@ export class WeakPasswordsDialogComponent implements IModal, OnInit {
   }
 
   async editEntry(id: number) {
-    this.modalService.openEditEntryWindow(await this.entryManager.get(id));
+    const entry = await this.entryManager.get(id);
+    this.modalService.openEditEntryWindow(entry);
   }
 
   private async getLastReport() {

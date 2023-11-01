@@ -78,7 +78,7 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
       }
     });
 
-    const clickListener = this.renderer.listen(this.element.nativeElement, 'click', (event: MouseEvent) => {
+    const clickListener = this.renderer.listen(this.element.nativeElement, 'click', (_: MouseEvent) => {
       if (this.dropdownState.isOpen) {
         this.dropdownState.close();
       } else {
@@ -95,6 +95,7 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
       }
     });
 
-    this.listeners.push(enterKeydownListener, clickListener, outsideClickListener);
+    const listeners = [enterKeydownListener, clickListener, outsideClickListener];
+    this.listeners.push(...listeners);
   }
 }

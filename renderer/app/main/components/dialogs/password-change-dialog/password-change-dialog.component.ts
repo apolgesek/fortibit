@@ -1,15 +1,15 @@
-import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { IAdditionalData, IModal } from '@app/shared';
-import { ModalRef, ModalService, WorkspaceService } from '@app/core/services';
-import { ValidatorFn, AbstractControl, ValidationErrors, FormBuilder, Validators, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { IpcChannel } from '../../../../../../shared/ipc-channel.enum';
-import { Observable, from, tap, delay, map } from 'rxjs';
+import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { IMessageBroker } from '@app/core/models';
-import { MessageBroker } from 'injection-tokens';
+import { ModalRef, ModalService, WorkspaceService } from '@app/core/services';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
+import { IpcChannel } from '@shared-renderer/index';
+import { MessageBroker } from 'injection-tokens';
+import { Observable, delay, from, map, tap } from 'rxjs';
 
 @Component({
   selector: 'app-password-change-dialog',

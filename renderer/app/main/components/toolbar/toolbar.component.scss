@@ -2,7 +2,6 @@
 @import 'mixins';
 
 :host {
-	border-top: 1px solid var(--border-color);
 	border-bottom: 1px solid var(--border-color);
 }
 
@@ -143,6 +142,20 @@
 		border: 2px solid var(--link-text);
 		::ng-deep svg {
 			stroke: var(--primary-text);
+		}
+	}
+}
+
+@media screen and (max-width: 859px) {
+	.secondary-btn:not(.add-entry) {
+		padding: 1rem;
+
+		.label {
+			display: none;
+		}
+
+		i-feather {
+			margin-right: 0 !important;
 		}
 	}
 }

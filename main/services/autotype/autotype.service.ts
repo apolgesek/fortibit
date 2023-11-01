@@ -1,7 +1,7 @@
-import { globalShortcut, ipcMain, IpcMainEvent } from "electron";
-import { IAppConfig } from "../../../app-config";
-import { IProduct } from "../../../product";
-import { IPasswordEntry, IpcChannel } from "../../../shared";
+import { IAppConfig } from "@root/app-config";
+import { IProduct } from "@root/product";
+import { IPasswordEntry, IpcChannel } from "@shared-renderer/index";
+import { IpcMainEvent, globalShortcut, ipcMain } from "electron";
 import { IConfigService } from "../config";
 import { IDatabaseService } from "../database";
 import { IEncryptionEventWrapper, MessageEventType } from "../encryption";
@@ -46,7 +46,7 @@ export class AutotypeService implements IAutotypeService {
       this.typeLoginDetails(entry);
     });
 
-    ipcMain.on(IpcChannel.ChangeEncryptionSettings, (_, form: Partial<IAppConfig>) => {
+    ipcMain.handle(IpcChannel.ChangeEncryptionSettings, (_, form: Partial<IAppConfig>) => {
       this.changeEncryptionSettings(form);
     });
   }
@@ -208,11 +208,11 @@ export class AutotypeService implements IAutotypeService {
       );
     }
 
-    this._configService.set({
-      autoTypeEnabled: settings.autoTypeEnabled ?? this._configService.appConfig.autoTypeEnabled,
-      autocompleteShortcut: settings.autocompleteShortcut ?? this._configService.appConfig.autocompleteShortcut,
-      autocompleteUsernameOnlyShortcut: settings.autocompleteUsernameOnlyShortcut ?? this._configService.appConfig.autocompleteUsernameOnlyShortcut,
-      autocompletePasswordOnlyShortcut: settings.autocompletePasswordOnlyShortcut ?? this._configService.appConfig.autocompletePasswordOnlyShortcut
-    });
+    // this._configService.set({
+    //   autoTypeEnabled: settings.autoTypeEnabled ?? this._configService.appConfig.autoTypeEnabled,
+    //   autocompleteShortcut: settings.autocompleteShortcut ?? this._configService.appConfig.autocompleteShortcut,
+    //   autocompleteUsernameOnlyShortcut: settings.autocompleteUsernameOnlyShortcut ?? this._configService.appConfig.autocompleteUsernameOnlyShortcut,
+    //   autocompletePasswordOnlyShortcut: settings.autocompletePasswordOnlyShortcut ?? this._configService.appConfig.autocompletePasswordOnlyShortcut
+    // });
   }
 }

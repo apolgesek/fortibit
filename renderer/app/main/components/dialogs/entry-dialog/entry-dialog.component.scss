@@ -85,10 +85,6 @@ $password-padding-right: 50px;
   }
 }
 
-textarea {
-  resize: none;
-}
-
 #entry-form {
   @include scrollbar;
   position: relative;
@@ -112,4 +108,8 @@ a.copy-password {
 
 .active {
   color: $blue-300 !important;
+}
+
+.inputgroup {
+  align-items: flex-start;
 }

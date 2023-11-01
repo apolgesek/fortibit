@@ -14,10 +14,10 @@
       <ng-container *ngSwitchCase="updateState.Downloaded">
         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <div style="margin-bottom: 0.5rem">Update is available. Relaunch to finish updating.</div>
+            <div style="margin-bottom: 0.5rem">Update is available. Restart to finish updating.</div>
             <div style="color: #707070;">{{ version }}</div>
           </div>
-          <button type="button" (click)="updateAndRelaunch()" class="primary-btn">Relaunch</button>
+          <button type="button" (click)="updateAndRelaunch()" class="primary-btn">Restart</button>
         </div>
       </ng-container>
       <ng-container *ngSwitchCase="updateState.NotAvailable">You have the latest version</ng-container>

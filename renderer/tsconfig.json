@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "outDir": "../out-tsc/app",
     "baseUrl": ".",
     "types": [],
@@ -13,7 +14,10 @@
       ],
       "@shared-renderer/*": [
         "../shared/*"
-      ]
+      ],
+      "@config/*": [
+        "../*"
+      ],
     },
   },
   "files": [

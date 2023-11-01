@@ -44,17 +44,19 @@ export class GroupManager {
     await this.groupRepository.update({
       id: group.id,
       name: group.name,
-      lastModificationDate: new Date()
     });
 
     this.getGroupsTree();
     this.markDirty();
   }
 
+  async bulkAdd(groups: IPasswordGroup[]): Promise<number> {
+    return this.groupRepository.bulkAdd(groups);
+  }
+
   async addGroup(model?: Partial<IPasswordGroup>): Promise<number> {
     const newGroup: IPasswordGroup = {
       name: model?.name ?? 'New group',
-      lastModificationDate: new Date()
     };
 
     if (model?.isImported) {

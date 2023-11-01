@@ -1,7 +1,5 @@
 import { ChildProcess, fork } from 'child_process';
-import { app } from 'electron';
 import { join } from 'path';
-import { ProcessArgument } from '../../../process-argument.enum';
 import { INativeApiService } from '../native-api.model';
 import { MessageEventType } from './message-event-type.enum';
 
@@ -20,12 +18,9 @@ class NativeCore {
 }
 
 class NativeAuthProcess {
-  private static _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
-  private constructor() {}
-
   static getInstance(): ChildProcess {
     const nativeAuthModulePath = join(global['__basedir'], 'main', 'services', 'native', 'win32', 'auth.service.js');
-    return fork(nativeAuthModulePath, [], { silent: true });
+    return fork(nativeAuthModulePath, [], { silent: false });
   };
 }
 
@@ -36,6 +31,10 @@ export class Win32ApiService implements INativeApiService {
 
   pressKey(key: number): void {
     NativeCore.getInstance().pressKey(key);
+  }
+
+  setWindowAffinity(handle: Buffer, enabled: boolean): void {
+    NativeCore.getInstance().setWindowAffinity(handle, enabled);
   }
 
   getActiveWindowTitle(): string {

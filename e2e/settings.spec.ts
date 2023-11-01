@@ -1,37 +1,18 @@
 import { expect, test } from '@playwright/test';
 import { ElectronApplication, Page, _electron as electron } from 'playwright-core';
 import { ProcessArgument } from '../main/process-argument.enum';
+import { addEntry } from './helpers/add-entry';
+import { authenticate } from './helpers/auth';
 
 const PATH = require('path');
 
 let app: ElectronApplication;
 let firstWindow: Page;
 
-interface IEntryModel {
-  title: string;
-  username: string
-}
-
-async function addEntry(model?: IEntryModel) {
-  await firstWindow.click('#add-entry', { force: true });
-
-  const title = firstWindow.locator('#entry-title');
-  const username = firstWindow.locator('#entry-username');
-  const submitBtn = firstWindow.locator('#entry-submit');
-
-  await title.type(model?.title ?? 'Title');
-  await username.type(model?.username ?? 'Username');
-  await submitBtn.click();
-}
-
 test.beforeEach(async () => {
-  app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`], colorScheme: 'dark' });
+  app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`], colorScheme: 'dark', env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' } });
   firstWindow = await app.firstWindow();
-  
-  await firstWindow.waitForLoadState('domcontentloaded');
-  await firstWindow.locator('.inputgroup.password input').focus();
-  await firstWindow.keyboard.insertText('test123');
-  await firstWindow.keyboard.press('Enter');
+  await authenticate(firstWindow);
 });
 
 test.afterEach(async () => {
@@ -40,43 +21,33 @@ test.afterEach(async () => {
 
 test.describe('Settings', async () => {
   test('Check open settings modal', async () => {
-    await firstWindow.waitForSelector('app-workspace', { state: 'visible' });
+    await firstWindow.getByRole('banner').waitFor({ state: 'visible' });
     await firstWindow.keyboard.press('Control+.');
-    const settingsModal = firstWindow.locator('app-modal');
-    await settingsModal.waitFor({ state: 'attached' });
-    expect(firstWindow.locator('app-modal')).toBeAttached();
+    await firstWindow.getByRole('dialog').getByText(/settings/i);
   });
 
   test('Check clipboard clear time change', async () => {
-    await firstWindow.waitForSelector('app-workspace', { state: 'visible' });
+    await firstWindow.getByRole('banner').waitFor({ state: 'visible' });
     await firstWindow.keyboard.press('Control+.');
-    const settingsModal = firstWindow.locator('app-modal');
-    await settingsModal.waitFor({ state: 'attached' });
-
-    const clipboardTimeInput = settingsModal.locator('#clipboardTime');
+    const settingsModal = firstWindow.getByRole('dialog');
+    await settingsModal.getByText(/^Settings$/).waitFor({ state: 'visible' });
+    const clipboardTimeInput = settingsModal.getByLabel(/clipboard auto-clear/i);
     await clipboardTimeInput.clear();
     await clipboardTimeInput.type('5');
     await firstWindow.keyboard.press('Escape');
-
-    await addEntry();
-    await firstWindow.locator('app-modal').waitFor({ state: 'detached' });
-
-    const entry = firstWindow.locator('.row-entry').first();
-    await entry.locator('.password').dblclick();
+    await addEntry(firstWindow, { config: { close: true } });
+    await firstWindow.getByText(/\•{6}/i).dblclick();
+    const notificationSeconds = await firstWindow.getByRole('alert').innerText();
     
-    const notificationSeconds = await firstWindow.locator('.seconds-left').innerText();
-    expect(notificationSeconds).toBe('5');
+    expect(notificationSeconds).toContain('5');
   });
 
   test('Check auto-type disabled', async () => {
-    await firstWindow.waitForSelector('app-workspace', { state: 'visible' });
+    await firstWindow.getByRole('banner').waitFor({ state: 'visible' });
     await firstWindow.keyboard.press('Control+.');
-    const settingsModal = firstWindow.locator('app-modal');
-    await settingsModal.waitFor({ state: 'attached' });
-
-    const autoTypeSwitch = settingsModal.locator('.switch').first();
-    await autoTypeSwitch.click();
-    await firstWindow.pause();
+    await firstWindow.getByRole('dialog').getByText(/^Settings$/).waitFor({ state: 'visible' });
+    await firstWindow.getByRole('dialog').getByText(/enable auto-type/i).click();
     await firstWindow.keyboard.press('Escape');
+    await firstWindow.getByText(/(disabled)/i);
   });
 });

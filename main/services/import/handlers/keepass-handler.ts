@@ -1,7 +1,8 @@
 import { ImportHandler, IPasswordEntry } from '../../../../shared';
+import { IConfigService } from '../../config';
 import { IEncryptionEventWrapper } from '../../encryption';
 import { IWindowService } from '../../window';
-import { XmlDataImporter } from './xml-data-importer'
+import { XmlDataImporter } from './xml-data-importer';
 
 export class KeePassHandler extends XmlDataImporter {
   protected handlerType = ImportHandler.KeePass;
@@ -12,9 +13,10 @@ export class KeePassHandler extends XmlDataImporter {
 
   constructor(
     protected readonly _windowService: IWindowService,
-    protected readonly _encryptionEventWrapper: IEncryptionEventWrapper
+    protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
+    protected readonly _configService: IConfigService
   ) {
-    super(_windowService, _encryptionEventWrapper)
+    super(_windowService, _encryptionEventWrapper, _configService)
   }
 
   private mapEntries(entries: any[]): Partial<IPasswordEntry>[] {

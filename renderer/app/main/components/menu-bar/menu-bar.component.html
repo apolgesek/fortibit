@@ -5,7 +5,7 @@
 	<ul appMenu class="menu">
 		<div class="brand-logo"></div>
 		<ul appDropdown class="dropdown">
-			<li appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
+			<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
 				File
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
@@ -29,6 +29,7 @@
 						Import <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
+						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.Fortibit)">Fortibit &bull; CSV</li>
 						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.KeePass)">KeePass &bull; XML</li>
 						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.OnePassword)">1Password &bull; CSV</li>
 						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.Bitwarden)">Bitwarden &bull; CSV</li>
@@ -51,7 +52,7 @@
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
-			<li appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
+			<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
 				View
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
@@ -59,11 +60,11 @@
 				<li appMenuItem (activate)="zoomOut()">Zoom out</li>
 				<li appMenuItem (activate)="resetZoom()">Reset zoom</li>
 				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="fullscreen()">Fullscreen mode</li>
+				<li appMenuItem (activate)="fullscreen()">Toggle fullscreen <span class="secondary">{{ fullscreenMode }}</span></li>
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
-			<li appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
+			<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
 				Tools
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
@@ -86,7 +87,7 @@
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
-			<li appDropdownToggle trigger="click" appMenuItem aria-hidden="true" class="menu-bar-item">
+			<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
 				Help
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">

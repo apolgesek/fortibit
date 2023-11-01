@@ -46,6 +46,7 @@
       Cancel
     </button>
     <button
+      *ngIf="additionalData?.payload?.mode === 'edit'"
       type="button"
       id="remove-group"
       class="primary-btn"

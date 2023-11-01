@@ -1,6 +1,6 @@
-import { IProduct } from "../product";
+import { IAppConfig } from "../app-config"
 
-export const getDefaultConfig = (platform: string) => {
+export const getDefaultConfig = (platform: string): Partial<IAppConfig> => {
   return {
     encryption: {
       passwordLength: 15,
@@ -20,5 +20,6 @@ export const getDefaultConfig = (platform: string) => {
     autocompleteUsernameOnlyShortcut: platform === 'win32' ? 'Alt+[' : 'Option+[',
     autocompletePasswordOnlyShortcut: platform === 'win32' ? 'Alt+]' : 'Option+]',
     autocompleteShortcut: platform === 'win32' ? 'Alt+\\' : 'Option+\\',
-  } as Partial<IProduct>
+    showInsecureUrlPrompt: true
+  }
 }

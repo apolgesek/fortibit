@@ -23,10 +23,10 @@ import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { UiUtil } from '@app/utils';
+import { IPasswordEntry } from '@shared-renderer/index';
 import { HotkeyHandler } from 'injection-tokens';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IPasswordEntry } from '../../../../../shared/index';
 import { TableFiltersComponent } from '../table-filters/table-filters.component';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
 
@@ -200,7 +200,6 @@ export class EntriesTableComponent implements OnInit {
       ? this.selectedEntries.map(e => e.id)
       : [ item.id ];
 
-    console.log(this.dragImage.nativeElement);
     UiUtil.setDragGhost(event, this.dragImage.nativeElement);
   }
 

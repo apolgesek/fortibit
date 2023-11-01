@@ -15,30 +15,23 @@
 		}
 
 		.dropdown-btn .badge {
-			margin-left: -1rem;
 			background-color: $red-orange;
-			height: 1.5rem;
-			width: 1.5rem;
-			z-index: 990;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: $white;
-			font-size: 0.75rem;
-			border-radius: 0.25rem;
+			outline: 2px solid var(--primary-bg);
+			height: 0.5625rem;
+			width: 0.5625rem;
+			border-radius: 100%;
 			font-weight: bold;
-			position: relative;
+			position: absolute;
+			z-index: 990;
+			bottom: 0px;
+			right: 0px;
 
-			&::after {
-				content: '';
-				position: absolute;
-				right: -0.25rem;
-				top: 0.5rem;
-				width: 0;
-				height: 0;
-				border-top: 4px solid transparent;
-				border-bottom: 4px solid transparent;
-				border-left: 4px solid $red-orange;
+			&.update {
+				background-color: $blue-200;
+			}
+
+			&.mixed {
+				background-color: $tulip-tree;
 			}
 		}
 	}
@@ -61,7 +54,7 @@
 		}
 
 		.update-btn {
-			color: $blue-300;
+			color: $blue-200;
 			display: flex;
 			justify-content: space-between;
 			align-items: center;

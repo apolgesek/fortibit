@@ -11,7 +11,7 @@ import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
-import { ImportHandler, IpcChannel } from '../../../../../shared/index';
+import { ImportHandler, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { exportDB } from 'dexie-export-import';
 import { AppConfig } from 'environments/environment';
@@ -40,6 +40,7 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 
   public readonly importHandler = ImportHandler;
   public recentFiles: string[];
+  public fullscreenMode: 'on' | 'off' = 'on';
 
   constructor(
     private readonly zone: NgZone,
@@ -104,8 +105,8 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
     this.modalService.openPasswordChangeWindow();
   }
 
-  openFile(path?: string) {
-    const success = this.workspaceService.executeEvent();
+  async openFile(path?: string) {
+    const success = await this.workspaceService.executeEvent();
     if (success) {
       this.messageBroker.ipcRenderer.send(IpcChannel.OpenFile, path);
     }
@@ -200,8 +201,9 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
     this.messageBroker.ipcRenderer.send(IpcChannel.ResetZoom);
   }
 
-  fullscreen() {
-    this.messageBroker.ipcRenderer.send(IpcChannel.ToggleFullscreen);
+  async fullscreen() {
+    const isFullscreen = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleFullscreen);
+    this.fullscreenMode = isFullscreen ? 'off' : 'on';
   }
 
   private fixMenuSize() {

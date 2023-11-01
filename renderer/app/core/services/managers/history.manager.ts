@@ -18,6 +18,10 @@ export class HistoryManager {
     return this.historyRepository.add(item);
   }
 
+  async bulkAdd(items: IHistoryEntry[]): Promise<number> {
+    return this.historyRepository.bulkAdd(items);
+  }
+
   async delete(id: number): Promise<void> {
     this.markDirty();
     return this.historyRepository.delete(id);

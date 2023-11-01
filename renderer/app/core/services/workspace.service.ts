@@ -4,12 +4,12 @@ import { DbManager } from '@app/core/database';
 import { IMessageBroker } from '@app/core/models';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { UiUtil } from '@app/utils';
+import { IAppConfig } from '@config/app-config';
+import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { exportDB, importInto } from 'dexie-export-import';
+import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
 import { MessageBroker } from 'injection-tokens';
 import { Observable, Subject, combineLatest, skip, startWith } from 'rxjs';
-import { IAppConfig } from '../../../../app-config';
-import { IpcChannel } from '../../../../shared/ipc-channel.enum';
-import { IPasswordEntry } from '../../../../shared/password-entry.model';
 import { GroupId } from '../enums';
 import { ConfigService } from './config.service';
 import { EntryManager } from './managers/entry.manager';
@@ -98,7 +98,7 @@ export class WorkspaceService {
     this.entryManager.entryHistory = null;
     this.entryManager.editedEntry = null;
     this.file = null;
-    this.isSynced = null;
+    this.isSynced = true;
 
     this.entryManager.selectedPasswords = [];
     this.entryManager.passwordEntries = [];
@@ -110,6 +110,7 @@ export class WorkspaceService {
   }
 
   async lock({ minimize = false }): Promise<void> {
+    await this.router.navigate(['/pass']);
     this.isLocked = true;
 
     this.groupManager.selectedGroup = null;
@@ -120,15 +121,14 @@ export class WorkspaceService {
     await this.dbManager.reset();
 
     this.messageBroker.ipcRenderer.send(IpcChannel.Lock);
-    this.router.navigate(['/pass'], { queryParams: { minimize } });
   }
 
   async unlock(): Promise<void> {
     this.isLocked = false;
-    this.messageBroker.ipcRenderer.send(IpcChannel.Unlock);
 
     await this.router.navigate(['/workspace']);
-
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    this.messageBroker.ipcRenderer.send(IpcChannel.Unlock);
     UiUtil.unlockInterface();
     this.isBiometricsAuthenticationInProgress = false;
 
@@ -146,6 +146,7 @@ export class WorkspaceService {
     const fileReader = new FileReader();
     fileReader.readAsText(blob);
     fileReader.onloadend = () => {
+      console.log(fileReader.result);
       this.messageBroker.ipcRenderer.send(IpcChannel.SaveFile, {
         database: fileReader.result,
         password,
@@ -168,6 +169,39 @@ export class WorkspaceService {
     return true;
   }
 
+  async loadVault(serialized: string) {
+    try {
+      const parsedVault = JSON.parse(serialized);
+
+      const databaseStructure: DexieExportJsonStructure = {
+        formatName: 'dexie',
+        formatVersion: 1,
+        data: {
+          databaseName: 'main',
+          databaseVersion: 1,
+          tables: Object.keys(parsedVault).map(table => {
+            return {
+              name: table,
+              rowCount: parsedVault[table].length,
+              schema: this.dbManager.schemas[table]
+            } 
+          }),
+          data: Object.keys(parsedVault).map(table => {
+            return {
+              tableName: table,
+              inbound: true,
+              rows: parsedVault[table]
+            };
+          })
+        }
+      }
+
+      return this.loadDatabase(JSON.stringify(databaseStructure));
+    } catch (err) {
+      throw new Error('Vault cannot be loaded to database', { cause: err });
+    }
+  }
+
   async loadDatabase(jsonString: string) {
     const blob = new Blob([jsonString]);
 
@@ -186,7 +220,7 @@ export class WorkspaceService {
     try {
       const groupId = await this.groupManager.addGroup({ name, isImported: true });
       const mappedEntries = entries.map(e => ({ ...e, groupId }));
-      await this.entryManager.bulkAddEntries(mappedEntries);
+      await this.entryManager.bulkAdd(mappedEntries);
       const entriesWithIds = await this.entryManager.getAllByGroup(groupId);
 
       for (const entry of entriesWithIds) {
@@ -243,7 +277,9 @@ export class WorkspaceService {
     this.messageBroker.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
       this.zone.run(() => {
         this.file = { filePath, filename: this.fileNamePipe.transform(filePath) };
-        this.lock({ minimize: false });
+        if (!this.isLocked) {
+          this.lock({ minimize: false });
+        }
       });
     });
   }

@@ -1,1 +1,1 @@
-export * from './initial-route.guard';
+export * from './workspace.guard';

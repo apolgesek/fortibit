@@ -1,6 +1,8 @@
 import { createHash } from 'crypto';
 import { IPasswordEntry } from '../../../shared';
+import { IExposedPasswordsService } from '../exposed-passwords/exposed-passwords-service.model';
 import { ExposedPasswordsService } from '../exposed-passwords/exposed-passwords.service';
+import { MockExposedPasswordsService } from '../exposed-passwords/mock-exposed-passwords.service';
 import { WeakPasswordsService } from '../weak-passwords/weak-passwords.service';
 import { IEncryptionService } from './encryption-service.model';
 import { EncryptionService } from './encryption.service';
@@ -12,17 +14,31 @@ type EventPayload = {
   [key: string]: any;
 };
 
+// include only intended props excluding database engine generated and private ones
+function normalizeEntity<T extends object>(e: T): Partial<T> {
+  const entity: Partial<T> = {};
+  for (const key in e) {
+    if (Object.prototype.hasOwnProperty.call(e, key) && /^[0-9a-z].*/i.test(key)) {
+      entity[key] = e[key];
+    }
+  }
+
+  return entity;
+}
+
 class Main {
   private readonly _encryptionService: IEncryptionService;
   private readonly _inMemoryEncryptionService: IEncryptionService;
-  private readonly _exposedPasswordsService: ExposedPasswordsService;
+  private readonly _exposedPasswordsService: IExposedPasswordsService;
   private readonly _weakPasswordsService: WeakPasswordsService;
   private readonly _messageListener: () => void;
 
   constructor() {
     this._encryptionService = new EncryptionService();
     this._inMemoryEncryptionService = new InMemoryEncryptionService();
-    this._exposedPasswordsService = new ExposedPasswordsService();
+    this._exposedPasswordsService = process.env.TEST_MODE === '0'
+      ? new ExposedPasswordsService()
+      : new MockExposedPasswordsService();
     this._weakPasswordsService = new WeakPasswordsService();
 
     this._messageListener = this.execute.bind(this);
@@ -74,8 +90,10 @@ class Main {
     const { database, password } = event;
     const parsedDb = JSON.parse(database);
     const stores = parsedDb.data.data;
+
     const entriesStore = stores.find(x => x.tableName === 'entries');
     const historyStore = stores.find(x => x.tableName === 'history');
+    const groupsStore = stores.find(x => x.tableName === 'groups');
 
     entriesStore.rows = entriesStore.rows.map(entry => ({
       ...entry,
@@ -86,8 +104,14 @@ class Main {
       item.entry.password = this._inMemoryEncryptionService.decryptString(item.entry.password, process.env.ENCRYPTION_KEY);
       return item;
     });
+
+    const vaultObject = {
+      entries: entriesStore.rows.map(normalizeEntity),
+      groups: groupsStore.rows.map(normalizeEntity),
+      history: historyStore.rows.map(normalizeEntity)
+    };
     
-    const databaseJSON = JSON.stringify(parsedDb);
+    const databaseJSON = JSON.stringify(vaultObject);
     process.send({ encrypted: this._encryptionService.encryptString(databaseJSON, password) });
   }
 
@@ -96,16 +120,13 @@ class Main {
   
     try {
       const decryptedDb = JSON.parse(this._encryptionService.decryptString(data, password));
-      const stores = decryptedDb.data.data;
-      const entriesStore = stores.find(x => x.tableName === 'entries');
-      const historyStore = stores.find(x => x.tableName === 'history');
 
-      entriesStore.rows = entriesStore.rows.map(entry => ({
+      decryptedDb.entries = decryptedDb.entries.map(entry => ({
         ...entry,
         password: this._inMemoryEncryptionService.encryptString(entry.password, process.env.ENCRYPTION_KEY)
       }));
 
-      historyStore.rows = historyStore.rows.map(item => {
+      decryptedDb.history = decryptedDb.history.map(item => {
         item.entry.password = this._inMemoryEncryptionService.encryptString(item.entry.password, process.env.ENCRYPTION_KEY);
         return item;
       });

@@ -6,6 +6,10 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { IHistoryEntry } from '@shared-renderer/history-entry.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+export interface IEntryHistoryDialogDataPayload {
+  id: number;
+}
+
 @Component({
   selector: 'app-entry-history-dialog',
   templateUrl: './entry-history-dialog.component.html',
@@ -13,13 +17,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   standalone: true,
   imports: [
     CommonModule,
-
     ModalComponent
   ]
 })
 export class EntryHistoryDialogComponent implements IModal, OnInit {
   public readonly ref: ComponentRef<EntryHistoryDialogComponent>;
-  public readonly additionalData?: IAdditionalData;
+  public readonly additionalData?: IAdditionalData<IEntryHistoryDialogDataPayload>;
   public history: IHistoryEntry[];
 
   constructor(

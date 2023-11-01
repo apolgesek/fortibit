@@ -5,6 +5,7 @@ import { ClipboardService } from '../clipboard.service';
 import { WorkspaceService } from '../workspace.service';
 import { EntryManager } from '../managers/entry.manager';
 import { GroupManager } from '../managers/group.manager';
+import { inject } from '@angular/core';
 
 export class DarwinHotkeyHandler implements IHotkeyHandler {
   public configuration: IHotkeyConfiguration = {
@@ -24,7 +25,7 @@ export class DarwinHotkeyHandler implements IHotkeyHandler {
     private readonly workspaceService: WorkspaceService,
     private readonly entryManager: EntryManager,
     private readonly groupManager: GroupManager
-  ) {}
+  ) {};
 
   isMultiselectionKeyDown(event: MouseEvent): boolean {
     return event.metaKey;

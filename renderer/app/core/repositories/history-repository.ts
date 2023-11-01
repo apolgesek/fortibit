@@ -18,6 +18,12 @@ export class HistoryRepository implements IHistoryRepository {
     });
   }
 
+  bulkAdd(items: IHistoryEntry[]): Promise<number> {
+    return this.db.context.transaction('rw', this.db.history, async () => {
+      return this.db.history.bulkAdd(items);
+    });
+  }
+
   delete(id: number): Promise<void> {
     return this.db.context.transaction('rw', this.db.history,
       () => this.db.history.delete(id));

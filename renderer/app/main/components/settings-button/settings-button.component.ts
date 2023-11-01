@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { IMessageBroker, IHotkeyHandler } from '@app/core/models';
+import { IHotkeyHandler, IMessageBroker } from '@app/core/models';
 import { ModalService } from '@app/core/services';
 import { slideDown } from '@app/shared';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
@@ -10,14 +10,13 @@ import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
-import { IpcChannel } from '../../../../../shared/ipc-channel.enum';
-import { UpdateState } from '../../../../../shared/update-state.model';
+import { IpcChannel, UpdateState } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
-import { MessageBroker, HotkeyHandler } from 'injection-tokens';
-import { Observable, scan, startWith, Subject } from 'rxjs';
+import { HotkeyHandler, MessageBroker } from 'injection-tokens';
+import { Observable, Subject, scan, startWith } from 'rxjs';
 
 interface INotification {
-  type: 'update';
+  type: 'update' | 'warning';
   content: string;
 }
 
@@ -102,5 +101,13 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.messageBroker.ipcRenderer.off(IpcChannel.UpdateState, this.updateListener);
+  }
+
+  getNotificationTypeColor(notifications: INotification[]): 'update' | 'mixed' {
+    if (notifications.length === 1 && notifications[0].type === 'update') {
+      return 'update';
+    } else {
+      return 'mixed';
+    }
   }
 }

@@ -6,6 +6,7 @@ import { IEncryptionEventWrapper } from './encryption-event-wrapper.model';
 
 export class EncryptionEventWrapper implements IEncryptionEventWrapper {
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
+  private readonly _isTestMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E));
 
   public async processEventAsync(event: any, encryptedKey: string): Promise<Serializable> {
     const process = await this.createEncryptionProcess(encryptedKey);
@@ -25,7 +26,8 @@ export class EncryptionEventWrapper implements IEncryptionEventWrapper {
       env: {
         ELECTRON_RUN_AS_NODE: '1',
         ENCRYPTION_KEY: this.decryptKey(encryptedKey),
-        BASEDIR: global['__basedir']
+        BASEDIR: global['__basedir'],
+        TEST_MODE: this._isTestMode ? '1' : '0'
       }
     });
   }

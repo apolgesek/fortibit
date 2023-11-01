@@ -40,6 +40,7 @@ namespace NativeCore
   using v8::Object;
   using v8::String;
   using v8::Value;
+  using v8::Boolean;
 
   INPUT SetupInput()
   {
@@ -97,6 +98,17 @@ namespace NativeCore
     SendInput(1, &ip, sizeof(INPUT));
 
     args.GetReturnValue().Set(true);
+  }
+
+  void SetWindowAffinity(const FunctionCallbackInfo<Value> &args)
+  {
+    char *buffer = node::Buffer::Data(args[0]);
+    bool value = args[1].As<Boolean>()->Value();
+    HWND win = static_cast<HWND>(*reinterpret_cast<void **>(buffer));
+
+    bool success = SetWindowDisplayAffinity(win, value ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
+    
+    args.GetReturnValue().Set(success);
   }
 
   void GetActiveWindowTitle(const FunctionCallbackInfo<Value> &args)
@@ -448,6 +460,7 @@ namespace NativeCore
   {
     NODE_SET_METHOD(exports, "pressPhraseKey", PressPhraseKey);
     NODE_SET_METHOD(exports, "pressKey", PressKey);
+    NODE_SET_METHOD(exports, "setWindowAffinity", SetWindowAffinity);
     NODE_SET_METHOD(exports, "getActiveWindowTitle", GetActiveWindowTitle);
     NODE_SET_METHOD(exports, "setIconicBitmap", SetIconicBitmap);
     NODE_SET_METHOD(exports, "unsetIconicBitmap", UnsetIconicBitmap);

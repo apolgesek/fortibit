@@ -1,13 +1,13 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, HostListener, Inject, NgZone, OnInit, ViewContainerRef } from '@angular/core';
+import { AfterViewInit, Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { NavigationStart, Router, RouterModule } from '@angular/router';
-import { IpcChannel } from '../../shared/ipc-channel.enum';
+import { IAppConfig } from '@config/app-config';
+import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
 import { filter, fromEvent, take } from 'rxjs';
-import { IAppConfig } from '../../app-config';
 import { AppConfig } from '../environments/environment';
 import { IMessageBroker } from './core/models';
-import { AppViewContainer, ComponentGridService, ConfigService, EntryManager, ModalManager, WorkspaceService } from './core/services';
+import { AppViewContainer, ComponentGridService, ConfigService, EntryManager, ModalManager, UpdateService, WorkspaceService } from './core/services';
 import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component';
 
 @Component({
@@ -20,12 +20,13 @@ import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component'
     MenuBarComponent
   ]
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
   public fontsLoaded = false;
   private config: IAppConfig;
 
   constructor(
     @Inject(MessageBroker) public readonly messageBroker: IMessageBroker,
+    @Inject(DOCUMENT) private readonly document: Document,
     private readonly router: Router,
     private readonly configService: ConfigService,
     private readonly modalManager: ModalManager,
@@ -34,8 +35,7 @@ export class AppComponent implements OnInit {
     private readonly workspaceService: WorkspaceService,
     private readonly entryManager: EntryManager,
     private readonly userInterfaceService: ComponentGridService,
-    private readonly zone: NgZone,
-    @Inject(DOCUMENT) private readonly document: Document,
+    private readonly updateService: UpdateService
   ) {
     this.appViewContainer.appViewContainerRef = this.viewContainerRef;
   }
@@ -58,6 +58,12 @@ export class AppComponent implements OnInit {
     } catch (err) {
       console.log('Failed to fetch fonts');
     }
+
+    this.updateService.initialize();
+  }
+
+  ngAfterViewInit(): void {
+    this.document.documentElement.style.setProperty('--device-pixel-ratio', window.devicePixelRatio.toString());
   }
 
   private registerGlobalEvents() {

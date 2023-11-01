@@ -14,6 +14,13 @@ export class DbManager {
   reports: IDbTable<IReport, number>;
   history: IDbTable<IHistoryEntry, number>;
 
+  readonly schemas =  {
+    entries: '++id,groupId,title,username',
+    groups: '++id',
+    reports: '++id,type,creationDate',
+    history: '++id,entryId,entry.lastModificationDate'
+  };
+
   // name must be unique to ensure stable access with multiple vaults open at the same time
   private readonly name: string = 'main' + new Date().getTime();
   private instance: IDbContext;
@@ -28,12 +35,7 @@ export class DbManager {
     }
 
     this.instance = new Dexie(this.name, { autoOpen: true });
-    this.instance.version(1).stores({
-      entries: '++id,groupId,title,username',
-      groups: '++id',
-      reports: '++id,type,creationDate',
-      history: '++id,entryId,entry.lastModificationDate'
-    });
+    this.instance.version(1).stores(this.schemas);
 
     this.entries = this.instance.table('entries');
     this.groups = this.instance.table('groups');

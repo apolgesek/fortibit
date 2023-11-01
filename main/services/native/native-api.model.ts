@@ -5,6 +5,7 @@ export const INativeApiService = createServiceDecorator<INativeApiService>('nati
 export interface INativeApiService {
   pressPhraseKey(char: string): void;
   pressKey(key: number): void;
+  setWindowAffinity(handle: Buffer, enabled: boolean): void;
   getActiveWindowTitle(): string;
   setLivePreviewBitmap(handle: Buffer, path: string): number;
   setThumbnailBitmap(handle: Buffer, path: string): number;

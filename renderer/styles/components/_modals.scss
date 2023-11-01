@@ -10,8 +10,9 @@
 		display: flex;
 		flex-direction: column;
 		background: var(--modal-bg);
-		min-width: 600px;
-		max-width: 80vw;
+		width: 80vw;
+		min-width: 500px;
+		max-width: 800px;
 		max-height: calc(100% - 10rem);
 		padding: 2rem;
 		position: absolute;
@@ -105,7 +106,6 @@
 
 .settings-modal {
 	height: 70vh;
-	width: 600px;
 
 	.inputgroup {
 		background-color: var(--modal-bg) !important;
@@ -113,7 +113,7 @@
 }
 
 .move-entry-modal {
-	min-width: auto !important;
-	max-width: auto !important;
+	min-width: 300px !important;
+	max-width: 300px !important;
 	width: 300px;
 }

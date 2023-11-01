@@ -47,28 +47,10 @@
 
 	&::after {
 		content: '';
-		width: 1px;
+		width: calc(1px / var(--device-pixel-ratio));
 		background-color: var(--border-color);
 		opacity: 1;
 	}
-
-	// @media (-webkit-min-device-pixel-ratio: 1.25) {
-	// 	&::after {
-	// 		width: 0.75px;
-	// 	}
-	// }
-
-	// @media (-webkit-min-device-pixel-ratio: 1.5) {
-	// 	&::after {
-	// 		width: 0.666px;
-	// 	}
-	// }
-	
-	// @media (-webkit-min-device-pixel-ratio: 2) {
-	// 	&::after {
-	// 		width: 0.5px;
-	// 	}
-	// }
 
 	&.active {
 		background-color: var(--border-color) !important;

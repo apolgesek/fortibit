@@ -2,16 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, Inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { IMessageBroker } from '@app/core/models';
 import { ConfigService, NotificationService, WorkspaceService } from '@app/core/services';
 import { MasterPasswordSetupComponent } from '@app/main/components/master-password-setup/master-password-setup.component';
 import { HotkeyBinderDirective } from '@app/main/directives/hotkey-binder.directive';
 import { isControlInvalid } from '@app/utils';
-import { FeatherModule } from 'angular-feather';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { IAppConfig } from '../../../../../../../app-config';
+import { IAppConfig } from '@config/app-config';
 import { getDefaultConfig } from '@shared-renderer/default-config';
-import { IMessageBroker } from '@app/core/models';
+import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-general-tab',
@@ -55,6 +55,8 @@ export class GeneralTabComponent implements OnInit {
         autoType: [null],
         lockOnSystemLock: [null],
         saveOnLock: [null],
+        showInsecureUrlPrompt: [null],
+        protectWindowsFromCapture: [null]
       }),
       input: this.formBuilder.group({
         idleTime: [0, Validators.compose([Validators.required, Validators.min(60)])],
@@ -71,6 +73,8 @@ export class GeneralTabComponent implements OnInit {
           autoType: config.autoTypeEnabled,
           lockOnSystemLock: config.lockOnSystemLock,
           saveOnLock: config.saveOnLock,
+          showInsecureUrlPrompt: config.showInsecureUrlPrompt,
+          protectWindowsFromCapture: config.protectWindowsFromCapture
         },
         input: {
           idleTime: config.idleSeconds,
@@ -95,6 +99,8 @@ export class GeneralTabComponent implements OnInit {
           autoTypeEnabled: form.autoType,
           lockOnSystemLock: form.lockOnSystemLock,
           saveOnLock: form.saveOnLock,
+          showInsecureUrlPrompt: form.showInsecureUrlPrompt,
+          protectWindowsFromCapture: form.protectWindowsFromCapture
         } as Partial<IAppConfig>;
 
         this.configService.setConfig(configPartial);

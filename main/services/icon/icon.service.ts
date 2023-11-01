@@ -1,14 +1,14 @@
+import { IPasswordEntry, IpcChannel } from "@shared-renderer/index";
 import { app, ipcMain, IpcMainEvent } from "electron";
 import { existsSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
-import { IPasswordEntry, IpcChannel } from "../../../shared";
+import * as psl from 'psl';
 import { IConfigService } from "../config";
 import { IFileService } from "../file";
 import { IWindowService } from "../window";
-import { IIconService } from "./icon-service.model";
-import * as psl from 'psl';
-import { IAsyncQueue } from "./async-queue.model";
 import { AsyncQueue } from "./async-queue";
+import { IAsyncQueue } from "./async-queue.model";
+import { IIconService } from "./icon-service.model";
 
 interface Icon {
   windowId: number;

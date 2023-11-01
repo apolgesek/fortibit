@@ -15,10 +15,7 @@ textarea {
 	padding: 0.5rem;
 	box-sizing: border-box;
 	position: relative;
-
-	&.checkbox {
-		align-items: center;
-	}
+	align-items: center;
 
 	input[type='text'],
 	input[type='password'],

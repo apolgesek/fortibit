@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
     "module": "es2020",
+    "baseUrl": ".",
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
@@ -17,6 +18,14 @@
       "es2022",
       "dom"
     ],
+    "paths": {
+      "@shared-renderer/*": [
+        "shared/*"
+      ],
+      "@root/*": [
+        "./*"
+      ]
+    }
   },
   "exclude": [
     "node_modules",

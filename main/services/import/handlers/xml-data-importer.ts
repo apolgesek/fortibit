@@ -1,7 +1,9 @@
+import { getDefaultPath, getFileFilter } from '@root/main/util';
 import { dialog } from 'electron';
 import { XMLParser } from 'fast-xml-parser';
 import { readFileSync } from 'fs-extra';
 import { IPasswordEntry, ImportHandler } from '../../../../shared';
+import { IConfigService } from '../../config';
 import { IEncryptionEventWrapper, MessageEventType } from '../../encryption';
 import { IWindowService } from '../../window';
 import { IImportHandler } from '../import-handler.model';
@@ -13,13 +15,16 @@ export abstract class XmlDataImporter implements IImportHandler {
 
   constructor(
     protected readonly _windowService: IWindowService,
-    protected readonly _encryptionEventWrapper: IEncryptionEventWrapper) {
+    protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
+    protected readonly _configService: IConfigService
+  ) {
   }
 
   async getMetadata(): Promise<IImportMetadata> {
     const fileObj = await dialog.showOpenDialog({
       properties: ['openFile'],
-      filters: [{ name: 'Extensible Markup Language', extensions: ['xml'] }]
+      defaultPath: getDefaultPath(this._configService.appConfig, ''),
+      filters: [getFileFilter(this._configService.appConfig, 'xml')]
     });
 
     if (fileObj.canceled) {

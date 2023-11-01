@@ -1,3 +1,4 @@
+import { stringify } from "csv-stringify/sync";
 import { writeFileSync } from "fs";
 
 export class CsvWriter {
@@ -6,14 +7,11 @@ export class CsvWriter {
       props = Object.keys(arr[0]) as (keyof T)[];
     }
 
-    const header = props.join(',');
     const rows = arr.map(obj => {
-      const values = props.map(prop => obj[prop]);
-
-      return values.join(',');
+      return props.map(prop => obj[prop]);
     });
 
-    const content = `${header}\n${rows.join('\n')}`;
-    writeFileSync(path, content);
+    const stringified = stringify([ props, ...rows ], { quoted: true });
+    writeFileSync(path, stringified);
   }
 }

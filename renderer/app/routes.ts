@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { WorkspaceGuard } from './core/guards/workspace.guard';
+import { workspaceGuard } from './core/guards';
 import { EntrySelectComponent } from './main/components/entry-select/entry-select.component';
 import { MasterPasswordSetupComponent } from './main/components/master-password-setup/master-password-setup.component';
 import { MasterPasswordComponent } from './main/components/master-password/master-password.component';
@@ -35,7 +35,7 @@ export const routes: Routes = [
       {
         path: 'master-password',
         component: MasterPasswordSetupComponent,
-        canActivate: [WorkspaceGuard],
+        canActivate: [workspaceGuard()],
         data: { state: 'MasterPasswordSetupComponent' }
       },
     ]

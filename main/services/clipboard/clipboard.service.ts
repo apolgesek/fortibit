@@ -1,8 +1,7 @@
-import { ipcMain } from 'electron';
-import { IpcChannel } from '../../../shared';
+import { IpcChannel } from '@shared-renderer/index';
+import { clipboard, ipcMain } from 'electron';
 import { IConfigService } from '../config';
 import { IClipboardService } from './clipboard-service.model';
-import { clipboard } from 'electron';
 
 export class ClipboardService implements IClipboardService {
   private _clearClipboardTimeout: NodeJS.Timeout;

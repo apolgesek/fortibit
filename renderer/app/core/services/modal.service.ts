@@ -1,24 +1,24 @@
-import { ComponentRef, Inject, Injectable } from '@angular/core';
+import { ComponentRef, Injectable, inject } from '@angular/core';
 import { ModalManager } from '@app/core/services/modal-manager';
 import { AboutDialogComponent } from '@app/main/components/dialogs/about-dialog/about-dialog.component';
 import { ConfirmExitDialogComponent } from '@app/main/components/dialogs/confirm-exit-dialog/confirm-exit-dialog.component';
+import { ConfirmUrlDialogComponent } from '@app/main/components/dialogs/confirm-url-dialog/confirm-url-dialog.component';
 import { DeleteEntryDialogComponent } from '@app/main/components/dialogs/delete-entry-dialog/delete-entry-dialog.component';
 import { DeleteGroupDialogComponent } from '@app/main/components/dialogs/delete-group-dialog/delete-group-dialog.component';
-import { EntryDialogComponent } from '@app/main/components/dialogs/entry-dialog/entry-dialog.component';
-import { EntryHistoryDialogComponent } from '@app/main/components/dialogs/entry-history-dialog/entry-history-dialog.component';
+import { EntryDialogComponent, IEntryDialogDataPayload } from '@app/main/components/dialogs/entry-dialog/entry-dialog.component';
+import { EntryHistoryDialogComponent, IEntryHistoryDialogDataPayload } from '@app/main/components/dialogs/entry-history-dialog/entry-history-dialog.component';
 import { ExposedPasswordsDialogComponent } from '@app/main/components/dialogs/exposed-passwords-dialog/exposed-passwords-dialog.component';
-import { FileRecoveryDialogComponent } from '@app/main/components/dialogs/file-recovery-dialog/file-recovery-dialog.component';
+import { FileRecoveryDialogComponent, IFileRecoveryDialogDataPayload } from '@app/main/components/dialogs/file-recovery-dialog/file-recovery-dialog.component';
 import { GeneratorDialogComponent } from '@app/main/components/dialogs/generator-dialog/generator-dialog.component';
-import { GroupDialogComponent } from '@app/main/components/dialogs/group-dialog/group-dialog.component';
-import { ImportDatabaseMetadataDialogComponent } from '@app/main/components/dialogs/import-database-metadata-dialog/import-database-metadata-dialog.component';
+import { GroupDialogComponent, IGroupDialogDataPayload } from '@app/main/components/dialogs/group-dialog/group-dialog.component';
+import { IImportDatabaseMetadataDialogDataPayload, ImportDatabaseMetadataDialogComponent } from '@app/main/components/dialogs/import-database-metadata-dialog/import-database-metadata-dialog.component';
 import { MaintenanceDialogComponent } from '@app/main/components/dialogs/maintenance-dialog/maintenance-dialog.component';
 import { MoveEntryDialogComponent } from '@app/main/components/dialogs/move-entry-dialog/move-entry-dialog.component';
 import { PasswordChangeDialogComponent } from '@app/main/components/dialogs/password-change-dialog/password-change-dialog.component';
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
 import { WeakPasswordsDialogComponent } from '@app/main/components/dialogs/weak-passwords-dialog/weak-passwords-dialog.component';
+import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { IHistoryEntry, IPasswordEntry, IpcChannel } from '../../../../shared/index';
-import { IMessageBroker } from '../models';
 import { EntryManager } from './managers/entry.manager';
 import { ModalRef } from './modal-ref';
 
@@ -26,11 +26,9 @@ import { ModalRef } from './modal-ref';
   providedIn: 'root'
 })
 export class ModalService {
-  constructor(
-    private readonly modalManager: ModalManager,
-    private readonly entryManager: EntryManager,
-    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-  ) {}
+  private readonly modalManager = inject(ModalManager);
+  private readonly entryManager = inject(EntryManager);
+  private readonly messageBroker = inject(MessageBroker);
 
   public get isAnyModalOpen(): boolean {
     return this.modalManager.isAnyModalOpen;
@@ -42,6 +40,10 @@ export class ModalService {
 
   openDeleteGroupWindow(): ModalRef {
     return this.modalManager.open(DeleteGroupDialogComponent);
+  }
+
+  async openConfirmOpenUrlWindow(): Promise<boolean> {
+    return this.modalManager.openPrompt(ConfirmUrlDialogComponent);
   }
 
   async openConfirmExitWindow(): Promise<boolean> {
@@ -61,14 +63,14 @@ export class ModalService {
   async openHistoryEntryWindow(entry: IHistoryEntry, config?: { readonly: boolean }): Promise<ModalRef> {
     this.entryManager.editedEntry = entry.entry;
 
-    const decryptedPassword = await this.messageBroker.ipcRenderer
+    const decryptedPassword: string = await this.messageBroker.ipcRenderer
       .invoke(IpcChannel.DecryptPassword, this.entryManager.editedEntry.password);
 
-    return this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword, config, historyEntry: entry }});
+    return this.modalManager.open<IEntryDialogDataPayload>(EntryDialogComponent, { payload: { decryptedPassword, config, historyEntry: entry }});
   }
 
   openGroupWindow(mode: 'new' | 'edit' = 'new'): ModalRef {
-    return this.modalManager.open(GroupDialogComponent, { payload: { mode } });
+    return this.modalManager.open<IGroupDialogDataPayload>(GroupDialogComponent, { payload: { mode } });
   }
 
   openAboutWindow(): ModalRef {
@@ -79,8 +81,8 @@ export class ModalService {
     return this.modalManager.open(SettingsDialogComponent);
   }
 
-  openImportedDbMetadataWindow<T>(metadata: T): ModalRef {
-    return this.modalManager.open(ImportDatabaseMetadataDialogComponent, { payload: metadata });
+  openImportedDbMetadataWindow(metadata: IImportDatabaseMetadataDialogDataPayload): ModalRef {
+    return this.modalManager.open<IImportDatabaseMetadataDialogDataPayload>(ImportDatabaseMetadataDialogComponent, { payload: metadata });
   }
 
   openExposedPasswordsWindow(): ModalRef {
@@ -93,7 +95,7 @@ export class ModalService {
 
   openEntryHistoryWindow(id: number): ModalRef {
     this.entryManager.editedEntry = this.entryManager.selectedPasswords[0];
-    return this.modalManager.open(EntryHistoryDialogComponent, { payload: { id } });
+    return this.modalManager.open<IEntryHistoryDialogDataPayload>(EntryHistoryDialogComponent, { payload: { id } });
   }
 
   openMoveEntryWindow(): ModalRef {
@@ -101,7 +103,7 @@ export class ModalService {
   }
 
   openRecoveryWindow(path: string): ModalRef {
-    return this.modalManager.open(FileRecoveryDialogComponent, { payload: { path } });
+    return this.modalManager.open<IFileRecoveryDialogDataPayload>(FileRecoveryDialogComponent, { payload: { path } });
   }
 
   openPasswordChangeWindow(): ModalRef {
@@ -128,7 +130,7 @@ export class ModalService {
         .invoke(IpcChannel.DecryptPassword, this.entryManager.editedEntry.password);
     }
 
-    return this.modalManager.open(EntryDialogComponent, { payload: { decryptedPassword } });
+    return this.modalManager.open<IEntryDialogDataPayload>(EntryDialogComponent, { payload: { decryptedPassword } });
   }
 }
 

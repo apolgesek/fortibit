@@ -1,11 +1,9 @@
-import { Component, ComponentRef, Inject } from '@angular/core';
-import { IpcChannel } from '../../../../../../shared/index';
-import { IMessageBroker } from '@app/core/models';
+import { Component, ComponentRef, inject } from '@angular/core';
 import { WorkspaceService, ModalRef } from '@app/core/services';
-
 import { MessageBroker } from 'injection-tokens';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { IpcChannel } from '@shared-renderer/index';
 
 @Component({
   selector: 'app-confirm-exit-dialog',
@@ -20,11 +18,9 @@ export class ConfirmExitDialogComponent implements IModal {
   public readonly ref!: ComponentRef<ConfirmExitDialogComponent>;
   public readonly additionalData!: IAdditionalData;
 
-  constructor(
-    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-    private readonly workspaceService: WorkspaceService,
-    private readonly modalRef: ModalRef
-  ) { }
+  private readonly messageBroker = inject(MessageBroker);
+  private readonly workspaceService = inject(WorkspaceService);
+  private readonly modalRef = inject(ModalRef);
 
   async saveChanges() {
     this.messageBroker.ipcRenderer.once(IpcChannel.GetSaveStatus, () => {

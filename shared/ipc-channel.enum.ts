@@ -37,6 +37,8 @@ export enum IpcChannel {
   GetImportedDatabaseMetadata = 'app:getImportedDatabaseMetadata',
   ScanLeaks = 'app:scanLeaks',
   ChangeEncryptionSettings = 'app:changeEncryptionSettings',
+  ChangeScreenLockSettings = 'app:changeScreenLockSettings',
+  ChangeWindowsCaptureProtection = 'app:changeWindowsCaptureProtection',
   CheckIconExists = 'app:checkIconExists',
   TryGetIcon = 'app:tryGetIcon',
   TryReplaceIcon = 'app:tryReplaceIcon',
@@ -65,5 +67,8 @@ export enum IpcChannel {
   ResetZoom = 'app:resetZoom',
   ToggleFullscreen = 'app:toggleFullscreen',
   RecalculateViewport = 'app:recalculateViewport',
-  ToggleViewportRecalculation = 'app:toggleViewportRecalculation'
+  ToggleViewportRecalculation = 'app:toggleViewportRecalculation',
+  SendInput = 'app:sendInput',
+  TestCleanup = 'app:testCleanup',
+  ConfigChanged = 'app:configChanged'
 }

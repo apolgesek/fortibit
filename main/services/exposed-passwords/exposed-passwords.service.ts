@@ -4,7 +4,7 @@ import { join } from "path";
 export class ExposedPasswordsService {
   private _apiUrl: string;
 
-  public async findLeaks(entries: { id: any, hash: string }[], basedir: string): Promise<{ id: any, occurrences: number }[]> {
+  public async findLeaks(entries: { id: number, hash: string }[], basedir: string): Promise<{ id: any, occurrences: number }[]> {
     try {
       if (!this._apiUrl) {
         const product = require(join(basedir, 'product.json'));

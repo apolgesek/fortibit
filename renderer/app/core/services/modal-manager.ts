@@ -53,7 +53,7 @@ export class ModalManager {
     });
   }
 
-  open<T extends IModal>(component: Type<T>, additionalData?: IAdditionalData): ModalRef {
+  open<P>(component: Type<IModal>, additionalData?: IAdditionalData<P>): ModalRef {
     // prevent multi open if opens on promise fullfillment
     if (this.openedModals.some(x => x.componentType === component)) {
       return;
@@ -69,7 +69,7 @@ export class ModalManager {
     }
 
     const componentRef = this.appViewContainer.getRootViewContainer().createComponent(component, { injector });
-    const componentInstance = componentRef.instance as T;
+    const componentInstance = componentRef.instance as IModal;
 
     modalRef.ref = componentRef;
     modalRef.onClose = new Subject<void>();

@@ -1,15 +1,15 @@
-import { Component, Inject, NgZone, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { SecondaryMenuBarComponent } from '@app/main/components/secondary-menu-bar/secondary-menu-bar.component';
-import { IPasswordEntry } from '../../../../../shared/password-entry.model';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CommonModule } from '@angular/common';
+import { Component, Inject, NgZone, OnInit } from '@angular/core';
+import { IMessageBroker } from '@app/core/models';
+import { SecondaryMenuBarComponent } from '@app/main/components/secondary-menu-bar/secondary-menu-bar.component';
 import { EntryIconDirective } from '@app/main/directives/entry-icon.directive';
 import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
 import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
-import { IMessageBroker } from '@app/core/models';
-import { MessageBroker } from 'injection-tokens';
-import { IpcChannel } from '../../../../../shared/ipc-channel.enum';
+import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IPasswordEntry } from '@shared-renderer/password-entry.model';
 import { FeatherModule } from 'angular-feather';
+import { MessageBroker } from 'injection-tokens';
 
 @Component({
   selector: 'app-entry-select',

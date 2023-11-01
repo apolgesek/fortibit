@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, DestroyRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { GroupId } from '@app/core/enums';
@@ -9,13 +10,13 @@ import { ConfigService } from '@app/core/services/config.service';
 import { AutofocusDirective } from '@app/shared/directives/autofocus.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { UiUtil } from '@app/utils';
-import { IpcChannel } from '../../../../../shared/index';
+import { IAppConfig } from '@config/app-config';
+import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { IAppConfig } from '../../../../../app-config';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { tips } from '../../../../assets/data/tips';
 
 @Component({
   selector: 'app-master-password',
@@ -30,11 +31,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     TooltipDirective
   ]
 })
-export class MasterPasswordComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MasterPasswordComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;
   public config: IAppConfig;
   public errorMessage: string;
   public passwordVisible = false;
+  public oneOfTips = '';
 
   private readonly defaultGroup = GroupId.AllItems;
 
@@ -42,6 +44,7 @@ export class MasterPasswordComponent implements OnInit, AfterViewInit, OnDestroy
   private _filePath: string;
 
   constructor(
+    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly workspaceService: WorkspaceService,
     private readonly groupManager: GroupManager,
     private readonly entryManager: EntryManager,
@@ -51,7 +54,6 @@ export class MasterPasswordComponent implements OnInit, AfterViewInit, OnDestroy
     private readonly configService: ConfigService,
     private readonly modalService: ModalService,
     private readonly destroyRef: DestroyRef,
-    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
   ) {
     this.loginForm = this.fb.group({
       password: ['', Validators.required]
@@ -61,7 +63,7 @@ export class MasterPasswordComponent implements OnInit, AfterViewInit, OnDestroy
       this.zone.run(async () => {
         if (decrypted && !error) {
           this.workspaceService.setSynced();
-          await this.workspaceService.loadDatabase(decrypted);
+          await this.workspaceService.loadVault(decrypted);
         } else {
           this.workspaceService.isBiometricsAuthenticationInProgress = false;
           UiUtil.unlockInterface();
@@ -94,7 +96,7 @@ export class MasterPasswordComponent implements OnInit, AfterViewInit, OnDestroy
     return this.workspaceService.isBiometricsAuthenticationInProgress;
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.configService.configLoadedSource$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(config => this.config = config);
     this.messageBroker.ipcRenderer.on(IpcChannel.DecryptedContent, this.onDecryptedContent);
     this.workspaceService.loadedDatabase$
@@ -104,6 +106,8 @@ export class MasterPasswordComponent implements OnInit, AfterViewInit, OnDestroy
       ).subscribe(() => {
         this.workspaceService.unlock();
       });
+
+    this.oneOfTips = tips[Math.floor(Math.random() * tips.length)].content;
   }
 
   async selectDefaultGroup() {

@@ -11,7 +11,11 @@
   </div>
   <div class="dialog-message">
     <div class="password-container">
-      <div class="password" [innerHTML]="password | prettyPassword"></div>
+      <div
+        class="password"
+        data-testid="password"
+        [innerHTML]="password | prettyPassword">
+      </div>
       <button
         type="button"
         style="margin-right: 0.5rem;"

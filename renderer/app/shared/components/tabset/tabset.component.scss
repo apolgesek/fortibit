@@ -40,6 +40,7 @@ ul li {
     margin: 0.5rem 0;
     background-color: var(--tabset-btn-bg);
     border-left: 4px solid transparent;
+    padding: 1rem 0.625rem;
 
     &:hover, :focus {
       color: var(--tabset-btn-text--hover);
