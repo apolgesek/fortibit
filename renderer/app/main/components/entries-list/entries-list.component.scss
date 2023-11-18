@@ -36,6 +36,10 @@ $sidePanelOutDuration: 250ms;
 	width: 100%;
 	@include font-regular;
 
+	::ng-deep .cdk-virtual-scroll-content-wrapper {
+    max-width: 100%;
+  }
+
 	.row-entry {
 		font-size: 0.875rem;
 		cursor: pointer;

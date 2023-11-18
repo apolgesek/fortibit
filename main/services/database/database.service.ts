@@ -1,6 +1,6 @@
 import { CsvWriter, getDefaultPath, getFileFilter, getHashCode } from '@root/main/util';
 import { IProduct } from '@root/product';
-import { ImportHandler, IpcChannel } from '@shared-renderer/index';
+import { ImportHandler, IpcChannel, VaultSchema } from '@shared-renderer/index';
 import { IpcMainEvent, IpcMainInvokeEvent, app, dialog, ipcMain, powerMonitor, safeStorage, session } from 'electron';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, unlinkSync } from 'fs';
 import { emptyDirSync, readFileSync, writeFileSync } from 'fs-extra';
@@ -146,8 +146,16 @@ export class DatabaseService implements IDatabaseService {
       );
       
       if (saveReturnValue.filePath && !saveReturnValue.canceled) {
-        CsvWriter.writeFile(saveReturnValue.filePath, result, ['title', 'username', 'occurrences']);
+        try {
+          CsvWriter.writeFile(saveReturnValue.filePath, result, ['title', 'username', 'occurrences']);
+          
+          return true;
+        } catch (err) {
+          throw new Error('Failed to save leaked password report');
+        }
       }
+
+      return false;
     });
 
     ipcMain.handle(IpcChannel.SaveWeakPasswordsReport, async (event: IpcMainEvent, result: any[]) => {
@@ -164,8 +172,16 @@ export class DatabaseService implements IDatabaseService {
       );
 
       if (saveReturnValue.filePath && !saveReturnValue.canceled) {
-        CsvWriter.writeFile(saveReturnValue.filePath, result, ['title', 'username', 'score']);
+        try {
+          CsvWriter.writeFile(saveReturnValue.filePath, result, ['title', 'username', 'score']);
+
+          return true;
+        } catch (err) {
+          throw new Error('Failed to save weak passwords report');
+        }
       }
+
+      return false;
     });
 
     ipcMain.handle(IpcChannel.CreateNew, async (event: IpcMainEvent) => {
@@ -307,7 +323,7 @@ export class DatabaseService implements IDatabaseService {
     }
 
     const password = saveFilePayload.password ?? this.getPassword(event.sender.id);
-    const payload = await this._encryptionEventService.saveDatabase(saveFilePayload.database, password, window.key);
+    const payload = await this._encryptionEventService.saveDatabase(this._configService.appConfig.schemaVersion, saveFilePayload.database, password, window.key);
     const finalFilePath = savePath.filePath.endsWith(this._configService.appConfig.fileExtension)
       ? savePath.filePath
       : this.appendExtension(savePath.filePath);
@@ -357,7 +373,7 @@ export class DatabaseService implements IDatabaseService {
 
   public async saveDatabaseSnapshot(event: IpcMainEvent, { database }): Promise<void> {
     const window = this._windowService.getWindowByWebContentsId(event.sender.id);
-    const payload = await this._encryptionEventService.saveDatabase(database, this.getPassword(event.sender.id) , window.key);
+    const payload = await this._encryptionEventService.saveDatabase(this._configService.appConfig.schemaVersion, database, this.getPassword(event.sender.id) , window.key);
     const tmpFileName = getHashCode(this.getFilePath(window.browserWindow.id));
 
     writeFileSync(join(this._tmpDirectoryPath, `~${tmpFileName}.tmp`),  payload.encrypted, { encoding: 'base64' });
@@ -413,10 +429,10 @@ export class DatabaseService implements IDatabaseService {
       if (!payload.error) {
         window.key = key;
         this.setPassword(password, event.sender.id);
-        const parsedDb = JSON.parse(payload.decrypted);
-        parsedDb.entries = this._iconService.fixIcons(parsedDb.entries);
+        const parsedDb: VaultSchema = JSON.parse(payload.decrypted);
+        parsedDb.tables.entries = this._iconService.fixIcons(parsedDb.tables.entries);
         payload.decrypted = JSON.stringify(parsedDb);
-        this._iconService.getIcons(window.browserWindow.id, parsedDb.entries);
+        this._iconService.getIcons(window.browserWindow.id, parsedDb.tables.entries);
         this._windowService.setIdleTimer();
 
         window.browserWindow.webContents.send(IpcChannel.DecryptedContent, { decrypted: payload.decrypted });

@@ -77,11 +77,6 @@
 					color: var(--dropdown-text--disabled);
 					background-color: var(--dropdown-bg);
 				}
-
-				.secondary {
-					margin-left: auto;
-					color: var(--dropdown-text--disabled);
-				}
 			}
 
 			.dropdown-content {
@@ -138,4 +133,19 @@
 	&:hover:not(:disabled), &:focus, &.expanded {
 		background-color: var(--dropdown-list-item-bg--hover) !important;
 	}
+}
+
+.zoom-level {
+	li {
+		border-radius: 0.25rem;
+	}
+
+	i-feather {
+		margin-right: 0 !important;
+	}
+}
+
+.secondary {
+	margin-left: auto;
+	color: var(--dropdown-text--disabled);
 }

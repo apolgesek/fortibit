@@ -1,181 +1,54 @@
-import { IHotkeyConfiguration } from '@app/core/models';
 import { ModalService } from '@app/core/services/modal.service';
-import { IHotkeyHandler } from '../../models/hotkey-handler.model';
 import { ClipboardService } from '../clipboard.service';
-import { WorkspaceService } from '../workspace.service';
 import { EntryManager } from '../managers/entry.manager';
 import { GroupManager } from '../managers/group.manager';
+import { WorkspaceService } from '../workspace.service';
+import { HotkeyHandler } from './hotkey-handler';
 
-export class WindowsHotkeyHandler implements IHotkeyHandler {
-  public configuration: IHotkeyConfiguration = {
-    deleteLabel: 'Delete (Del)',
-    copyPasswordLabel: 'Copy password (Ctrl + Shift + C)',
-    copyUsernameLabel: 'Copy username (Ctrl + Shift + U)',
-    removeGroupLabel: 'Delete (Del)',
-    renameGroupLabel: 'Rename (Ctrl + E)',
-    emptyBinLabel: 'Empty recycle bin',
-    settingsLabel: 'Settings (Ctrl + .)',
-    moveEntryLabel: 'Move (M)'
-  };
-
-  constructor(
-    private readonly modalService: ModalService,
-    private readonly clipboardService: ClipboardService,
-    private readonly workspaceService: WorkspaceService,
-    private readonly entryManager: EntryManager,
-    private readonly groupManager: GroupManager
-  ) {}
-
-  isMultiselectionKeyDown(event: MouseEvent): boolean {
-    return event.ctrlKey;
-  }
-
-  intercept(event: KeyboardEvent) {
-    if (this.modalService.isAnyModalOpen) {
-      return;
-    }
-
-    this.registerSaveDatabase(event);
-    this.registerDeleteEntry(event);
-    this.registerDeleteGroup(event);
-    this.registerEditEntry(event);
-    this.registerCopyPassword(event);
-    this.registerCopyUsername(event);
-    this.registerAddEntry(event);
-    this.registerSelectAllEntries(event);
-    this.registerFindEntries(event);
-    this.registerFindGlobalEntries(event);
-    this.registerLockDatabase(event);
-    this.registerRenameGroup(event);
-    this.registerAddGroup(event);
-    this.registerMoveEntry(event);
-    this.registerOpenSettings(event);
-  }
-
-  public registerSaveDatabase(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 's' && event.ctrlKey) {
-      if (!this.workspaceService.isSynced) {
-        this.workspaceService.saveDatabase();
+export class WindowsHotkeyHandler extends HotkeyHandler {
+  protected keyMap: (event: KeyboardEvent) => string[] = (event: KeyboardEvent) => {
+    return [event.ctrlKey, event.shiftKey, event.key].map((x, idx) => {
+      switch (idx) {
+        case 0:
+          return x ? 'ctrl' : null;
+        case 1:
+          return x ? 'shift' : null;
+        case 2:
+          return (x as string).toLowerCase();
       }
+    });
+  };
+  
+  constructor(
+    protected readonly modalService: ModalService,
+    protected readonly clipboardService: ClipboardService,
+    protected readonly workspaceService: WorkspaceService,
+    protected readonly entryManager: EntryManager,
+    protected readonly groupManager: GroupManager
+  ) {
+    super(modalService, clipboardService, workspaceService, entryManager, groupManager);
+    
+    this.registerHotkey('Delete', [this.deleteEntry, this.deleteGroup], { labelId: 'Remove' });
+    this.registerHotkey('F11', this.toggleFullscreen, { labelId: 'ToggleFullscreen' });
+    this.registerHotkey('Ctrl+A', this.selectAllEntries);
+    this.registerHotkey('Ctrl+E', this.editEntry, { labelId: 'Edit' });
+    this.registerHotkey('Ctrl+F', this.findEntries, { labelId: 'FindInGroup' });
+    this.registerHotkey('Ctrl+G', this.openGenerator, { labelId: 'Generator' });
+    this.registerHotkey('Ctrl+H', this.openHistory, { labelId: 'History' });
+    this.registerHotkey('Ctrl+L', this.lockDatabase, { labelId: 'Lock' });
+    this.registerHotkey('Ctrl+M', this.moveEntry, { labelId: 'MoveEntry' });
+    this.registerHotkey('Ctrl+N', this.addEntry, { labelId: 'AddEntry' });
+    this.registerHotkey('Ctrl+O', this.addGroup, { labelId: 'AddGroup' });
+    this.registerHotkey('Ctrl+R', this.renameGroup, { labelId: 'RenameGroup' });
+    this.registerHotkey('Ctrl+S', this.saveDatabase, { labelId: 'SaveDatabase' });
 
-      event.preventDefault();
-    }
-  }
+    this.registerHotkey('Ctrl+.', this.openSettings, { labelId: 'OpenSettings' });
+    this.registerHotkey('Ctrl+-', this.zoomOut, { labelId: 'ZoomOut' });
+    this.registerHotkey('Ctrl+=', this.zoomIn, { labelId: 'ZoomIn' });
+    this.registerHotkey('Ctrl+0', this.resetZoom, { labelId: 'ResetZoom' });
 
-  public registerDeleteEntry(event: KeyboardEvent) {
-    if (event.key === 'Delete' && this.entryManager.selectedPasswords.length) {
-      this.modalService.openDeleteEntryWindow();
-      event.preventDefault();
-    }
-  }
-
-  public registerDeleteGroup(event: KeyboardEvent) {
-    if (event.key === 'Delete'
-      && this.groupManager.selectedGroup
-      && !this.groupManager.builtInGroups.map(x => x.id).includes(this.groupManager.selectedGroup)
-      && this.entryManager.selectedPasswords.length === 0) {
-      this.modalService.openDeleteGroupWindow();
-      event.preventDefault();
-    }
-  }
-
-  public registerRenameGroup(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'e'
-      && event.ctrlKey
-      && this.groupManager.selectedGroup
-      && !this.groupManager.builtInGroups.map(x => x.id).includes(this.groupManager.selectedGroup)) {
-      this.modalService.openGroupWindow('edit');
-      event.preventDefault();
-    }
-  }
-
-  public registerEditEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'e' && !event.ctrlKey && this.entryManager.selectedPasswords.length) {
-      this.modalService.openEditEntryWindow();
-      event.preventDefault();
-    }
-  }
-
-  public registerMoveEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'm' && this.entryManager.selectedPasswords.length) {
-      this.modalService.openMoveEntryWindow();
-      event.preventDefault();
-    }
-  }
-
-  public registerCopyPassword(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'c'
-      && event.ctrlKey
-      && event.shiftKey
-      && this.entryManager.selectedPasswords.length === 1) {
-      this.clipboardService.copyEntryDetails(this.entryManager.selectedPasswords[0], 'password');
-      event.preventDefault();
-    }
-  }
-
-  public registerCopyUsername(event: KeyboardEvent) {
-    if (
-      event.key.toLowerCase() === 'u'
-      && event.ctrlKey
-      && event.shiftKey
-      && this.entryManager.selectedPasswords.length === 1
-    ) {
-      this.clipboardService.copyEntryDetails(this.entryManager.selectedPasswords[0], 'username');
-      event.preventDefault();
-    }
-  }
-
-  public registerAddEntry(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'i' && event.ctrlKey && this.groupManager.isAddAllowed) {
-      this.modalService.openNewEntryWindow();
-      event.preventDefault();
-    }
-  }
-
-  public registerAddGroup(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'o' && event.ctrlKey) {
-      this.modalService.openGroupWindow();
-      event.preventDefault();
-    }
-  }
-
-  public registerSelectAllEntries(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'a' && event.ctrlKey && this.entryManager.selectedPasswords.length) {
-      this.entryManager.selectedPasswords = [];
-      this.entryManager.selectedPasswords.push(...this.entryManager.passwordEntries);
-      event.preventDefault();
-    }
-  }
-
-  public registerFindEntries(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'f' && event.ctrlKey) {
-      this.entryManager.isGlobalSearch = false;
-      this.entryManager.selectedPasswords = [];
-      (document.querySelector('.search') as HTMLInputElement).focus();
-      event.preventDefault();
-    }
-  }
-
-  public registerFindGlobalEntries(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'g' && event.ctrlKey) {
-      this.entryManager.isGlobalSearch = true;
-      this.entryManager.selectedPasswords = [];
-      (document.querySelector('.search') as HTMLInputElement).focus();
-      event.preventDefault();
-    }
-  }
-
-  public registerLockDatabase(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'l' && event.ctrlKey && this.workspaceService.file) {
-      this.workspaceService.lock({ minimize: true });
-      event.preventDefault();
-    }
-  }
-
-  public registerOpenSettings(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === '.' && event.ctrlKey) {
-      this.modalService.openSettingsWindow();
-      event.preventDefault();
-    }
+    this.registerHotkey('Ctrl+Shift+C', this.copyPassword, { labelId: 'CopyPassword' });
+    this.registerHotkey('Ctrl+Shift+F', this.findGlobalEntries, { labelId: 'FindInVault' });
+    this.registerHotkey('Ctrl+Shift+U', this.copyUsername, { labelId: 'CopyUsername' });
   }
 }

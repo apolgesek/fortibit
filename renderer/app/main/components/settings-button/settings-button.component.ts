@@ -3,6 +3,7 @@ import { Component, DestroyRef, Inject, NgZone, OnDestroy, OnInit } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IHotkeyHandler, IMessageBroker } from '@app/core/models';
 import { ModalService } from '@app/core/services';
+import { HotkeyLabel } from '@app/core/services/hotkey/hotkey-label';
 import { slideDown } from '@app/shared';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
@@ -42,6 +43,7 @@ interface INotification {
 export class SettingsButtonComponent implements OnInit, OnDestroy {
   public readonly notifications$: Observable<INotification[]>;
   public updateAvailable = '';
+  public settingsLabel: string;
   private readonly notificationsSource = new Subject<INotification>();
   private updateListener: (event: any, state: UpdateState, version: string) => void;
 
@@ -83,10 +85,6 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
     this.messageBroker.ipcRenderer.on(IpcChannel.UpdateState, this.updateListener);
   }
 
-  public get settingsLabel(): string {
-    return this.hotkeyHandler.configuration.settingsLabel;
-  }
-
   openSettings() {
     this.modalService.openSettingsWindow();
   }
@@ -96,6 +94,7 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.settingsLabel = this.hotkeyHandler.getContextMenuLabel('OpenSettings');
     this.messageBroker.ipcRenderer.send(IpcChannel.GetUpdateState);
   }
 

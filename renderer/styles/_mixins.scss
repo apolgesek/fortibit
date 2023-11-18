@@ -33,6 +33,10 @@
   &::-webkit-scrollbar-track {
     display: none;
   }
+
+  ::-webkit-scrollbar-corner {
+    background: rgba(0,0,0,0);
+  }
 }
 
 @mixin scrollbar-hover {

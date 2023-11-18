@@ -2,6 +2,7 @@ import { IAppConfig } from "../app-config"
 
 export const getDefaultConfig = (platform: string): Partial<IAppConfig> => {
   return {
+    schemaVersion: 1,
     encryption: {
       passwordLength: 15,
       lowercase: true,

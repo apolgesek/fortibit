@@ -109,6 +109,7 @@ export class ConfigService implements IConfigService {
   set(settings: Partial<IAppConfig>) {
     this._appConfig = { ...this._appConfig, ...settings };
     const excludedKeys: (keyof IAppConfig)[] = [
+      'schemaVersion',
       'version',
       'electronVersion',
       'nodeVersion',

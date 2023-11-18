@@ -17,6 +17,7 @@ const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
 const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
 
 const formatURL = (urlObject: UrlObject) => String(Object.assign(new URL('http://localhost'), urlObject));
+const zoomLevels = [0.25,0.33,0.5,0.67,0.75,0.8,0.9,1,1.1,1.25,1.5,1.75,2,2.5,3];
 
 export class WindowService implements IWindowService {
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
@@ -61,22 +62,6 @@ export class WindowService implements IWindowService {
       win.browserWindow.isMaximized() ? win.browserWindow.unmaximize() : win.browserWindow.maximize();
     });
 
-    ipcMain.on(IpcChannel.ZoomIn, (event: IpcMainEvent) => {
-      let currentFactor = event.sender.getZoomFactor();
-      currentFactor === 1 ? currentFactor += 0.1 : currentFactor += 0.25;
-      event.sender.setZoomFactor(currentFactor);
-    });
-
-    ipcMain.on(IpcChannel.ZoomOut, (event: IpcMainEvent) => {
-      let currentFactor = event.sender.getZoomFactor();
-      currentFactor === 1.25 ? currentFactor -= 0.15 : currentFactor -= 0.25;
-      event.sender.setZoomFactor(currentFactor);
-    });
-
-    ipcMain.on(IpcChannel.ResetZoom, (event: IpcMainEvent) => {
-      event.sender.setZoomFactor(1);
-    });
-
     ipcMain.on(IpcChannel.Close, (event: IpcMainEvent) => {
       const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
     
@@ -85,6 +70,31 @@ export class WindowService implements IWindowService {
       }
 
       win.browserWindow.close();
+    });
+
+    ipcMain.handle(IpcChannel.ZoomIn, (event: IpcMainEvent) => {
+      let currentFactor = parseFloat(event.sender.getZoomFactor().toFixed(2));
+      if (currentFactor === zoomLevels[zoomLevels.length - 1]) return zoomLevels[zoomLevels.length - 1];
+
+      const idx = zoomLevels.findIndex(x => x === currentFactor);
+      event.sender.setZoomFactor(zoomLevels[idx + 1]);
+
+      return zoomLevels[idx + 1];
+    });
+
+    ipcMain.handle(IpcChannel.ZoomOut, (event: IpcMainEvent) => {
+      let currentFactor = parseFloat(event.sender.getZoomFactor().toFixed(2));
+      if (currentFactor === zoomLevels[0]) return zoomLevels[0];
+      
+      const idx = zoomLevels.findIndex(x => x === currentFactor);
+      event.sender.setZoomFactor(zoomLevels[idx - 1]);
+
+      return zoomLevels[idx - 1];
+    });
+
+    ipcMain.handle(IpcChannel.ResetZoom, (event: IpcMainEvent) => {
+      event.sender.setZoomFactor(1);
+      return 1;
     });
 
     ipcMain.handle(IpcChannel.ToggleFullscreen, (event: IpcMainEvent) => {

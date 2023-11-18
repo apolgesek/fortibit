@@ -118,6 +118,12 @@
 		</div>
 		<div class="section">
 			<div class="subsection">
+				<p class="label">Schema version</p>
+				<p>{{ config.schemaVersion | number: '1.1-3' }}</p>
+			</div>
+		</div>
+		<div class="section">
+			<div class="subsection">
 				<p class="label">Autotype</p>
 				<p>
 				 <span class="subtype">Full:</span> {{ config.autocompleteShortcut }}
@@ -137,7 +143,4 @@
 	</div>
 </ng-template>
 
-<div
-	appSidebarHandle
-	position="left">
-</div>
+<app-sidebar-handle />

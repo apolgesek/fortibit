@@ -1,12 +1,10 @@
-import { Injectable, inject } from '@angular/core';
 import { IReport } from '../../../../shared/report.model';
 import { DbManager } from '../database/db-manager';
 import { ReportType } from '../enums';
 import { IReportRepository, PredicateFn } from './report-repository.model';
 
-@Injectable({providedIn: 'root'})
 export class ReportRepository implements IReportRepository {
-  private readonly db = inject(DbManager);
+  constructor(private readonly db: DbManager) {}
 
   getAllByPredicate(fn: PredicateFn): Promise<IReport[]> {
     return this.db.context.transaction('r', this.db.reports,

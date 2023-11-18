@@ -41,7 +41,7 @@ export class EntryHistoryDialogComponent implements IModal, OnInit {
   }
 
   async openEntry(entry: IHistoryEntry) {
-    const modalRef = await this.modalService.openHistoryEntryWindow(entry, { readonly: true });
+    const modalRef = await this.modalService.openHistoryEntryWindow(entry);
 
     modalRef.onClose.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.getEntryHistory();

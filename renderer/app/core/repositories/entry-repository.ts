@@ -32,8 +32,9 @@ export class EntryRepository implements IEntryRepository {
   }
 
   add(item: Partial<IPasswordEntry>): Promise<number> {
+    const { group, ...entity } = item;
     return this.db.context.transaction('rw', this.db.entries,
-      () => this.db.entries.add(item as IPasswordEntry));
+      () => this.db.entries.add(entity as IPasswordEntry));
   }
 
   bulkAdd(items: IPasswordEntry[]): Promise<number> {
@@ -42,13 +43,14 @@ export class EntryRepository implements IEntryRepository {
   }
 
   update(item: Partial<IPasswordEntry>): Promise<number> {
+    const { group, ...entity } = item;
     return this.db.context.transaction('rw', this.db.entries, this.db.groups, async () => {
       if (!item.id) {
         throw new Error('No id provided for the entry to update');
       }
 
       const originalItem = await this.get(item.id);
-      const updatedItem = { ...originalItem, ...item };
+      const updatedItem = { ...originalItem, ...entity };
 
       return this.db.entries.put(updatedItem, item.id);
     });

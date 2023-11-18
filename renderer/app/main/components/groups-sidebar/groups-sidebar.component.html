@@ -27,8 +27,8 @@
 				<span>Groups</span>
 				<div class="quick-actions">
 					<button
-						appTooltip="Add group"
-						aria-label="Add group"
+						[appTooltip]="addGroupLabel"
+						[attr.aria-label]="addGroupLabel"
 						class="add-group"
 						container="body"
 						(click)="addGroup(); false">
@@ -64,7 +64,4 @@
 	</ul>
 </div>
 
-<div
-	appSidebarHandle
-	position="right">
-</div>
+<app-sidebar-handle />

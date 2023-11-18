@@ -78,8 +78,8 @@
   --dropdown-list-item-bg--hover: #{$grey-600};
 
   // NOTIFICATION
-  --notification-bg: #{lighten($black-800, 5)};
-  --notification-bg--success: #{$grey-600};
+  --notification-bg: #{lighten($black-800, 2)};
+  --notification-bg--success: #{$black-800};
   --notification-bg--error: #{$grey-600};
 
   // EXPANDABLE SECTION

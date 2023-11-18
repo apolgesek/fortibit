@@ -75,9 +75,12 @@ export class ExposedPasswordsDialogComponent implements IModal, OnInit {
   }
 
   async saveReport() {
-    await this.messageBroker.ipcRenderer
+    const saved = await this.messageBroker.ipcRenderer
       .invoke(IpcChannel.SaveExposedPasswordsReport, this.exposedPasswordsFound);
-    this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Report generated' });
+
+    if (saved) {
+      this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Report exported' });
+    }
   }
 
   ngOnInit(): void {

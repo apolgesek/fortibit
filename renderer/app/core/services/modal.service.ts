@@ -60,13 +60,13 @@ export class ModalService {
     return this.openEntryWindow();
   }
 
-  async openHistoryEntryWindow(entry: IHistoryEntry, config?: { readonly: boolean }): Promise<ModalRef> {
+  async openHistoryEntryWindow(entry: IHistoryEntry): Promise<ModalRef> {
     this.entryManager.editedEntry = entry.entry;
 
     const decryptedPassword: string = await this.messageBroker.ipcRenderer
       .invoke(IpcChannel.DecryptPassword, this.entryManager.editedEntry.password);
 
-    return this.modalManager.open<IEntryDialogDataPayload>(EntryDialogComponent, { payload: { decryptedPassword, config, historyEntry: entry }});
+    return this.modalManager.open<IEntryDialogDataPayload>(EntryDialogComponent, { payload: { decryptedPassword, config: { readonly: true }, historyEntry: entry }});
   }
 
   openGroupWindow(mode: 'new' | 'edit' = 'new'): ModalRef {
@@ -93,9 +93,9 @@ export class ModalService {
     return this.modalManager.open(WeakPasswordsDialogComponent);
   }
 
-  openEntryHistoryWindow(id: number): ModalRef {
+  openEntryHistoryWindow(): ModalRef {
     this.entryManager.editedEntry = this.entryManager.selectedPasswords[0];
-    return this.modalManager.open<IEntryHistoryDialogDataPayload>(EntryHistoryDialogComponent, { payload: { id } });
+    return this.modalManager.open<IEntryHistoryDialogDataPayload>(EntryHistoryDialogComponent, { payload: { id: this.entryManager.editedEntry.id } });
   }
 
   openMoveEntryWindow(): ModalRef {

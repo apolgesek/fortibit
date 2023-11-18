@@ -1,14 +1,14 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivateFn, Router } from '@angular/router';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { from, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { WorkspaceService } from '../services';
 
-export function workspaceGuard(): CanActivateFn {
-  return () => {
+export function masterPasswordSetupGuard(): CanActivateFn {
+  return (route: ActivatedRouteSnapshot) => {
     const messageBroker = inject(MessageBroker);
     const workspaceService = inject(WorkspaceService);
     const fileNamePipe = inject(FileNamePipe);
@@ -28,8 +28,17 @@ export function workspaceGuard(): CanActivateFn {
             return true;
           }
         }
-
         return true;
-      }));
+      }),
+      switchMap((allow) => {
+        if (allow && !route.queryParams.explicitNew) {
+          return from(workspaceService.setupDatabase());
+        } else if (allow) {
+          return of(true);
+        }
+
+        return of(false);
+      })
+    );
   }
 }

@@ -5,28 +5,42 @@ import { IMessageBroker } from '@app/core/models';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { UiUtil } from '@app/utils';
 import { IAppConfig } from '@config/app-config';
-import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { IPasswordEntry, IpcChannel, VaultSchema } from '@shared-renderer/index';
 import { exportDB, importInto } from 'dexie-export-import';
 import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
 import { MessageBroker } from 'injection-tokens';
-import { Observable, Subject, combineLatest, skip, startWith } from 'rxjs';
+import { Observable, Subject, map, merge } from 'rxjs';
 import { GroupId } from '../enums';
 import { ConfigService } from './config.service';
 import { EntryManager } from './managers/entry.manager';
 import { GroupManager } from './managers/group.manager';
 import { HistoryManager } from './managers/history.manager';
+import { ReportManager } from './managers/report.manager';
 import { ModalService } from './modal.service';
 import { NotificationService } from './notification.service';
 
+enum DirtyMarkType {
+  Entry,
+  Group,
+  History,
+  Report
+}
+
 @Injectable({ providedIn: 'root' })
 export class WorkspaceService {
-  public readonly loadedDatabase$: Observable<boolean>;
+  public readonly loadedDatabase$: Observable<boolean>;  
   public isSynced = true;
   public file?: { filePath: string; filename: string };
   public isLocked = true;
   public isBiometricsAuthenticationInProgress = false;
-  private config: IAppConfig;
+
   private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
+  private config: IAppConfig;
+  private _zoomFactor = 1;
+
+  get zoomFactor(): number {
+    return Math.round(this._zoomFactor * 100);
+  }
 
   constructor(
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
@@ -34,6 +48,7 @@ export class WorkspaceService {
     private readonly entryManager: EntryManager,
     private readonly groupManager: GroupManager,
     private readonly historyManager: HistoryManager,
+    private readonly reportManager: ReportManager,
     private readonly dbManager: DbManager,
     private readonly notificationService: NotificationService,
     private readonly modalService: ModalService,
@@ -45,11 +60,12 @@ export class WorkspaceService {
       this.config = config as IAppConfig;
     });
 
-    combineLatest([
-      this.entryManager.markDirtySource.pipe(startWith(null)),
-      this.groupManager.markDirtySource.pipe(startWith(null)),
-      this.historyManager.markDirtySource.pipe(startWith(null))
-    ]).pipe(skip(1)).subscribe(() => {
+    merge(
+      this.entryManager.markDirtySource.pipe(map(() => DirtyMarkType.Entry)),
+      this.groupManager.markDirtySource.pipe(map(() => DirtyMarkType.Group)),
+      this.historyManager.markDirtySource.pipe(map(() => DirtyMarkType.History)),
+      this.reportManager.markDirtySource.pipe(map(() => DirtyMarkType.Report))
+    ).pipe().subscribe(() => {
       this.isSynced = null;
       this.saveDatabaseSnapshot();
     });
@@ -92,7 +108,7 @@ export class WorkspaceService {
   }
 
   async createNew(): Promise<void> {
-    await this.router.navigate(['/master-password']);
+    await this.router.navigate(['/master-password'], { queryParams: { explicitNew: true } });
 
     this.groupManager.selectedGroup = null;
     this.entryManager.entryHistory = null;
@@ -146,7 +162,6 @@ export class WorkspaceService {
     const fileReader = new FileReader();
     fileReader.readAsText(blob);
     fileReader.onloadend = () => {
-      console.log(fileReader.result);
       this.messageBroker.ipcRenderer.send(IpcChannel.SaveFile, {
         database: fileReader.result,
         password,
@@ -171,7 +186,9 @@ export class WorkspaceService {
 
   async loadVault(serialized: string) {
     try {
-      const parsedVault = JSON.parse(serialized);
+      const parsedVault: VaultSchema = JSON.parse(serialized);
+      this.configService.setConfig({ schemaVersion: parsedVault.schemaVersion });
+      const keys = Object.keys(this.dbManager.schemas);
 
       const databaseStructure: DexieExportJsonStructure = {
         formatName: 'dexie',
@@ -179,18 +196,18 @@ export class WorkspaceService {
         data: {
           databaseName: 'main',
           databaseVersion: 1,
-          tables: Object.keys(parsedVault).map(table => {
+          tables: keys.map(table => {
             return {
               name: table,
-              rowCount: parsedVault[table].length,
+              rowCount: parsedVault.tables[table].length,
               schema: this.dbManager.schemas[table]
             } 
           }),
-          data: Object.keys(parsedVault).map(table => {
+          data: keys.map(table => {
             return {
               tableName: table,
               inbound: true,
-              rows: parsedVault[table]
+              rows: parsedVault.tables[table]
             };
           })
         }
@@ -249,12 +266,14 @@ export class WorkspaceService {
     return this.saveDatabase(config, newPassword);
   }
 
-  async setupDatabase() {
+  async setupDatabase(): Promise<boolean> {
     await this.messageBroker.ipcRenderer.invoke(IpcChannel.RegenerateKey);
 
     if (!this.file) {
       await this.groupManager.setupGroups();
     }
+
+    return true;
   }
 
   setSynced() {
@@ -273,13 +292,46 @@ export class WorkspaceService {
     this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleTheme);
   }
 
+  async zoomIn() {
+    this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ZoomIn);
+  }
+
+  async zoomOut() {
+    this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ZoomOut);
+  }
+
+  async resetZoom() {
+    this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ResetZoom);
+  }
+
+  toggleFullscreen() {
+    this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleFullscreen);
+  }
+
+  findEntries() {
+    this.entryManager.isGlobalSearch = false;
+    this.entryManager.selectedPasswords = [];
+
+    UiUtil.focusSearchbox();
+  }
+
+  findGlobalEntries() {
+    this.entryManager.isGlobalSearch = true;
+    this.entryManager.selectedPasswords = [];
+
+    UiUtil.focusSearchbox();
+  }
+
   private handleDatabaseLock() {
     this.messageBroker.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
-      this.zone.run(() => {
+      this.zone.run(async () => {
         this.file = { filePath, filename: this.fileNamePipe.transform(filePath) };
         if (!this.isLocked) {
-          this.lock({ minimize: false });
+          await this.lock({ minimize: false });
         }
+
+        // navigation is needed when being on New Vault page
+        this.router.navigate(['/pass']);
       });
     });
   }

@@ -75,5 +75,5 @@ var IpcChannel;
     IpcChannel["SendInput"] = "app:sendInput";
     IpcChannel["TestCleanup"] = "app:testCleanup";
     IpcChannel["ConfigChanged"] = "app:configChanged";
-})(IpcChannel = exports.IpcChannel || (exports.IpcChannel = {}));
+})(IpcChannel || (exports.IpcChannel = IpcChannel = {}));
 //# sourceMappingURL=ipc-channel.enum.js.map

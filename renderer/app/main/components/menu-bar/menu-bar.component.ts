@@ -2,8 +2,9 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, DestroyRef, ElementRef, Inject, NgZone, OnInit, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DbManager } from '@app/core/database';
-import { IMessageBroker } from '@app/core/models';
+import { IHotkeyHandler, IMessageBroker } from '@app/core/models';
 import { ConfigService, NotificationService, WorkspaceService } from '@app/core/services';
+import { HotkeyLabel } from '@app/core/services/hotkey/hotkey-label';
 import { ModalService } from '@app/core/services/modal.service';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
@@ -15,7 +16,7 @@ import { ImportHandler, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { exportDB } from 'dexie-export-import';
 import { AppConfig } from 'environments/environment';
-import { MessageBroker } from 'injection-tokens';
+import { HotkeyHandler, MessageBroker } from 'injection-tokens';
 import { Observable, fromEvent, merge } from 'rxjs';
 
 @Component({
@@ -39,13 +40,14 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
   @ViewChild('overlay') public readonly overlay!: ElementRef; 
 
   public readonly importHandler = ImportHandler;
+  public hotkeys: { [key in keyof Partial<typeof HotkeyLabel>]: string };
   public recentFiles: string[];
-  public fullscreenMode: 'on' | 'off' = 'on';
 
   constructor(
     private readonly zone: NgZone,
     private readonly destroyRef: DestroyRef,
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
+    @Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler,
     private readonly configService: ConfigService,
     private readonly workspaceService: WorkspaceService,
     private readonly modalService: ModalService,
@@ -65,7 +67,12 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
     return this.workspaceService.isLocked;
   }
 
+  get zoomFactor(): number {
+    return this.workspaceService.zoomFactor;
+  }
+
   ngOnInit() {
+    this.hotkeys = this.hotkeyHandler.hotkeysMap;
     this.configService.configLoadedSource$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(config => {
       this.recentFiles = config.workspaces.recentlyOpened;
     });
@@ -103,6 +110,30 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 
   openChangePasswordWindow() {
     this.modalService.openPasswordChangeWindow();
+  }
+
+  searchGroup() {
+    this.workspaceService.findEntries();
+  }
+
+  searchVault() {
+    this.workspaceService.findGlobalEntries();
+  }
+
+  zoomIn() {
+    this.workspaceService.zoomIn();
+  }
+
+  zoomOut() {
+    this.workspaceService.zoomOut();
+  }
+
+  resetZoom() {
+    this.workspaceService.resetZoom();
+  }
+
+  fullscreen() {
+    this.workspaceService.toggleFullscreen();
   }
 
   async openFile(path?: string) {
@@ -187,23 +218,6 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 
   exit() {
     this.messageBroker.ipcRenderer.send(IpcChannel.Close);
-  }
-
-  zoomIn() {
-    this.messageBroker.ipcRenderer.send(IpcChannel.ZoomIn);
-  }
-
-  zoomOut() {
-    this.messageBroker.ipcRenderer.send(IpcChannel.ZoomOut);
-  }
-
-  resetZoom() {
-    this.messageBroker.ipcRenderer.send(IpcChannel.ResetZoom);
-  }
-
-  async fullscreen() {
-    const isFullscreen = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleFullscreen);
-    this.fullscreenMode = isFullscreen ? 'off' : 'on';
   }
 
   private fixMenuSize() {

@@ -3,6 +3,7 @@ import { Component, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IMessageBroker } from '@app/core/models';
 import { WorkspaceService } from '@app/core/services';
+import { ShowPasswordIconComponent } from '@app/shared/components/show-password-icon/show-password-icon.component';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/index';
@@ -22,7 +23,8 @@ interface IGetSaveSatus {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FeatherModule
+    FeatherModule,
+    ShowPasswordIconComponent
   ]
 })
 export class MasterPasswordSetupComponent implements OnInit, OnDestroy {

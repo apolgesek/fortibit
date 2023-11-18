@@ -1,0 +1,22 @@
+export const HotkeyLabel = {
+  Remove: 'Remove',
+  Edit: 'Edit',
+  AddGroup: 'Add group',
+  AddEntry: 'Add entry',
+  CopyPassword: 'Copy password',
+  CopyUsername: 'Copy username',
+  RenameGroup: 'Rename group',
+  EmptyBin: 'Empty recycyle bin',
+  OpenSettings: 'Settings',
+  MoveEntry: 'Move entry',
+  SaveDatabase: 'Save database',
+  Lock: 'Lock',
+  FindInGroup: 'Find in group',
+  FindInVault: 'Find in vault',
+  ToggleFullscreen: 'Toggle fullscreen',
+  Generator: 'Generator',
+  ZoomIn: 'Zoom in',
+  ZoomOut: 'Zoom out',
+  ResetZoom: 'Reset zoom',
+  History: 'History'
+}

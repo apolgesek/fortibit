@@ -26,6 +26,7 @@ import {
   AlertCircle,
   Book,
   Bookmark,
+  Check,
   CheckCircle,
   ChevronDown,
   ChevronRight,
@@ -44,6 +45,7 @@ import {
   Info,
   Key,
   Plus,
+  Minus,
   PlusCircle,
   RefreshCw,
   RefreshCcw,
@@ -56,7 +58,7 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowRight,
-  Share
+  Share,
 } from 'angular-feather/icons';
 import { MessageBroker, HotkeyHandler } from 'injection-tokens';
 import 'zone.js';
@@ -110,8 +112,10 @@ const icons = {
   User,
   Code,
   Plus,
+  Minus,
   Settings,
   FilePlus,
+  Check,
   CheckCircle,
   RefreshCw,
   RefreshCcw,

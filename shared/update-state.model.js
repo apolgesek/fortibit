@@ -8,5 +8,5 @@ var UpdateState;
     UpdateState[UpdateState["NotAvailable"] = 2] = "NotAvailable";
     UpdateState[UpdateState["Available"] = 3] = "Available";
     UpdateState[UpdateState["Downloaded"] = 4] = "Downloaded";
-})(UpdateState = exports.UpdateState || (exports.UpdateState = {}));
+})(UpdateState || (exports.UpdateState = UpdateState = {}));
 //# sourceMappingURL=update-state.model.js.map

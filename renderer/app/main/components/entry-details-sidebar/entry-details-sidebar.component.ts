@@ -2,16 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, Inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GroupId } from '@app/core/enums';
-import { IMessageBroker, IPasswordGroup } from '@app/core/models';
+import { IMessageBroker } from '@app/core/models';
 import { ClipboardService, EntryManager, GroupManager, ModalService, NotificationService, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
+import { SidebarHandleComponent } from '@app/shared/components/sidebar-handle/sidebar-handle.component';
 import { TooltipComponent } from '@app/shared/components/tooltip/tooltip.component';
-import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { LinkPipe } from '@app/shared/pipes/link.pipe';
 import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
 import { IAppConfig } from '@config/app-config';
-import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { IEntryGroup, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { AppConfig } from 'environments/environment';
 import { MessageBroker } from 'injection-tokens';
@@ -24,7 +24,7 @@ import { MessageBroker } from 'injection-tokens';
   imports: [
     CommonModule,
     FeatherModule,
-    SidebarHandleDirective,
+    SidebarHandleComponent,
     TooltipDirective,
     TooltipComponent,
     LinkPipe,
@@ -32,7 +32,7 @@ import { MessageBroker } from 'injection-tokens';
   ]
 })
 export class EntryDetailsSidebarComponent implements OnInit {
-  public group: IPasswordGroup;
+  public group: IEntryGroup;
   public config: IAppConfig;
   public isReadonlyEntry = true;
   public isAnimating = false;
@@ -108,7 +108,7 @@ export class EntryDetailsSidebarComponent implements OnInit {
   }
 
   openEntryHistory() {
-    this.modalService.openEntryHistoryWindow(this.entry.id);
+    this.modalService.openEntryHistoryWindow();
   }
 
   openAutotypeInformation() {

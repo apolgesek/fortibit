@@ -1,0 +1,34 @@
+@import 'themes/base-variables';
+
+:host {
+  position: absolute;
+  top: 0;
+	right: 0;
+  min-width: $handle-width;
+  height: 100%;
+  z-index: 990;
+	justify-content: flex-end;
+	transition: background-color 50ms;
+	cursor: w-resize;
+	display: flex;
+	justify-content: right;
+	right: 0;
+	left: auto;
+
+	&.left {
+		justify-content: left;
+		left: 0;
+		right: auto;
+	}
+
+	&:hover, &.active {
+		.drag {
+			width: calc(4px / var(--device-pixel-ratio));
+		}
+	}
+
+	.drag {
+		width: calc(1px / var(--device-pixel-ratio));
+		background-color: var(--border-color);
+	}
+}

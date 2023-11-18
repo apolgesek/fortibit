@@ -4,8 +4,8 @@
 :host {
   display: flex;
   position: relative;
-  width: 16rem;
   z-index: 0;
+  overflow: hidden;
 }
 
 .sidebar {

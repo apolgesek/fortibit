@@ -1,6 +1,5 @@
 export * from './app-view-container';
 export * from './clipboard.service';
-export * from './component-grid.service';
 export * from './config.service';
 export * from './electron/electron.service';
 export * from './hotkey/windows-hotkey-handler';

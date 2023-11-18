@@ -1,1 +1,1 @@
-export * from './workspace.guard';
+export * from './master-password-setup.guard';

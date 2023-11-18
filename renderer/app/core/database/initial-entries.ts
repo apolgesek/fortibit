@@ -1,7 +1,7 @@
+import { IEntryGroup } from '@shared-renderer/entry-group';
 import { GroupId } from '../enums';
-import { IPasswordGroup } from '../models/index';
 
-export const initialEntries: IPasswordGroup[] = [
+export const initialEntries: IEntryGroup[] = [
   { name: 'General', id: 1 },
   { name: 'Banking', id: 2 },
   { name: 'Email', id: 3 },

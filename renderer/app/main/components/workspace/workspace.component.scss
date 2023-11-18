@@ -1,7 +1,8 @@
 @import 'themes/light/variables';;
 
 .main-container {
-	display: flex;
+	display: grid;
+	grid-template-columns: 192px auto 352px;
 	width: 100vw;
 	height: map-get($map: $layout, $key: "workspace")
 }

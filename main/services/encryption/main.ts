@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { IPasswordEntry } from '../../../shared';
+import { IPasswordEntry, VaultSchema } from '../../../shared';
 import { IExposedPasswordsService } from '../exposed-passwords/exposed-passwords-service.model';
 import { ExposedPasswordsService } from '../exposed-passwords/exposed-passwords.service';
 import { MockExposedPasswordsService } from '../exposed-passwords/mock-exposed-passwords.service';
@@ -87,13 +87,14 @@ class Main {
   }
 
   public encryptDatabase(event: EventPayload) {
-    const { database, password } = event;
+    const { schemaVersion, database, password } = event;
     const parsedDb = JSON.parse(database);
     const stores = parsedDb.data.data;
 
     const entriesStore = stores.find(x => x.tableName === 'entries');
     const historyStore = stores.find(x => x.tableName === 'history');
     const groupsStore = stores.find(x => x.tableName === 'groups');
+    const reportsStore = stores.find(x => x.tableName === 'reports');
 
     entriesStore.rows = entriesStore.rows.map(entry => ({
       ...entry,
@@ -105,13 +106,17 @@ class Main {
       return item;
     });
 
-    const vaultObject = {
-      entries: entriesStore.rows.map(normalizeEntity),
-      groups: groupsStore.rows.map(normalizeEntity),
-      history: historyStore.rows.map(normalizeEntity)
+    const vault: VaultSchema = {
+      schemaVersion: schemaVersion,
+      tables: {
+        entries: entriesStore.rows.map(normalizeEntity),
+        groups: groupsStore.rows.map(normalizeEntity),
+        history: historyStore.rows.map(normalizeEntity),
+        reports: reportsStore.rows.map(normalizeEntity)
+      }
     };
     
-    const databaseJSON = JSON.stringify(vaultObject);
+    const databaseJSON = JSON.stringify(vault);
     process.send({ encrypted: this._encryptionService.encryptString(databaseJSON, password) });
   }
 
@@ -119,20 +124,22 @@ class Main {
     const { data, password } = event;
   
     try {
-      const decryptedDb = JSON.parse(this._encryptionService.decryptString(data, password));
+      const stringifiedDb = this._encryptionService.decryptString(data, password);
+      const decryptedDb = JSON.parse(stringifiedDb);
 
-      decryptedDb.entries = decryptedDb.entries.map(entry => ({
+      decryptedDb.tables.entries = decryptedDb.tables.entries.map(entry => ({
         ...entry,
         password: this._inMemoryEncryptionService.encryptString(entry.password, process.env.ENCRYPTION_KEY)
       }));
 
-      decryptedDb.history = decryptedDb.history.map(item => {
+      decryptedDb.tables.history = decryptedDb.tables.history.map(item => {
         item.entry.password = this._inMemoryEncryptionService.encryptString(item.entry.password, process.env.ENCRYPTION_KEY);
         return item;
       });
 
       process.send({ decrypted: JSON.stringify(decryptedDb) });
     } catch (err) {
+      console.log(err);
       process.send({ error: err });
     }
   }

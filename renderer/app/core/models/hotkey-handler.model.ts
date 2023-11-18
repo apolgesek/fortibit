@@ -1,22 +1,25 @@
-import { IHotkeyConfiguration } from './hotkey-configuration.model';
+import { HotkeyLabel } from "../services/hotkey/hotkey-label";
 
 export interface IHotkeyHandler {
-  configuration: IHotkeyConfiguration;
   isMultiselectionKeyDown: (event: MouseEvent) => boolean;
   intercept: (event: KeyboardEvent) => void;
-  registerSaveDatabase: (event: KeyboardEvent) => void;
-  registerDeleteEntry: (event: KeyboardEvent) => void;
-  registerDeleteGroup: (event: KeyboardEvent) => void;
-  registerRenameGroup: (event: KeyboardEvent) => void;
-  registerEditEntry: (event: KeyboardEvent) => void;
-  registerMoveEntry: (event: KeyboardEvent) => void;
-  registerAddEntry: (event: KeyboardEvent) => void;
-  registerCopyPassword: (event: KeyboardEvent) => void;
-  registerCopyUsername: (event: KeyboardEvent) => void;
-  registerSelectAllEntries: (event: KeyboardEvent) => void;
-  registerFindEntries: (event: KeyboardEvent) => void;
-  registerFindGlobalEntries: (event: KeyboardEvent) => void;
-  registerLockDatabase: (event: KeyboardEvent) => void;
-  registerAddGroup: (event: KeyboardEvent) => void;
-  registerOpenSettings: (event: KeyboardEvent) => void;
+  getContextMenuLabel: (label: keyof typeof HotkeyLabel) => string;
+  get hotkeysMap(): { [key in keyof Partial<typeof HotkeyLabel>]: string };
+
+  saveDatabase: () => void;
+  deleteEntry: () => void;
+  deleteGroup: () => void;
+  renameGroup: () => void;
+  editEntry: () => void;
+  moveEntry: () => void;
+  addEntry: () => void;
+  copyPassword: () => void;
+  copyUsername: () => void;
+  selectAllEntries: () => void;
+  findEntries: () => void;
+  findGlobalEntries: () => void;
+  lockDatabase: () => void;
+  addGroup: () => void;
+  openSettings: () => void;
+  toggleFullscreen: () => void;
 }

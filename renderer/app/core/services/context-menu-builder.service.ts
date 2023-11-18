@@ -3,6 +3,7 @@ import { ModalService } from '@app/core/services/modal.service';
 import { MenuItem } from '@app/shared';
 import { HotkeyHandler } from 'injection-tokens';
 import { ClipboardService, EntryManager } from '.';
+import { HotkeyLabel } from './hotkey/hotkey-label';
 
 @Injectable({
   providedIn: 'root'
@@ -17,25 +18,34 @@ export class ContextMenuBuilderService {
   buildGroupContextMenuItems(configuration: { isRoot: boolean } = { isRoot: false }): this {
     this.contextMenuItems = [
       {
-        label: this.hotkeyHandler.configuration.renameGroupLabel,
-        disabled: configuration.isRoot,
+        label: this.hotkeyHandler.getContextMenuLabel('AddEntry'),
         command: () => {
-          this.modalService.openGroupWindow('edit');
+          this.modalService.openNewEntryWindow();
         }
-      },
-      {
-        label: this.hotkeyHandler.configuration.removeGroupLabel,
-        disabled: configuration.isRoot,
-        command: () => this.modalService.openDeleteGroupWindow(),
-      },
+      }
     ];
+
+    if (!configuration.isRoot) {
+      this.contextMenuItems.push(
+        {
+          label: this.hotkeyHandler.getContextMenuLabel('Edit'),
+          command: () => {
+            this.modalService.openGroupWindow('edit');
+          }
+        },
+        {
+          label: this.hotkeyHandler.getContextMenuLabel('Remove'),
+          command: () => this.modalService.openDeleteGroupWindow(),
+        }
+      );
+    }
 
     return this;
   }
 
   buildEmptyRecycleBinContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: this.hotkeyHandler.configuration.emptyBinLabel,
+      label: this.hotkeyHandler.getContextMenuLabel('EmptyBin'),
       disabled: this.entryManager.passwordEntries.length === 0,
       command: () => {
         this.entryManager.selectedPasswords = [...this.entryManager.passwordEntries];
@@ -48,7 +58,7 @@ export class ContextMenuBuilderService {
 
   buildRemoveEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: this.hotkeyHandler.configuration.deleteLabel,
+      label: this.hotkeyHandler.getContextMenuLabel('Remove'),
       command: () => {
         this.modalService.openDeleteEntryWindow();
       }
@@ -59,7 +69,7 @@ export class ContextMenuBuilderService {
 
   buildCopyUsernameEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: this.hotkeyHandler.configuration.copyUsernameLabel,
+      label: this.hotkeyHandler.getContextMenuLabel('CopyUsername'),
       command: () => {
         this.clipboardService.copyEntryDetails(
           this.entryManager.selectedPasswords[0],
@@ -73,7 +83,7 @@ export class ContextMenuBuilderService {
 
   buildCopyPasswordEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: this.hotkeyHandler.configuration.copyPasswordLabel,
+      label: this.hotkeyHandler.getContextMenuLabel('CopyPassword'),
       command: () => {
         this.clipboardService.copyEntryDetails(
           this.entryManager.selectedPasswords[0],
@@ -87,7 +97,7 @@ export class ContextMenuBuilderService {
 
   buildEditEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: 'Edit (E)',
+      label: this.hotkeyHandler.getContextMenuLabel('Edit'),
       command: () => {
         this.modalService.openEditEntryWindow();
       }
@@ -98,7 +108,7 @@ export class ContextMenuBuilderService {
 
   buildMoveEntryContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: this.hotkeyHandler.configuration.moveEntryLabel,
+      label: this.hotkeyHandler.getContextMenuLabel('MoveEntry'),
       command: () => {
         this.modalService.openMoveEntryWindow();
       }

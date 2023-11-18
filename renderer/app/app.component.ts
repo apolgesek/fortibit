@@ -3,11 +3,11 @@ import { AfterViewInit, Component, HostListener, Inject, OnInit, ViewContainerRe
 import { NavigationStart, Router, RouterModule } from '@angular/router';
 import { IAppConfig } from '@config/app-config';
 import { IpcChannel } from '@shared-renderer/index';
-import { MessageBroker } from 'injection-tokens';
-import { filter, fromEvent, take } from 'rxjs';
+import { HotkeyHandler, MessageBroker } from 'injection-tokens';
+import { filter, fromEvent, take, tap } from 'rxjs';
 import { AppConfig } from '../environments/environment';
-import { IMessageBroker } from './core/models';
-import { AppViewContainer, ComponentGridService, ConfigService, EntryManager, ModalManager, UpdateService, WorkspaceService } from './core/services';
+import { IHotkeyHandler, IMessageBroker } from './core/models';
+import { AppViewContainer, ConfigService, EntryManager, ModalManager, UpdateService, WorkspaceService } from './core/services';
 import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component';
 
 @Component({
@@ -26,6 +26,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   constructor(
     @Inject(MessageBroker) public readonly messageBroker: IMessageBroker,
+    @Inject(HotkeyHandler) public readonly hotkeyHandler: IHotkeyHandler,
     @Inject(DOCUMENT) private readonly document: Document,
     private readonly router: Router,
     private readonly configService: ConfigService,
@@ -34,14 +35,15 @@ export class AppComponent implements OnInit, AfterViewInit {
     private readonly viewContainerRef: ViewContainerRef,
     private readonly workspaceService: WorkspaceService,
     private readonly entryManager: EntryManager,
-    private readonly userInterfaceService: ComponentGridService,
-    private readonly updateService: UpdateService
+    private readonly updateService: UpdateService,
   ) {
     this.appViewContainer.appViewContainerRef = this.viewContainerRef;
   }
 
+  // preventing dragenter and dragover events is neccesary to fire drop event for file drag&drop
   @HostListener('document:dragenter', ['$event'])
-  private onDragEnter(event: MouseEvent) {
+  @HostListener('document:dragover', ['$event'])
+  onDragEnterOrOver(event: DragEvent) {
     event.preventDefault();
   }
 
@@ -64,11 +66,17 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.document.documentElement.style.setProperty('--device-pixel-ratio', window.devicePixelRatio.toString());
+
+    fromEvent(window, 'keydown')
+    .pipe(
+      tap((event: Event) => {
+        this.hotkeyHandler.intercept(event as KeyboardEvent);
+      }),
+    ).subscribe();
   }
 
   private registerGlobalEvents() {
     this.handleMouseClick();
-    this.onDragOverApp();
     this.onFileDrop();
     this.handleEntryDeselection();
     this.handleAppExit();
@@ -114,7 +122,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   private handleEntryDeselection() {
     fromEvent(this.document, 'mousedown')
       .subscribe(() => (event: MouseEvent) => {
-        if (this.isOutsideClick(event) && this.userInterfaceService.isIdle) {
+        if (this.isOutsideClick(event)) {
           this.entryManager.selectedPasswords = [];
         }
       });
@@ -138,13 +146,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             this.messageBroker.ipcRenderer.send(IpcChannel.DropFile, file.path);
           }
         }
-      });
-  }
 
-  private onDragOverApp() {
-    fromEvent(this.document, 'dragover')
-      .subscribe(() => (event: Event) => {
-        (event as MouseEvent).preventDefault();
       });
   }
 

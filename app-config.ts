@@ -1,6 +1,7 @@
 import { IProduct } from './product';
 
 export interface IAppConfig extends IProduct {
+  schemaVersion: number;
   fileExtension: string;
   version?: string;
   electronVersion?: string;

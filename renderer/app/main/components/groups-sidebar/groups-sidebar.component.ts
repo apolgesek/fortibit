@@ -1,8 +1,7 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { GroupId } from '@app/core/enums';
-import { IPasswordGroup } from '@app/core/models';
 import { WorkspaceService, EntryManager, GroupManager, ModalService } from '@app/core/services';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
 import { SearchService } from '@app/core/services/search.service';
@@ -11,11 +10,13 @@ import { MenuItem } from '@app/shared';
 import { ContextMenuItemDirective } from '@app/shared/directives/context-menu-item.directive';
 import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
 import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
-import { SidebarHandleDirective } from '@app/shared/directives/sidebar-handle.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
-import { IPasswordEntry } from '../../../../../shared/index';
+import { SidebarHandleComponent } from '@app/shared/components/sidebar-handle/sidebar-handle.component';
+import { IEntryGroup, IPasswordEntry } from '../../../../../shared/index';
 import { FeatherModule } from 'angular-feather';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
+import { IHotkeyHandler } from '@app/core/models';
+import { HotkeyHandler } from 'injection-tokens';
 
 @Component({
   selector: 'app-groups-sidebar',
@@ -27,7 +28,7 @@ import { ToolbarComponent } from '../toolbar/toolbar.component';
     ScrollingModule,
     FeatherModule,
     ContextMenuItemDirective,
-    SidebarHandleDirective,
+    SidebarHandleComponent,
     DroppableDirective,
     FocusableListDirective,
     FocusableListItemDirective,
@@ -49,6 +50,7 @@ export class GroupsSidebarComponent implements OnInit {
   public groupContextMenuBin: MenuItem[] = [];
   public folderTreeRootElement: HTMLElement | undefined;
   public treeRootElement: HTMLElement | undefined;
+  public addGroupLabel = '';
 
   constructor(
     private readonly workspaceService: WorkspaceService,
@@ -57,6 +59,7 @@ export class GroupsSidebarComponent implements OnInit {
     private readonly searchService: SearchService,
     private readonly contextMenuBuilderService: ContextMenuBuilderService,
     private readonly modalService: ModalService,
+    @Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler,
   ) {}
 
   get selectedGroup(): number {
@@ -75,7 +78,7 @@ export class GroupsSidebarComponent implements OnInit {
     return this.entryManager.selectedPasswords;
   }
 
-  get groups(): IPasswordGroup[] {
+  get groups(): IEntryGroup[] {
     return this.groupManager.groups;
   }
 
@@ -83,7 +86,8 @@ export class GroupsSidebarComponent implements OnInit {
     return this.groupManager.selectedGroupName;
   }
 
-  async ngOnInit() {
+  ngOnInit() {
+    this.addGroupLabel = this.hotkeyHandler.getContextMenuLabel('AddGroup');
     this.groupContextMenuRoot = this.contextMenuBuilderService
       .buildGroupContextMenuItems({ isRoot: true })
       .getResult();
@@ -119,12 +123,13 @@ export class GroupsSidebarComponent implements OnInit {
 
   getContextMenu(id: number): MenuItem[] {
     switch (id) {
-    case GroupId.Root:
     case GroupId.Starred:
     case GroupId.AllItems:
       return [];
     case GroupId.RecycleBin:
       return this.groupContextMenuBin;
+    case GroupId.Root:
+      return this.groupContextMenuRoot;
     default:
       return this.groupContextMenuItems;
     }

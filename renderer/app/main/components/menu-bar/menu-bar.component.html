@@ -22,14 +22,13 @@
 					</div>
 				</div>
 				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="save()" [disabled]="isDatabasePristine">Save</li>
+				<li appMenuItem (activate)="save()" [disabled]="isDatabasePristine">Save <span class="secondary">{{ hotkeys['SaveDatabase'] }}</span></li>
 				<li appMenuItem [disabled]="isLocked" (activate)="saveAs()">Save as...</li>
 				<div appDropdown class="dropdown" style="width: 100%;">
 					<li appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
 						Import <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.Fortibit)">Fortibit &bull; CSV</li>
 						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.KeePass)">KeePass &bull; XML</li>
 						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.OnePassword)">1Password &bull; CSV</li>
 						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.Bitwarden)">Bitwarden &bull; CSV</li>
@@ -44,7 +43,7 @@
 						<li aria-hidden="true" appMenuItem (activate)="export()">CSV</li>
 					</div>
 				</div>
-				<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">Lock</li>
+				<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">Lock <span class="secondary">{{ hotkeys['Lock'] }}</span></li>
 				<div class="divider"><hr /></div>
 				<li appMenuItem (activate)="openChangePasswordWindow()" [disabled]="isLocked">Change password</li>
 				<div class="divider"><hr /></div>
@@ -56,11 +55,17 @@
 				View
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
-				<li appMenuItem (activate)="zoomIn()">Zoom in</li>
-				<li appMenuItem (activate)="zoomOut()">Zoom out</li>
-				<li appMenuItem (activate)="resetZoom()">Reset zoom</li>
+				<li appMenuItem (activate)="searchGroup()" [disabled]="isLocked">Search group <span class="secondary">{{ hotkeys['FindInGroup'] }}</span></li>
+				<li appMenuItem (activate)="searchVault()" [disabled]="isLocked">Search vault <span class="secondary">{{ hotkeys['FindInVault'] }}</span></li>
+				<ul class="zoom-level" style="list-style-type: none; display: flex; align-items: center; padding: 0 0.5rem;">
+					<span style="margin-right: auto;">Zoom</span>
+					<li appMenuItem (activate)="zoomOut()" [closeOnSelect]="false">
+					<i-feather name="minus"></i-feather></li><span style="margin: 0 0.5rem">{{ zoomFactor }}%</span>
+					<li appMenuItem (activate)="zoomIn()" [closeOnSelect]="false"><i-feather name="plus"></i-feather></li>
+				</ul>
+				<li appMenuItem (activate)="resetZoom()">Reset zoom <span class="secondary">{{ hotkeys['ResetZoom'] }}</span></li>
 				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="fullscreen()">Toggle fullscreen <span class="secondary">{{ fullscreenMode }}</span></li>
+				<li appMenuItem (activate)="fullscreen()">Toggle fullscreen <span class="secondary">{{ hotkeys['ToggleFullscreen'] }}</span></li>
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
@@ -68,7 +73,7 @@
 				Tools
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
-				<li appMenuItem (activate)="openGeneratorWindow()">Generator</li>
+				<li appMenuItem (activate)="openGeneratorWindow()">Generator <span class="secondary">{{ hotkeys['Generator'] }}</span></li>
 				<div class="divider"><hr /></div>
 				<div appDropdown class="dropdown" style="width: 100%;">
 					<li appDropdownToggle trigger="hover" appMenuItem class="submenu-open" [disabled]="isLocked">

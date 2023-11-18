@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDefaultConfig = void 0;
 var getDefaultConfig = function (platform) {
     return {
+        schemaVersion: 1,
         encryption: {
             passwordLength: 15,
             lowercase: true,

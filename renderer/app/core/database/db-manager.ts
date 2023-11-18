@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import { Injectable } from '@angular/core';
-import { IHistoryEntry, IPasswordEntry, IReport } from '../../../../shared/index';
 import Dexie from 'dexie';
-import { IPasswordGroup } from '../models';
+import { IEntryGroup, IHistoryEntry, IPasswordEntry, IReport } from '../../../../shared/index';
 
 export interface IDbContext extends Dexie {}
 export interface IDbTable<T, K> extends Dexie.Table<T, K> {}
@@ -10,7 +9,7 @@ export interface IDbTable<T, K> extends Dexie.Table<T, K> {}
 @Injectable({ providedIn: 'root' })
 export class DbManager {
   entries: IDbTable<IPasswordEntry, number>;
-  groups: IDbTable<IPasswordGroup, number>;
+  groups: IDbTable<IEntryGroup, number>;
   reports: IDbTable<IReport, number>;
   history: IDbTable<IHistoryEntry, number>;
 

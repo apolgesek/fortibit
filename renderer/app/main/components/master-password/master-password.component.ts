@@ -17,6 +17,7 @@ import { MessageBroker } from 'injection-tokens';
 import { from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { tips } from '../../../../assets/data/tips';
+import { ShowPasswordIconComponent } from '@app/shared/components/show-password-icon/show-password-icon.component';
 
 @Component({
   selector: 'app-master-password',
@@ -28,7 +29,8 @@ import { tips } from '../../../../assets/data/tips';
     ReactiveFormsModule,
     FeatherModule,
     AutofocusDirective,
-    TooltipDirective
+    TooltipDirective,
+    ShowPasswordIconComponent
   ]
 })
 export class MasterPasswordComponent implements OnInit, OnDestroy {
@@ -128,6 +130,10 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.loginForm.reset();
     this.messageBroker.ipcRenderer.off(IpcChannel.DecryptedContent, this.onDecryptedContent);
+  }
+
+  changeVisibility(isVisible: boolean, element: HTMLInputElement) {
+    element.type = isVisible ? 'text' : 'password';
   }
 
   togglePasswordVisibility() {

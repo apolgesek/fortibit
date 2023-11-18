@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
 import { ReportType } from '@app/core/enums';
 import { IMessageBroker } from '@app/core/models';
-import { EntryManager, ModalRef, ModalService, NotificationService, ReportService } from '@app/core/services';
+import { EntryManager, ModalRef, ModalService, NotificationService, ReportService, WorkspaceService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { IpcChannel } from '@shared-renderer/index';
@@ -44,7 +44,7 @@ export class WeakPasswordsDialogComponent implements IModal, OnInit {
     private readonly reportService: ReportService,
     private readonly modalService: ModalService,
     private readonly entryManager: EntryManager,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
   ) { }
 
   close() {
@@ -81,11 +81,14 @@ export class WeakPasswordsDialogComponent implements IModal, OnInit {
   }
 
   async saveReport() {
-    await this.messageBroker.ipcRenderer.invoke(
+    const saved = await this.messageBroker.ipcRenderer.invoke(
       IpcChannel.SaveWeakPasswordsReport,
       this.weakPasswordsFound.map(x => ({ ...x, score: this.scoreMap[x.score] }))
     );
-    this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Report generated' });
+
+    if (saved) {
+      this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Report exported' });
+    }
   }
 
   ngOnInit(): void {

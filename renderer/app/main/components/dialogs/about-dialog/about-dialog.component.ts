@@ -6,6 +6,7 @@ import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { IAppConfig } from '@config/app-config';
 import { IpcChannel, UpdateState } from '@shared-renderer/index';
+import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { take } from 'rxjs';
 
@@ -16,7 +17,8 @@ import { take } from 'rxjs';
   standalone: true,
   imports: [
     ModalComponent,
-    CommonModule
+    CommonModule,
+    FeatherModule
   ]
 })
 export class AboutDialogComponent implements IModal, OnInit {

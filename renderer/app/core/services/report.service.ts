@@ -4,9 +4,9 @@ import { exportDB } from 'dexie-export-import';
 import { MessageBroker } from 'injection-tokens';
 import { DbManager } from '../database';
 import { ReportType } from '../enums';
-import { ReportRepository } from '../repositories';
 import { EntryManager } from './managers/entry.manager';
 import { GroupManager } from './managers/group.manager';
+import { ReportManager } from './managers/report.manager';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +14,7 @@ import { GroupManager } from './managers/group.manager';
 export class ReportService {
   private readonly messageBroker = inject(MessageBroker);
   private readonly db = inject(DbManager);
-  private readonly reportRepository = inject(ReportRepository);
+  private readonly reportManager = inject(ReportManager);
   private readonly entryManager = inject(EntryManager);
   private readonly groupManager = inject(GroupManager);
 
@@ -36,7 +36,7 @@ export class ReportService {
   }
 
   async getExposedPasswords(): Promise<any> {
-    const report = await this.reportRepository.getLastReport(ReportType.ExposedPasswords);
+    const report = await this.reportManager.getLastReport(ReportType.ExposedPasswords);
 
     if (!report) {
       return;
@@ -77,7 +77,7 @@ export class ReportService {
   }
 
   async getWeakPasswords(): Promise<any> {
-    const report = await this.reportRepository.getLastReport(ReportType.WeakPasswords);
+    const report = await this.reportManager.getLastReport(ReportType.WeakPasswords);
 
     if (!report) {
       return;
@@ -100,12 +100,12 @@ export class ReportService {
   }
 
   async addReport(report: Partial<IReport>): Promise<number> {
-    const reports = await this.reportRepository.getAllByPredicate(x => x.type === report.type);
+    const reports = await this.reportManager.getAllByPredicate(x => x.type === report.type);
 
     if (reports.length >= 1) {
-      await this.reportRepository.delete(reports.shift().id);
+      await this.reportManager.delete(reports.shift().id);
     }
 
-    return this.reportRepository.add(report as IReport);
+    return this.reportManager.add(report as IReport);
   }
 }

@@ -5,6 +5,7 @@ import { IMessageBroker } from '@app/core/models';
 import { ModalRef, ModalService, WorkspaceService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { ShowPasswordIconComponent } from '@app/shared/components/show-password-icon/show-password-icon.component';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/index';
@@ -19,7 +20,8 @@ import { Observable, delay, from, map, tap } from 'rxjs';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    ModalComponent
+    ModalComponent,
+    ShowPasswordIconComponent
   ],
 })
 export class PasswordChangeDialogComponent implements IModal, OnInit {

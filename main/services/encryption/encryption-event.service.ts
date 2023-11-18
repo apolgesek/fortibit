@@ -16,8 +16,8 @@ export class EncryptionEventService implements IEncryptionEventService {
     return await this._encryptionEventWrapper.processEventAsync(encryptionEvent, key) as { error: string, data: string };
   }
 
-  public async saveDatabase(database: string, password: string, key: string): Promise<{ encrypted: string }> {
-    const encryptionEvent = { database, password, type: MessageEventType.EncryptDatabase };
+  public async saveDatabase(schemaVersion: number,  database: string, password: string, key: string): Promise<{ encrypted: string }> {
+    const encryptionEvent = { schemaVersion, database, password, type: MessageEventType.EncryptDatabase };
     return await this._encryptionEventWrapper.processEventAsync(encryptionEvent, key) as { encrypted: string };
   }
 

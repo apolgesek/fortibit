@@ -41,12 +41,12 @@ export class MainComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    fromEvent(window, 'keydown')
-      .pipe(
-        tap((event: Event) => {
-          this.hotkeyHandler.registerOpenSettings(event as KeyboardEvent);
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe();
+    // fromEvent(window, 'keydown')
+    //   .pipe(
+    //     tap((event: Event) => {
+    //       this.hotkeyHandler.registerOpenSettings(event as KeyboardEvent);
+    //     }),
+    //     takeUntilDestroyed(this.destroyRef)
+    //   ).subscribe();
   }
 }

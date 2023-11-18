@@ -20,6 +20,10 @@ export class UiUtil {
     document.body.classList.remove('lock');
   }
 
+  public static focusSearchbox() {
+    (document.querySelector('.search') as HTMLInputElement).focus();
+  }
+
   private static readonly lockKeydownEvent = (event: KeyboardEvent) => {
     event.preventDefault();
   };

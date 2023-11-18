@@ -20,7 +20,7 @@
           <button type="button" (click)="updateAndRelaunch()" class="primary-btn">Restart</button>
         </div>
       </ng-container>
-      <ng-container *ngSwitchCase="updateState.NotAvailable">You have the latest version</ng-container>
+      <ng-container *ngSwitchCase="updateState.NotAvailable"><i-feather name="check-circle"></i-feather> You have the latest version</ng-container>
       <ng-container *ngSwitchCase="updateState.ConnectionFailed">Error occured when checking for update</ng-container>
       <ng-container *ngSwitchCase="updateState.Available">
         <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">

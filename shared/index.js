@@ -15,6 +15,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./default-config"), exports);
+__exportStar(require("./entry-group"), exports);
 __exportStar(require("./entry.model"), exports);
 __exportStar(require("./history-entry.model"), exports);
 __exportStar(require("./import-handler.enum"), exports);
@@ -22,4 +23,5 @@ __exportStar(require("./ipc-channel.enum"), exports);
 __exportStar(require("./password-entry.model"), exports);
 __exportStar(require("./report.model"), exports);
 __exportStar(require("./update-state.model"), exports);
+__exportStar(require("./vault-schema"), exports);
 //# sourceMappingURL=index.js.map
