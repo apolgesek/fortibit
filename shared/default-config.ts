@@ -1,6 +1,6 @@
-import { IAppConfig } from "../app-config"
+import { Configuration } from "../configuration"
 
-export const getDefaultConfig = (platform: string): Partial<IAppConfig> => {
+export const getDefaultConfig = (platform: string): Partial<Configuration> => {
   return {
     schemaVersion: 1,
     encryption: {

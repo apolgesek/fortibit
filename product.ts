@@ -1,4 +1,4 @@
-interface IEncryptionSettings {
+type EncryptionSettings = {
   passwordLength: number;
   lowercase: boolean;
   uppercase: boolean;
@@ -6,7 +6,7 @@ interface IEncryptionSettings {
   specialChars: boolean;
 }
 
-export interface IProduct {
+export type Product = {
   name: string;
   temporaryFileExtension: string;
   commit: string;
@@ -16,7 +16,7 @@ export interface IProduct {
   signatureSubject: string;
   leakedPasswordsUrl: string;
   compressionEnabled: boolean;
-  encryption: IEncryptionSettings;
+  encryption: EncryptionSettings;
   idleSeconds: number;
   lockOnSystemLock: boolean;
   saveOnLock: boolean;

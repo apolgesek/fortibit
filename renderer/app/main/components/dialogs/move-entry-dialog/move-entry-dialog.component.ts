@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { IEntryGroup } from '@shared-renderer/entry-group';
+import { EntryGroup } from '@shared-renderer/entry-group';
 import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, fromEvent, map, Observable, of } from 'rxjs';
 
 @Component({
@@ -23,7 +23,7 @@ export class MoveEntryDialogComponent implements IModal, OnInit, AfterViewInit {
   @ViewChild('searchPhrase') public searchText: ElementRef;
   public readonly ref: ComponentRef<unknown>;
   public readonly additionalData?: IAdditionalData;
-  public groups$: Observable<IEntryGroup[]>;
+  public groups$: Observable<EntryGroup[]>;
 
   private readonly searchPhrase: BehaviorSubject<string> = new BehaviorSubject('');
 
@@ -43,7 +43,7 @@ export class MoveEntryDialogComponent implements IModal, OnInit, AfterViewInit {
     this.modalRef.close();
   }
 
-  trackingTag(_: number, item: IEntryGroup): number {
+  trackingTag(_: number, item: EntryGroup): number {
     return item.id;
   }
 
@@ -72,7 +72,7 @@ export class MoveEntryDialogComponent implements IModal, OnInit, AfterViewInit {
       });
   }
 
-  async moveTo(group: IEntryGroup): Promise<void> {
+  async moveTo(group: EntryGroup): Promise<void> {
     this.entryManager.movedEntries = [...this.entryManager.selectedPasswords.map(x => x.id)];
     const movedEntriesCount = this.entryManager.movedEntries.length;
     await this.entryManager.moveEntry(group.id);

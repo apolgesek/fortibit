@@ -1,5 +1,5 @@
 import { MessageEventType } from '../../encryption';
 
-export interface IEncryptionEvent {
+export type EncryptionEvent = {
   type: MessageEventType;
 }

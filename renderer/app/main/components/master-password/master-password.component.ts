@@ -1,23 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Inject, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, Inject, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { GroupId } from '@app/core/enums';
-import { IMessageBroker } from '@app/core/models';
-import { EntryManager, GroupManager, ModalService, WorkspaceService } from '@app/core/services';
+import { IMessageBroker, Toast } from '@app/core/models';
+import { EntryManager, GroupManager, ModalService, NotificationService, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
+import { ShowPasswordIconComponent } from '@app/shared/components/show-password-icon/show-password-icon.component';
 import { AutofocusDirective } from '@app/shared/directives/autofocus.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { UiUtil } from '@app/utils';
-import { IAppConfig } from '@config/app-config';
+import { tips } from '@assets/data/tips';
+import { Configuration } from '@config/configuration';
 import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { tips } from '../../../../assets/data/tips';
-import { ShowPasswordIconComponent } from '@app/shared/components/show-password-icon/show-password-icon.component';
 
 @Component({
   selector: 'app-master-password',
@@ -34,33 +34,35 @@ import { ShowPasswordIconComponent } from '@app/shared/components/show-password-
   ]
 })
 export class MasterPasswordComponent implements OnInit, OnDestroy {
-  public loginForm: FormGroup;
-  public config: IAppConfig;
-  public errorMessage: string;
+  public config: Configuration;
   public passwordVisible = false;
   public oneOfTips = '';
 
   private readonly defaultGroup = GroupId.AllItems;
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly _loginForm = this.formBuilder.group({
+    password: ['', Validators.required]
+  });
 
   private onDecryptedContent: (_: any, { decrypted }: { decrypted: string }) => void;
   private _filePath: string;
+
+  get loginForm() {
+    return this._loginForm;
+  }
 
   constructor(
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly workspaceService: WorkspaceService,
     private readonly groupManager: GroupManager,
     private readonly entryManager: EntryManager,
-    private readonly fb: FormBuilder,
     private readonly zone: NgZone,
     private readonly route: ActivatedRoute,
     private readonly configService: ConfigService,
     private readonly modalService: ModalService,
     private readonly destroyRef: DestroyRef,
+    private readonly notifcationService: NotificationService
   ) {
-    this.loginForm = this.fb.group({
-      password: ['', Validators.required]
-    });
-
     this.onDecryptedContent = (_, { decrypted, error }: { decrypted: string; error: string }) => {
       this.zone.run(async () => {
         if (decrypted && !error) {
@@ -69,15 +71,15 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
         } else {
           this.workspaceService.isBiometricsAuthenticationInProgress = false;
           UiUtil.unlockInterface();
-          this.errorMessage = error;
-          this.loginForm.get('password').setErrors({ error: true });
+          this.notifcationService.add({ type: 'error', message: error, alive: 5000 });
+          this.loginForm.controls.password.setErrors({ error: true });
         }
       });
     };
   }
 
-  get passwordControl(): FormControl {
-    return this.loginForm.get('password') as FormControl;
+  get passwordControl() {
+    return this.loginForm.controls.password;
   }
 
   get filePath(): string {
@@ -161,6 +163,13 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
     });
 
     if (this.loginForm.invalid) {
+      const notificationModel: Toast = { type: 'error', message: 'Password is required', alive: 5000 };
+      
+      if (this.notifcationService.isActive(notificationModel)) {
+        return;
+      }
+
+      this.notifcationService.add(notificationModel);
       return;
     }
 

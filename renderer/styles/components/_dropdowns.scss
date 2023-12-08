@@ -59,6 +59,12 @@
 		font-size: 0.875rem;
 		line-height: 1;
 		background-color: var(--dropdown-bg);
+		user-select: none;
+
+		&.disabled {
+			color: var(--dropdown-text--disabled);
+			background-color: var(--dropdown-bg);
+		}
 
 		&:hover, &:focus, &.focused  {
 			background-color: var(--dropdown-list-item-bg--hover) !important;

@@ -7,7 +7,7 @@ import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
 
-export interface IFileRecoveryDialogDataPayload {
+export type FileRecoveryDialogDataPayload = {
   path: string;
 }
 
@@ -23,7 +23,7 @@ export interface IFileRecoveryDialogDataPayload {
 })
 export class FileRecoveryDialogComponent implements IModal {
   ref: ComponentRef<FileRecoveryDialogComponent>;
-  additionalData?: IAdditionalData<IFileRecoveryDialogDataPayload>;
+  additionalData?: IAdditionalData<FileRecoveryDialogDataPayload>;
   showBackdrop?: boolean;
 
   constructor(

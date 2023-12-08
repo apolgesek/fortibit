@@ -1,11 +1,11 @@
-import { IEntry } from './entry.model';
+import { Entry } from './entry.model';
 
-export interface IPasswordEntry extends IEntry {
+export type PasswordEntry = Entry & {
 	username: string;
 	password: string;
 	url?: string;
 	notes?: string;
 	autotypeExp?: string;
 	icon?: string;
-	history?: IPasswordEntry[];
+	history?: PasswordEntry[];
 }

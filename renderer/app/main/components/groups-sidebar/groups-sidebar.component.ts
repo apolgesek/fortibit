@@ -1,5 +1,5 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { CommonModule } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import { WorkspaceService, EntryManager, GroupManager, ModalService } from '@app/core/services';
@@ -12,7 +12,7 @@ import { FocusableListItemDirective } from '@app/shared/directives/focusable-lis
 import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { SidebarHandleComponent } from '@app/shared/components/sidebar-handle/sidebar-handle.component';
-import { IEntryGroup, IPasswordEntry } from '../../../../../shared/index';
+import { EntryGroup, PasswordEntry } from '../../../../../shared/index';
 import { FeatherModule } from 'angular-feather';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
 import { IHotkeyHandler } from '@app/core/models';
@@ -24,7 +24,9 @@ import { HotkeyHandler } from 'injection-tokens';
   styleUrls: ['./groups-sidebar.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
+    NgIf,
+    NgFor,
+    NgClass,
     ScrollingModule,
     FeatherModule,
     ContextMenuItemDirective,
@@ -70,15 +72,15 @@ export class GroupsSidebarComponent implements OnInit {
     return this.workspaceService.databaseFileName;
   }
 
-  get passwordEntries(): IPasswordEntry[] {
+  get passwordEntries(): PasswordEntry[] {
     return this.entryManager.passwordEntries ?? [];
   }
 
-  get selectedEntries(): IPasswordEntry[] {
+  get selectedEntries(): PasswordEntry[] {
     return this.entryManager.selectedPasswords;
   }
 
-  get groups(): IEntryGroup[] {
+  get groups(): EntryGroup[] {
     return this.groupManager.groups;
   }
 

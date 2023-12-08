@@ -1,9 +1,9 @@
-import { IPasswordEntry } from '../../../shared/password-entry.model';
+import { PasswordEntry } from '../../../shared/password-entry.model';
 
 export class WeakPasswordsService {
   private zxcvbn;
 
-  public async getAll(entries: IPasswordEntry[]): Promise<{id: number, score: number}[]> {
+  public async getAll(entries: PasswordEntry[]): Promise<{id: number, score: number}[]> {
     if (!this.zxcvbn) {
       this.zxcvbn = await import('zxcvbn');
     }

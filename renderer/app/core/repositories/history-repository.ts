@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IHistoryEntry } from '../../../../shared';
+import { HistoryEntry } from '../../../../shared';
 import { DbManager } from '../database/db-manager';
 import { HistoryEntryPredicateFn, IHistoryRepository } from './history-repository.model';
 
@@ -7,18 +7,18 @@ import { HistoryEntryPredicateFn, IHistoryRepository } from './history-repositor
 export class HistoryRepository implements IHistoryRepository {
   constructor(private readonly db: DbManager) {}
 
-  get(id: number): Promise<IHistoryEntry[] | undefined> {
+  get(id: number): Promise<HistoryEntry[] | undefined> {
     return this.db.context.transaction('r', this.db.history,
       () => this.db.history.where('entryId').equals(id).toArray());
   }
 
-  add(item: IHistoryEntry): Promise<number> {
+  add(item: HistoryEntry): Promise<number> {
     return this.db.context.transaction('rw', this.db.history, async () => {
       return this.db.history.add(item);
     });
   }
 
-  bulkAdd(items: IHistoryEntry[]): Promise<number> {
+  bulkAdd(items: HistoryEntry[]): Promise<number> {
     return this.db.context.transaction('rw', this.db.history, async () => {
       return this.db.history.bulkAdd(items);
     });
@@ -32,7 +32,7 @@ export class HistoryRepository implements IHistoryRepository {
   deleteByPredicate(fn: HistoryEntryPredicateFn): Promise<number> {
     return this.db.context.transaction('rw', this.db.history, async () => {
       const historyEntries = await this.db.history.filter(x => fn(x, this.db.history)).toArray();
-      const ids = historyEntries.map((x: IHistoryEntry) => x.id);
+      const ids = historyEntries.map((x: HistoryEntry) => x.id);
 
       return this.bulkDelete(ids);
     });

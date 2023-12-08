@@ -10,8 +10,8 @@ import { TooltipComponent } from '@app/shared/components/tooltip/tooltip.compone
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { LinkPipe } from '@app/shared/pipes/link.pipe';
 import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
-import { IAppConfig } from '@config/app-config';
-import { IEntryGroup, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { Configuration } from '@config/configuration';
+import { EntryGroup, PasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { AppConfig } from 'environments/environment';
 import { MessageBroker } from 'injection-tokens';
@@ -32,8 +32,8 @@ import { MessageBroker } from 'injection-tokens';
   ]
 })
 export class EntryDetailsSidebarComponent implements OnInit {
-  public group: IEntryGroup;
-  public config: IAppConfig;
+  public group: EntryGroup;
+  public config: Configuration;
   public isReadonlyEntry = true;
   public isAnimating = false;
 
@@ -49,7 +49,7 @@ export class EntryDetailsSidebarComponent implements OnInit {
     private readonly clipboardService: ClipboardService
   ) {}
 
-  get entry(): IPasswordEntry {
+  get entry(): PasswordEntry {
     if (this.isEntrySelected) {
       return this.entryManager.selectedPasswords[0];
     }
@@ -116,11 +116,11 @@ export class EntryDetailsSidebarComponent implements OnInit {
     this.messageBroker.ipcRenderer.send(IpcChannel.OpenUrl, url);
   }
 
-  copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry) {
+  copyToClipboard(entry: PasswordEntry, property: keyof PasswordEntry) {
     this.clipboardService.copyEntryDetails(entry, property);
   }
 
-  async toggleStarred(entry: IPasswordEntry) {
+  async toggleStarred(entry: PasswordEntry) {
     await this.entryManager.saveEntry({ ...entry, isStarred: !entry.isStarred});
 
     if (!entry.isStarred) {

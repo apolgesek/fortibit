@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ComponentRef, ElementRef, HostBinding, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { NotificationService } from '@app/core/services/notification.service';
-import { IToastModel } from '@app/core/models';
+import { Toast } from '@app/core/models';
 import { CommonModule } from '@angular/common';
 import { FeatherModule } from 'angular-feather';
 
@@ -18,7 +18,7 @@ export class NotificationComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('attr.role') public readonly role = 'alert';
   @HostBinding('attr.aria-live') public readonly ariaLive = 'off';
 
-  public model!: IToastModel;
+  public model!: Toast;
   public componentRef!: ComponentRef<NotificationComponent>;
   public timeLeft = 0;
   private animationStartTime = 0;

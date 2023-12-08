@@ -1,7 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, Inject, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GroupId } from '@app/core/enums';
 import { IHotkeyHandler } from '@app/core/models';
@@ -23,7 +23,7 @@ import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { UiUtil } from '@app/utils';
-import { IPasswordEntry } from '@shared-renderer/index';
+import { PasswordEntry } from '@shared-renderer/index';
 import { HotkeyHandler } from 'injection-tokens';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -69,7 +69,9 @@ export class EntriesTableComponent implements OnInit {
   @ViewChild(CdkVirtualScrollViewport) public readonly scrollViewport: CdkVirtualScrollViewport | undefined;
   @ViewChild('dragImage') public readonly dragImage: ElementRef;
 
-  public passwordList$: Observable<IPasswordEntry[]>;
+  @ViewChildren(FocusableListItemDirective) public readonly listItems: QueryList<FocusableListItemDirective>;
+
+  public passwordList$: Observable<PasswordEntry[]>;
   public searchPhrase$: Observable<string>;
   public entryMenuItems: MenuItem[] = [];
   public multiEntryMenuItems: MenuItem[] = [];
@@ -95,7 +97,7 @@ export class EntriesTableComponent implements OnInit {
     return [];
   }
 
-  get selectedEntries(): IPasswordEntry[] {
+  get selectedEntries(): PasswordEntry[] {
     return this.entryManager.selectedPasswords;
   }
 
@@ -103,7 +105,7 @@ export class EntriesTableComponent implements OnInit {
     return this.entryManager.movedEntries;
   }
 
-  get passwordEntries(): IPasswordEntry[] {
+  get passwordEntries(): PasswordEntry[] {
     return this.entryManager.passwordEntries ?? [];
   }
 
@@ -141,12 +143,23 @@ export class EntriesTableComponent implements OnInit {
     this.multiEntryMenuItems = this.buildMultiEntryMenuItems();
     this.entryMenuItems = this.buildEntryMenuItems();
 
-    this.configService.configLoadedSource$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((config) => {
-      this.iconsEnabled = config.displayIcons;
+    this.configService.configLoadedSource$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((config) => {
+        this.iconsEnabled = config.displayIcons;
+    });
+
+    this.entryManager.selectFirstEntry$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const firstItem: HTMLElement = this.listItems.first?.elRef?.nativeElement;
+        if (firstItem) {
+          firstItem.focus();
+        }
     });
   }
 
-  trackingTag(_: number, entry: IPasswordEntry): string {
+  trackingTag(_: number, entry: PasswordEntry): string {
     return entry.id
       + entry.title
       + entry.username
@@ -155,11 +168,11 @@ export class EntriesTableComponent implements OnInit {
       + entry.icon ?? '';
   }
 
-  copyToClipboard(entry: IPasswordEntry, property: keyof IPasswordEntry) {
+  copyToClipboard(entry: PasswordEntry, property: keyof PasswordEntry) {
     this.clipboardService.copyEntryDetails(entry, property);
   }
 
-  selectEntry(event: MouseEvent, entry: IPasswordEntry) {
+  selectEntry(event: MouseEvent, entry: PasswordEntry) {
     if (this.hotkeyService.isMultiselectionKeyDown(event)) {
       const foundIndex = this.selectedEntries.findIndex(p => p.id === entry.id);
 
@@ -175,7 +188,7 @@ export class EntriesTableComponent implements OnInit {
     }
   }
 
-  showEntryContextMenu(event: MouseEvent, item: IPasswordEntry) {
+  showEntryContextMenu(event: MouseEvent, item: PasswordEntry) {
     event.preventDefault();
 
     if (this.selectedEntries.length === 0 || this.selectedEntries.length === 1) {
@@ -183,11 +196,11 @@ export class EntriesTableComponent implements OnInit {
     }
   }
 
-  isEntrySelected(entry: IPasswordEntry): boolean {
+  isEntrySelected(entry: PasswordEntry): boolean {
     return Boolean(this.selectedEntries.find(e => e.id === entry?.id));
   }
 
-  isEntryDragged(entry: IPasswordEntry): boolean {
+  isEntryDragged(entry: PasswordEntry): boolean {
     return Boolean(this.entryManager.movedEntries.find(e => e === entry?.id));
   }
 
@@ -195,7 +208,7 @@ export class EntriesTableComponent implements OnInit {
     this.modalService.openNewEntryWindow();
   }
 
-  startDrag(event: DragEvent, item: IPasswordEntry) {
+  startDrag(event: DragEvent, item: PasswordEntry) {
     this.entryManager.movedEntries = this.selectedEntries.length > 0
       ? this.selectedEntries.map(e => e.id)
       : [ item.id ];
@@ -216,7 +229,7 @@ export class EntriesTableComponent implements OnInit {
   }
 
   private handleEntriesReload() {
-    this.entryManager.reloadedEntries$
+    this.entryManager.scrollTopEntries
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.scrollViewport?.scrollTo({ top: 0 });

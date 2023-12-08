@@ -89,11 +89,11 @@ test.describe('Workspace > Entry & group', async () => {
   test('Check entry edited', async () => {
     await addEntry(firstWindow, { config: { close: true } });
     await firstWindow.getByText(/username1/i).click();
-    await firstWindow.keyboard.press('E');
+    await firstWindow.keyboard.press('Control+E');
     await firstWindow
       .getByText(/edit entry in general/i)
       .waitFor({ state: 'visible', timeout: 4000 });
-    await firstWindow.getByPlaceholder(/title/i).type('Mail');
+    await firstWindow.getByPlaceholder(/title/i).type('Title1');
     await firstWindow.getByText(/confirm/i).click();
 
     expect(await firstWindow.getByPlaceholder(/title/i).inputValue()).toBe('Title1');
@@ -217,7 +217,8 @@ test.describe('Workspace > Entry & group', async () => {
 
   test('Check group name changed', async () => {
     await firstWindow.getByText(/banking/i).click({ button: 'right' });
-    await firstWindow.getByText(/rename/i).click();
+    const contextMenu = firstWindow.getByTestId('context-menu');
+    await contextMenu.getByText(/edit/i).click();
     await firstWindow.getByPlaceholder(/name/i).focus();
     await firstWindow.keyboard.insertText('example');
     await firstWindow.getByRole('dialog').getByRole('button', { name: /save/i }).click();
@@ -330,11 +331,12 @@ test.describe('Workspace > Entry & group', async () => {
   test('Check entry context menu displayed', async () => {
     await addEntry(firstWindow, { config: { close: true } });
     await firstWindow.getByText(/username1/i).click({ button: 'right' });
-    const copyUsernameOption = await firstWindow.getByText(/copy username/i).count();
-    const copyPasswordOption = await firstWindow.getByText(/copy password/i).count();
-    const editEntryOption = await firstWindow.getByText(/edit (.*)/i).count();
-    const moveEntryOption = await firstWindow.getByText(/move (.*)/i).count();
-    const deleteEntryOption = await firstWindow.getByText(/delete (.*)/i).count();
+    const contextMenu = firstWindow.getByTestId('context-menu');
+    const copyUsernameOption = await contextMenu.getByText(/copy username/i).count();
+    const copyPasswordOption = await contextMenu.getByText(/copy password/i).count();
+    const editEntryOption = await contextMenu.getByText(/edit (.*)/i).count();
+    const moveEntryOption = await contextMenu.getByText(/^\s*move (.*)/i).count();
+    const deleteEntryOption = await contextMenu.getByText(/remove (.*)/i).count();
 
     expect(copyUsernameOption).toBe(1);
     expect(copyPasswordOption).toBe(1);
@@ -345,16 +347,17 @@ test.describe('Workspace > Entry & group', async () => {
 
   test('Check group context menu displayed', async () => {
     await firstWindow.getByRole('listitem').getByText(/email/i).click({ button: 'right' });
-    const renameGroupOption = firstWindow.getByText(/delete (.*)/i);
-    const removeGroupOption = firstWindow.getByText(/rename (.*)/i);
+    const contextMenu = firstWindow.getByTestId('context-menu');
+    const editGroupOption = contextMenu.getByText(/edit (.*)/i);
+    const removeGroupOption = contextMenu.getByText(/remove (.*)/i);
 
-    expect(await renameGroupOption.count()).toBe(1);
+    expect(await editGroupOption.count()).toBe(1);
     expect(await removeGroupOption.count()).toBe(1);
 
     await firstWindow.getByRole('listitem').getByText(/general/i).click({ button: 'right' });
 
     expect(await removeGroupOption.count()).toBe(0);
-    expect(await renameGroupOption.count()).toBe(0);
+    expect(await editGroupOption.count()).toBe(0);
   });
 
   test('Check sort by creation date', async () => {
@@ -444,7 +447,7 @@ test.describe('Workspace > Entry & group', async () => {
   test('Check maintenance scan should remove entry according to input', async () => {
     await addEntry(firstWindow, { config: { close: true } });
     await firstWindow.getByText(/username1/i).click();
-    await firstWindow.keyboard.press('E');
+    await firstWindow.keyboard.press('Control+E');
     await firstWindow
       .getByText(/edit entry in general/i)
       .waitFor({ state: 'visible', timeout: 4000 });
@@ -472,8 +475,7 @@ test.describe('Workspace > Entry & group', async () => {
 test.describe('Workspace > Entry history', async () => {
   async function addHistoryEntry() {
     await firstWindow.getByText(/username1/i).click();
-    await firstWindow.keyboard.press('E');
-    await firstWindow
+    await firstWindow.keyboard.press('Control+E');    await firstWindow
       .getByText(/edit entry in general/i)
       .waitFor({ state: 'visible', timeout: 4000 });
     await firstWindow.getByPlaceholder(/title/i).type('Aaaaa');
@@ -510,7 +512,7 @@ test.describe('Workspace > Entry history', async () => {
     await firstWindow.getByRole('dialog').nth(1).waitFor({ state: 'detached' });
     await firstWindow.keyboard.press('Escape');
     await firstWindow.getByRole('dialog').waitFor({ state: 'detached' });
-    await firstWindow.keyboard.press('E');
+    await firstWindow.keyboard.press('Control+E');
     const entryTitle = await firstWindow.getByRole('dialog').getByPlaceholder(/title/i).inputValue();
 
     expect(entryTitle).toBe('Title1');
@@ -553,23 +555,31 @@ test.describe('Workspace > File', async () => {
     await invoke.evaluate((invoke) => invoke('app:sendInput', 'test_copy.fbit'));
     await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
 
-    await expect(firstWindow.getByText(/vault path: .*test_copy.fbit/i)).toBeVisible();
+    await expect(firstWindow.getByText(/vault: .*test_copy.fbit/i)).toBeVisible();
   });
 
   test('Open recent option click should open different vault master password screen', async () => {
     await firstWindow.getByRole('menubar').getByText(/file/i).click();
+    await firstWindow.getByText(/open file.../i).click();
+    await firstWindow.waitForTimeout(2000);
+    const invoke = await getInvoke(firstWindow);
+    await invoke.evaluate((invoke) => invoke('app:sendInput', 'test_copy.fbit'));
+    await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
+    await firstWindow.waitForTimeout(2000);
+
+    await firstWindow.getByRole('menubar').getByText(/file/i).click();
     await firstWindow.getByText(/open recent/i).click();
-    const option = await firstWindow.getByText(/2:.*\.fbit/i).innerText();
+    const option = await firstWindow.getByText(/1:.*\.fbit/i).innerText();
     await firstWindow.getByText(option).click();
 
-    await expect(firstWindow.getByText(new RegExp(`vault path: .*${option.replace(/\d: /, '')}`, 'i'))).toBeVisible();
+    await expect(firstWindow.getByText(new RegExp(`vault: .*${option.replace(/\d: /, '')}`, 'i'))).toBeVisible();
   });
 
   test('Save option click should save updated vault', async () => {
     await authenticate(firstWindow);
     await addEntry(firstWindow, { config: { close: true } });
     await firstWindow.getByRole('menubar').getByText(/file/i).click();
-    await firstWindow.getByRole('menubar').getByText(/^save$/i).click();
+    await firstWindow.getByRole('menubar').getByText(/^save/i).first().click();
 
     expect(await firstWindow.getByRole('alert').innerText()).toMatch(/database saved/i);
     

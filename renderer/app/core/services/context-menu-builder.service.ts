@@ -3,7 +3,6 @@ import { ModalService } from '@app/core/services/modal.service';
 import { MenuItem } from '@app/shared';
 import { HotkeyHandler } from 'injection-tokens';
 import { ClipboardService, EntryManager } from '.';
-import { HotkeyLabel } from './hotkey/hotkey-label';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +44,7 @@ export class ContextMenuBuilderService {
 
   buildEmptyRecycleBinContextMenuItem(): this {
     this.contextMenuItems.push({
-      label: this.hotkeyHandler.getContextMenuLabel('EmptyBin'),
+      label: 'Empty recycle bin',
       disabled: this.entryManager.passwordEntries.length === 0,
       command: () => {
         this.entryManager.selectedPasswords = [...this.entryManager.passwordEntries];

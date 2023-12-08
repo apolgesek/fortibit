@@ -2,7 +2,7 @@ import { Inject, Injectable, NgZone, inject } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import { IMessageBroker } from '@app/core/models';
 import { EntryRepository, EntryPredicateFn } from '@app/core/repositories';
-import { IHistoryEntry } from '@shared-renderer/history-entry.model';
+import { HistoryEntry } from '@shared-renderer/history-entry.model';
 import { MessageBroker } from 'injection-tokens';
 import { BehaviorSubject, combineLatest, from, map, Observable, of, shareReplay, Subject, switchMap } from 'rxjs';
 import { NotificationService } from '../notification.service';
@@ -10,33 +10,37 @@ import { SearchService } from '../search.service';
 import { GroupManager } from './group.manager';
 import { DbManager } from '@app/core/database';
 import { HistoryManager } from './history.manager';
-import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { PasswordEntry, IpcChannel } from '@shared-renderer/index';
 
-interface SearchResultsModel {
-  passwords: IPasswordEntry[];
+type SearchResults = {
+  passwords: PasswordEntry[];
   searchPhrase: string;
-  searchResults: IPasswordEntry[];
+  searchResults: PasswordEntry[];
 }
 
-type GetSearchResultsModel = [passwords: IPasswordEntry[], searchPhrase: string];
+type GetSearchResultsModel = [passwords: PasswordEntry[], searchPhrase: string];
 
 @Injectable({ providedIn: 'root' })
 export class EntryManager {
-  public readonly entries$: Observable<IPasswordEntry[]>;
-  public readonly reloadedEntries$: Observable<void>;
-  public readonly selectEntry$: Observable<IPasswordEntry>;
+  public readonly entries$: Observable<PasswordEntry[]>;
+  public readonly scrollTopEntries: Observable<void>;
+  public readonly selectEntry$: Observable<PasswordEntry>;
+  public readonly selectFirstEntry$: Observable<void>;
+
   public readonly markDirtySource: Subject<void>;
 
   public movedEntries: number[] = [];
-  public editedEntry?: IPasswordEntry;
-  public passwordEntries: IPasswordEntry[] = [];
-  public selectedPasswords: IPasswordEntry[] = [];
-  public entryHistory: IHistoryEntry[];
+  public editedEntry?: PasswordEntry;
+  public passwordEntries: PasswordEntry[] = [];
+  public selectedPasswords: PasswordEntry[] = [];
+  public entryHistory: HistoryEntry[];
 
   private readonly entryRepository: EntryRepository = new EntryRepository(inject(DbManager));
-  private readonly reloadedEntriesSource: Subject<void> = new Subject();
-  private readonly entrySelectedSource: Subject<IPasswordEntry> = new Subject();
-  private readonly passwordListSource$: BehaviorSubject<IPasswordEntry[]> = new BehaviorSubject<IPasswordEntry[]>([]);
+
+  private readonly scrollTopEntriesSource: Subject<void> = new Subject();
+  private readonly entrySelectedSource: Subject<PasswordEntry> = new Subject();
+  private readonly firstEntrySelectedSource: Subject<void> = new Subject();
+  private readonly passwordListSource: BehaviorSubject<PasswordEntry[]> = new BehaviorSubject<PasswordEntry[]>([]);
 
   constructor(
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
@@ -49,7 +53,7 @@ export class EntryManager {
     this.markDirtySource = new Subject();
 
     this.entries$ = combineLatest([
-      this.passwordListSource$,
+      this.passwordListSource,
       this.searchService.searchPhrase$
     ]).pipe(
       switchMap(([passwords, searchPhrase]) => this.getSearchResults$([passwords, searchPhrase])),
@@ -58,8 +62,9 @@ export class EntryManager {
       shareReplay()
     );
 
-    this.reloadedEntries$ = this.reloadedEntriesSource.asObservable();
+    this.scrollTopEntries = this.scrollTopEntriesSource.asObservable();
     this.selectEntry$ = this.entrySelectedSource.asObservable();
+    this.selectFirstEntry$ = this.firstEntrySelectedSource.asObservable(); // when search box is focused and ArrowDown key is pressed
 
     this.handleEntryAutotype();
 
@@ -87,7 +92,7 @@ export class EntryManager {
     this.searchService.isGlobalSearchMode = value;
   }
 
-  async saveEntry(entry: Partial<IPasswordEntry>): Promise<number> {
+  async saveEntry(entry: Partial<PasswordEntry>): Promise<number> {
     let id: number;
 
     if (entry.id) {
@@ -95,7 +100,7 @@ export class EntryManager {
 
       id = await this.entryRepository.update(entry);
       this.passwordEntries = await this.getEntries();
-      this.selectedPasswords = [{ ...editedEntry, ...entry } as IPasswordEntry];
+      this.selectedPasswords = [{ ...editedEntry, ...entry } as PasswordEntry];
 
       if (editedEntry.icon && !editedEntry.icon.startsWith('data:image/png')) {
         this.replaceIconPath(id, editedEntry, entry);
@@ -103,7 +108,7 @@ export class EntryManager {
         this.getIconPath(entry);
       }
 
-      const historyEntry: IHistoryEntry = {
+      const historyEntry: HistoryEntry = {
         entry: editedEntry,
         entryId: editedEntry.id
       };
@@ -131,7 +136,7 @@ export class EntryManager {
     this.passwordEntries = await this.getEntries(id);
   }
 
-  async bulkAdd(entries: IPasswordEntry[]): Promise<number> {
+  async bulkAdd(entries: PasswordEntry[]): Promise<number> {
     const addedEntries = await this.entryRepository.bulkAdd(entries);
 
     if (entries.some(x => x.groupId === this.groupManager.selectedGroup)) {
@@ -186,7 +191,7 @@ export class EntryManager {
     this.markDirty();
   }
 
-  async selectEntry(entry: IPasswordEntry): Promise<void> {
+  async selectEntry(entry: PasswordEntry): Promise<void> {
     if (entry) {
       entry.group = this.groupManager.groups.find(x => x.id === entry.groupId)?.name
         // could be Recycle bin
@@ -196,7 +201,7 @@ export class EntryManager {
     this.entrySelectedSource.next(entry);
   }
 
-  async getEntryHistory(id: number): Promise<IHistoryEntry[]> {
+  async getEntryHistory(id: number): Promise<HistoryEntry[]> {
     const history = await this.historyManager.get(id);
     history.sort((a, b) => b.id - a.id);
 
@@ -205,7 +210,7 @@ export class EntryManager {
     return this.entryHistory;
   }
 
-  async deleteEntryHistory(entryId: number, entry: IPasswordEntry): Promise<void> {
+  async deleteEntryHistory(entryId: number, entry: PasswordEntry): Promise<void> {
     await this.historyManager.delete(entryId);
     await this.getEntryHistory(entry.id);
 
@@ -213,14 +218,14 @@ export class EntryManager {
   }
 
   updateEntriesSource() {
-    this.passwordListSource$.next([...this.passwordEntries as IPasswordEntry[]]);
+    this.passwordListSource.next([...this.passwordEntries as PasswordEntry[]]);
   }
 
   reloadEntries() {
-    this.reloadedEntriesSource.next();
+    this.scrollTopEntriesSource.next();
   }
 
-  getIconPath(entry: Partial<IPasswordEntry>): void {
+  getIconPath(entry: Partial<PasswordEntry>): void {
     if (entry.url) {
       this.messageBroker.ipcRenderer.send(IpcChannel.TryGetIcon, entry.id, entry.url);
     }
@@ -230,23 +235,23 @@ export class EntryManager {
     return this.entryRepository.update({ id, icon });
   }
 
-  async get(id: number): Promise<IPasswordEntry> {
+  async get(id: number): Promise<PasswordEntry> {
     return this.entryRepository.get(id);
   }
 
-  async getAllByPredicate(predicate: EntryPredicateFn): Promise<IPasswordEntry[]> {
+  async getAllByPredicate(predicate: EntryPredicateFn): Promise<PasswordEntry[]> {
     return this.entryRepository.getAllByPredicate(predicate);
   }
 
-  async getAllByGroup(groupId: number): Promise<IPasswordEntry[]> {
+  async getAllByGroup(groupId: number): Promise<PasswordEntry[]> {
     return this.entryRepository.getAllByGroup(groupId);
   }
 
-  async getEntries(id = this.groupManager.selectedGroup): Promise<IPasswordEntry[]> {
+  async getEntries(id = this.groupManager.selectedGroup): Promise<PasswordEntry[]> {
     return await this.getEntriesInternal(id);
   }
 
-  private async getEntriesInternal(id: number): Promise<IPasswordEntry[]> {
+  private async getEntriesInternal(id: number): Promise<PasswordEntry[]> {
     if (id === GroupId.Starred) {
       return this.entryRepository.getAllByPredicate(x => x.isStarred);
     } else if (id === GroupId.AllItems) {
@@ -256,7 +261,11 @@ export class EntryManager {
     }
   }
 
-  private getSearchResults$([passwords, searchPhrase]: GetSearchResultsModel): Observable<SearchResultsModel> {
+  selectFirstEntry() {
+    this.firstEntrySelectedSource.next();
+  }
+
+  private getSearchResults$([passwords, searchPhrase]: GetSearchResultsModel): Observable<SearchResults> {
     if (searchPhrase.length) {
       this.selectedPasswords = [];
     }
@@ -279,7 +288,7 @@ export class EntryManager {
     });
   }
 
-  private isEntryMatchingRegex(entry: IPasswordEntry, title: string): boolean {
+  private isEntryMatchingRegex(entry: PasswordEntry, title: string): boolean {
     if (entry.autotypeExp) {
       return new RegExp(entry.autotypeExp).test(title);
     }
@@ -291,11 +300,11 @@ export class EntryManager {
     return false;
   }
 
-  private replaceIconPath(id: number, editedEntry: IPasswordEntry, newEntry: Partial<IPasswordEntry>): void {
+  private replaceIconPath(id: number, editedEntry: PasswordEntry, newEntry: Partial<PasswordEntry>): void {
     this.messageBroker.ipcRenderer.send(IpcChannel.TryReplaceIcon, id, editedEntry.icon, newEntry.url);
   }
 
-  private removeIconPath(entry: Partial<IPasswordEntry>): void {
+  private removeIconPath(entry: Partial<PasswordEntry>): void {
     this.messageBroker.ipcRenderer.send(IpcChannel.RemoveIcon, entry);
   }
 

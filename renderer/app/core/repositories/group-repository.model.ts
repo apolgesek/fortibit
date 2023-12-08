@@ -1,6 +1,6 @@
-import { IEntryGroup } from '@shared-renderer/entry-group';
+import { EntryGroup } from '@shared-renderer/entry-group';
 import { IRepository } from './index';
-export interface IGroupRepository extends IRepository<IEntryGroup> {
-  bulkAdd(items: IEntryGroup[]): Promise<number>;
+export interface IGroupRepository extends IRepository<EntryGroup> {
+  bulkAdd(items: EntryGroup[]): Promise<number>;
   bulkDelete(ids: number[]): Promise<void>;
 }

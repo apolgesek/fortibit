@@ -1,7 +1,7 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { AfterViewInit, Component, HostListener, Inject, OnInit, ViewContainerRef } from '@angular/core';
 import { NavigationStart, Router, RouterModule } from '@angular/router';
-import { IAppConfig } from '@config/app-config';
+import { Configuration } from '@config/configuration';
 import { IpcChannel } from '@shared-renderer/index';
 import { HotkeyHandler, MessageBroker } from 'injection-tokens';
 import { filter, fromEvent, take, tap } from 'rxjs';
@@ -22,7 +22,7 @@ import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component'
 })
 export class AppComponent implements OnInit, AfterViewInit {
   public fontsLoaded = false;
-  private config: IAppConfig;
+  private config: Configuration;
 
   constructor(
     @Inject(MessageBroker) public readonly messageBroker: IMessageBroker,

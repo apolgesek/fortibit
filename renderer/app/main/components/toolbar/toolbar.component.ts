@@ -120,6 +120,10 @@ export class ToolbarComponent {
   }
 
   handleSearchboxKeydown(event: KeyboardEvent) {
+    if (event.key === 'ArrowDown') {
+      this.entryManager.selectFirstEntry();
+    }
+
     if (!event.ctrlKey) {
       event.stopPropagation();
     }

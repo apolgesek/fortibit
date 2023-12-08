@@ -1,13 +1,13 @@
 import { IEncryptionEventWrapper } from '../encryption/encryption-event-wrapper.model';
 import { IEncryptionEventService } from './encryption-event-service.model';
-import { IGetLeaksEvent } from './events/get-leaks-event.model';
+import { GetLeaksEvent } from './events/get-leaks-event.model';
 import { MessageEventType } from './message-event-type.enum';
 
 export class EncryptionEventService implements IEncryptionEventService {
   constructor(@IEncryptionEventWrapper private readonly _encryptionEventWrapper: IEncryptionEventWrapper) {}
 
   public async getLeaks(database: string, key: string): Promise<{data: string | false, error: string}> {
-    const encryptionEvent: IGetLeaksEvent = { database, type: MessageEventType.GetLeaks };
+    const encryptionEvent: GetLeaksEvent = { database, type: MessageEventType.GetLeaks };
     return await this._encryptionEventWrapper.processEventAsync(encryptionEvent, key) as { error: string, data: string };
   }
 

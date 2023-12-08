@@ -7,7 +7,7 @@ import { EntryIconDirective } from '@app/main/directives/entry-icon.directive';
 import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
 import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { IPasswordEntry } from '@shared-renderer/password-entry.model';
+import { PasswordEntry } from '@shared-renderer/password-entry.model';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 
@@ -28,7 +28,7 @@ import { MessageBroker } from 'injection-tokens';
 })
 export class EntrySelectComponent implements OnInit {
   public selectedEntries = [];
-  public passwordList: IPasswordEntry[];
+  public passwordList: PasswordEntry[];
 
   constructor(
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
@@ -36,7 +36,7 @@ export class EntrySelectComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.messageBroker.ipcRenderer.on(IpcChannel.SendMatchingEntries, (_, entries: IPasswordEntry[]) => {
+    this.messageBroker.ipcRenderer.on(IpcChannel.SendMatchingEntries, (_, entries: PasswordEntry[]) => {
       this.zone.run(() => {
         this.passwordList = entries;
         this.selectEntry(null, this.passwordList[0]);
@@ -44,7 +44,7 @@ export class EntrySelectComponent implements OnInit {
     });
   }
 
-  selectEntry(_: MouseEvent, entry: IPasswordEntry) {
+  selectEntry(_: MouseEvent, entry: PasswordEntry) {
     this.selectedEntries = [entry];
   }
 
@@ -52,11 +52,11 @@ export class EntrySelectComponent implements OnInit {
     this.messageBroker.ipcRenderer.send(IpcChannel.AutotypeEntrySelected, this.selectedEntries[0]);
   }
 
-  isEntrySelected(entry: IPasswordEntry): boolean {
+  isEntrySelected(entry: PasswordEntry): boolean {
     return Boolean(this.selectedEntries.find(e => e.id === entry?.id));
   }
 
-  trackingTag(_: number, entry: IPasswordEntry): string {
+  trackingTag(_: number, entry: PasswordEntry): string {
     return entry.id.toString();
   }
 }

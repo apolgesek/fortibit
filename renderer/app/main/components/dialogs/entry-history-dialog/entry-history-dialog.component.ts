@@ -3,10 +3,10 @@ import { Component, ComponentRef, DestroyRef, OnInit } from '@angular/core';
 import { EntryManager, ModalRef, ModalService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { IHistoryEntry } from '@shared-renderer/history-entry.model';
+import { HistoryEntry } from '@shared-renderer/history-entry.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-export interface IEntryHistoryDialogDataPayload {
+export type EntryHistoryDialogDataPayload = {
   id: number;
 }
 
@@ -22,8 +22,8 @@ export interface IEntryHistoryDialogDataPayload {
 })
 export class EntryHistoryDialogComponent implements IModal, OnInit {
   public readonly ref: ComponentRef<EntryHistoryDialogComponent>;
-  public readonly additionalData?: IAdditionalData<IEntryHistoryDialogDataPayload>;
-  public history: IHistoryEntry[];
+  public readonly additionalData?: IAdditionalData<EntryHistoryDialogDataPayload>;
+  public history: HistoryEntry[];
 
   constructor(
     private readonly destroyRef: DestroyRef,
@@ -40,7 +40,7 @@ export class EntryHistoryDialogComponent implements IModal, OnInit {
     this.history = this.entryManager.entryHistory;
   }
 
-  async openEntry(entry: IHistoryEntry) {
+  async openEntry(entry: HistoryEntry) {
     const modalRef = await this.modalService.openHistoryEntryWindow(entry);
 
     modalRef.onClose.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {

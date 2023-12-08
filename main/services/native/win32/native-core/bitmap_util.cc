@@ -29,7 +29,7 @@ std::vector<char> ReadBMP(const std::string &file)
   return img;
 }
 
-HBITMAP CreateDIB(int nWidth, int nHeight, int iconWidth, int iconHeight, std::string path)
+HBITMAP CreateDIB(int nWidth, int nHeight, int iconWidth, int iconHeight, std::string path, std::string theme)
 {
   HBITMAP hbm = NULL;
   HDC hdcMem = CreateCompatibleDC(NULL);
@@ -49,7 +49,12 @@ HBITMAP CreateDIB(int nWidth, int nHeight, int iconWidth, int iconHeight, std::s
     if (hbm != NULL) 
     {
       std::vector<char> img = ReadBMP(path);
-      std::vector<int> backgroundColor = {255, 255, 255};
+      std::vector<int> backgroundColor = { 255, 255, 255 };
+
+      if (theme.compare("dark") == 0)
+      {
+        backgroundColor = { 43, 43, 43 };
+      }
 
       int i = 0;
       int startX = (nWidth / 2) - (iconWidth / 2);

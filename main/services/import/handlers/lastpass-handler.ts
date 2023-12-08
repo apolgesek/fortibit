@@ -5,7 +5,7 @@ import { IWindowService } from '../../window';
 import { CsvDataImporter } from './csv-data-importer';
 import { TYPE_DEF } from './type-definition';
 
-interface ILastpassEntry {
+type ILastpassEntry = {
   url: string;
   username: string;
   password: string;

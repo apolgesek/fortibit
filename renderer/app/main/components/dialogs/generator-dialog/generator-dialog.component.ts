@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ComponentRef, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ClipboardService, ModalRef } from '@app/core/services';
 import { IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
@@ -31,7 +31,6 @@ import { debounceTime } from 'rxjs';
 export class GeneratorDialogComponent implements IModal, OnInit {
   public ref: ComponentRef<unknown>;
   public password = 'Generating...';
-  public settingsForm: FormGroup;
 
   private readonly modalRef = inject(ModalRef);
   private readonly formBuilder = inject(FormBuilder);
@@ -39,15 +38,19 @@ export class GeneratorDialogComponent implements IModal, OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly clipboardService = inject(ClipboardService);
 
-  async ngOnInit() {
-    this.settingsForm = this.formBuilder.group({
-      passwordLength: [15],
-      lowercase: [true],
-      uppercase: [true],
-      specialChars: [true],
-      numbers: [true]
-    });
+  private readonly _settingsForm = this.formBuilder.group({
+    passwordLength: [15],
+    lowercase: [true],
+    uppercase: [true],
+    specialChars: [true],
+    numbers: [true]
+  });;
 
+  get settingsForm() {
+    return this._settingsForm;
+  }
+
+  async ngOnInit() {
     this.generatePassword();
 
     this.settingsForm.valueChanges

@@ -1,4 +1,4 @@
-export interface IToastModel {
+export type Toast = {
   message: string;
   type: 'success' | 'error';
   alive?: number;

@@ -1,4 +1,4 @@
-export interface ISaveFilePayload {
+export type SaveFilePayload = {
   database: string;
   password: string;
   config: {

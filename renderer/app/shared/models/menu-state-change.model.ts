@@ -1,4 +1,3 @@
-export interface IMenuStateChange {
+export type MenuStateChange = {
   isOpen: boolean;
-  notifyChanges?: boolean;
 }

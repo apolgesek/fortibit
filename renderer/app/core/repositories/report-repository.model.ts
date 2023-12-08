@@ -1,10 +1,10 @@
-import { IReport } from '../../../../shared/report.model';
+import { Report } from '../../../../shared/report.model';
 
-export type PredicateFn = (entry: IReport) => boolean;
+export type PredicateFn = (entry: Report) => boolean;
 
 export interface IReportRepository {
-  getAllByPredicate(fn: PredicateFn): Promise<IReport[]>;
-  getLastReport(type: number): Promise<IReport>;
-  add(report: IReport): Promise<number>;
+  getAllByPredicate(fn: PredicateFn): Promise<Report[]>;
+  getLastReport(type: number): Promise<Report>;
+  add(report: Report): Promise<number>;
   delete(id: number): Promise<void>;
 }

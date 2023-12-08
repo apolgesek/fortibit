@@ -1,4 +1,4 @@
-import { ImportHandler, IPasswordEntry } from '../../../../shared';
+import { ImportHandler, PasswordEntry } from '../../../../shared';
 import { IConfigService } from '../../config';
 import { IEncryptionEventWrapper } from '../../encryption';
 import { IWindowService } from '../../window';
@@ -19,7 +19,7 @@ export class KeePassHandler extends XmlDataImporter {
     super(_windowService, _encryptionEventWrapper, _configService)
   }
 
-  private mapEntries(entries: any[]): Partial<IPasswordEntry>[] {
+  private mapEntries(entries: any[]): Partial<PasswordEntry>[] {
     return entries.map(x => {
       return {
         username: x.String.find(x => x.Key === 'UserName').Value?.toString(),

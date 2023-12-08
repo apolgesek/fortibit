@@ -13,7 +13,7 @@
         aria-describedby="clipboard-time-invalid"
         class="number"
         formControlName="clipboardTime"
-        (input)="onNumberChange($event, 'clipboardTime', 4)">
+        (input)="onNumberChange($event, 'input.clipboardTime', 4)">
     </div>
     <div
       *ngIf="isControlInvalid(passwordForm.get('input.clipboardTime'))"
@@ -86,7 +86,7 @@
         aria-describedby="idle-time-invalid"
         class="number"
         formControlName="idleTime"
-        (input)="onNumberChange($event, 'idleTime', 4)">
+        (input)="onNumberChange($event, 'input.idleTime', 4)">
     </div>
     <div
       *ngIf="isControlInvalid(passwordForm.get('input.idleTime'))"

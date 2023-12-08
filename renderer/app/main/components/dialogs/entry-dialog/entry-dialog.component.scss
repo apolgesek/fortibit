@@ -41,8 +41,9 @@ $password-padding-right: 50px;
   }
 
   i-feather {
-    cursor: pointer;
+    margin-right: 0 !important;
     color: var(--icon-secondary);
+    cursor: pointer;
 
     &:hover {
 			color: $blue-300;

@@ -4,8 +4,8 @@ import { DbManager } from '@app/core/database';
 import { IMessageBroker } from '@app/core/models';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { UiUtil } from '@app/utils';
-import { IAppConfig } from '@config/app-config';
-import { IPasswordEntry, IpcChannel, VaultSchema } from '@shared-renderer/index';
+import { Configuration } from '@config/configuration';
+import { PasswordEntry, IpcChannel, VaultSchema } from '@shared-renderer/index';
 import { exportDB, importInto } from 'dexie-export-import';
 import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
 import { MessageBroker } from 'injection-tokens';
@@ -35,7 +35,7 @@ export class WorkspaceService {
   public isBiometricsAuthenticationInProgress = false;
 
   private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
-  private config: IAppConfig;
+  private config: Configuration;
   private _zoomFactor = 1;
 
   get zoomFactor(): number {
@@ -57,7 +57,7 @@ export class WorkspaceService {
     private readonly router: Router,
   ) {
     this.configService.configLoadedSource$.pipe().subscribe(config => {
-      this.config = config as IAppConfig;
+      this.config = config as Configuration;
     });
 
     merge(
@@ -79,11 +79,11 @@ export class WorkspaceService {
       this.zone.run(async () => {
         if (this.config.saveOnLock && this.file) {
           await this.saveDatabase({ notify: false });
-          await this.lock({ minimize: true });
+          await this.lock();
         } else {
           const success = await this.executeEvent();
           if (success) {
-            this.lock({ minimize: true });
+            this.lock();
           }
         }
       });
@@ -125,7 +125,8 @@ export class WorkspaceService {
     await this.setupDatabase();
   }
 
-  async lock({ minimize = false }): Promise<void> {
+  async lock(): Promise<void> {
+    this.messageBroker.ipcRenderer.send(IpcChannel.Lock);
     await this.router.navigate(['/pass']);
     this.isLocked = true;
 
@@ -135,8 +136,6 @@ export class WorkspaceService {
     this.entryManager.updateEntriesSource();
 
     await this.dbManager.reset();
-
-    this.messageBroker.ipcRenderer.send(IpcChannel.Lock);
   }
 
   async unlock(): Promise<void> {
@@ -233,7 +232,7 @@ export class WorkspaceService {
     this.setDatabaseLoaded();
   }
 
-  async importDatabase(name: string, entries: IPasswordEntry[]): Promise<boolean> {
+  async importDatabase(name: string, entries: PasswordEntry[]): Promise<boolean> {
     try {
       const groupId = await this.groupManager.addGroup({ name, isImported: true });
       const mappedEntries = entries.map(e => ({ ...e, groupId }));
@@ -327,7 +326,7 @@ export class WorkspaceService {
       this.zone.run(async () => {
         this.file = { filePath, filename: this.fileNamePipe.transform(filePath) };
         if (!this.isLocked) {
-          await this.lock({ minimize: false });
+          await this.lock();
         }
 
         // navigation is needed when being on New Vault page

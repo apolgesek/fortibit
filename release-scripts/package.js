@@ -3,9 +3,9 @@
 (function() {
   const fse = require('fs-extra');
 
-  const props = require('../product.json');
-  props.commit = require('child_process').execSync('git rev-parse HEAD').toString().trim();
+  const product = require('../product.json');
+  product.commit = require('child_process').execSync('git rev-parse HEAD').toString().trim();
 
-  const productJson = JSON.stringify(props);
+  const productJson = JSON.stringify(product);
   fse.writeFileSync('../product.json', productJson, { encoding: 'utf-8' });
 })();

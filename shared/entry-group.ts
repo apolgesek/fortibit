@@ -1,4 +1,4 @@
-export interface IEntryGroup {
+export type EntryGroup = {
   name: string;
   id?: number;
   isImported?: boolean;

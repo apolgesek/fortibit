@@ -59,6 +59,7 @@ import {
   ArrowUp,
   ArrowRight,
   Share,
+  Heart,
 } from 'angular-feather/icons';
 import { MessageBroker, HotkeyHandler } from 'injection-tokens';
 import 'zone.js';
@@ -132,7 +133,8 @@ const icons = {
   ArrowDown,
   ArrowUp,
   ArrowRight,
-  Share
+  Share,
+  Heart
 };
 
 bootstrapApplication(AppComponent, {

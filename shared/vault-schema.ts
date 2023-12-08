@@ -1,14 +1,14 @@
-import { IEntryGroup } from "./entry-group";
-import { IHistoryEntry } from "./history-entry.model";
-import { IPasswordEntry } from "./password-entry.model";
-import { IReport } from "./report.model";
+import { EntryGroup } from "./entry-group";
+import { HistoryEntry } from "./history-entry.model";
+import { PasswordEntry } from "./password-entry.model";
+import { Report } from "./report.model";
 
-export interface VaultSchema {
+export type VaultSchema = {
   schemaVersion: number;
   tables: {
-    entries: IPasswordEntry[];
-    groups: IEntryGroup[];
-    history: IHistoryEntry[];
-    reports: IReport[];
+    entries: PasswordEntry[];
+    groups: EntryGroup[];
+    history: HistoryEntry[];
+    reports: Report[];
   }
 }

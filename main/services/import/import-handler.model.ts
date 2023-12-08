@@ -1,7 +1,7 @@
 import { IpcMainEvent } from "electron";
-import { IImportMetadata } from "./handlers/import-metadata.model";
+import { ImportMetadata } from "./handlers/import-metadata.model";
 
 export interface IImportHandler {
-  getMetadata(): Promise<IImportMetadata>;
+  getMetadata(): Promise<ImportMetadata>;
   import(event: IpcMainEvent, path: string): Promise<string>;
 }

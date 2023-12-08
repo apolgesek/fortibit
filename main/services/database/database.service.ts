@@ -1,5 +1,5 @@
 import { CsvWriter, getDefaultPath, getFileFilter, getHashCode } from '@root/main/util';
-import { IProduct } from '@root/product';
+import { Product } from '@root/product';
 import { ImportHandler, IpcChannel, VaultSchema } from '@shared-renderer/index';
 import { IpcMainEvent, IpcMainInvokeEvent, app, dialog, ipcMain, powerMonitor, safeStorage, session } from 'electron';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, unlinkSync } from 'fs';
@@ -15,7 +15,7 @@ import { IImportService } from '../import';
 import { INativeApiService } from '../native';
 import { IWindowService } from '../window';
 import { IDatabaseService } from './database-service.model';
-import { ISaveFilePayload } from './save-file-payload';
+import { SaveFilePayload } from './save-file-payload';
 
 export class DatabaseService implements IDatabaseService {
   private readonly _isTestMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E));
@@ -88,7 +88,7 @@ export class DatabaseService implements IDatabaseService {
       return this.getFilePath(event.sender.id);
     });
 
-    ipcMain.on(IpcChannel.SaveFile, async (event: IpcMainEvent, payload: ISaveFilePayload) => {
+    ipcMain.on(IpcChannel.SaveFile, async (event: IpcMainEvent, payload: SaveFilePayload) => {
       this.saveDatabase(event, payload);
     });
 
@@ -190,6 +190,8 @@ export class DatabaseService implements IDatabaseService {
     });
 
     ipcMain.on(IpcChannel.Lock, (event: IpcMainEvent) => {
+      this._windowService.onLock(event.sender.id);
+
       this.removeBrowserSession();
       this.removeRecoveryFile(event.sender.id);
       this.setPassword(null, event.sender.id);
@@ -199,7 +201,7 @@ export class DatabaseService implements IDatabaseService {
       this.removeRecoveryFile(event.sender.id);
     });
 
-    ipcMain.handle(IpcChannel.ChangeScreenLockSettings, (_: IpcMainEvent, form: Partial<IProduct>) => {
+    ipcMain.handle(IpcChannel.ChangeScreenLockSettings, (_: IpcMainEvent, form: Partial<Product>) => {
       this.changeEncryptionSettings(form);
     });
 
@@ -223,7 +225,7 @@ export class DatabaseService implements IDatabaseService {
       return this.removeRecoveryFile(event.sender.id)
     });
 
-    ipcMain.on(IpcChannel.DatabaseChanged, (event: IpcMainEvent, payload: ISaveFilePayload) => {
+    ipcMain.on(IpcChannel.DatabaseChanged, (event: IpcMainEvent, payload: SaveFilePayload) => {
       if (this._isTestMode) {
         return;
       }
@@ -301,7 +303,7 @@ export class DatabaseService implements IDatabaseService {
     return this._fileMap.get(windowId)?.file;
   }
 
-  public async saveDatabase(event: IpcMainEvent, saveFilePayload: ISaveFilePayload): Promise<void> {    
+  public async saveDatabase(event: IpcMainEvent, saveFilePayload: SaveFilePayload): Promise<void> {    
     let savePath: Electron.SaveDialogReturnValue = { filePath: this._fileMap.get(event.sender.id)?.file, canceled: false };
     const window = this._windowService.getWindowByWebContentsId(event.sender.id);
 
@@ -458,7 +460,7 @@ export class DatabaseService implements IDatabaseService {
     return `${name}.${this._configService.appConfig.fileExtension}`;
   }
 
-  private changeEncryptionSettings(settings: Partial<IProduct>) {
+  private changeEncryptionSettings(settings: Partial<Product>) {
     if (settings.lockOnSystemLock !== this._configService.appConfig.lockOnSystemLock) {
       if (settings.lockOnSystemLock) {
         powerMonitor.addListener('lock-screen', this._screenLockHandler);

@@ -1,7 +1,7 @@
-import { IPasswordEntry } from "./password-entry.model";
+import { PasswordEntry } from "./password-entry.model";
 
-export interface IHistoryEntry {
-  entry: IPasswordEntry;
+export type HistoryEntry = {
+  entry: PasswordEntry;
   entryId?: number;
   id?: number;
 }

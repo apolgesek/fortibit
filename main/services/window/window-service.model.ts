@@ -15,4 +15,5 @@ export interface IWindowService {
   setIdleTimer(): void;
   setTitle(windowId: number, title: string): void;
   getSecureKey(): string;
+  onLock(windowId: number): void;
 }

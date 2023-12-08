@@ -1,5 +1,5 @@
-import { IAppConfig } from '@root/app-config';
-import { IProduct } from '@root/product';
+import { Configuration } from '@root/configuration';
+import { Product } from '@root/product';
 import { IpcChannel, getDefaultConfig } from '@shared-renderer/index';
 import * as merge from 'deepmerge';
 import { IpcMainEvent, app, ipcMain } from 'electron';
@@ -11,7 +11,7 @@ import { INativeApiService } from '../native';
 import { IConfigService } from './index';
 
 export class ConfigService implements IConfigService {
-  public get appConfig(): IAppConfig {
+  public get appConfig(): Configuration {
     return this._appConfig;
   }
 
@@ -25,7 +25,7 @@ export class ConfigService implements IConfigService {
 
   private readonly _productPath: string;
   private readonly _workspacesPath: string;
-  private _appConfig: IAppConfig;
+  private _appConfig: Configuration;
 
   constructor(@INativeApiService private readonly _nativeApiService: INativeApiService) {
     const dir = join(app.getPath('appData'), app.getName(), 'config');
@@ -50,7 +50,7 @@ export class ConfigService implements IConfigService {
     this._workspacesPath = workspacePath;
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const productInformation: IProduct = merge(JSON.parse(productFileContent), require(this._productPath));
+    const productInformation: Product = merge(JSON.parse(productFileContent), require(this._productPath));
     const workspacesInformation: any = require(this._workspacesPath);
 
     this._appConfig = merge(getDefaultConfig(process.platform), {
@@ -92,7 +92,7 @@ export class ConfigService implements IConfigService {
       showInsecureUrlPrompt: productInformation.showInsecureUrlPrompt,
       biometricsProtectedFiles: [],
       protectWindowsFromCapture: productInformation.protectWindowsFromCapture
-    } as IAppConfig);
+    } as Configuration);
 
     ipcMain.handle(IpcChannel.GetAppConfig, async () => {
       const paths = await this._nativeApiService.listCredentials();
@@ -101,14 +101,14 @@ export class ConfigService implements IConfigService {
       return this.appConfig;
     });
 
-    ipcMain.on(IpcChannel.ConfigChanged, (_: IpcMainEvent, config: Partial<IAppConfig>) => {
+    ipcMain.on(IpcChannel.ConfigChanged, (_: IpcMainEvent, config: Partial<Configuration>) => {
       this.set(config);
     })
   }
 
-  set(settings: Partial<IAppConfig>) {
+  set(settings: Partial<Configuration>) {
     this._appConfig = { ...this._appConfig, ...settings };
-    const excludedKeys: (keyof IAppConfig)[] = [
+    const excludedKeys: (keyof Configuration)[] = [
       'schemaVersion',
       'version',
       'electronVersion',
@@ -120,7 +120,7 @@ export class ConfigService implements IConfigService {
       'workspaces',
       'e2eFilesPath'
     ];
-    writeFileSync(this._productPath, JSON.stringify(this._appConfig, (key: keyof IAppConfig, value) => {
+    writeFileSync(this._productPath, JSON.stringify(this._appConfig, (key: keyof Configuration, value) => {
       if (excludedKeys.includes(key)) {
         return undefined;
       }

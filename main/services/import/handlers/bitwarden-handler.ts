@@ -5,7 +5,7 @@ import { IWindowService } from '../../window';
 import { CsvDataImporter } from './csv-data-importer';
 import { TYPE_DEF } from './type-definition';
 
-interface IBitwardenEntry {
+type IBitwardenEntry = {
   folder: string;
   favorite: number;
   type: string;

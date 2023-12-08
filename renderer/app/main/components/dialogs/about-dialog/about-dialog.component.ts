@@ -4,7 +4,7 @@ import { ModalRef, UpdateService, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { IAppConfig } from '@config/app-config';
+import { Configuration } from '@config/configuration';
 import { IpcChannel, UpdateState } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
@@ -25,7 +25,7 @@ export class AboutDialogComponent implements IModal, OnInit {
   public readonly ref!: ComponentRef<AboutDialogComponent>;
   public readonly additionalData!: IAdditionalData;
   public readonly updateState = UpdateState;
-  public config: IAppConfig;
+  public config: Configuration;
 
   private readonly configService = inject(ConfigService);
   private readonly modalRef = inject(ModalRef);
@@ -47,7 +47,7 @@ export class AboutDialogComponent implements IModal, OnInit {
 
   ngOnInit() {
     this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
-      this.config = config as IAppConfig;
+      this.config = config as Configuration;
     });
   }
   

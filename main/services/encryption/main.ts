@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { IPasswordEntry, VaultSchema } from '../../../shared';
+import { PasswordEntry, VaultSchema } from '../../../shared';
 import { IExposedPasswordsService } from '../exposed-passwords/exposed-passwords-service.model';
 import { ExposedPasswordsService } from '../exposed-passwords/exposed-passwords.service';
 import { MockExposedPasswordsService } from '../exposed-passwords/mock-exposed-passwords.service';
@@ -204,7 +204,7 @@ class Main {
 
   public bulkDecryptString(event: EventPayload) {
     const { rows } = event;
-    let decrypted: IPasswordEntry[] = JSON.parse(rows);
+    let decrypted: PasswordEntry[] = JSON.parse(rows);
     decrypted = decrypted.map(x => ({ ...x, password: this._inMemoryEncryptionService.decryptString(x.password, process.env.ENCRYPTION_KEY) }));
     process.send({ decrypted });
   }

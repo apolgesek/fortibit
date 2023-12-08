@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, } from 'rxjs';
 import { MenuItemDirective } from '../directives/menu-item.directive';
-import { IMenuStateChange } from '../models/menu-state-change.model';
+import { MenuStateChange } from '../models/menu-state-change.model';
 
 @Injectable()
 export class DropdownStateService {
@@ -11,11 +11,11 @@ export class DropdownStateService {
   public parent: DropdownStateService;
   public child: DropdownStateService;
 
-  public readonly stateChanges$: Observable<IMenuStateChange>;
+  public readonly stateChanges$: Observable<MenuStateChange>;
   public readonly focusFirstItem$: Observable<void>;
 
-  private readonly _stateChangesSource: BehaviorSubject<IMenuStateChange> =
-    new BehaviorSubject({ isOpen: false, notifyChanges: false });
+  private readonly _stateChangesSource: BehaviorSubject<MenuStateChange> =
+    new BehaviorSubject({ isOpen: false });
   private readonly _focusFirstSource: Subject<void> = new Subject();
 
   constructor() {
@@ -27,12 +27,12 @@ export class DropdownStateService {
     return this._stateChangesSource.value.isOpen;
   }
 
-  open(notifyChanges = true): void {
-    this._stateChangesSource.next({ isOpen: true, notifyChanges });
+  open(): void {
+    this._stateChangesSource.next({ isOpen: true });
   }
 
-  close(notifyChanges = true): void {
-    this._stateChangesSource.next({ isOpen: false, notifyChanges });
+  close(): void {
+    this._stateChangesSource.next({ isOpen: false });
   }
 
   closeRecursive(node: DropdownStateService) {

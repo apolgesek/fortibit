@@ -41,12 +41,12 @@ export class Win32ApiService implements INativeApiService {
     return NativeCore.getInstance().getActiveWindowTitle();
   }
 
-  setLivePreviewBitmap(handle: Buffer, path: string): number {
-    return NativeCore.getInstance().setLivePreviewBitmap(handle, path);
+  setLivePreviewBitmap(handle: Buffer, path: string, theme: 'dark' | 'light'): number {
+    return NativeCore.getInstance().setLivePreviewBitmap(handle, path, theme);
   }
 
-  setThumbnailBitmap(handle: Buffer, path: string): number {
-    return NativeCore.getInstance().setThumbnailBitmap(handle, path);
+  setThumbnailBitmap(handle: Buffer, path: string, theme: 'dark' | 'light'): number {
+    return NativeCore.getInstance().setThumbnailBitmap(handle, path, theme);
   }
 
   setIconicBitmap(handle: Buffer): number {

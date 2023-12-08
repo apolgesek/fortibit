@@ -1,6 +1,6 @@
 import { Page } from "playwright";
 
-interface IEntryModel {
+type IEntryModel = {
   title?: string;
   username?: string;
   config?: { close: true };

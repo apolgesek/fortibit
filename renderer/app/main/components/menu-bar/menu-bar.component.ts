@@ -188,7 +188,7 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
   async lock() {
     const success = this.workspaceService.executeEvent();
     if (success) {
-      this.workspaceService.lock({ minimize: true });
+      this.workspaceService.lock();
     }
   }
 

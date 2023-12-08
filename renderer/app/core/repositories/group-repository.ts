@@ -1,4 +1,4 @@
-import { IEntryGroup } from '@shared-renderer/entry-group';
+import { EntryGroup } from '@shared-renderer/entry-group';
 import { DbManager } from '../database/db-manager';
 import { GroupId } from '../enums';
 import { IGroupRepository } from './index';
@@ -6,27 +6,27 @@ import { IGroupRepository } from './index';
 export class GroupRepository implements IGroupRepository {
   constructor(private readonly db: DbManager) {}
 
-  getAll(): Promise<IEntryGroup[]> {
+  getAll(): Promise<EntryGroup[]> {
     return this.db.context.transaction('r', this.db.groups,
       () => this.db.groups.toArray());
   }
 
-  get(id: number): Promise<IEntryGroup | undefined> {
+  get(id: number): Promise<EntryGroup | undefined> {
     return this.db.context.transaction('r', this.db.groups,
       () => this.db.groups.get(id));
   }
 
-  bulkAdd(items: IEntryGroup[]): Promise<number> {
+  bulkAdd(items: EntryGroup[]): Promise<number> {
     return this.db.context.transaction('rw', this.db.groups,
       () => this.db.groups.bulkAdd(items));
   }
 
-  add(item: IEntryGroup): Promise<number> {
+  add(item: EntryGroup): Promise<number> {
     return this.db.context.transaction('rw', this.db.groups,
       () => this.db.groups.add(item));
   }
 
-  update(item: IEntryGroup): Promise<number> {
+  update(item: EntryGroup): Promise<number> {
     return this.db.context.transaction('rw', this.db.groups,
       () => this.db.groups.update(item, {...item}));
   }

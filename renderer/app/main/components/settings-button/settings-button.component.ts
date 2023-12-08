@@ -3,7 +3,6 @@ import { Component, DestroyRef, Inject, NgZone, OnDestroy, OnInit } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IHotkeyHandler, IMessageBroker } from '@app/core/models';
 import { ModalService } from '@app/core/services';
-import { HotkeyLabel } from '@app/core/services/hotkey/hotkey-label';
 import { slideDown } from '@app/shared';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
@@ -16,7 +15,7 @@ import { FeatherModule } from 'angular-feather';
 import { HotkeyHandler, MessageBroker } from 'injection-tokens';
 import { Observable, Subject, scan, startWith } from 'rxjs';
 
-interface INotification {
+type Notification = {
   type: 'update' | 'warning';
   content: string;
 }
@@ -41,10 +40,10 @@ interface INotification {
   ]
 })
 export class SettingsButtonComponent implements OnInit, OnDestroy {
-  public readonly notifications$: Observable<INotification[]>;
+  public readonly notifications$: Observable<Notification[]>;
   public updateAvailable = '';
   public settingsLabel: string;
-  private readonly notificationsSource = new Subject<INotification>();
+  private readonly notificationsSource = new Subject<Notification>();
   private updateListener: (event: any, state: UpdateState, version: string) => void;
 
   constructor(
@@ -56,7 +55,7 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
   ) {
     this.notifications$ = this.notificationsSource.asObservable()
       .pipe(
-        scan((acc, n: INotification) => {
+        scan((acc, n: Notification) => {
           const updateNotificationIndex = acc.findIndex(x => x.type === 'update');
 
           if (updateNotificationIndex > -1 && n.type === 'update') {
@@ -66,7 +65,7 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
           }
 
           return acc;
-        }, [] as INotification[]),
+        }, [] as Notification[]),
         startWith([]),
         takeUntilDestroyed(this.destroyRef)
       );
@@ -102,7 +101,7 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
     this.messageBroker.ipcRenderer.off(IpcChannel.UpdateState, this.updateListener);
   }
 
-  getNotificationTypeColor(notifications: INotification[]): 'update' | 'mixed' {
+  getNotificationTypeColor(notifications: Notification[]): 'update' | 'mixed' {
     if (notifications.length === 1 && notifications[0].type === 'update') {
       return 'update';
     } else {

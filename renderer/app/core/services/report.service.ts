@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { IReport, IpcChannel } from '@shared-renderer/index';
+import { Report, IpcChannel } from '@shared-renderer/index';
 import { exportDB } from 'dexie-export-import';
 import { MessageBroker } from 'injection-tokens';
 import { DbManager } from '../database';
@@ -99,13 +99,13 @@ export class ReportService {
     return { report, entries: reportedEntries };
   }
 
-  async addReport(report: Partial<IReport>): Promise<number> {
+  async addReport(report: Partial<Report>): Promise<number> {
     const reports = await this.reportManager.getAllByPredicate(x => x.type === report.type);
 
     if (reports.length >= 1) {
       await this.reportManager.delete(reports.shift().id);
     }
 
-    return this.reportManager.add(report as IReport);
+    return this.reportManager.add(report as Report);
   }
 }

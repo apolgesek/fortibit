@@ -2,16 +2,16 @@ import { getDefaultPath, getFileFilter } from '@root/main/util';
 import { dialog } from 'electron';
 import { XMLParser } from 'fast-xml-parser';
 import { readFileSync } from 'fs-extra';
-import { IPasswordEntry, ImportHandler } from '../../../../shared';
+import { PasswordEntry, ImportHandler } from '../../../../shared';
 import { IConfigService } from '../../config';
 import { IEncryptionEventWrapper, MessageEventType } from '../../encryption';
 import { IWindowService } from '../../window';
 import { IImportHandler } from '../import-handler.model';
-import { IImportMetadata } from './import-metadata.model';
+import { ImportMetadata } from './import-metadata.model';
 
 export abstract class XmlDataImporter implements IImportHandler {
   protected abstract readonly handlerType: ImportHandler;
-  protected abstract readonly mapFn: (data: any) => Partial<IPasswordEntry>[];
+  protected abstract readonly mapFn: (data: any) => Partial<PasswordEntry>[];
 
   constructor(
     protected readonly _windowService: IWindowService,
@@ -20,7 +20,7 @@ export abstract class XmlDataImporter implements IImportHandler {
   ) {
   }
 
-  async getMetadata(): Promise<IImportMetadata> {
+  async getMetadata(): Promise<ImportMetadata> {
     const fileObj = await dialog.showOpenDialog({
       properties: ['openFile'],
       defaultPath: getDefaultPath(this._configService.appConfig, ''),

@@ -180,13 +180,15 @@ namespace NativeCore
     Isolate *isolate = args.GetIsolate();
 
     char *buffer = node::Buffer::Data(args[0]);
-    v8::String::Utf8Value str(isolate, args[1]);
-    std::string path = *str;
+    v8::String::Utf8Value pathStr(isolate, args[1]);
+    v8::String::Utf8Value themeStr(isolate, args[2]);
+    std::string path = *pathStr;
+    std::string theme = *themeStr;
 
     HWND win = static_cast<HWND>(*reinterpret_cast<void **>(buffer));
 
     HRESULT result = E_FAIL;
-    HBITMAP hbmp = CreateDIB(ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT, path);
+    HBITMAP hbmp = CreateDIB(ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH, ICON_HEIGHT, path, theme);
 
     if (hbmp)
     {
@@ -202,8 +204,10 @@ namespace NativeCore
     Isolate *isolate = args.GetIsolate();
 
     char *buffer = node::Buffer::Data(args[0]);
-    v8::String::Utf8Value str(isolate, args[1]);
-    std::string path = *str;
+    v8::String::Utf8Value pathStr(isolate, args[1]);
+    v8::String::Utf8Value themeStr(isolate, args[2]);
+    std::string path = *pathStr;
+    std::string theme = *themeStr;
 
     HWND win = static_cast<HWND>(*reinterpret_cast<void **>(buffer));
     HRESULT result = E_FAIL;
@@ -243,7 +247,7 @@ namespace NativeCore
       int winWidth = rcClient.right - rcClient.left;
       int winHeight = rcClient.bottom - rcClient.top;
 
-      HBITMAP hbm = CreateDIB(winWidth, winHeight, ICON_WIDTH, ICON_HEIGHT, path);
+      HBITMAP hbm = CreateDIB(winWidth, winHeight, ICON_WIDTH, ICON_HEIGHT, path, theme);
       if (hbm)
       {
         result = DwmSetIconicLivePreviewBitmap(win, hbm, NULL, 0);

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { Configuration } from '@root/configuration';
 import { IpcChannel } from '@shared-renderer/index';
 import { randomBytes } from 'crypto';
 import { app, BrowserWindow, ipcMain, IpcMainEvent, nativeImage, nativeTheme, powerMonitor, safeStorage, screen } from 'electron';
@@ -11,13 +12,12 @@ import { INativeApiService } from '../native';
 import { IPerformanceService } from '../performance/performance-service.model';
 import { IWindowService } from './';
 import { IWindow } from './window-model';
-import { IAppConfig } from '@root/app-config';
 
 const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
 const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
 
 const formatURL = (urlObject: UrlObject) => String(Object.assign(new URL('http://localhost'), urlObject));
-const zoomLevels = [0.25,0.33,0.5,0.67,0.75,0.8,0.9,1,1.1,1.25,1.5,1.75,2,2.5,3];
+const zoomLevels = [0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3];
 
 export class WindowService implements IWindowService {
   private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
@@ -44,9 +44,9 @@ export class WindowService implements IWindowService {
       win.browserWindow.close();
     });
 
-    ipcMain.on(IpcChannel.Lock, (event: IpcMainEvent) => {
-      this.onLock(event.sender.id);
-    });
+    // ipcMain.on(IpcChannel.Lock, (event: IpcMainEvent) => {
+    //   this.onLock(event.sender.id);
+    // });
 
     ipcMain.on(IpcChannel.Unlock, (event: IpcMainEvent) => {
       this.onUnlock(event.sender.id);
@@ -105,7 +105,7 @@ export class WindowService implements IWindowService {
       return fullscreenMode;
     });
 
-    ipcMain.handle(IpcChannel.ChangeWindowsCaptureProtection, (event: IpcMainEvent, config: Partial<IAppConfig>) => {
+    ipcMain.handle(IpcChannel.ChangeWindowsCaptureProtection, (event: IpcMainEvent, config: Partial<Configuration>) => {
       const win = this._windows.find(x => x.browserWindow.webContents.id === event.sender.id);
 
       if (config.protectWindowsFromCapture !== this._configService.appConfig.protectWindowsFromCapture) {
@@ -116,10 +116,10 @@ export class WindowService implements IWindowService {
     ipcMain.handle(IpcChannel.ToggleTheme, () => {
       if (nativeTheme.shouldUseDarkColors) {
         nativeTheme.themeSource = 'light';
-        this._configService.set({theme: 'light'});
+        this._configService.set({ theme: 'light' });
       } else {
         nativeTheme.themeSource = 'dark';
-        this._configService.set({theme: 'dark'});
+        this._configService.set({ theme: 'dark' });
       }
 
       if (this._configService.appConfig.theme === 'light') {
@@ -127,6 +127,16 @@ export class WindowService implements IWindowService {
       } else {
         this.windows.forEach(w => w.browserWindow.setTitleBarOverlay({ color: '#191d1e', symbolColor: '#dadada' }));
       }
+
+      this.windows.forEach(w => {
+        if (w.key == null) {
+          this._nativeApiService.setThumbnailBitmap(
+            w.browserWindow.getNativeWindowHandle(),
+            this.getThumbnailIconPath(),
+            this._configService.appConfig.theme
+          );        
+        }
+      });
 
       return nativeTheme.shouldUseDarkColors;
     });
@@ -178,10 +188,6 @@ export class WindowService implements IWindowService {
       window.webContents.send(IpcChannel.MaximizedRestored, false);
     });
 
-    if (this._configService.appConfig.protectWindowsFromCapture) {
-      this._nativeApiService.setWindowAffinity(window.getNativeWindowHandle(), true);
-    }
-
     this._windows.push({ browserWindow: window, key: null });
 
     // log performance only for the first window when the app initializes
@@ -219,10 +225,6 @@ export class WindowService implements IWindowService {
     window.once('closed', () => {
       this.removeWindow(window);
     })
-
-    if (this._configService.appConfig.protectWindowsFromCapture) {
-      this._nativeApiService.setWindowAffinity(window.getNativeWindowHandle(), true);
-    }
     
     this._windows.push({ browserWindow: window, key: null });
     return window;
@@ -273,7 +275,11 @@ export class WindowService implements IWindowService {
     return safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(key).toString('base64') : key;
   }
 
-  private onLock(windowId: number) {
+  private getThumbnailIconPath(): string {
+    return join(app.getAppPath(), 'assets', `icon-${this._configService.appConfig.theme}.bmp`);
+  }
+
+  onLock(windowId: number): void {
     const win = this.getWindowByWebContentsId(windowId);
     win.key = null;
 
@@ -296,6 +302,10 @@ export class WindowService implements IWindowService {
   }
 
   private enablePreviewFeatures(win: IWindow): void {
+    if (win?.browserWindow?.isDestroyed()) {
+      return;
+    }
+    
     win.browserWindow.setOverlayIcon(null, '');
     win.browserWindow.unhookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP);
     win.browserWindow.unhookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP);
@@ -303,21 +313,24 @@ export class WindowService implements IWindowService {
   }
 
   private disablePreviewFeatures(win: IWindow): void {
+    if (win?.browserWindow?.isDestroyed()) {
+      return;
+    }
+    
     const appIcon = nativeImage.createFromPath(join(global['__basedir'], 'assets', 'forbidden.png'));
     win.browserWindow.setOverlayIcon(appIcon, 'Database locked');
 
     const windowHandle = win.browserWindow.getNativeWindowHandle();
     this._nativeApiService.setIconicBitmap(windowHandle);
     
-    const iconPath = join(app.getAppPath(), 'assets', 'icon.bmp');
-    this._nativeApiService.setThumbnailBitmap(windowHandle, iconPath);
+    this._nativeApiService.setThumbnailBitmap(windowHandle, this.getThumbnailIconPath(), this._configService.appConfig.theme);
 
     win.browserWindow.hookWindowMessage(WM_SENDICONICTHUMBNAILBITMAP, () => {
-      this._nativeApiService.setThumbnailBitmap(windowHandle, iconPath);
+      this._nativeApiService.setThumbnailBitmap(windowHandle, this.getThumbnailIconPath(), this._configService.appConfig.theme);
     });
 
     win.browserWindow.hookWindowMessage(WM_DWMSENDICONICLIVEPREVIEWBITMAP, () => {
-      this._nativeApiService.setLivePreviewBitmap(windowHandle, iconPath);
+      this._nativeApiService.setLivePreviewBitmap(windowHandle, this.getThumbnailIconPath(), this._configService.appConfig.theme);
     });
   }
 
@@ -363,6 +376,10 @@ export class WindowService implements IWindowService {
     window.webContents.on('will-navigate', (e) => {
       e.preventDefault();
     });
+
+    if (this._configService.appConfig.protectWindowsFromCapture) {
+      this._nativeApiService.setWindowAffinity(window.getNativeWindowHandle(), true);
+    }
 
     return window;
   }

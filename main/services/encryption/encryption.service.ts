@@ -25,7 +25,7 @@ export class EncryptionService implements IEncryptionService {
     // Create buffers of salt and ciphertextAndNonce.
     const salt = ciphertextAndNonceAndSalt.subarray(0, KDF_SALT_SIZE);
     const ciphertextAndNonce = ciphertextAndNonceAndSalt.subarray(KDF_SALT_SIZE);
-    // Derive the key using PBKDF2.
+    // Derive the key using scrypt.
     const key = this.createKeyFromPassword(password, salt);
     
     // Decrypt and return result.

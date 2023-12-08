@@ -1,8 +1,8 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ConfigService, WorkspaceService } from '@app/core/services';
-import { IProduct } from '@config/product';
+import { Product } from '@config/product';
 import { FeatherModule } from 'angular-feather';
 import { take } from 'rxjs';
 
@@ -17,20 +17,27 @@ import { take } from 'rxjs';
   ]
 })
 export class ViewTabComponent implements OnInit {
-  public viewForm: FormGroup;
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly _viewForm = this.formBuilder.group({
+    darkTheme: [false],
+    displayIcons: [false]
+  });
+
+  get viewForm() {
+    return this._viewForm;
+  }
 
   constructor(
     private readonly destroyRef: DestroyRef,
-    private readonly formBuilder: FormBuilder,
     private readonly workspaceService: WorkspaceService,
     private readonly configService: ConfigService,
   ) { }
 
   ngOnInit(): void {
     this.configService.configLoadedSource$.pipe(take(1)).subscribe((config) => {
-      this.viewForm = this.formBuilder.group({
-        darkTheme: [config.theme === 'dark'],
-        displayIcons: [config.displayIcons]
+      this.viewForm.setValue({
+        darkTheme: config.theme === 'dark',
+        displayIcons: config.displayIcons
       });
 
       this.viewForm.valueChanges
@@ -41,13 +48,13 @@ export class ViewTabComponent implements OnInit {
             const configPartial = {
               displayIcons: form.displayIcons,
               theme: form.darkTheme ? 'dark' : 'light'
-            } as Partial<IProduct>;
+            } as Partial<Product>;
 
             this.configService.setConfig(configPartial);
           }
         });
 
-      this.viewForm.get('darkTheme').valueChanges
+      this.viewForm.controls.darkTheme.valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           this.toggleTheme();

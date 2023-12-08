@@ -1,7 +1,7 @@
 import { CsvWriter, getDefaultPath, getFileFilter } from "@root/main/util";
 import { stringify } from "csv-stringify/sync";
 import { dialog } from "electron";
-import { IPasswordEntry } from "../../../shared";
+import { PasswordEntry } from "../../../shared";
 import { IConfigService } from "../config";
 import { IEncryptionEventWrapper, MessageEventType } from "../encryption";
 import { IWindow } from "../window/window-model";
@@ -33,7 +33,7 @@ export class ExportService implements IExportService {
       type: MessageEventType.BulkDecryptString
     };
 
-    const payload = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, window.key) as { error: string, decrypted: IPasswordEntry[] };
+    const payload = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, window.key) as { error: string, decrypted: PasswordEntry[] };
     CsvWriter.writeFile(saveDialogReturnValue.filePath, payload.decrypted, ['title', 'username', 'password', 'url', 'notes']);
   
     return true;

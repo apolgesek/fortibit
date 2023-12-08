@@ -22,6 +22,9 @@
       <li *ngIf="updateAvailable" appMenuItem (activate)="openAboutWindow()" class="update-btn">
         Update is available <span class="version">{{ updateAvailable }}</span>
       </li>
+      <li *ngIf="!updateAvailable" appMenuItem [disabled]="true">
+        No updates available
+      </li>
       <li appMenuItem (activate)="openSettings()">{{ settingsLabel }}</li>
     </ul>
   </div>

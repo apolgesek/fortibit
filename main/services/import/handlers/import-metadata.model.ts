@@ -1,6 +1,6 @@
 import { ImportHandler } from "../../../../shared";
 
-export interface IImportMetadata {
+export type ImportMetadata = {
   filePath: string;
   size: number;
   type: ImportHandler;

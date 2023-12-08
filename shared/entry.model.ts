@@ -1,4 +1,4 @@
-export interface IEntry {
+export type Entry = {
   id: number;
 	groupId: number;
   creationDate: Date | number;

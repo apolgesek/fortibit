@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectorRef, Component, ComponentRef, DestroyRef, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupId } from '@app/core/enums';
 import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -11,20 +11,20 @@ import { DateMaskDirective } from '@app/shared/directives/date-mask.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
-import { IAppConfig } from '@config/app-config';
-import { IHistoryEntry, IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { Configuration } from '@config/configuration';
+import { HistoryEntry, PasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { fromEvent } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import * as zxcvbn from 'zxcvbn';
 
-export interface IEntryDialogDataPayload {
+export type EntryDialogDataPayload = {
   decryptedPassword: string;
   config?: {
     readonly: boolean
   };
-  historyEntry?: IHistoryEntry;
+  historyEntry?: HistoryEntry;
 }
 
 @Component({
@@ -46,20 +46,18 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   @ViewChild('entryForm') entryForm: ElementRef;
   @ViewChildren('passwordInput') passwordInputs: QueryList<ElementRef>;
 
-  public newEntryForm: FormGroup;
   public passwordScore = -1;
-  public config: IAppConfig;
+  public config: Configuration;
   public saveLocked = false;
   public isVisible = true;
   public isReadOnly = false;
   public passwordVisible = false;
 
   public readonly ref!: ComponentRef<EntryDialogComponent>;
-  public readonly additionalData!: IAdditionalData<IEntryDialogDataPayload>;
+  public readonly additionalData!: IAdditionalData<EntryDialogDataPayload>;
   public readonly isControlInvalid = isControlInvalid;
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly fb = inject(FormBuilder);
   private readonly messageBroker = inject(MessageBroker);
   private readonly configService = inject(ConfigService);
   private readonly clipboardService = inject(ClipboardService);
@@ -68,8 +66,27 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   private readonly groupManager = inject(GroupManager);
   private readonly notificationService = inject(NotificationService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly fb = inject(FormBuilder);
+
+  private readonly _newEntryForm = this.fb.group({
+    id: [null],
+    title: ['', Validators.required],
+    username: [''],
+    passwords: this.fb.group({
+      password: ['', Validators.required],
+      repeatPassword: [''],
+    }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
+    url: [''],
+    notes: [''],
+    autotypeExp: [''],
+    creationDate: [null as number | Date],
+  });
 
   private lastTrigger: 'click' | 'keydown';
+
+  get newEntryForm() {
+    return this._newEntryForm;
+  }
 
   get header(): string {
     if (this.entryManager.editedEntry) {
@@ -92,19 +109,15 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   }
 
   get passwordLength(): number {
-    return this.newEntryForm.get('passwords.password')?.value?.length;
+    return this.newEntryForm.controls.passwords.controls.password?.value?.length;
   }
 
-  get passwordsGroup(): FormGroup {
-    return this.newEntryForm.get('passwords') as FormGroup;
+  get passwordsGroup() {
+    return this.newEntryForm.controls.passwords;
   }
 
-  get title(): FormControl {
-    return this.newEntryForm.get('title') as FormControl;
-  }
-
-  get expirationDate(): FormControl {
-    return this.newEntryForm.get('expirationDate') as FormControl;
+  get title() {
+    return this.newEntryForm.controls.title;
   }
 
   ngOnInit() {
@@ -115,21 +128,10 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
       this.config = config;
       const passwordMask = new Array(this.additionalData?.payload.decryptedPassword?.length
-        ?? Math.ceil(this.config.encryption.passwordLength / 2)).fill('*');
+        ?? Math.ceil(this.config.encryption.passwordLength / 2)).fill('*').join('');
 
-      this.newEntryForm = this.fb.group({
-        id: [null],
-        title: [null, Validators.required],
-        username: [null],
-        passwords: this.fb.group({
-          password: [passwordMask, Validators.required],
-          repeatPassword: [passwordMask],
-        }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
-        url: [null],
-        notes: [null],
-        autotypeExp: [null],
-        creationDate: [null],
-      });
+      this.newEntryForm.controls.passwords.controls.password.patchValue(passwordMask);
+      this.newEntryForm.controls.passwords.controls.repeatPassword.patchValue(passwordMask);
 
       this.prefillForm();
     });
@@ -198,7 +200,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
   }
 
   async delete() {
-    const historyEntry = this.additionalData.payload.historyEntry as IHistoryEntry;
+    const historyEntry = this.additionalData.payload.historyEntry as HistoryEntry;
     await this.entryManager.deleteEntryHistory(historyEntry.id, historyEntry.entry);
     this.notificationService.add({ message: 'History entry removed', type: 'success', alive: 10 * 1000  });
     this.close();
@@ -346,7 +348,7 @@ export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDe
     });
   }
 
-  private isSame(formData, entry: IPasswordEntry): boolean {
+  private isSame(formData, entry: PasswordEntry): boolean {
     return formData.title === entry.title
       && formData.username === entry.username
       && formData.passwords.password === this.additionalData.payload.decryptedPassword

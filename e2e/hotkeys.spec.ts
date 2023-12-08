@@ -13,8 +13,9 @@ test.describe('Hotkeys after auth', async () => {
   test.beforeEach(async () => {
     app = await electron.launch({ args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`], colorScheme: 'dark', env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' } });
     firstWindow = await app.firstWindow();
+    await app.waitForEvent('window');
     await authenticate(firstWindow);
-    await firstWindow.getByRole('banner').waitFor({ state: 'visible' });
+    await firstWindow.getByRole('main').waitFor({ state: 'visible' });
   });
 
   test.afterEach(async () => {
@@ -22,14 +23,14 @@ test.describe('Hotkeys after auth', async () => {
   });
 
   test('Check open new entry modal', async () => {
-    await firstWindow.keyboard.press('Control+I');
+    await firstWindow.keyboard.press('Control+N');
     await firstWindow.getByText(/add entry in general/i).waitFor({ state: 'visible' });
   });
 
   test('Check open edit entry modal', async () => {
     await addEntry(firstWindow, { config: { close: true } });
     await firstWindow.getByText(/username1/i).click();
-    await firstWindow.keyboard.press('E');
+    await firstWindow.keyboard.press('Control+E');
     await firstWindow.getByText(/edit entry in general/i).waitFor({ state: 'visible' });
   });
 
@@ -85,7 +86,7 @@ test.describe('Hotkeys before auth', async () => {
   });
 
   test('Check should not open new entry modal', async () => {
-    await firstWindow.keyboard.press('Control+I');
+    await firstWindow.keyboard.press('Control+N');
     const dialog = firstWindow.getByRole('dialog');
 
     expect(dialog).not.toBeAttached();

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ReportType } from '@app/core/enums';
 import { Subject } from 'rxjs';
-import { IReport } from '../../../../../shared';
+import { Report } from '../../../../../shared';
 import { DbManager } from '../../database/db-manager';
 import { ReportRepository } from '../../repositories/report-repository';
 import { PredicateFn } from '../../repositories/report-repository.model';
@@ -11,15 +11,15 @@ export class ReportManager {
   public readonly markDirtySource: Subject<void> = new Subject();
   private readonly reportRepository: ReportRepository = new ReportRepository(inject(DbManager));
 
-  async getAllByPredicate(fn: PredicateFn): Promise<IReport[] | undefined> {
+  async getAllByPredicate(fn: PredicateFn): Promise<Report[] | undefined> {
     return this.reportRepository.getAllByPredicate(fn);
   }
 
-  async getLastReport(type: ReportType): Promise<IReport> {
+  async getLastReport(type: ReportType): Promise<Report> {
     return this.reportRepository.getLastReport(type);
   }
 
-  async add(item: IReport): Promise<number> {
+  async add(item: Report): Promise<number> {
     this.markDirty();
     return this.reportRepository.add(item);
   }

@@ -1,8 +1,8 @@
 /* eslint-disable @angular-eslint/no-output-native */
 /* eslint-disable @angular-eslint/no-output-rename */
 /* eslint-disable @angular-eslint/no-output-on-prefix */
-import { AfterViewInit, ContentChildren, DestroyRef, Directive, ElementRef, EventEmitter, HostBinding, Input, OnDestroy, Optional, Output, QueryList, SkipSelf } from '@angular/core';
-import { animationFrameScheduler, filter, fromEvent, observeOn, Subject, takeUntil } from 'rxjs';
+import { AfterViewInit, ContentChildren, DestroyRef, Directive, ElementRef, EventEmitter, HostBinding, Input, Optional, Output, QueryList, SkipSelf } from '@angular/core';
+import { animationFrameScheduler, fromEvent, observeOn, Subject, takeUntil } from 'rxjs';
 import { DropdownStateService } from '../services/dropdown-state.service';
 import { MenuService } from '../services/menu.service';
 import { MenuItemDirective } from './menu-item.directive';
@@ -22,6 +22,7 @@ export class DropdownDirective implements AfterViewInit {
 
   @ContentChildren(MenuItemDirective, { descendants: true })
   public menuItems: QueryList<MenuItemDirective>;
+  
   private dropdownClosed: Subject<void> = new Subject();
   private _index: number;
 
@@ -64,7 +65,6 @@ export class DropdownDirective implements AfterViewInit {
     this.dropdownState.stateChanges$
       .pipe(
         observeOn(animationFrameScheduler),
-        filter(x => x.notifyChanges),
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(state => {
         if (state.isOpen) {

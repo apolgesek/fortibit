@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, Inject, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { IMessageBroker } from '@app/core/models';
 import { ConfigService, WorkspaceService } from '@app/core/services';
-import { IProduct } from '@config/product';
+import { Product } from '@config/product';
 import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
@@ -22,16 +22,23 @@ import { take } from 'rxjs';
   styleUrls: ['./integration-tab.component.scss']
 })
 export class IntegrationTabComponent implements OnInit {
-  public integrationForm: FormGroup;
   public isBiometricsEnabledForCurrentDatabase = false;
   public credentialButtonDisabled = false;
   public isUnlocked = false;
+
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly _integrationForm = this.formBuilder.group({
+    biometricsAuthenticationEnabled: [false],
+  });
+
+  get integrationForm() {
+    return this._integrationForm;
+  }
 
   constructor(
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly workspaceService: WorkspaceService,
     private readonly destroyRef: DestroyRef,
-    private readonly formBuilder: FormBuilder,
     private readonly configService: ConfigService,
   ) { }
 
@@ -44,9 +51,6 @@ export class IntegrationTabComponent implements OnInit {
       this.isUnlocked = !this.workspaceService.isLocked;
       this.isBiometricsEnabledForCurrentDatabase = this.isUnlocked
         && config.biometricsProtectedFiles.includes(this.workspaceService.file?.filePath);
-      this.integrationForm = this.formBuilder.group({
-        biometricsAuthenticationEnabled: [config.biometricsAuthenticationEnabled],
-      });
     });
 
     this.integrationForm.valueChanges
@@ -56,7 +60,7 @@ export class IntegrationTabComponent implements OnInit {
         if (this.integrationForm.valid) {
           const configPartial = {
             biometricsAuthenticationEnabled: form.biometricsAuthenticationEnabled,
-          } as Partial<IProduct>;
+          } as Partial<Product>;
 
           this.configService.setConfig(configPartial);
         }

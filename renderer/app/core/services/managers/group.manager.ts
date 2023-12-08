@@ -2,14 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { DbManager, initialEntries } from '@app/core/database';
 import { GroupId } from '@app/core/enums';
 import { GroupRepository } from '@app/core/repositories';
-import { IEntryGroup } from '@shared-renderer/entry-group';
+import { EntryGroup } from '@shared-renderer/entry-group';
 import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class GroupManager {
   public readonly markDirtySource: Subject<void> = new Subject();
-  public groups: IEntryGroup[] = [];
-  public builtInGroups: IEntryGroup[] = [];
+  public groups: EntryGroup[] = [];
+  public builtInGroups: EntryGroup[] = [];
   public selectedGroup?: number;
   public selectedGroupName?: string;
   public contextSelectedGroup?: number;
@@ -24,11 +24,11 @@ export class GroupManager {
       && selectedCategoryId !== GroupId.Starred;
   }
 
-  async getAll(): Promise<IEntryGroup[]> {
+  async getAll(): Promise<EntryGroup[]> {
     return this.groupRepository.getAll();
   }
 
-  async get(id: number): Promise<IEntryGroup> {
+  async get(id: number): Promise<EntryGroup> {
     return this.groupRepository.get(id);
   }
 
@@ -40,7 +40,7 @@ export class GroupManager {
     this.markDirty();
   }
 
-  async updateGroup(group: IEntryGroup) {
+  async updateGroup(group: EntryGroup) {
     await this.groupRepository.update({
       id: group.id,
       name: group.name,
@@ -50,12 +50,12 @@ export class GroupManager {
     this.markDirty();
   }
 
-  async bulkAdd(groups: IEntryGroup[]): Promise<number> {
+  async bulkAdd(groups: EntryGroup[]): Promise<number> {
     return this.groupRepository.bulkAdd(groups);
   }
 
-  async addGroup(model?: Partial<IEntryGroup>): Promise<number> {
-    const newGroup: IEntryGroup = {
+  async addGroup(model?: Partial<EntryGroup>): Promise<number> {
+    const newGroup: EntryGroup = {
       name: model?.name ?? 'New group',
     };
 
@@ -85,7 +85,7 @@ export class GroupManager {
     this.selectedGroup = GroupId.AllItems;
   }
 
-  async getGroupsTree(): Promise<IEntryGroup[]> {
+  async getGroupsTree(): Promise<EntryGroup[]> {
     const builtInGroups = [GroupId.Root, GroupId.AllItems, GroupId.Starred, GroupId.RecycleBin];
     const allGroups = await this.groupRepository.getAll();
 

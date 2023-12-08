@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@angular/core';
 import { NotificationService } from '@app/core/services/notification.service';
-import { IAppConfig } from '@config/app-config';
-import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { Configuration } from '@config/configuration';
+import { PasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
 import { IMessageBroker } from '../models';
 import { ConfigService } from './config.service';
 
-interface ICopyTextModel {
+type CopyText = {
   value: string;
   description: string;
   clearTimeMs: number;
@@ -17,7 +17,7 @@ interface ICopyTextModel {
   providedIn: 'root'
 })
 export class ClipboardService {
-  private config: IAppConfig;
+  private config: Configuration;
   constructor(
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly notificationService: NotificationService,
@@ -28,7 +28,7 @@ export class ClipboardService {
     });
   }
 
-  async copyText(model: ICopyTextModel) {
+  async copyText(model: CopyText) {
     const isCopied = this.messageBroker.ipcRenderer.invoke(IpcChannel.CopyCliboard, model.value);
 
     if (isCopied) {
@@ -41,7 +41,7 @@ export class ClipboardService {
     }
   }
 
-  async copyEntryDetails(entry: IPasswordEntry, property: keyof IPasswordEntry) {
+  async copyEntryDetails(entry: PasswordEntry, property: keyof PasswordEntry) {
     let value = entry[property];
     if (property === 'password') {
       value = await this.messageBroker.ipcRenderer.invoke(IpcChannel.DecryptPassword, entry[property]);

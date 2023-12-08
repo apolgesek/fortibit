@@ -1,24 +1,24 @@
 import { MessageEventType } from "./message-event-type.enum";
 
-interface EventPayload {
+type EventPayload = {
   type: MessageEventType;
 };
 
-interface GetPasswordEvent extends EventPayload {
+type GetPasswordEvent = EventPayload & {
   windowHandleHex: string;
   dbPath: string;
 }
 
-interface SavePasswordEvent extends EventPayload {
+type SavePasswordEvent = EventPayload & {
   password: string;
   dbPath: string;
 }
 
-interface RemovePasswordEvent extends EventPayload {
+type RemovePasswordEvent = EventPayload & {
   dbPath: string;
 }
 
-interface ListPathsEvent extends EventPayload {}
+type ListPathsEvent = EventPayload;
 
 class Main {
   private readonly _messageListener: () => void;

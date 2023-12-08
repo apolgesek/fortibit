@@ -6,15 +6,19 @@ import { ModalService } from "../modal.service";
 import { WorkspaceService } from "../workspace.service";
 import { HotkeyLabel } from "./hotkey-label";
 import { authenticated } from './authenticated-decorator';
+import { noOpenModal } from './no-open-modal-decorator';
 
 export type Action = () => void;
 export type ActionOrActions = Action | Action[];
 
-export interface Config {
-  labelId?: keyof typeof HotkeyLabel;
+type HotkeyLabelKey = keyof typeof HotkeyLabel;
+type HotkeyLabelMap = { [key in HotkeyLabelKey]: string };
+
+export type Config = {
+  labelId?: HotkeyLabelKey;
 }
 
-export interface HotkeyRegister {
+export type HotkeyRegister = {
   [hotkey: string]: {
     actionOrActions: ActionOrActions,
     config: Config
@@ -29,13 +33,17 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
   public hotkeys: HotkeyRegister = {};
   protected abstract keyMap: (event: KeyboardEvent) => string[];
 
-  get hotkeysMap(): { [key in keyof Partial<typeof HotkeyLabel>]: string } {
-    const map = {};
-    Object.keys(HotkeyLabel).forEach(key => {
-      map[key] = this.getHotkeyLabel(key as keyof Partial<typeof HotkeyLabel>);
+  get hotkeysMap(): HotkeyLabelMap {
+    const map = {} as HotkeyLabelMap;
+    Object.keys(HotkeyLabel).forEach((key: HotkeyLabelKey) => {
+      map[key] = this.getHotkeyLabel(key);
     });
 
     return map;
+  }
+
+  get isAnyModalOpen(): boolean {
+    return this.modalService.isAnyModalOpen;
   }
 
   constructor(
@@ -51,10 +59,6 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
   }
 
   intercept(event: KeyboardEvent) {
-    if (this.modalService.isAnyModalOpen) {
-      return;
-    }
-
     if (!this.keyMap) {
       throw new Error('Key mapping is not implemented');
     }
@@ -75,7 +79,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
-  public getContextMenuLabel(label: keyof typeof HotkeyLabel): string {
+  public getContextMenuLabel(label: HotkeyLabelKey): string {
     for (const key in this.hotkeys) {
       if (Object.prototype.hasOwnProperty.call(this.hotkeys, key)) {
         const element = this.hotkeys[key];
@@ -86,6 +90,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public saveDatabase() {    
     if (!this.workspaceService.isSynced) {
@@ -93,6 +98,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public deleteEntry() {
     if (this.entryManager.selectedPasswords.length) {
@@ -100,6 +106,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public deleteGroup() {
     if (this.groupManager.selectedGroup
@@ -109,6 +116,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public renameGroup() {
     if (this.groupManager.selectedGroup && !this.groupManager.builtInGroups.map(x => x.id).includes(this.groupManager.selectedGroup)) {
@@ -116,6 +124,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public editEntry() {
     if (this.entryManager.selectedPasswords.length) {
@@ -123,6 +132,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public moveEntry() {
     if (this.entryManager.selectedPasswords.length) {
@@ -130,6 +140,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public copyPassword() {
     if (this.entryManager.selectedPasswords.length === 1) {
@@ -137,6 +148,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public copyUsername() {
     if (this.entryManager.selectedPasswords.length === 1) {
@@ -144,6 +156,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public addEntry() {
     if (this.groupManager.isAddAllowed) {
@@ -151,11 +164,13 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public addGroup() {
     this.modalService.openGroupWindow();
   }
 
+  @noOpenModal
   @authenticated
   public selectAllEntries() {
     if (this.entryManager.selectedPasswords.length) {
@@ -164,11 +179,13 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     }
   }
 
+  @noOpenModal
   @authenticated
   public findEntries() {
     this.workspaceService.findEntries();
   }
 
+  @noOpenModal
   @authenticated
   public findGlobalEntries() {
     this.workspaceService.findGlobalEntries();
@@ -177,15 +194,17 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
   @authenticated
   public lockDatabase() {
     if (this.workspaceService.file) {
-      this.workspaceService.lock({ minimize: true });
+      this.workspaceService.lock();
     }
   }
 
+  @noOpenModal
   @authenticated
   public openHistory() {
     this.modalService.openEntryHistoryWindow();
   }
 
+  @noOpenModal
   public openSettings() {
     this.modalService.openSettingsWindow();
   }
@@ -194,6 +213,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     this.workspaceService.toggleFullscreen();
   }
 
+  @noOpenModal
   public openGenerator() {
     this.modalService.openGeneratorWindow();
   }
@@ -220,7 +240,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
     this.hotkeys[hotkey.toLowerCase()] = { actionOrActions, config };
   }
 
-  private getHotkeyLabel(label: keyof Partial<typeof HotkeyLabel>): string {
+  private getHotkeyLabel(label: HotkeyLabelKey): string {
     for (const key in this.hotkeys) {
       if (Object.prototype.hasOwnProperty.call(this.hotkeys, key)) {
         const element = this.hotkeys[key];

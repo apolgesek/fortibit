@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, Inject, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IMessageBroker } from '@app/core/models';
 import { ConfigService, NotificationService, WorkspaceService } from '@app/core/services';
 import { MasterPasswordSetupComponent } from '@app/main/components/master-password-setup/master-password-setup.component';
 import { HotkeyBinderDirective } from '@app/main/directives/hotkey-binder.directive';
 import { isControlInvalid } from '@app/utils';
-import { IAppConfig } from '@config/app-config';
+import { Configuration } from '@config/configuration';
 import { getDefaultConfig } from '@shared-renderer/default-config';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
@@ -28,14 +28,34 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 })
 export class GeneralTabComponent implements OnInit {
   public readonly isControlInvalid = isControlInvalid;
-  public passwordForm!: FormGroup;
+
+  private readonly formBuilder = inject(FormBuilder);
 
   private readonly debounceTimeMs = 500;
+  private readonly _passwordForm = this.formBuilder.group({
+    toggle: this.formBuilder.group({
+      autoType: [false],
+      lockOnSystemLock: [false],
+      saveOnLock: [false],
+      showInsecureUrlPrompt: [false],
+      protectWindowsFromCapture: [false]
+    }),
+    input: this.formBuilder.group({
+      idleTime: [0, Validators.compose([Validators.required, Validators.min(60)])],
+      clipboardTime: [0, Validators.compose([Validators.required, Validators.min(0)])],
+      autotypeShortcut: [''],
+      autotypePasswordOnlyShortcut: [''],
+      autotypeUsernameOnlyShortcut: ['']
+    }),
+  });
+
+  get passwordForm() {
+    return this._passwordForm;
+  }
 
   constructor(
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly destroyRef: DestroyRef,
-    private readonly formBuilder: FormBuilder,
     private readonly notificationService: NotificationService,
     private readonly configService: ConfigService,
     private readonly workspaceService: WorkspaceService
@@ -50,23 +70,6 @@ export class GeneralTabComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.passwordForm = this.formBuilder.group({
-      toggle: this.formBuilder.group({
-        autoType: [null],
-        lockOnSystemLock: [null],
-        saveOnLock: [null],
-        showInsecureUrlPrompt: [null],
-        protectWindowsFromCapture: [null]
-      }),
-      input: this.formBuilder.group({
-        idleTime: [0, Validators.compose([Validators.required, Validators.min(60)])],
-        clipboardTime: [0, Validators.compose([Validators.required, Validators.min(0)])],
-        autotypeShortcut: [null],
-        autotypePasswordOnlyShortcut: [null],
-        autotypeUsernameOnlyShortcut: [null]
-      }),
-    });
-  
     this.configService.configLoadedSource$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(config => {
       this.passwordForm.setValue({
         toggle: {
@@ -86,12 +89,12 @@ export class GeneralTabComponent implements OnInit {
       }, { emitEvent: false });
     });
 
-    this.passwordForm.get('toggle').valueChanges
+    this.passwordForm.controls.toggle.valueChanges
       .pipe(
         distinctUntilChanged(),
         takeUntilDestroyed(this.destroyRef)
       ).subscribe((form) => {
-        if (this.passwordForm.get('toggle').invalid) {
+        if (this.passwordForm.controls.toggle.invalid) {
           return;
         }
 
@@ -101,18 +104,18 @@ export class GeneralTabComponent implements OnInit {
           saveOnLock: form.saveOnLock,
           showInsecureUrlPrompt: form.showInsecureUrlPrompt,
           protectWindowsFromCapture: form.protectWindowsFromCapture
-        } as Partial<IAppConfig>;
+        } as Partial<Configuration>;
 
         this.configService.setConfig(configPartial);
       });
 
-      this.passwordForm.get('input').valueChanges
+      this.passwordForm.controls.input.valueChanges
         .pipe(
           debounceTime(this.debounceTimeMs),
           distinctUntilChanged(),
           takeUntilDestroyed(this.destroyRef)
         ).subscribe((form) => {
-          if (this.passwordForm.get('input').invalid) {
+          if (this.passwordForm.controls.input.invalid) {
             return;
           }
 
@@ -122,7 +125,7 @@ export class GeneralTabComponent implements OnInit {
             autocompleteShortcut: form.autotypeShortcut,
             autocompletePasswordOnlyShortcut: form.autotypePasswordOnlyShortcut,
             autocompleteUsernameOnlyShortcut: form.autotypeUsernameOnlyShortcut
-          } as Partial<IAppConfig>;
+          } as Partial<Configuration>;
 
           this.configService.setConfig(configPartial);
         });
@@ -135,15 +138,17 @@ export class GeneralTabComponent implements OnInit {
       alive: 10 * 1000,
       message: 'Default settings restored.'
     });
+
+    this.onNumberChange(null, 'toggle', 5);
   }
 
-  onNumberChange(event: KeyboardEvent, controlName: string, maxLength: number) {
+  onNumberChange(event: KeyboardEvent, path: string, maxLength: number) {
     const input = event.target as HTMLInputElement;
     const value = input.value.toString();
 
     if (value.length >= maxLength) {
       input.valueAsNumber = parseInt(value.slice(0, maxLength), 10);
-      this.passwordForm.get(controlName).setValue(input.value);
+      this.passwordForm.get(path).setValue(input.value);
     }
   }
 }

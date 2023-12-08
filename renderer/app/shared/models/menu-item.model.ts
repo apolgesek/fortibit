@@ -1,4 +1,4 @@
-export interface MenuItem {
+export type MenuItem = {
   label?: string;
   separator?: boolean;
   disabled?: boolean;

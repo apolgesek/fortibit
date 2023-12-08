@@ -4,7 +4,7 @@ import { ListStateService } from '../services/list-state.service';
 import { FocusableListItemDirective } from './focusable-list-item.directive';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-interface ItemFocusedEvent {
+type ItemFocusedEvent = {
   originalEvent: Event;
   item: any;
 }

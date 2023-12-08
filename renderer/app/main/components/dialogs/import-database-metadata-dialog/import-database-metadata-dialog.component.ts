@@ -5,10 +5,10 @@ import { ModalRef, WorkspaceService } from '@app/core/services';
 import { NotificationService } from '@app/core/services/notification.service';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { IPasswordEntry, ImportHandler, IpcChannel } from '@shared-renderer/index';
+import { PasswordEntry, ImportHandler, IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
 
-export interface IImportDatabaseMetadataDialogDataPayload {
+export type ImportDatabaseMetadataDialogDataPayload = {
   filePath: string;
   size: number;
   type: ImportHandler;
@@ -26,7 +26,7 @@ export interface IImportDatabaseMetadataDialogDataPayload {
 })
 export class ImportDatabaseMetadataDialogComponent implements IModal {
   ref!: ComponentRef<ImportDatabaseMetadataDialogComponent>;
-  additionalData?: IAdditionalData<IImportDatabaseMetadataDialogDataPayload>;
+  additionalData?: IAdditionalData<ImportDatabaseMetadataDialogDataPayload>;
   isConfirmButtonLocked = false;
 
   constructor(
@@ -41,7 +41,7 @@ export class ImportDatabaseMetadataDialogComponent implements IModal {
       this.isConfirmButtonLocked = true;
       const entries: string = await this.messageBroker.ipcRenderer
         .invoke(IpcChannel.Import, this.additionalData?.payload.filePath, this.additionalData?.payload.type);
-      let deserializedEntries: IPasswordEntry[] = JSON.parse(entries);
+      let deserializedEntries: PasswordEntry[] = JSON.parse(entries);
       deserializedEntries = deserializedEntries.map(x => ({...x, creationDate: new Date()}));
 
       const filePath: string = this.additionalData?.payload.filePath;

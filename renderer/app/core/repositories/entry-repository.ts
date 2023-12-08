@@ -1,4 +1,4 @@
-import { IPasswordEntry } from '../../../../shared/index';
+import { PasswordEntry } from '../../../../shared/index';
 import { DbManager } from '../database/db-manager';
 import { GroupId } from '../enums';
 import { IEntryRepository, EntryPredicateFn } from './index';
@@ -6,22 +6,22 @@ import { IEntryRepository, EntryPredicateFn } from './index';
 export class EntryRepository implements IEntryRepository {
   constructor(private readonly db: DbManager) {}
 
-  getAll(): Promise<IPasswordEntry[]> {
+  getAll(): Promise<PasswordEntry[]> {
     return this.db.context.transaction('r', this.db.entries,
       () => this.db.entries.toArray());
   }
 
-  getAllByGroup(groupId: number): Promise<IPasswordEntry[]> {
+  getAllByGroup(groupId: number): Promise<PasswordEntry[]> {
     return this.db.context.transaction('r', this.db.entries,
       () => this.db.entries.where('groupId').equals(groupId).toArray());
   }
 
-  getAllByPredicate(fn: EntryPredicateFn): Promise<IPasswordEntry[]> {
+  getAllByPredicate(fn: EntryPredicateFn): Promise<PasswordEntry[]> {
     return this.db.context.transaction('r', this.db.entries,
       () => this.db.entries.filter(x => fn(x)).toArray());
   }
 
-  get(id: number): Promise<IPasswordEntry | undefined> {
+  get(id: number): Promise<PasswordEntry | undefined> {
     return this.db.context.transaction('r', this.db.entries, this.db.groups,
       async () => {
         const entry = await this.db.entries.get(id);
@@ -31,18 +31,18 @@ export class EntryRepository implements IEntryRepository {
       });
   }
 
-  add(item: Partial<IPasswordEntry>): Promise<number> {
+  add(item: Partial<PasswordEntry>): Promise<number> {
     const { group, ...entity } = item;
     return this.db.context.transaction('rw', this.db.entries,
-      () => this.db.entries.add(entity as IPasswordEntry));
+      () => this.db.entries.add(entity as PasswordEntry));
   }
 
-  bulkAdd(items: IPasswordEntry[]): Promise<number> {
+  bulkAdd(items: PasswordEntry[]): Promise<number> {
     return this.db.context.transaction('rw', this.db.entries,
       () => this.db.entries.bulkAdd(items));
   }
 
-  update(item: Partial<IPasswordEntry>): Promise<number> {
+  update(item: Partial<PasswordEntry>): Promise<number> {
     const { group, ...entity } = item;
     return this.db.context.transaction('rw', this.db.entries, this.db.groups, async () => {
       if (!item.id) {
@@ -87,7 +87,7 @@ export class EntryRepository implements IEntryRepository {
       ));
   }
 
-  getSearchResults(searchPhrase: string): Promise<IPasswordEntry[]> {
+  getSearchResults(searchPhrase: string): Promise<PasswordEntry[]> {
     const lowerCasePhrase = searchPhrase.toLowerCase();
     return this.db.context.transaction('r', this.db.entries, () => {
       if (!lowerCasePhrase.length) {

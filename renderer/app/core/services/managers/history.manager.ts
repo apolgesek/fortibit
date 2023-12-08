@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { DbManager } from '@app/core/database';
 import { HistoryRepository } from '@app/core/repositories';
-import { IHistoryEntry } from '@shared-renderer/history-entry.model';
+import { HistoryEntry } from '@shared-renderer/history-entry.model';
 import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -9,16 +9,16 @@ export class HistoryManager {
   public readonly markDirtySource: Subject<void> = new Subject();
   private readonly historyRepository: HistoryRepository = new HistoryRepository(inject(DbManager));
 
-  async get(id: number): Promise<IHistoryEntry[] | undefined> {
+  async get(id: number): Promise<HistoryEntry[] | undefined> {
     return this.historyRepository.get(id);
   }
 
-  async add(item: IHistoryEntry): Promise<number> {
+  async add(item: HistoryEntry): Promise<number> {
     this.markDirty();
     return this.historyRepository.add(item);
   }
 
-  async bulkAdd(items: IHistoryEntry[]): Promise<number> {
+  async bulkAdd(items: HistoryEntry[]): Promise<number> {
     return this.historyRepository.bulkAdd(items);
   }
 

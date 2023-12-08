@@ -56,10 +56,12 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
         });
     }
 
+    (document.activeElement as HTMLElement).blur();
     // outside click must be enabled for any outer elements,, e.g. notification
     this.focusTrap = focusTrap.createFocusTrap(this.el.nativeElement, {
+      returnFocusOnDeactivate: false,
       allowOutsideClick: true,
-      initialFocus: this.autofocusElement?.nativeElement
+      initialFocus: this.autofocusElement?.nativeElement ?? false
     });
     this.focusTrap.activate();
     UiUtil.unlockInterface();

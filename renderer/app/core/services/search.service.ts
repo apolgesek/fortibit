@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { IPasswordEntry } from '../../../../shared/index';
+import { PasswordEntry } from '../../../../shared/index';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, map, Observable, Subject, tap } from 'rxjs';
 import { Sort } from '../enums';
 
-type SortableEntryProp = keyof Pick<IPasswordEntry, 'title' | 'username' | 'creationDate'>;
+type SortableEntryProp = keyof Pick<PasswordEntry, 'title' | 'username' | 'creationDate'>;
 
 interface ISearchService {
   reset(): void;
   setSort(state: Sort, prop: SortableEntryProp): void;
-  filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]): IPasswordEntry[];
+  filterEntries(passwords: PasswordEntry[], phrase: string, searchResults: PasswordEntry[]): PasswordEntry[];
 }
 
 @Injectable({
@@ -64,7 +64,7 @@ export class SearchService implements ISearchService {
     this.updateSearchResults();
   }
 
-  public filterEntries(passwords: IPasswordEntry[], phrase: string, searchResults: IPasswordEntry[]): IPasswordEntry[] {
+  public filterEntries(passwords: PasswordEntry[], phrase: string, searchResults: PasswordEntry[]): PasswordEntry[] {
     if (!searchResults.length) {
       const filteredPasswords = passwords.filter(p => {
         if (phrase.length) {
@@ -93,7 +93,7 @@ export class SearchService implements ISearchService {
     }
   }
 
-  private compareAscending(a: IPasswordEntry, b: IPasswordEntry): number {
+  private compareAscending(a: PasswordEntry, b: PasswordEntry): number {
     if (a[this.sortProp] && b[this.sortProp]) {
       if (this.sortProp === 'creationDate') {
         const firstProp = a[this.sortProp];
@@ -117,7 +117,7 @@ export class SearchService implements ISearchService {
     }
   }
 
-  private compareDescending(a: IPasswordEntry, b: IPasswordEntry): number {
+  private compareDescending(a: PasswordEntry, b: PasswordEntry): number {
     if (a[this.sortProp] && b[this.sortProp]) {
       if (this.sortProp === 'creationDate') {
         const firstProp = a[this.sortProp];

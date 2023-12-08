@@ -11,7 +11,7 @@ import { IWindowService } from '../window/window-service.model';
 import { ICommandHandler } from './command-handler.model';
 import { IUpdateService } from './update-service.model';
 
-interface UpdateInformation {
+type UpdateInformation = {
   version: string;
   fileName: string;
   url: string;

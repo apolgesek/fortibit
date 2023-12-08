@@ -1,7 +1,7 @@
-import { IEntryGroup } from '@shared-renderer/entry-group';
+import { EntryGroup } from '@shared-renderer/entry-group';
 import { GroupId } from '../enums';
 
-export const initialEntries: IEntryGroup[] = [
+export const initialEntries: EntryGroup[] = [
   { name: 'General', id: 1 },
   { name: 'Banking', id: 2 },
   { name: 'Email', id: 3 },

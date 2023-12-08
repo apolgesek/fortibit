@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IMessageBroker } from '@app/core/models';
-import { IAppConfig } from '@config/app-config';
+import { Configuration } from '@config/configuration';
 import { IpcChannel } from '@shared-renderer/index';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class WebService implements IMessageBroker {
               specialChars: true,
               passwordLength: 15
             }
-          } as IAppConfig);
+          } as Configuration);
         } else if (channel === IpcChannel.EncryptPassword) {
           // mock
           return Promise.resolve('test123');

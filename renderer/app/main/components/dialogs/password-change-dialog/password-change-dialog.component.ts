@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { Component, ComponentRef, Inject, inject } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { IMessageBroker } from '@app/core/models';
 import { ModalRef, ModalService, WorkspaceService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -24,37 +24,38 @@ import { Observable, delay, from, map, tap } from 'rxjs';
     ShowPasswordIconComponent
   ],
 })
-export class PasswordChangeDialogComponent implements IModal, OnInit {
+export class PasswordChangeDialogComponent implements IModal {
   public readonly isControlInvalid = isControlInvalid;
-  public passwordForm!: FormGroup;
 
   ref: ComponentRef<unknown>;
   additionalData?: IAdditionalData;
   showBackdrop?: boolean;
+
+  private readonly fb = inject(FormBuilder);
+  private readonly _passwordForm = this.fb.group({
+    currentPassword: ['', {
+      validators: [Validators.required],
+      asyncValidators: [this.passwordValidator()], updateOn: 'blur'
+    }],
+    newPassword: this.fb.group({
+      password: ['', { validators: Validators.compose([Validators.required, Validators.minLength(6)]) }],
+      repeatPassword: ['']
+    }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
+  });
+
+  get passwordForm() {
+    return this._passwordForm;
+  }
 
   constructor(
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
     private readonly workspaceService: WorkspaceService,
     private readonly modalService: ModalService,
     private readonly modalRef: ModalRef,
-    private readonly formBuilder: FormBuilder
   ) {}
 
-  get passwordsGroup(): FormGroup {
-    return this.passwordForm.get('newPassword') as FormGroup;
-  }
-
-  ngOnInit(): void {
-    this.passwordForm = this.formBuilder.group({
-      currentPassword: [null, {
-        validators: [Validators.required],
-        asyncValidators: [this.passwordValidator()], updateOn: 'blur'
-      }],
-      newPassword: this.formBuilder.group({
-        password: [null, { validators: Validators.compose([Validators.required, Validators.minLength(6)]) }],
-        repeatPassword: [null]
-      }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
-    });
+  get passwordsGroup() {
+    return this.passwordForm.controls.newPassword;
   }
 
   close() {
@@ -71,8 +72,8 @@ export class PasswordChangeDialogComponent implements IModal, OnInit {
     const success = await this.workspaceService
       .saveNewDatabase(this.passwordForm.value.newPassword.password, { forceNew: false });
     if (success) {
-      this.passwordForm.get('currentPassword').reset();
-      this.passwordForm.get('newPassword').reset();
+      this.passwordForm.controls.currentPassword.reset();
+      this.passwordForm.controls.newPassword.reset();
     }
   }
 

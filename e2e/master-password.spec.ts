@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { ElectronApplication, Page, _electron as electron } from 'playwright-core';
 import { ProcessArgument } from '../main/process-argument.enum';
 import { getInvoke } from './helpers/ipc';
+import { authenticate } from './helpers/auth';
 
 const PATH = require('path');
 
@@ -21,12 +22,29 @@ test.describe('Master password', async () => {
   test('Check no password entered error message', async () => {
     await firstWindow.getByPlaceholder(/password/i).focus(); 
     await firstWindow.getByLabel(/unlock/i).click();
-    const error = await firstWindow.getByTestId('password-error').innerText();
-
-    expect(error).toMatch(/password is required/i);
+    const notification = firstWindow.getByRole('alert');
+    
+    expect(await notification.innerText()).toMatch(/password is required/i);
   });
 
   test('Check windows hello screen dispayed', async () => {
+    await authenticate(firstWindow);
+    await firstWindow.getByRole('main').waitFor({ state: 'visible' });
+    await firstWindow.keyboard.press('Control+.');
+    const dialog = firstWindow.getByRole('dialog');
+    await dialog.getByRole('button', { name: /integration/i }).click();
+    const biometricsAuthCheckbox = dialog.getByLabel(/windows hello/i);
+
+    if (!await biometricsAuthCheckbox.isChecked()) {
+      await dialog.getByText(/windows hello/i).click();
+      const addCredentialButton = dialog.getByRole('button', { name: /add credential/i });
+
+      if (await addCredentialButton.isVisible()) {
+        await addCredentialButton.click();
+      }
+    }
+
+    await firstWindow.keyboard.press('Control+L');
     await firstWindow.getByRole('button', { name: /unlock with windows hello/i }).click();
     const overlay = firstWindow.locator('.biometrics-overlay');
 
@@ -38,9 +56,9 @@ test.describe('Master password', async () => {
     await firstWindow.getByPlaceholder(/password/i).focus(); 
     await firstWindow.keyboard.insertText('wr0ng_password');
     await firstWindow.keyboard.press('Enter');
-    const error = await firstWindow.getByTestId('password-error').innerText();
+    const notification = firstWindow.getByRole('alert');
 
-    expect(error).toMatch(/password is invalid/i);
+    expect(await notification.innerText()).toMatch(/password is invalid/i);
   });
 
   test('Check settings modal open when not authenticated', async () => {

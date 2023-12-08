@@ -1,11 +1,11 @@
 import { FileFilter, app } from 'electron';
-import { IAppConfig } from '../../app-config';
+import { Configuration } from '../../app-config';
 import { ProcessArgument } from '../process-argument.enum';
 import { join } from 'path';
 
 type FileType = 'vaultExt' | 'csv' | 'xml';
 
-export function getFileFilter(config: IAppConfig, fileType: FileType): FileFilter {
+export function getFileFilter(config: Configuration, fileType: FileType): FileFilter {
   let fileFilter = { name: 'Fortibit database file', extensions: [ config.fileExtension ]  }
 
   switch (fileType) {
@@ -21,7 +21,7 @@ export function getFileFilter(config: IAppConfig, fileType: FileType): FileFilte
   return fileFilter;
 }
 
-export function getDefaultPath(config: IAppConfig, path: string): string {
+export function getDefaultPath(config: Configuration, path: string): string {
   const pathParts: string[] = [];
   
   if (Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E))) {

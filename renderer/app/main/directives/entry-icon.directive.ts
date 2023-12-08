@@ -1,7 +1,7 @@
 import { AfterViewInit, Directive, ElementRef, Inject, Input } from '@angular/core';
 import { IMessageBroker } from '@app/core/models';
 import { EntryManager } from '@app/core/services';
-import { IPasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { PasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
 
 @Directive({
@@ -9,7 +9,7 @@ import { MessageBroker } from 'injection-tokens';
   standalone: true,
 })
 export class EntryIconDirective implements AfterViewInit {
-  private _entry: IPasswordEntry;
+  private _entry: PasswordEntry;
   private iconExists = false;
 
   constructor(
@@ -18,7 +18,7 @@ export class EntryIconDirective implements AfterViewInit {
     @Inject(MessageBroker) private readonly messageBroker: IMessageBroker
   ) { }
 
-  @Input('appEntryIcon') set entry(value: IPasswordEntry) {
+  @Input('appEntryIcon') set entry(value: PasswordEntry) {
     if (this._entry && this.detailsChanged(value)) {
       this.updateIcon(value);
     }
@@ -32,14 +32,14 @@ export class EntryIconDirective implements AfterViewInit {
     this.setIcon(this._entry);
   }
 
-  public async updateIcon(entry: IPasswordEntry) {
+  public async updateIcon(entry: PasswordEntry) {
     this.iconExists = entry.icon
       && (entry.icon.startsWith('data')
       || await this.messageBroker.ipcRenderer.invoke(IpcChannel.CheckIconExists, entry.icon));
     await this.setIcon(entry);
   }
 
-  private async setIcon(entry: IPasswordEntry) {
+  private async setIcon(entry: PasswordEntry) {
     if (this.iconExists) {
       this.setImageIcon(entry);
     } else {
@@ -47,24 +47,24 @@ export class EntryIconDirective implements AfterViewInit {
     }
   }
 
-  private detailsChanged(entry: IPasswordEntry): boolean {
+  private detailsChanged(entry: PasswordEntry): boolean {
     return this._entry.icon !== entry.icon || this._entry.title !== entry.title;
   }
 
-  private setImageIcon(entry: IPasswordEntry) {
+  private setImageIcon(entry: PasswordEntry) {
     (this.el.nativeElement as HTMLImageElement).src = entry.icon.startsWith('data:image/png')
       ? entry.icon
       : 'file://' + entry.icon;
   }
 
-  private setInitialIcon(entry: IPasswordEntry): Promise<number> {
+  private setInitialIcon(entry: PasswordEntry): Promise<number> {
     const dataUrl = this.getDefaultIcon(entry);
     (this.el.nativeElement as HTMLImageElement).src = dataUrl;
 
     return this.entryManager.updateIcon(entry.id, dataUrl);
   }
 
-  private getDefaultIcon(entry: IPasswordEntry): string {
+  private getDefaultIcon(entry: PasswordEntry): string {
     let iconText = '';
 
     if (entry.title?.trim().length > 0) {

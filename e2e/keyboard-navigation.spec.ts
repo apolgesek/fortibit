@@ -21,75 +21,81 @@ test.afterEach(async () => {
 test.describe('Keyboard navigation/menu', async () => {
   test('Check arrow down navigation', async () => {
     await firstWindow.getByRole('menubar').getByText(/file/i).click();
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
     const focusedItem = firstWindow.getByRole('menubar').getByText(/new file.../i);
     await focusedItem.waitFor({ state: 'visible' });
     await firstWindow.waitForTimeout(100);
+    
     expect(focusedItem).toBeFocused();
   });
 
   test('Check arrow up navigation should focus first item', async () => {
     await firstWindow.getByRole('menubar').getByText(/file/i).click();
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowUp', { delay: 50 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowUp', { delay: 100 });
     const focusedItem = firstWindow.getByRole('menubar').getByText(/new file.../i);
     await focusedItem.waitFor({ state: 'visible' });
+
     expect(focusedItem).toBeFocused();
   });
 
   test('Check arrow up navigation should focus last item', async () => {
     await firstWindow.getByRole('menubar').getByText(/file/i).click();
-    await firstWindow.keyboard.press('ArrowUp', { delay: 50 });
+    await firstWindow.keyboard.press('ArrowUp', { delay: 100 });
     const focusedItem = firstWindow.getByRole('menubar').getByText(/exit/i);
     await focusedItem.waitFor({ state: 'visible' });
+
     expect(focusedItem).toBeFocused();
   });
 
   test('Check arrow right navigation open menu to the right', async () => {
     await firstWindow.getByRole('menubar').getByText(/file/i).click();
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowRight', { delay: 50 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowRight', { delay: 100 });
     const focusedItem = firstWindow.getByRole('menubar').getByText(/view/i);
     await focusedItem.waitFor({ state: 'visible' });
+
     expect(focusedItem).toBeFocused();
   });
 
   test('Check arrow right navigation open submenu to the right', async () => {
     await firstWindow.getByRole('menubar').getByText(/file/i).click();
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowRight', { delay: 50 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowRight', { delay: 100 });
     const focusedItem = firstWindow.getByRole('menubar').getByText(/keepass/i)
     await focusedItem.waitFor({ state: 'visible' });
+
     expect(focusedItem).toBeFocused();
   });
 
   test('Check disabled menu item skipped', async () => {
     await firstWindow.getByRole('menubar').getByText(/file/i).click();
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    const menuItem = await firstWindow.getByRole('menubar').getByText(/^save$/i);
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    const menuItem = await firstWindow.getByRole('menubar').getByText(/save/i).first();
     await menuItem.waitFor({ state: 'visible' });
+
     expect(menuItem).toBeDisabled();
   });
 
   test('Check arrow left close submenu', async () => {
     await firstWindow.getByRole('menubar').getByText(/file/i).click();
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowDown', { delay: 50 });
-    await firstWindow.keyboard.press('ArrowRight', { delay: 50 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+    await firstWindow.keyboard.press('ArrowRight', { delay: 100 });
     const focusedItem = firstWindow.getByRole('menubar').getByText(/keepass/i)
     await focusedItem.waitFor({ state: 'visible' });
-    await firstWindow.keyboard.press('ArrowLeft', { delay: 50 });
+    await firstWindow.keyboard.press('ArrowLeft', { delay: 100 });
     await focusedItem.waitFor({ state: 'hidden' });
   });
 });

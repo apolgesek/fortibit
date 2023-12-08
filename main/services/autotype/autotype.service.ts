@@ -1,6 +1,6 @@
-import { IAppConfig } from "@root/app-config";
-import { IProduct } from "@root/product";
-import { IPasswordEntry, IpcChannel } from "@shared-renderer/index";
+import { Configuration } from "@root/configuration";
+import { Product } from "@root/product";
+import { PasswordEntry, IpcChannel } from "@shared-renderer/index";
 import { IpcMainEvent, globalShortcut, ipcMain } from "electron";
 import { IConfigService } from "../config";
 import { IDatabaseService } from "../database";
@@ -11,8 +11,8 @@ import { IWindowService } from '../window';
 import { IWindow } from "../window/window-model";
 import { IAutotypeService } from "./autotype-service.model";
 
-interface IAutotypeResult {
-  entries: IPasswordEntry[];
+type AutotypeResult = {
+  entries: PasswordEntry[];
   windowId: number;
 }
 
@@ -23,7 +23,7 @@ enum AutocompleteMode {
 }
 
 export class AutotypeService implements IAutotypeService {
-  private _result: IAutotypeResult[] = [];
+  private _result: AutotypeResult[] = [];
   private _autocompleteMode = AutocompleteMode.Full;
   private _processRunning = false;
 
@@ -39,14 +39,14 @@ export class AutotypeService implements IAutotypeService {
     @IConfigService private readonly _configService: IConfigService,
     @INativeApiService private readonly _nativeApiService: INativeApiService
   ) {
-    ipcMain.on(IpcChannel.AutotypeEntrySelected, (event: IpcMainEvent, entry: IPasswordEntry) => {
+    ipcMain.on(IpcChannel.AutotypeEntrySelected, (event: IpcMainEvent, entry: PasswordEntry) => {
       const browserWindow = this._windowService.getWindowByWebContentsId(event.sender.id).browserWindow;
       browserWindow.blur();
       browserWindow.hide();
       this.typeLoginDetails(entry);
     });
 
-    ipcMain.handle(IpcChannel.ChangeEncryptionSettings, (_, form: Partial<IAppConfig>) => {
+    ipcMain.handle(IpcChannel.ChangeEncryptionSettings, (_, form: Partial<Configuration>) => {
       this.changeEncryptionSettings(form);
     });
   }
@@ -112,14 +112,14 @@ export class AutotypeService implements IAutotypeService {
   }
 
   private addWindowHandler(win: IWindow) {
-    const listener = (event: Electron.Event, channel: string, entries: IPasswordEntry[]) => {
+    const listener = (event: Electron.Event, channel: string, entries: PasswordEntry[]) => {
       if (channel !== IpcChannel.AutocompleteEntry) return;
       
       try {
         this._result.push({ entries: entries, windowId: (event as IpcMainEvent).sender.id });
 
         if (this._windows.length - 1 === this._result.length) {
-          const foundEntries: IPasswordEntry[] = this._result.reduce((arr, current) => ([...arr, ...current.entries]), []);
+          const foundEntries: PasswordEntry[] = this._result.reduce((arr, current) => ([...arr, ...current.entries]), []);
 
           switch (foundEntries.length) {
             case 0:
@@ -157,7 +157,7 @@ export class AutotypeService implements IAutotypeService {
     win.browserWindow.webContents.on('ipc-message', listener);
   }
 
-  private async typeLoginDetails(entry: IPasswordEntry): Promise<void> {
+  private async typeLoginDetails(entry: PasswordEntry): Promise<void> {
     const windowId = this._result.find(x => x.entries.find(e => e.id === entry.id)).windowId;
     const window = this._windowService.getWindowByWebContentsId(windowId);
 
@@ -193,7 +193,7 @@ export class AutotypeService implements IAutotypeService {
     this._result = [];
   }
 
-  private changeEncryptionSettings(settings: Partial<IProduct>) {
+  private changeEncryptionSettings(settings: Partial<Product>) {
     if (settings.autoTypeEnabled ?? this._configService.appConfig.autoTypeEnabled) {
       this.registerAutocompleteShortcut(
         settings.autocompleteShortcut ?? this._configService.appConfig.autocompleteShortcut,

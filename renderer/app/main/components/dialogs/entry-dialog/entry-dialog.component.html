@@ -61,21 +61,25 @@
             (input)="onPasswordChange($event)">
             <div *ngIf="!isReadOnly; else readonly" class="password-tools">
               <div class="actions">
-                <i-feather
+                <a
+                  href="#"
                   appTooltip="Show password"
-                  aria-label="Show password"
                   container="body"
-                  (click)="togglePasswordVisibility()"
-                  [name]="passwordVisible ? 'eye-off' : 'eye'"
-                  [ngClass]="{ active: passwordVisible }">
-                </i-feather>
-                <i-feather
+                  aria-label="Show password"
+                  (click)="togglePasswordVisibility(); false">
+                  <i-feather
+                    [name]="passwordVisible ? 'eye-off' : 'eye'"
+                    [ngClass]="{ active: passwordVisible }">
+                  </i-feather>
+                </a>
+                <a
+                  href="#"
                   appTooltip="Generate password"
                   aria-label="Generate password"
                   container="body"
-                  (click)="regeneratePassword()"
-                  name="refresh-cw">
-                </i-feather>
+                  (click)="regeneratePassword(); false">
+                  <i-feather name="refresh-cw"></i-feather>
+                </a>
               </div>
             </div>
             <ng-template #readonly>

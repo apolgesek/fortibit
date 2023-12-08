@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import { Injectable } from '@angular/core';
 import Dexie from 'dexie';
-import { IEntryGroup, IHistoryEntry, IPasswordEntry, IReport } from '../../../../shared/index';
+import { EntryGroup, HistoryEntry, PasswordEntry, Report } from '../../../../shared/index';
 
-export interface IDbContext extends Dexie {}
-export interface IDbTable<T, K> extends Dexie.Table<T, K> {}
+export type IDbContext = Dexie;
+export type IDbTable<T, K> = Dexie.Table<T, K>;
 
 @Injectable({ providedIn: 'root' })
 export class DbManager {
-  entries: IDbTable<IPasswordEntry, number>;
-  groups: IDbTable<IEntryGroup, number>;
-  reports: IDbTable<IReport, number>;
-  history: IDbTable<IHistoryEntry, number>;
+  entries: IDbTable<PasswordEntry, number>;
+  groups: IDbTable<EntryGroup, number>;
+  reports: IDbTable<Report, number>;
+  history: IDbTable<HistoryEntry, number>;
 
   readonly schemas =  {
     entries: '++id,groupId,title,username',

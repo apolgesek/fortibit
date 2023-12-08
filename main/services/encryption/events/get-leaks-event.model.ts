@@ -1,5 +1,5 @@
-import { IEncryptionEvent } from "./event.model";
+import { EncryptionEvent } from "./event.model";
 
-export interface IGetLeaksEvent extends IEncryptionEvent {
+export type GetLeaksEvent = EncryptionEvent & {
   database: string;
 }

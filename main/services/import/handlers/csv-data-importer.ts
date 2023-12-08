@@ -2,17 +2,17 @@ import { getDefaultPath, getFileFilter } from '@root/main/util';
 import * as csv from 'csv-parser';
 import { dialog } from 'electron';
 import { createReadStream } from 'fs-extra';
-import { IPasswordEntry, ImportHandler } from '../../../../shared';
+import { PasswordEntry, ImportHandler } from '../../../../shared';
 import { IConfigService } from '../../config';
 import { IEncryptionEventWrapper, MessageEventType } from '../../encryption';
 import { IWindowService } from '../../window';
 import { IImportHandler } from '../import-handler.model';
-import { IImportMetadata } from './import-metadata.model';
+import { ImportMetadata } from './import-metadata.model';
 
 export abstract class CsvDataImporter<T> implements IImportHandler {
   protected abstract readonly handlerType: ImportHandler;
   protected abstract readonly mock: T;
-  protected abstract readonly mapFn: (result: T[]) => Partial<IPasswordEntry>[];
+  protected abstract readonly mapFn: (result: T[]) => Partial<PasswordEntry>[];
 
   constructor(
     protected readonly _windowService: IWindowService,
@@ -21,7 +21,7 @@ export abstract class CsvDataImporter<T> implements IImportHandler {
   ) {
   }
 
-  async getMetadata(): Promise<IImportMetadata> {
+  async getMetadata(): Promise<ImportMetadata> {
     const fileObj = await dialog.showOpenDialog({
       properties: ['openFile'],
       defaultPath: getDefaultPath(this._configService.appConfig, ''),
@@ -61,7 +61,7 @@ export abstract class CsvDataImporter<T> implements IImportHandler {
   import(event: Electron.IpcMainEvent, path: string): Promise<string> {
     return new Promise((resolve, reject) => {
       let results: T[] = [];
-      let output: Partial<IPasswordEntry>[] = [];
+      let output: Partial<PasswordEntry>[] = [];
 
       createReadStream(path)
         .pipe(csv())

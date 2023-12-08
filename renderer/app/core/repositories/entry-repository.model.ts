@@ -1,13 +1,13 @@
-import { IPasswordEntry } from '../../../../shared/index';
+import { PasswordEntry } from '../../../../shared/index';
 import { IRepository } from './index';
 
-export type EntryPredicateFn = (entry: IPasswordEntry) => boolean;
+export type EntryPredicateFn = (entry: PasswordEntry) => boolean;
 
-export interface IEntryRepository extends IRepository<IPasswordEntry> {
-  getAllByPredicate(fn: EntryPredicateFn): Promise<IPasswordEntry[]>;
-  getAllByGroup(id: number): Promise<IPasswordEntry[]>;
-  bulkAdd(items: IPasswordEntry[]): Promise<number>;
+export interface IEntryRepository extends IRepository<PasswordEntry> {
+  getAllByPredicate(fn: EntryPredicateFn): Promise<PasswordEntry[]>;
+  getAllByGroup(id: number): Promise<PasswordEntry[]>;
+  bulkAdd(items: PasswordEntry[]): Promise<number>;
   bulkDelete(ids: number[]): Promise<void>;
   moveEntries(ids: number[], targetGroupId: number): Promise<number[]>;
-  getSearchResults(searchPhrase: string): Promise<IPasswordEntry[]>;
+  getSearchResults(searchPhrase: string): Promise<PasswordEntry[]>;
 }

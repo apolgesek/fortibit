@@ -1,7 +1,7 @@
 import { ApplicationRef, ComponentRef, EmbeddedViewRef, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
-import { IToastModel } from '../models';
-import { AppViewContainer } from './app-view-container';
 import { NotificationComponent } from '../../shared/components/notification/notification.component';
+import { Toast } from '../models';
+import { AppViewContainer } from './app-view-container';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +18,7 @@ export class NotificationService {
     this.renderer = this.rendererFactory.createRenderer(null, null);
   }
 
-  add(model: IToastModel) {
+  public add(model: Toast) {
     this.toasts.forEach((ref) => {
       this.appRef.detachView(ref.hostView);
       ref.destroy();
@@ -45,5 +45,13 @@ export class NotificationService {
 
     const idx = this.toasts.findIndex(x => x === ref);
     this.toasts.splice(idx, 1);
+  }
+
+  public isActive(model: Toast): boolean {
+    return this.toasts.some(x => this.isEqual(x, model));
+  }
+
+  private isEqual(toast: ComponentRef<NotificationComponent>, model: Toast): boolean {
+    return toast.instance.model.message === model.message && toast.instance.model.type === model.type;
   }
 }

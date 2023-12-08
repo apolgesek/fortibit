@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfigService } from '@app/core/services';
 import { isControlInvalid } from '@app/utils';
-import { IProduct } from '@config/product';
+import { Product } from '@config/product';
 import { Subject, debounceTime, distinctUntilChanged, take, takeUntil } from 'rxjs';
 
 @Component({
@@ -17,28 +17,33 @@ import { Subject, debounceTime, distinctUntilChanged, take, takeUntil } from 'rx
   ]
 })
 export class EncryptionTabComponent implements OnInit, OnDestroy {
-  public encryptionForm: FormGroup;
-
   public readonly isControlInvalid = isControlInvalid;
   private readonly destroyed: Subject<void> = new Subject();
   private readonly debounceTimeMs = 500;
 
-  constructor(
-    private readonly formBuilder: FormBuilder,
-    private readonly configService: ConfigService,
-  ) { }
+  private readonly configService = inject(ConfigService);
+  private readonly formBuilder = inject(FormBuilder);
+
+  private readonly _encryptionForm = this.formBuilder.group({
+    passwordLength: [0, { validators: Validators.compose([Validators.required, Validators.min(6), Validators.max(32)]) }],
+    lowercase: [false],
+    uppercase: [false],
+    specialChars: [false],
+    numbers: [false]
+  });
+
+  get encryptionForm() {
+    return this._encryptionForm;
+  }
 
   ngOnInit(): void {
     this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
-      this.encryptionForm = this.formBuilder.group({
-        passwordLength: new FormControl(
-          config.encryption.passwordLength, {
-            validators: Validators.compose([Validators.required, Validators.min(6), Validators.max(32)]),
-          }),
-        lowercase: [config.encryption.lowercase],
-        uppercase: [config.encryption.uppercase],
-        specialChars: [config.encryption.specialChars],
-        numbers: [config.encryption.numbers]
+      this._encryptionForm.setValue({
+        passwordLength: config.encryption.passwordLength,
+        lowercase: config.encryption.lowercase,
+        numbers: config.encryption.numbers,
+        specialChars: config.encryption.specialChars,
+        uppercase: config.encryption.uppercase
       });
 
       this.encryptionForm.valueChanges
@@ -59,7 +64,7 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
               specialChars: form.specialChars,
               numbers: form.numbers,
             }
-          } as Partial<IProduct>;
+          } as Partial<Product>;
 
           this.configService.setConfig(configPartial);
         });
@@ -73,13 +78,13 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
     }, this.debounceTimeMs);
   }
 
-  onNumberChange(event: KeyboardEvent, controlName: string, maxLength: number) {
+  onNumberChange(event: KeyboardEvent, path: string, maxLength: number) {
     const input = event.target as HTMLInputElement;
     const value = input.value.toString();
 
     if (value.length >= maxLength) {
       input.valueAsNumber = parseInt(value.slice(0, maxLength), 10);
-      this.encryptionForm.get(controlName).setValue(input.value);
+      this.encryptionForm.get(path).setValue(input.value);
     }
   }
 }

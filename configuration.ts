@@ -1,6 +1,6 @@
-import { IProduct } from './product';
+import { Product } from './product';
 
-export interface IAppConfig extends IProduct {
+export type Configuration = Product & {
   schemaVersion: number;
   fileExtension: string;
   version?: string;

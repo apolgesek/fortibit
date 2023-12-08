@@ -5,7 +5,7 @@ import { IWindowService } from '../../window';
 import { CsvDataImporter } from './csv-data-importer';
 import { TYPE_DEF } from './type-definition';
 
-interface IOnePasswordEntry {
+type IOnePasswordEntry = {
   title: string;
   url: string;
   username: string;

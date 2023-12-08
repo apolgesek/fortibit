@@ -1,4 +1,4 @@
-import { IPasswordEntry, IpcChannel } from "@shared-renderer/index";
+import { PasswordEntry, IpcChannel } from "@shared-renderer/index";
 import { app, ipcMain, IpcMainEvent } from "electron";
 import { existsSync, mkdirSync, unlinkSync } from "fs";
 import { join } from "path";
@@ -10,7 +10,7 @@ import { AsyncQueue } from "./async-queue";
 import { IAsyncQueue } from "./async-queue.model";
 import { IIconService } from "./icon-service.model";
 
-interface Icon {
+type Icon = {
   windowId: number;
   id: number;
   url: string;
@@ -42,7 +42,7 @@ export class IconService implements IIconService {
       window.browserWindow.webContents.send(IpcChannel.UpdateIcon, id, iconPath);
     });
 
-    ipcMain.on(IpcChannel.RemoveIcon, async (event: IpcMainEvent, entry: IPasswordEntry) => {
+    ipcMain.on(IpcChannel.RemoveIcon, async (event: IpcMainEvent, entry: PasswordEntry) => {
       await this.removeIcon(entry.icon);
       const window = this._windowService.getWindowByWebContentsId(event.sender.id);
       window.browserWindow.webContents.send(IpcChannel.UpdateIcon, entry.id);
@@ -61,7 +61,7 @@ export class IconService implements IIconService {
     this.iconQueue.process();
   }
 
-  getIcons(windowId: number, entries: IPasswordEntry[]) {
+  getIcons(windowId: number, entries: PasswordEntry[]) {
     for (const entry of entries) {
       if (entry.url && (!entry.icon || entry.icon.startsWith('data:image/png'))) {
         this.iconQueue.add({ windowId, id: entry.id, url: entry.url });
@@ -92,7 +92,7 @@ export class IconService implements IIconService {
     return Promise.resolve(false);
   }
 
-  fixIcons(entries: IPasswordEntry[]) {
+  fixIcons(entries: PasswordEntry[]) {
     return entries.map(entry => {
       if (entry.icon && !entry.icon.startsWith('data:image/png') && !existsSync(entry.icon)) {
         return { ...entry, icon: null };
@@ -126,6 +126,6 @@ export class IconService implements IIconService {
     }
 
     url = psl.parse(new URL(url).hostname).domain;
-    return url.replaceAll('.', '-');
+    return url;
   }
 }

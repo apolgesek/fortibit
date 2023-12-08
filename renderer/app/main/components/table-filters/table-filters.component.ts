@@ -11,12 +11,12 @@ import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { FeatherModule } from 'angular-feather';
 
-interface ISortOption {
+type SortOption = {
   name: string;
   prop: 'username' | 'creationDate' | 'title';
 }
 
-interface ISortDirectionOption {
+type SortDirectionOption = {
   name: string;
   state: Sort;
 }
@@ -44,19 +44,19 @@ export class TableFiltersComponent {
   @ViewChildren('sort') public readonly sortDropdowns: QueryList<DropdownDirective>;
   @ViewChildren('filterDropdown') public readonly filterDropdowns: QueryList<DropdownDirective>;
 
-  public readonly sortOptions: ISortOption[] = [
+  public readonly sortOptions: SortOption[] = [
     { name: 'Creation date', prop: 'creationDate' },
     { name: 'Title', prop: 'title' },
   ];
 
-  public readonly sortDirectionOptions: ISortDirectionOption[] = [
+  public readonly sortDirectionOptions: SortDirectionOption[] = [
     { name: 'Ascending', state: Sort.Asc },
     { name: 'Descending', state: Sort.Desc }
   ];
 
   public readonly sort = Sort;
-  public selectedSortOption: ISortOption;
-  public selectedSortDirection: ISortDirectionOption;
+  public selectedSortOption: SortOption;
+  public selectedSortDirection: SortDirectionOption;
 
   constructor(private readonly searchService: SearchService) {
     this.selectedSortOption = this.sortOptions.find(x => x.prop === this.searchService.sortProp);
@@ -67,12 +67,12 @@ export class TableFiltersComponent {
     return 0;
   }
 
-  setSort(option: ISortOption) {
+  setSort(option: SortOption) {
     this.selectedSortOption = option;
     this.searchService.setSort(this.selectedSortDirection.state, option.prop);
   }
 
-  setSortDirection(option: ISortDirectionOption) {
+  setSortDirection(option: SortDirectionOption) {
     this.selectedSortDirection = option;
     this.searchService.setSort(option.state, this.selectedSortOption.prop);
   }
