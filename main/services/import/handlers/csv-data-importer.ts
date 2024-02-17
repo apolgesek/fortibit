@@ -10,120 +10,136 @@ import { IImportHandler } from '../import-handler.model';
 import { ImportMetadata } from './import-metadata.model';
 
 export abstract class CsvDataImporter<T> implements IImportHandler {
-  protected abstract readonly handlerType: ImportHandler;
-  protected abstract readonly mock: T;
-  protected abstract readonly mapFn: (result: T[]) => Partial<PasswordEntry>[];
+	protected abstract readonly handlerType: ImportHandler;
+	protected abstract readonly mock: T;
+	protected abstract readonly mapFn: (result: T[]) => Partial<PasswordEntry>[];
 
-  constructor(
-    protected readonly _windowService: IWindowService,
-    protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
-    protected readonly _configService: IConfigService
-  ) {
-  }
+	constructor(
+		protected readonly _windowService: IWindowService,
+		protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
+		protected readonly _configService: IConfigService,
+	) {}
 
-  async getMetadata(): Promise<ImportMetadata> {
-    const fileObj = await dialog.showOpenDialog({
-      properties: ['openFile'],
-      defaultPath: getDefaultPath(this._configService.appConfig, ''),
-      filters: [getFileFilter(this._configService.appConfig, 'csv')]
-    });
+	async getMetadata(): Promise<ImportMetadata> {
+		const fileObj = await dialog.showOpenDialog({
+			properties: ['openFile'],
+			defaultPath: getDefaultPath(this._configService.appConfig, ''),
+			filters: [getFileFilter(this._configService.appConfig, 'csv')],
+		});
 
-    if (fileObj.canceled) {
-      return;
-    }
+		if (fileObj.canceled) {
+			return;
+		}
 
-    return new Promise((resolve, reject) => {
-      const results: T[] = [];
+		return new Promise((resolve, reject) => {
+			const results: T[] = [];
 
-      createReadStream(fileObj.filePaths[0])
-        .pipe(csv())
-        .on('headers', (headers) => {
-          if(!this.validateKeys(Object.keys(this.mock) as (keyof T)[], headers)) {
-            reject('The was an error importing file');
-            return;
-          }
-        })
-        .on('data', (data) => results.push(data))
-        .on('error', (err) => reject(err))
-        .on('end', () => {
-          const payload = {
-            filePath: fileObj.filePaths[0],
-            size: results.length,
-            type: this.handlerType
-          };
-              
-          resolve(payload);
-          return;
-        });
-    });
-  }
+			createReadStream(fileObj.filePaths[0])
+				.pipe(csv())
+				.on('headers', (headers) => {
+					if (
+						!this.validateKeys(Object.keys(this.mock) as (keyof T)[], headers)
+					) {
+						reject('The was an error importing file');
+						return;
+					}
+				})
+				.on('data', (data) => results.push(data))
+				.on('error', (err) => reject(err))
+				.on('end', () => {
+					const payload = {
+						filePath: fileObj.filePaths[0],
+						size: results.length,
+						type: this.handlerType,
+					};
 
-  import(event: Electron.IpcMainEvent, path: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      let results: T[] = [];
-      let output: Partial<PasswordEntry>[] = [];
+					resolve(payload);
+					return;
+				});
+		});
+	}
 
-      createReadStream(path)
-        .pipe(csv())
-        .on('data', (data) => results.push(data))
-        .on('error', (err) => reject(err))
-        .on('end', async () => {
-          const isValid = results.every(x => this.validateTypes(x));
+	import(event: Electron.IpcMainEvent, path: string): Promise<string> {
+		return new Promise((resolve, reject) => {
+			let results: T[] = [];
+			let output: Partial<PasswordEntry>[] = [];
 
-          if (!isValid) {
-            reject('The was an error importing file');
-            return;
-          }
+			createReadStream(path)
+				.pipe(csv())
+				.on('data', (data) => results.push(data))
+				.on('error', (err) => reject(err))
+				.on('end', async () => {
+					const isValid = results.every((x) => this.validateTypes(x));
 
-          output = this.mapFn(results);
-          let encryptedOutput;
+					if (!isValid) {
+						reject('The was an error importing file');
+						return;
+					}
 
-          try {
-            encryptedOutput = await Promise.all(output.map(async (e) => {
-              const encryptionEvent = {
-                plain: e.password,
-                type: MessageEventType.EncryptString
-              };
-          
-              const window = this._windowService.getWindowByWebContentsId(event.sender.id);
-              const password = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, window.key) as { encrypted: string };
-        
-              return {
-                ...e,
-                password: password.encrypted
-              };
-            }));
-          } catch (err) {
-            reject('Encryption error occured');
-          }
-      
-          const serialized = JSON.stringify(encryptedOutput);
-          resolve(serialized);
-        });
-    });
-  }
+					output = this.mapFn(results);
+					let encryptedOutput;
 
-  protected validateKeys(expectedHeaders: (keyof T)[], value: string[]) {
-    const uniqueHeaders = Array.from(new Set(value));
+					try {
+						encryptedOutput = await Promise.all(
+							output.map(async (e) => {
+								const encryptionEvent = {
+									plain: e.password,
+									type: MessageEventType.EncryptString,
+								};
 
-    return uniqueHeaders.length === expectedHeaders.length
-      && expectedHeaders.every(eh => uniqueHeaders.findIndex(h => h === eh) > -1);
-  }
+								const window = this._windowService.getWindowByWebContentsId(
+									event.sender.id,
+								);
+								const password =
+									(await this._encryptionEventWrapper.processEventAsync(
+										encryptionEvent,
+										window.key,
+									)) as { encrypted: string };
 
-  protected validateTypes(object: T): boolean {
-    for (const key in object) {
-      if (Object.prototype.hasOwnProperty.call(object, key)) {
-        const element = object[key];
-        if (typeof element !== typeof this.mock[key]) {
-          if (typeof this.mock[key] === 'number' && Number.isInteger(parseInt(element as unknown as string))) {
-            continue;
-          }
+								return {
+									...e,
+									password: password.encrypted,
+								};
+							}),
+						);
+					} catch (err) {
+						reject('Encryption error occured');
+					}
 
-          return false;
-        }
-      }
-    }
+					const serialized = JSON.stringify(encryptedOutput);
+					resolve(serialized);
+				});
+		});
+	}
 
-    return true;
-  }
+	protected validateKeys(expectedHeaders: (keyof T)[], value: string[]) {
+		const uniqueHeaders = Array.from(new Set(value));
+
+		return (
+			uniqueHeaders.length === expectedHeaders.length &&
+			expectedHeaders.every(
+				(eh) => uniqueHeaders.findIndex((h) => h === eh) > -1,
+			)
+		);
+	}
+
+	protected validateTypes(object: T): boolean {
+		for (const key in object) {
+			if (Object.prototype.hasOwnProperty.call(object, key)) {
+				const element = object[key];
+				if (typeof element !== typeof this.mock[key]) {
+					if (
+						typeof this.mock[key] === 'number' &&
+						Number.isInteger(parseInt(element as unknown as string))
+					) {
+						continue;
+					}
+
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
 }

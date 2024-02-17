@@ -1,7 +1,7 @@
 .dropdown-content {
 	right: 0;
-  z-index: 999;
-	width: 200px;	
+	z-index: 999;
+	width: 200px;
 	padding-top: 4px;
 	padding-bottom: 4px;
 	position: absolute;
@@ -27,11 +27,11 @@
 		cursor: default;
 		background-color: var(--dropdown-bg);
 
-		&:hover  {
+		&:hover {
 			background-color: var(--dropdown-bg) !important;
 		}
 	}
-	
+
 	&.submenu-container {
 		border-radius: 0.25rem !important;
 
@@ -66,15 +66,17 @@
 			background-color: var(--dropdown-bg);
 		}
 
-		&:hover, &:focus, &.focused  {
+		&:hover,
+		&:focus,
+		&.focused {
 			background-color: var(--dropdown-list-item-bg--hover) !important;
 		}
 	}
 }
 
 .dropdown {
-  position: relative;
-  display: block;
+	position: relative;
+	display: block;
 	list-style-type: none;
 	padding: 0;
 	border-radius: 0.25rem;

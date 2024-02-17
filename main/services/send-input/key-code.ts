@@ -12,20 +12,20 @@ export class KeyCode {
 	private static getKeyCode(key: Key): number {
 		if (!KeyCode._keyMap) {
 			switch (process.platform) {
-				case "win32":
+				case 'win32':
 					KeyCode._keyMap = {
 						[Key.Tab]: 9,
 						[Key.Enter]: 13,
 					};
 					break;
-				case "darwin":
+				case 'darwin':
 					KeyCode._keyMap = {
 						[Key.Tab]: 48,
 						[Key.Enter]: 76,
 					};
 					break;
 				default:
-					throw new Error("Key Code: Unsupported platform");
+					throw new Error('Key Code: Unsupported platform');
 			}
 		}
 

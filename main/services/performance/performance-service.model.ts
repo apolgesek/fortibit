@@ -1,6 +1,7 @@
-import { createServiceDecorator } from '../../dependency-injection/create-service-decorator';
+import { createServiceDecorator } from '../../di/create-service-decorator';
 
-export const IPerformanceService = createServiceDecorator<IPerformanceService>('performanceService');
+export const IPerformanceService =
+	createServiceDecorator<IPerformanceService>('performanceService');
 export interface IPerformanceService {
-  mark(description: string): void;
-} 
+	mark(description: string): void;
+}

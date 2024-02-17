@@ -1,9 +1,4 @@
-export type Entry = {
-  id: number;
-	groupId: number;
-  creationDate: Date | number;
-	lastModificationDate: Date | number;
-  isStarred: boolean;
-	group?: string;
-  title?: string;
-}
+import { CardEntry } from './card-entry.model';
+import { PasswordEntry } from './password-entry.model';
+
+export type Entry = PasswordEntry | CardEntry;

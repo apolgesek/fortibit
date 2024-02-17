@@ -1,13 +1,9 @@
-@import 'themes/light/variables';;
+@import 'themes/light/variables';
 @import 'mixins';
-
-:host {
-	border-bottom: 1px solid var(--border-color);
-}
 
 .add-entry {
 	@include toolbar-btn;
-	margin: 0 0.5rem 0 1rem;
+	margin: 0 1rem 0 1rem;
 	min-width: 10rem;
 	color: var(--add-entry-cta-text);
 	background-color: var(--add-entry-cta-bg);
@@ -18,7 +14,8 @@
 		color: var(--secondary-btn-text--disabled);
 	}
 
-	&:hover:not(:disabled), &:focus {
+	&:hover:not(:disabled),
+	&:focus {
 		color: white;
 		background-color: var(--add-entry-cta-bg--hover);
 	}
@@ -29,18 +26,6 @@
 	}
 }
 
-.save-db {
-	i-feather {
-		width: 16px !important;
-		height: 16px !important;
-	}
-}
-
-.edit-entry {
-	margin-left: 0.5rem;
-	margin-right: 0.5rem;
-}
-
 .remove-entry {
 	margin-right: 0.5rem;
 }
@@ -48,11 +33,14 @@
 .main-nav {
 	width: 100%;
 	height: $toolbar-height;
-  background-color: var(--primary-bg);
-	box-sizing: border-box;
+	background-color: var(--primary-bg);
 	display: flex;
 	position: relative;
 	z-index: 3;
+
+	box-sizing: border-box;
+	border-top: 1px solid var(--border-color);
+	border-bottom: 1px solid var(--border-color);
 
 	.menu-panel {
 		flex: 1;
@@ -70,14 +58,15 @@
 		border: 1px solid var(--border-color);
 		border-radius: 0.25rem;
 		margin-right: 1rem;
-	
+		flex: 1;
+
 		.search {
 			font-size: 0.875rem;
 			border: none;
 			border-radius: 0.25rem;
 			padding: 0 1rem;
 			height: 100%;
-			width: 8rem;
+			flex: 1;
 			border-top-right-radius: 0;
 			border-bottom-right-radius: 0;
 			z-index: 100;
@@ -89,7 +78,7 @@
 				color: lighten($grey-400, 15);
 			}
 		}
-	
+
 		.search-mode {
 			display: flex;
 			align-items: center;
@@ -102,8 +91,8 @@
 			border-bottom-right-radius: 0.25rem;
 
 			.clear-search {
-				width: 1rem !important;
-				height: 1rem !important;
+				width: 1.25rem !important;
+				height: 1.25rem !important;
 				border: 1px solid transparent;
 				border-radius: 2px;
 				outline: none;
@@ -123,8 +112,8 @@
 
 .global-search-icon {
 	border: 2px solid transparent;
-	width: 1rem !important;
-	height: 1rem !important;
+	width: 1.25rem !important;
+	height: 1.25rem !important;
 	margin-right: 1rem !important;
 	border-radius: 2px;
 	cursor: pointer;

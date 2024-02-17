@@ -7,104 +7,115 @@ import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class GroupManager {
-  public readonly markDirtySource: Subject<void> = new Subject();
-  public groups: EntryGroup[] = [];
-  public builtInGroups: EntryGroup[] = [];
-  public selectedGroup?: number;
-  public selectedGroupName?: string;
-  public contextSelectedGroup?: number;
-  public isGroupDragged?: boolean;
+	public readonly markDirtySource: Subject<void> = new Subject();
+	public groups: EntryGroup[] = [];
+	public builtInGroups: EntryGroup[] = [];
+	public selectedGroup?: number;
+	public selectedGroupName?: string;
+	public contextSelectedGroup?: number;
+	public isGroupDragged?: boolean;
 
-  private readonly groupRepository: GroupRepository = new GroupRepository(inject(DbManager));
+	private readonly groupRepository: GroupRepository = new GroupRepository(
+		inject(DbManager),
+	);
 
-  get isAddAllowed(): boolean {
-    const selectedCategoryId = this.selectedGroup;
+	get isAddAllowed(): boolean {
+		const selectedCategoryId = this.selectedGroup;
 
-    return selectedCategoryId !== GroupId.RecycleBin
-      && selectedCategoryId !== GroupId.Starred;
-  }
+		return (
+			selectedCategoryId !== GroupId.RecycleBin &&
+			selectedCategoryId !== GroupId.Starred
+		);
+	}
 
-  async getAll(): Promise<EntryGroup[]> {
-    return this.groupRepository.getAll();
-  }
+	async getAll(): Promise<EntryGroup[]> {
+		return this.groupRepository.getAll();
+	}
 
-  async get(id: number): Promise<EntryGroup> {
-    return this.groupRepository.get(id);
-  }
+	async get(id: number): Promise<EntryGroup> {
+		return this.groupRepository.get(id);
+	}
 
-  async removeGroup() {
-    await this.groupRepository.bulkDelete([this.selectedGroup]);
-    await this.getGroupsTree();
-    await this.selectGroup(GroupId.AllItems);
+	async removeGroup() {
+		await this.groupRepository.bulkDelete([this.selectedGroup]);
+		await this.getGroupsTree();
+		await this.selectGroup(GroupId.AllItems);
 
-    this.markDirty();
-  }
+		this.markDirty();
+	}
 
-  async updateGroup(group: EntryGroup) {
-    await this.groupRepository.update({
-      id: group.id,
-      name: group.name,
-    });
+	async updateGroup(group: EntryGroup) {
+		await this.groupRepository.update({
+			id: group.id,
+			name: group.name,
+		});
 
-    this.getGroupsTree();
-    this.markDirty();
-  }
+		this.getGroupsTree();
+		this.markDirty();
+	}
 
-  async bulkAdd(groups: EntryGroup[]): Promise<number> {
-    return this.groupRepository.bulkAdd(groups);
-  }
+	async bulkAdd(groups: EntryGroup[]): Promise<number> {
+		return this.groupRepository.bulkAdd(groups);
+	}
 
-  async addGroup(model?: Partial<EntryGroup>): Promise<number> {
-    const newGroup: EntryGroup = {
-      name: model?.name ?? 'New group',
-    };
+	async addGroup(model?: Partial<EntryGroup>): Promise<number> {
+		const newGroup: EntryGroup = {
+			name: model?.name ?? 'New group',
+		};
 
-    if (model?.isImported) {
-      newGroup.isImported = true;
-    }
+		if (model?.isImported) {
+			newGroup.isImported = true;
+		}
 
-    const groupId = await this.groupRepository.add(newGroup);
+		const groupId = await this.groupRepository.add(newGroup);
 
-    if (groupId > 0) {
-      await this.getGroupsTree();
-    }
+		if (groupId > 0) {
+			await this.getGroupsTree();
+		}
 
-    this.markDirty();
+		this.markDirty();
 
-    return groupId;
-  }
+		return groupId;
+	}
 
-  async selectGroup(id: number) {
-    this.selectedGroup = id;
-    this.selectedGroupName = (await this.groupRepository.get(id)).name;
-  }
+	async selectGroup(id: number) {
+		this.selectedGroup = id;
+		this.selectedGroupName = (await this.groupRepository.get(id)).name;
+	}
 
-  async setupGroups() {
-    await this.groupRepository.bulkAdd(initialEntries);
-    this.groups = await this.getGroupsTree();
-    this.selectedGroup = GroupId.AllItems;
-  }
+	async setupGroups() {
+		await this.groupRepository.bulkAdd(initialEntries);
+		this.groups = await this.getGroupsTree();
+		this.selectedGroup = GroupId.AllItems;
+	}
 
-  async getGroupsTree(): Promise<EntryGroup[]> {
-    const builtInGroups = [GroupId.Root, GroupId.AllItems, GroupId.Starred, GroupId.RecycleBin];
-    const allGroups = await this.groupRepository.getAll();
+	async getGroupsTree(): Promise<EntryGroup[]> {
+		const builtInGroups = [
+			GroupId.Root,
+			GroupId.AllItems,
+			GroupId.Starred,
+			GroupId.RecycleBin,
+		];
+		const allGroups = await this.groupRepository.getAll();
 
-    this.groups = [];
-    this.groups[0] = allGroups.find(g => g.id === GroupId.Root);
-    this.builtInGroups = builtInGroups.map(g => initialEntries.find(x => x.id === g));
+		this.groups = [];
+		this.groups[0] = allGroups.find((g) => g.id === GroupId.Root);
+		this.builtInGroups = builtInGroups.map((g) =>
+			initialEntries.find((x) => x.id === g),
+		);
 
-    const rootGroups = allGroups
-      .filter(x => !builtInGroups.includes(x.id))
-      .sort((a, b) => a.name.localeCompare(b.name));
+		const rootGroups = allGroups
+			.filter((x) => !builtInGroups.includes(x.id))
+			.sort((a, b) => a.name.localeCompare(b.name));
 
-    for (let index = 0; index < rootGroups.length; index++){
-      this.groups[index + 1] = rootGroups[index];
-    }
+		for (let index = 0; index < rootGroups.length; index++) {
+			this.groups[index + 1] = rootGroups[index];
+		}
 
-    return this.groups;
-  }
+		return this.groups;
+	}
 
-  private markDirty() {
-    this.markDirtySource.next();
-  }
+	private markDirty() {
+		this.markDirtySource.next();
+	}
 }

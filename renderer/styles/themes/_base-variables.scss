@@ -6,10 +6,10 @@ $blue-400: #364f63;
 $blue-300: #47779e;
 $blue-250: #6191b8;
 $blue-200: #17adba;
-$blue-100: #CAE6E3;
+$blue-100: #cae6e3;
 
 $black-900: #191d1e;
-$black-800: #2C2C2C;
+$black-800: #2c2c2c;
 
 $grey-600: #3f3f3f;
 $grey-500: #65676b;
@@ -20,7 +20,7 @@ $grey-100: #f1f3f4;
 
 $white: #fcfcfc;
 
-$jungle-green: #21A67A;
+$jungle-green: #21a67a;
 $bright-red: #a80000;
 $red-orange: #ff3333;
 
@@ -33,9 +33,10 @@ $toolbar-height: 5rem;
 $workspace-header-height: 2.5rem;
 
 $layout: (
-  "app": calc(100vh - $menu-bar-height),
-  "workspace": calc(100vh - $menu-bar-height - $toolbar-height),
-  "entry-table": calc(100vh - $menu-bar-height - $toolbar-height - $workspace-header-height)
+	'app': calc(100vh - $menu-bar-height),
+	'workspace': calc(100vh - $menu-bar-height - $toolbar-height),
+	'entry-table':
+		calc(100vh - $menu-bar-height - $toolbar-height - $workspace-header-height),
 );
 
 // OTHER

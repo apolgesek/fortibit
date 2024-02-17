@@ -1,66 +1,72 @@
 <app-modal>
-  <div
-    class="dialog-header">
-    <h2>{{ title }}</h2>
-    <a
-      href="#"
-      role="button"
-      aria-label="Close"
-      class="close-dialog"
-      (click)="close(); false">&times;
-    </a>
-  </div>
-  <div class="dialog-message">
-    <div [formGroup]="groupForm">
-      <div class="inputgroup">
-        <span class="inputgroup-addon"><i-feather name="bookmark"></i-feather></span>
-        <input
-          type="text"
-          aria-describedby="name-invalid"
-          [attr.aria-invalid]="isControlInvalid(name)"
-          id="group-name"
-          #autofocus
-          formControlName="name"
-          placeholder="Name">   
-      </div>
-      <div
-        *ngIf="isControlInvalid(name)"
-        class="validation-error"
-        id="name-invalid">
-        <ng-container *ngIf="name.hasError('required')">
-          Group name is required.
-        </ng-container>
-        <ng-container *ngIf="name.hasError('maxlength')">
-          Group name must not exceed 40 characters.
-        </ng-container>
-      </div>
-    </div>
-  </div>
-  <div
-    class="footer-container">
-    <button
-      type="button"
-      class="text-btn"
-      (click)="close()"
-      (keyup.enter)="close()">
-      Cancel
-    </button>
-    <button
-      *ngIf="additionalData?.payload?.mode === 'edit'"
-      type="button"
-      id="remove-group"
-      class="primary-btn"
-      (click)="removeGroup()"
-      (keyup.enter)="removeGroup()">
-      Remove
-    </button>
-    <button
-      type="button"
-      id="save-group"
-      class="primary-btn"
-      (click)="saveGroup()"
-      (keyup.enter)="saveGroup()">
-      Save
-    </button>
-  </div>
+	<div class="dialog-header">
+		<h2>{{ title }}</h2>
+		<a
+			href="#"
+			role="button"
+			aria-label="Close"
+			class="close-dialog"
+			(click)="close(); (false)"
+			>&times;
+		</a>
+	</div>
+	<div class="dialog-message">
+		<div [formGroup]="groupForm">
+			<div class="inputgroup">
+				<span class="inputgroup-addon"
+					><i-feather name="bookmark"></i-feather
+				></span>
+				<input
+					type="text"
+					aria-describedby="name-invalid"
+					[attr.aria-invalid]="isControlInvalid(name)"
+					id="group-name"
+					#autofocus
+					formControlName="name"
+					placeholder="Name"
+				/>
+			</div>
+			<div
+				*ngIf="isControlInvalid(name)"
+				class="validation-error"
+				id="name-invalid"
+			>
+				<ng-container *ngIf="name.hasError('required')">
+					Group name is required.
+				</ng-container>
+				<ng-container *ngIf="name.hasError('maxlength')">
+					Group name must not exceed 40 characters.
+				</ng-container>
+			</div>
+		</div>
+	</div>
+	<div class="footer-container">
+		<button
+			type="button"
+			class="text-btn"
+			(click)="close()"
+			(keyup.enter)="close()"
+		>
+			Cancel
+		</button>
+		<button
+			*ngIf="additionalData?.payload?.mode === 'edit'"
+			type="button"
+			id="remove-group"
+			class="primary-btn"
+			(click)="removeGroup()"
+			(keyup.enter)="removeGroup()"
+		>
+			Remove
+		</button>
+		<button
+			type="button"
+			id="save-group"
+			class="primary-btn"
+			(click)="saveGroup()"
+			(keyup.enter)="saveGroup()"
+		>
+			Save
+		</button>
+	</div>
 </app-modal>

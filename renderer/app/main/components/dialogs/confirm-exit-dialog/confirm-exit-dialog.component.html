@@ -1,36 +1,25 @@
 <app-modal>
-  <div class="dialog-header">
-    <h2>Quit fortibit</h2>
-    <a
-      href="#"
-      role="button"
-      aria-label="Close"
-      class="close-dialog"
-      (click)="close(); false">&times;
-    </a>
-  </div>
-  <div class="dialog-message">
-    Are you sure you want to quit? There are unsaved changes.
-  </div>
-  <div class="footer-container">
-    <button
-      type="button"
-      class="text-btn"
-      (click)="saveChanges()">
-      Save
-    </button>
-    <button
-      type="button"
-      class="text-btn"
-      (click)="executeTask()">
-      Don't save
-    </button>
-    <button
-      #autofocus
-      type="button"
-      class="primary-btn"
-      (click)="close()">
-      Cancel
-    </button>
-  </div>
+	<div class="dialog-header">
+		<h2>Quit fortibit</h2>
+		<a
+			href="#"
+			role="button"
+			aria-label="Close"
+			class="close-dialog"
+			(click)="close(); (false)"
+			>&times;
+		</a>
+	</div>
+	<div class="dialog-message">
+		Are you sure you want to quit? There are unsaved changes.
+	</div>
+	<div class="footer-container">
+		<button type="button" class="text-btn" (click)="saveChanges()">Save</button>
+		<button type="button" class="text-btn" (click)="executeTask()">
+			Don't save
+		</button>
+		<button #autofocus type="button" class="primary-btn" (click)="close()">
+			Cancel
+		</button>
+	</div>
 </app-modal>

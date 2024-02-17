@@ -1,4 +1,4 @@
-@import 'themes/light/variables';;
+@import 'themes/light/variables';
 @import 'mixins';
 
 :host {
@@ -13,7 +13,7 @@
 	flex-direction: column;
 	padding: 1rem;
 	max-width: 200px;
-	border-top: 1px solid rgba(0,0,0, 0.04);
+	border-top: 1px solid rgba(0, 0, 0, 0.04);
 	background-color: var(--modal-bg);
 	border-top-left-radius: 0.25rem;
 
@@ -26,7 +26,8 @@
 	display: flex;
 
 	&:hover {
-		.filters-btn, .sort-btn {
+		.filters-btn,
+		.sort-btn {
 			&:focus {
 				outline: none !important;
 			}
@@ -34,7 +35,8 @@
 	}
 }
 
-.filters-btn, .sort-btn {
+.filters-btn,
+.sort-btn {
 	border-radius: 0.25rem;
 	background-color: var(--primary-bg);
 	padding: 0.25rem 0.5rem;
@@ -47,8 +49,8 @@
 	}
 
 	&:focus:not(:hover) {
-    outline: 2px solid $barberry !important;
-  }
+		outline: 2px solid $barberry !important;
+	}
 
 	&:active {
 		outline: none !important;
@@ -104,7 +106,9 @@
 		margin-left: 0.5rem;
 	}
 
-	&:hover, &:focus, &.selected {
+	&:hover,
+	&:focus,
+	&.selected {
 		background-color: var(--tabset-btn-bg);
 	}
 }
@@ -129,7 +133,7 @@
 		margin-left: 0;
 
 		&:first-child {
-			flex: 1
+			flex: 1;
 		}
 	}
 }

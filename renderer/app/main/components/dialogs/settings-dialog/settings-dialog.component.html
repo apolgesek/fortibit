@@ -1,29 +1,35 @@
 <app-modal bodyClass="settings-modal">
-  <div
-    class="dialog-header">
-    <h2>Settings</h2>
-    <a
-      href="#"
-      role="button"
-      aria-label="Close"
-      class="close-dialog"
-      (click)="close(); false">&times;
-    </a>
-  </div>
-  <div class="dialog-message">
-    <app-tabset>
-      <app-tab header="General" #generalTab>
-        <app-general-tab *ngIf="generalTab.active"></app-general-tab>
-      </app-tab>
-      <app-tab header="Encryption" #encryptionTab>
-        <app-encryption-tab *ngIf="encryptionTab.active"></app-encryption-tab>
-      </app-tab>
-      <app-tab header="View" #viewTab>
-        <app-view-tab *ngIf="viewTab.active"></app-view-tab>
-      </app-tab>
-      <app-tab header="Integration" #integrationTab *ngIf="shouldIncludeTab(tab.Integration)">
-        <app-integration-tab *ngIf="integrationTab.active"></app-integration-tab>
-      </app-tab>
-    </app-tabset>
-  </div>
+	<div class="dialog-header">
+		<h2>Settings</h2>
+		<a
+			href="#"
+			role="button"
+			aria-label="Close"
+			class="close-dialog"
+			(click)="close(); (false)"
+			>&times;
+		</a>
+	</div>
+	<div class="dialog-message">
+		<app-tabset>
+			<app-tab header="General" #generalTab>
+				<app-general-tab *ngIf="generalTab.active"></app-general-tab>
+			</app-tab>
+			<app-tab header="Encryption" #encryptionTab>
+				<app-encryption-tab *ngIf="encryptionTab.active"></app-encryption-tab>
+			</app-tab>
+			<app-tab header="View" #viewTab>
+				<app-view-tab *ngIf="viewTab.active"></app-view-tab>
+			</app-tab>
+			<app-tab
+				header="Integration"
+				#integrationTab
+				*ngIf="shouldIncludeTab(tab.Integration)"
+			>
+				<app-integration-tab
+					*ngIf="integrationTab.active"
+				></app-integration-tab>
+			</app-tab>
+		</app-tabset>
+	</div>
 </app-modal>

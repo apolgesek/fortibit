@@ -1,6 +1,7 @@
-import { Entry } from './entry.model';
+import { EntryBase } from './entry-base.model';
 
-export type PasswordEntry = Entry & {
+export type PasswordEntry = EntryBase & {
+	type: 'password';
 	username: string;
 	password: string;
 	url?: string;
@@ -8,4 +9,4 @@ export type PasswordEntry = Entry & {
 	autotypeExp?: string;
 	icon?: string;
 	history?: PasswordEntry[];
-}
+};

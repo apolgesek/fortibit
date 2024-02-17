@@ -1,37 +1,21 @@
 {
-  "compilerOptions": {
-    "sourceMap": true,
-    "declaration": false,
-    "baseUrl": "./",
-    "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "module": "commonjs",
-    "target": "es5",
-    "types": [
-      "node"
-    ],
-    "paths": {
-      "@shared-renderer/*": [
-        "shared/*"
-      ],
-      "@root/*": [
-        "./*"
-      ]
-    },
-    "lib": [
-      "es2021",
-      "dom"
-    ]
-  },
-  "files": [
-    "main.ts",
-  ],
-  "include": [
-    "**/auth.service.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts",
-  ]
+	"compilerOptions": {
+		"sourceMap": true,
+		"declaration": false,
+		"baseUrl": "./",
+		"moduleResolution": "node",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"module": "commonjs",
+		"target": "es5",
+		"types": ["node"],
+		"paths": {
+			"@shared-renderer/*": ["shared/*"],
+			"@root/*": ["./*"]
+		},
+		"lib": ["es2021", "dom"]
+	},
+	"files": ["main.ts"],
+	"include": ["**/auth.service.ts"],
+	"exclude": ["node_modules", "**/*.spec.ts"]
 }

@@ -2,31 +2,51 @@ import { Inject, Injectable } from '@angular/core';
 import { Configuration } from '@config/configuration';
 import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { Observable, ReplaySubject, Subject, forkJoin, from } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin, from } from 'rxjs';
 import { IMessageBroker } from '../models';
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root',
 })
 export class ConfigService {
-  public readonly configLoadedSource$: Observable<Configuration>;
-  private readonly configLoaded: Subject<Configuration> = new ReplaySubject(1);
-  private config: Configuration | null = null;
+	public readonly configLoadedSource$: Observable<Configuration>;
+	private readonly configLoaded: BehaviorSubject<Configuration> = new BehaviorSubject(null);
 
-  constructor(@Inject(MessageBroker) private readonly messageBroker: IMessageBroker) {
-    this.configLoadedSource$ = this.configLoaded.asObservable();
-  }
+	public get config(): Configuration {
+		return this.configLoaded.value;
+	}
 
-  setConfig(config: Partial<Configuration>) {
-    this.config = {...this.config, ...config};
+	constructor(
+		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
+	) {
+		this.configLoadedSource$ = this.configLoaded.asObservable();
+	}
 
-    forkJoin([
-      from(this.messageBroker.ipcRenderer.invoke(IpcChannel.ChangeEncryptionSettings, this.config)),
-      from(this.messageBroker.ipcRenderer.invoke(IpcChannel.ChangeScreenLockSettings, this.config)),
-      from(this.messageBroker.ipcRenderer.invoke(IpcChannel.ChangeWindowsCaptureProtection, this.config))
-    ]).subscribe(() => {
-      this.messageBroker.ipcRenderer.send(IpcChannel.ConfigChanged, config);
-      this.configLoaded.next(this.config);
-    });
-  }
+	setConfig(config: Partial<Configuration>) {
+		const fullConfig = { ...this.config, ...config };
+
+		forkJoin([
+			from(
+				this.messageBroker.ipcRenderer.invoke(
+					IpcChannel.ChangeEncryptionSettings,
+					fullConfig,
+				),
+			),
+			from(
+				this.messageBroker.ipcRenderer.invoke(
+					IpcChannel.ChangeScreenLockSettings,
+					fullConfig,
+				),
+			),
+			from(
+				this.messageBroker.ipcRenderer.invoke(
+					IpcChannel.ChangeWindowsCaptureProtection,
+					fullConfig,
+				),
+			),
+		]).subscribe(() => {
+			this.messageBroker.ipcRenderer.send(IpcChannel.ConfigChanged, config);
+			this.configLoaded.next(fullConfig);
+		});
+	}
 }

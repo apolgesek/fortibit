@@ -1,44 +1,44 @@
 @import 'mixins';
 
 .text-right {
-  text-align: right;
+	text-align: right;
 }
 
 .table-header {
-  display: flex;
+	display: flex;
 }
 
 .row {
-  display: flex;
-  border-top: 1px solid var(--border-color);
+	display: flex;
+	border-top: 1px solid var(--border-color);
 
-  &:last-child {
-    border-bottom: 1px solid var(--border-color);
-  }
+	&:last-child {
+		border-bottom: 1px solid var(--border-color);
+	}
 }
 
 .cell {
-  flex: 1;
-  max-width: 25%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 0.5rem;
+	flex: 1;
+	max-width: 25%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	padding: 0.5rem;
 
-  &.index {
-    flex: none;
-    width: 3rem;
-  }
+	&.index {
+		flex: none;
+		width: 3rem;
+	}
 }
 
 .table {
-  @include scrollbar;
-  font-size: 0.875rem;
-  position: relative;
-  max-height: 100%;
-  overflow: auto;
-  padding-right: 1rem;
+	@include scrollbar;
+	font-size: 0.875rem;
+	position: relative;
+	max-height: 100%;
+	overflow: auto;
+	padding-right: 1rem;
 }
 
 .footer-container {
-  margin-top: 2rem;
+	margin-top: 2rem;
 }

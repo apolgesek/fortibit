@@ -6,39 +6,37 @@ import { EntryManager, GroupManager, ModalRef } from '@app/core/services';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-delete-entry-dialog',
-  templateUrl: './delete-entry-dialog.component.html',
-  styleUrls: ['./delete-entry-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    ModalComponent
-  ],
+	selector: 'app-delete-entry-dialog',
+	templateUrl: './delete-entry-dialog.component.html',
+	styleUrls: ['./delete-entry-dialog.component.scss'],
+	standalone: true,
+	imports: [CommonModule, ModalComponent],
 })
 export class DeleteEntryDialogComponent implements IModal, OnInit {
-  public readonly ref!: ComponentRef<DeleteEntryDialogComponent>;
-  public readonly additionalData!: IAdditionalData;
-  public isInRecycleBin = false;
+	public readonly ref!: ComponentRef<DeleteEntryDialogComponent>;
+	public readonly additionalData!: IAdditionalData;
+	public isInRecycleBin = false;
 
-  private readonly groupManager = inject(GroupManager);
-  private readonly entryManager = inject(EntryManager);
-  private readonly modalRef = inject(ModalRef);
+	private readonly groupManager = inject(GroupManager);
+	private readonly entryManager = inject(EntryManager);
+	private readonly modalRef = inject(ModalRef);
 
-  get selectedRowsCount(): number {
-    return this.entryManager.selectedPasswords.length;
-  }
+	get selectedRowsCount(): number {
+		return this.entryManager.selectedPasswords.length;
+	}
 
-  ngOnInit() {
-    this.isInRecycleBin = this.groupManager.selectedGroup === GroupId.RecycleBin;
-  }
+	ngOnInit() {
+		this.isInRecycleBin =
+			this.groupManager.selectedGroup === GroupId.RecycleBin;
+	}
 
-  async deleteEntry() {
-    await this.entryManager.deleteEntry();
+	async deleteEntry() {
+		await this.entryManager.deleteEntry();
 
-    this.close();
-  }
+		this.close();
+	}
 
-  close() {
-    this.modalRef.close();
-  }
+	close() {
+		this.modalRef.close();
+	}
 }

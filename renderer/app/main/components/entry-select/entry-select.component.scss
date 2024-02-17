@@ -5,8 +5,8 @@ $sidePanelInDuration: 300ms;
 $sidePanelOutDuration: 250ms;
 
 :host {
-  display: block;
-  width: 100%;
+	display: block;
+	width: 100%;
 	overflow: auto;
 	position: relative;
 
@@ -14,7 +14,7 @@ $sidePanelOutDuration: 250ms;
 	@include scrollbar;
 
 	.table-viewport {
-		height: map-get($map: $layout, $key: "entry-table");
+		height: map-get($map: $layout, $key: 'entry-table');
 		// vertical scrollbar inside the table viewport
 		@include scrollbar;
 
@@ -43,7 +43,7 @@ h2 {
 }
 
 .password-table {
-	padding: 0 2rem;
+	padding: 1rem 2rem 0;
 	box-sizing: border-box;
 	width: 100%;
 	@include font-regular;

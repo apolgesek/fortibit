@@ -18,7 +18,8 @@
 		margin-right: 0.5rem;
 	}
 
-	&:hover, &:focus-visible {
+	&:hover,
+	&:focus-visible {
 		background-color: var(--expandable-bg--hover);
 	}
 }

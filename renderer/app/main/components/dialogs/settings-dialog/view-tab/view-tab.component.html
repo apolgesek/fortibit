@@ -1,27 +1,27 @@
 <div class="container">
-  <form [formGroup]="viewForm">
-    <div class="inputgroup checkbox">
-      <label class="label" for="darkTheme">Dark theme:</label>
-      <label class="switch">
-        <input
-          id="darkTheme"
-          type="checkbox"
-          formControlName="darkTheme">
-          <span class="slider"></span>
-      </label>    
-    </div>
-    <div class="info-box"><i-feather name="info"></i-feather>
-      Icons for web login entries are provided by fortibit's trusted content server.
-    </div>
-    <div class="inputgroup checkbox">
-      <label class="label" for="displayIcons">Display entry icons:</label>
-      <label class="switch">
-        <input
-          id="displayIcons"
-          type="checkbox"
-          formControlName="displayIcons">
-          <span class="slider"></span>
-      </label>    
-    </div>
-  </form>
+	<form [formGroup]="viewForm">
+		<div class="inputgroup checkbox">
+			<label class="label" for="darkTheme">Dark theme:</label>
+			<label class="switch">
+				<input id="darkTheme" type="checkbox" formControlName="darkTheme" />
+				<span class="slider"></span>
+			</label>
+		</div>
+		<div class="info-box">
+			<i-feather name="info"></i-feather>
+			Icons for web login entries are provided by fortibit's trusted content
+			server.
+		</div>
+		<div class="inputgroup checkbox">
+			<label class="label" for="displayIcons">Display entry icons:</label>
+			<label class="switch">
+				<input
+					id="displayIcons"
+					type="checkbox"
+					formControlName="displayIcons"
+				/>
+				<span class="slider"></span>
+			</label>
+		</div>
+	</form>
 </div>

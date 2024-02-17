@@ -1,209 +1,190 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "cli": {
-    "analytics": false
-  },
-  "version": 1,
-  "newProjectRoot": "projects",
-  "projects": {
-    "angular-electron": {
-      "root": "",
-      "sourceRoot": "renderer",
-      "projectType": "application",
-      "schematics": {
-        "@schematics/angular:application": {
-          "strict": true
-        }
-      },
-      "architect": {
-        "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
-          "options": {
-            "outputPath": "dist",
-            "index": "renderer/index.html",
-            "main": "renderer/main.ts",
-            "tsConfig": "renderer/tsconfig.json",
-            "polyfills": "renderer/polyfills.ts",
-            "allowedCommonJsDependencies": [
-              "rxjs",
-              "zxcvbn"
-            ],
-            "assets": [
-              "renderer/assets",
-              "renderer/preload.js"
-            ],
-            "styles": [
-              "renderer/styles.scss"
-            ],
-            "stylePreprocessorOptions": {
-              "includePaths": [
-                "renderer/styles"
-              ]
-            },
-            "scripts": [],
-            "customWebpackConfig": {
-              "path": "./angular.webpack.js",
-              "replaceDuplicatePlugins": true
-            }
-          },
-          "configurations": {
-            "local": {
-              "optimization": false,
-              "outputHashing": "none",
-              "sourceMap": true,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": false
-            },
-            "web": {
-              "optimization": false,
-              "outputHashing": "none",
-              "sourceMap": true,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": false,
-              "fileReplacements": [
-                {
-                  "replace": "renderer/environments/environment.ts",
-                  "with": "renderer/environments/environment.web.ts"
-                }
-              ]
-            },
-            "dev": {
-              "optimization": false,
-              "outputHashing": "none",
-              "sourceMap": true,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": false,
-              "fileReplacements": [
-                {
-                  "replace": "renderer/environments/environment.ts",
-                  "with": "renderer/environments/environment.dev.ts"
-                }
-              ]
-            },
-            "production": {
-              "optimization": true,
-              "outputHashing": "none",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "renderer/environments/environment.ts",
-                  "with": "renderer/environments/environment.prod.ts"
-                }
-              ]
-            },
-            "e2e": {
-              "optimization": true,
-              "outputHashing": "none",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "renderer/environments/environment.ts",
-                  "with": "renderer/environments/environment.e2e.ts"
-                }
-              ]
-            }
-          }
-        },
-        "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
-          "options": {
-            "browserTarget": "angular-electron:build"
-          },
-          "configurations": {
-            "local": {
-              "browserTarget": "angular-electron:build:local"
-            },
-            "dev": {
-              "browserTarget": "angular-electron:build:dev"
-            },
-            "web": {
-              "browserTarget": "angular-electron:build:web"
-            },
-            "production": {
-              "browserTarget": "angular-electron:build:production"
-            }
-          }
-        },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
-          "options": {
-            "browserTarget": "angular-electron:build"
-          }
-        },
-        "test": {
-          "builder": "@angular-builders/custom-webpack:karma",
-          "options": {
-            "main": "renderer/test.ts",
-            "polyfills": "renderer/polyfills-test.ts",
-            "karmaConfig": "renderer/karma.conf.js",
-            "scripts": [],
-            "styles": [
-              "renderer/styles.scss"
-            ],
-            "assets": [
-              "renderer/assets",
-              "renderer/favicon.ico",
-              "renderer/favicon.png",
-              "renderer/favicon.icns",
-              "renderer/favicon.256x256.png",
-              "renderer/favicon.512x512.png"
-            ],
-            "customWebpackConfig": {
-              "path": "./angular.webpack.js"
-            }
-          }
-        },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "lintFilePatterns": [
-              "renderer/**/*.ts",
-              "renderer/**/*.html"
-            ]
-          }
-        }
-      }
-    },
-    "angular-electron-e2e": {
-      "root": "e2e",
-      "projectType": "application",
-      "architect": {
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "eslintConfig": "e2e/eslintrc.e2e.json",
-            "tsConfig": [
-              "e2e/tsconfig.e2e.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        }
-      }
-    }
-  },
-  "schematics": {
-    "@schematics/angular:component": {
-      "prefix": "app",
-      "style": "scss"
-    },
-    "@schematics/angular:directive": {
-      "prefix": "app"
-    }
-  }
+	"$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+	"cli": {
+		"analytics": false
+	},
+	"version": 1,
+	"newProjectRoot": "projects",
+	"projects": {
+		"angular-electron": {
+			"root": "",
+			"sourceRoot": "renderer",
+			"projectType": "application",
+			"schematics": {
+				"@schematics/angular:application": {
+					"strict": true
+				}
+			},
+			"architect": {
+				"build": {
+					"builder": "@angular-builders/custom-webpack:browser",
+					"options": {
+						"outputPath": "dist",
+						"index": "renderer/index.html",
+						"main": "renderer/main.ts",
+						"tsConfig": "renderer/tsconfig.json",
+						"polyfills": "renderer/polyfills.ts",
+						"allowedCommonJsDependencies": ["rxjs", "zxcvbn"],
+						"assets": ["renderer/assets", "renderer/preload.js"],
+						"styles": ["renderer/styles.scss"],
+						"stylePreprocessorOptions": {
+							"includePaths": ["renderer/styles"]
+						},
+						"scripts": [],
+						"customWebpackConfig": {
+							"path": "./angular.webpack.js",
+							"replaceDuplicatePlugins": true
+						}
+					},
+					"configurations": {
+						"local": {
+							"optimization": false,
+							"outputHashing": "none",
+							"sourceMap": true,
+							"namedChunks": false,
+							"extractLicenses": true,
+							"vendorChunk": false,
+							"buildOptimizer": false
+						},
+						"web": {
+							"optimization": false,
+							"outputHashing": "none",
+							"sourceMap": true,
+							"namedChunks": false,
+							"extractLicenses": true,
+							"vendorChunk": false,
+							"buildOptimizer": false,
+							"fileReplacements": [
+								{
+									"replace": "renderer/environments/environment.ts",
+									"with": "renderer/environments/environment.web.ts"
+								}
+							]
+						},
+						"dev": {
+							"optimization": false,
+							"outputHashing": "none",
+							"sourceMap": true,
+							"namedChunks": false,
+							"extractLicenses": true,
+							"vendorChunk": false,
+							"buildOptimizer": false,
+							"fileReplacements": [
+								{
+									"replace": "renderer/environments/environment.ts",
+									"with": "renderer/environments/environment.dev.ts"
+								}
+							]
+						},
+						"production": {
+							"optimization": true,
+							"outputHashing": "none",
+							"sourceMap": false,
+							"namedChunks": false,
+							"extractLicenses": true,
+							"vendorChunk": false,
+							"buildOptimizer": true,
+							"fileReplacements": [
+								{
+									"replace": "renderer/environments/environment.ts",
+									"with": "renderer/environments/environment.prod.ts"
+								}
+							]
+						},
+						"e2e": {
+							"optimization": true,
+							"outputHashing": "none",
+							"sourceMap": false,
+							"namedChunks": false,
+							"extractLicenses": true,
+							"vendorChunk": false,
+							"buildOptimizer": true,
+							"fileReplacements": [
+								{
+									"replace": "renderer/environments/environment.ts",
+									"with": "renderer/environments/environment.e2e.ts"
+								}
+							]
+						}
+					}
+				},
+				"serve": {
+					"builder": "@angular-builders/custom-webpack:dev-server",
+					"options": {
+						"browserTarget": "angular-electron:build"
+					},
+					"configurations": {
+						"local": {
+							"browserTarget": "angular-electron:build:local"
+						},
+						"dev": {
+							"browserTarget": "angular-electron:build:dev"
+						},
+						"web": {
+							"browserTarget": "angular-electron:build:web"
+						},
+						"production": {
+							"browserTarget": "angular-electron:build:production"
+						}
+					}
+				},
+				"extract-i18n": {
+					"builder": "@angular-devkit/build-angular:extract-i18n",
+					"options": {
+						"browserTarget": "angular-electron:build"
+					}
+				},
+				"test": {
+					"builder": "@angular-builders/custom-webpack:karma",
+					"options": {
+						"main": "renderer/test.ts",
+						"polyfills": "renderer/polyfills-test.ts",
+						"karmaConfig": "renderer/karma.conf.js",
+						"scripts": [],
+						"styles": ["renderer/styles.scss"],
+						"assets": [
+							"renderer/assets",
+							"renderer/favicon.ico",
+							"renderer/favicon.png",
+							"renderer/favicon.icns",
+							"renderer/favicon.256x256.png",
+							"renderer/favicon.512x512.png"
+						],
+						"customWebpackConfig": {
+							"path": "./angular.webpack.js"
+						}
+					}
+				},
+				"lint": {
+					"builder": "@angular-eslint/builder:lint",
+					"options": {
+						"lintFilePatterns": ["renderer/**/*.ts", "renderer/**/*.html"]
+					}
+				}
+			}
+		},
+		"angular-electron-e2e": {
+			"root": "e2e",
+			"projectType": "application",
+			"architect": {
+				"lint": {
+					"builder": "@angular-eslint/builder:lint",
+					"options": {
+						"eslintConfig": "e2e/eslintrc.e2e.json",
+						"tsConfig": ["e2e/tsconfig.e2e.json"],
+						"exclude": ["**/node_modules/**"]
+					}
+				}
+			}
+		}
+	},
+	"schematics": {
+		"@schematics/angular:component": {
+			"prefix": "app",
+			"style": "scss"
+		},
+		"@schematics/angular:directive": {
+			"prefix": "app"
+		}
+	}
 }

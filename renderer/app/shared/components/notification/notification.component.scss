@@ -1,9 +1,10 @@
-@import 'themes/light/variables';;
+@import 'themes/light/variables';
 @import 'mixins';
 
 :host {
 	display: block;
-	width: 300px;
+	min-width: 300px;
+	max-width: 360px;
 	padding: 0.5rem 0;
 	bottom: 0;
 	right: 50%;
@@ -14,10 +15,23 @@
 	cursor: pointer;
 	border-radius: 0.25rem;
 	background: var(--notification-bg);
-	box-shadow: rgba(0,0,0,0.12) 0px 5px 10px,rgba(0,0,0,0.15) 0px 3px 3px;
-	transform: translateX(50%) translateY(100vh) translateZ(0);
+	box-shadow:
+		rgba(0, 0, 0, 0.12) 0px 5px 10px,
+		rgba(0, 0, 0, 0.15) 0px 3px 3px;
+	transform: translateX(50%) translateY(50px) translateZ(0);
 	backface-visibility: hidden;
 	perspective: 1000;
+
+	animation: slide-in 200ms;
+	animation-fill-mode: forwards;
+	animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+	animation-delay: 0;
+
+	@keyframes slide-in {
+		100% {
+			transform: translateX(50%) translateY(-20px) translateZ(0);
+		}
+	}
 
 	.toast-body {
 		display: flex;

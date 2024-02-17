@@ -1,41 +1,43 @@
 @import 'mixins';
-@import 'themes/light/variables';;
+@import 'themes/light/variables';
 
 .list {
-  margin-top: 1rem;
+	margin-top: 1rem;
 }
 
-.list-viewport, .not-found {
-  height: 248px;
+.list-viewport,
+.not-found {
+	height: 248px;
 }
 
 .list-viewport {
-  @include scrollbar;
+	@include scrollbar;
 }
 
 .not-found {
-  margin-top: 1rem;
-  width: 100%;
-  text-align: center;
+	margin-top: 1rem;
+	width: 100%;
+	text-align: center;
 }
 
 .list-item {
-  @include font-medium;
-  display: flex;
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  height: 20px;
-  color: var(--primary-text);
-  border-radius: 0.25rem;
+	@include font-medium;
+	display: flex;
+	width: 100%;
+	padding: 0.5rem;
+	font-size: 1rem;
+	cursor: pointer;
+	height: 20px;
+	color: var(--primary-text);
+	border-radius: 0.25rem;
 
-  &:hover, &:focus {
-    outline: none;
-    background-color: var(--tabset-btn-bg);
-  }
+	&:hover,
+	&:focus {
+		outline: none;
+		background-color: var(--tabset-btn-bg);
+	}
 
-  .pi {
-    margin-right: 0.5rem;
-  }
+	.pi {
+		margin-right: 0.5rem;
+	}
 }

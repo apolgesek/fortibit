@@ -4,15 +4,15 @@ import { IpcChannel } from '@shared-renderer/index';
 
 @Injectable()
 export class ElectronService implements IMessageBroker {
-  ipcRenderer: any;
-  platform: string;
+	ipcRenderer: any;
+	platform: string;
 
-  constructor() {
-    this.ipcRenderer = (window as any).api;
-  }
+	constructor() {
+		this.ipcRenderer = (window as any).api;
+	}
 
-  async getPlatform(): Promise<string> {
-    this.platform = await this.ipcRenderer.invoke(IpcChannel.GetPlatformInfo);
-    return this.platform;
-  }
+	async getPlatform(): Promise<string> {
+		this.platform = await this.ipcRenderer.invoke(IpcChannel.GetPlatformInfo);
+		return this.platform;
+	}
 }

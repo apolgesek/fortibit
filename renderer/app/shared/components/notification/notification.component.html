@@ -1,6 +1,8 @@
-<div class="toast-body" [ngClass]="{'countdown': model.showCount}">
-  <div class="message">
-    {{ model.message }}
-  </div>
-  <div *ngIf="model.showCount && timeLeft > 0" class="seconds-left">{{ timeLeft }}</div>
+<div class="toast-body" [ngClass]="{ countdown: model.showCount }">
+	<div class="message">
+		{{ model.message }}
+	</div>
+	<div *ngIf="model.showCount && timeLeft > 0" class="seconds-left">
+		{{ timeLeft }}
+	</div>
 </div>

@@ -1,5 +1,5 @@
 export enum Sort {
-  None,
-  Asc,
-  Desc,
+	None,
+	Asc,
+	Desc,
 }

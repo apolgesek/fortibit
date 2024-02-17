@@ -1,139 +1,144 @@
-<form
-  [formGroup]="passwordForm">
-  <div class="change-password">
-    <div class="section-header">
-      Clipboard settings
-    </div>
-    <div formGroupName="input" class="inputgroup">
-      <label class="label" for="clipboardTime">Clipboard auto-clear time (seconds):</label>
-      <input
-        id="clipboardTime"
-        type="number"
-        [attr.aria-invalid]="isControlInvalid(passwordForm.get('input.clipboardTime'))"
-        aria-describedby="clipboard-time-invalid"
-        class="number"
-        formControlName="clipboardTime"
-        (input)="onNumberChange($event, 'input.clipboardTime', 4)">
-    </div>
-    <div
-      *ngIf="isControlInvalid(passwordForm.get('input.clipboardTime'))"
-      class="validation-error"
-      id="clipboard-time-invalid">
-      Please enter at least 0 seconds.
-    </div>
-    <div class="section-header">
-      Auto-type settings
-    </div>
-    <div formGroupName="toggle" class="inputgroup checkbox">
-      <label class="label" for="auto-type">Enable auto-type:</label>
-      <label class="switch">
-        <input
-          id="auto-type"
-          type="checkbox"
-          formControlName="autoType">
-          <span class="slider"></span>
-      </label>    
-    </div>
-    <div formGroupName="input" class="inputgroup">
-      <label class="label" for="autotypeShortcut">Autotype hotkey:</label>
-      <input
-        style="width: 160px"
-        appHotkeyBinder
-        id="autotypeShortcut"
-        type="text"
-        formControlName="autotypeShortcut">
-    </div>
-    <div formGroupName="input" class="inputgroup">
-      <label class="label" for="autotypeUsernameOnlyShortcut">Autotype username only hotkey:</label>
-      <input
-        style="width: 160px"
-        appHotkeyBinder
-        id="autotypeUsernameOnlyShortcut"
-        type="text"
-        formControlName="autotypeUsernameOnlyShortcut">
-    </div>
-    <div formGroupName="input" class="inputgroup">
-      <label class="label" for="autotypePasswordOnlyShortcut">Autotype password only hotkey:</label>
-      <input
-        style="width: 160px"
-        appHotkeyBinder
-        id="autotypePasswordOnlyShortcut"
-        type="text"
-        formControlName="autotypePasswordOnlyShortcut">
-    </div>
-    <div class="section-header">
-      Links
-    </div>
-    <div formGroupName="toggle" class="inputgroup checkbox">
-      <label class="label" for="insecureUrl">Show insecure url prompt:</label>
-      <label class="switch">
-        <input
-          id="insecureUrl"
-          type="checkbox"
-          formControlName="showInsecureUrlPrompt">
-          <span class="slider"></span>
-      </label>
-    </div>
-    <div class="section-header">
-      Lock database after inactive time
-    </div>
-    <div formGroupName="input" class="inputgroup">
-      <label class="label" for="idleTime">Idle time lock (seconds):</label>
-      <input
-        id="idleTime"
-        type="number"
-        [attr.aria-invalid]="isControlInvalid(passwordForm.get('input.idleTime'))"
-        aria-describedby="idle-time-invalid"
-        class="number"
-        formControlName="idleTime"
-        (input)="onNumberChange($event, 'input.idleTime', 4)">
-    </div>
-    <div
-      *ngIf="isControlInvalid(passwordForm.get('input.idleTime'))"
-      class="validation-error"
-      id="idle-time-invalid">
-      Please enter at least 60 seconds.
-    </div>
-    <div formGroupName="toggle" class="inputgroup checkbox">
-      <label class="label" for="lockOnSystemLock">Lock database when locking the computer:</label>
-      <label class="switch">
-        <input
-          id="lockOnSystemLock"
-          type="checkbox"
-          formControlName="lockOnSystemLock">
-          <span class="slider"></span>
-      </label>    
-    </div>
-    <div formGroupName="toggle" class="inputgroup checkbox">
-      <label class="label" for="lockOnSystemLock">Save database before it gets locked due to inactivity:</label>
-      <label class="switch">
-        <input
-          id="saveOnLock"
-          type="checkbox"
-          formControlName="saveOnLock">
-          <span class="slider"></span>
-      </label>    
-    </div>
-    <div class="section-header">
-      Other
-    </div>
-    <div formGroupName="toggle" class="inputgroup checkbox">
-      <label class="label" for="protectWindowsFromCapture">Do not allow window screenshots:</label>
-      <label class="switch">
-        <input
-          id="protectWindowsFromCapture"
-          type="checkbox"
-          formControlName="protectWindowsFromCapture">
-          <span class="slider"></span>
-      </label>    
-    </div>
-    <div class="section-header">
-      Restore default settings
-    </div>
-    <div class="restore">
-      <button (click)="restoreDefaults()" class="restore-btn primary-btn">
-        <i-feather name="refresh-ccw"></i-feather>Restore defaults
-      </button>
-    </div>
-  </div>
+<form [formGroup]="passwordForm">
+	<div class="change-password">
+		<div class="section-header">Clipboard settings</div>
+		<div formGroupName="input" class="inputgroup">
+			<label class="label" for="clipboardTime"
+				>Clipboard auto-clear time (seconds):</label
+			>
+			<input
+				id="clipboardTime"
+				type="number"
+				[attr.aria-invalid]="
+					isControlInvalid(passwordForm.get('input.clipboardTime'))
+				"
+				aria-describedby="clipboard-time-invalid"
+				class="number"
+				formControlName="clipboardTime"
+				(input)="onNumberChange($event, 'input.clipboardTime', 4)"
+			/>
+		</div>
+		<div
+			*ngIf="isControlInvalid(passwordForm.get('input.clipboardTime'))"
+			class="validation-error"
+			id="clipboard-time-invalid"
+		>
+			Please enter at least 0 seconds.
+		</div>
+		<div class="section-header">Auto-type settings</div>
+		<div formGroupName="toggle" class="inputgroup checkbox">
+			<label class="label" for="auto-type">Enable auto-type:</label>
+			<label class="switch">
+				<input id="auto-type" type="checkbox" formControlName="autoType" />
+				<span class="slider"></span>
+			</label>
+		</div>
+		<div formGroupName="input" class="inputgroup">
+			<label class="label" for="autotypeShortcut">Autotype hotkey:</label>
+			<input
+				style="width: 160px"
+				appHotkeyBinder
+				id="autotypeShortcut"
+				type="text"
+				formControlName="autotypeShortcut"
+			/>
+		</div>
+		<div formGroupName="input" class="inputgroup">
+			<label class="label" for="autotypeUsernameOnlyShortcut"
+				>Autotype username only hotkey:</label
+			>
+			<input
+				style="width: 160px"
+				appHotkeyBinder
+				id="autotypeUsernameOnlyShortcut"
+				type="text"
+				formControlName="autotypeUsernameOnlyShortcut"
+			/>
+		</div>
+		<div formGroupName="input" class="inputgroup">
+			<label class="label" for="autotypePasswordOnlyShortcut"
+				>Autotype password only hotkey:</label
+			>
+			<input
+				style="width: 160px"
+				appHotkeyBinder
+				id="autotypePasswordOnlyShortcut"
+				type="text"
+				formControlName="autotypePasswordOnlyShortcut"
+			/>
+		</div>
+		<div class="section-header">Links</div>
+		<div formGroupName="toggle" class="inputgroup checkbox">
+			<label class="label" for="insecureUrl">Show insecure url prompt:</label>
+			<label class="switch">
+				<input
+					id="insecureUrl"
+					type="checkbox"
+					formControlName="showInsecureUrlPrompt"
+				/>
+				<span class="slider"></span>
+			</label>
+		</div>
+		<div class="section-header">Lock database after inactive time</div>
+		<div formGroupName="input" class="inputgroup">
+			<label class="label" for="idleTime">Idle time lock (seconds):</label>
+			<input
+				id="idleTime"
+				type="number"
+				[attr.aria-invalid]="
+					isControlInvalid(passwordForm.get('input.idleTime'))
+				"
+				aria-describedby="idle-time-invalid"
+				class="number"
+				formControlName="idleTime"
+				(input)="onNumberChange($event, 'input.idleTime', 4)"
+			/>
+		</div>
+		<div
+			*ngIf="isControlInvalid(passwordForm.get('input.idleTime'))"
+			class="validation-error"
+			id="idle-time-invalid"
+		>
+			Please enter at least 60 seconds.
+		</div>
+		<div formGroupName="toggle" class="inputgroup checkbox">
+			<label class="label" for="lockOnSystemLock"
+				>Lock database when locking the computer:</label
+			>
+			<label class="switch">
+				<input
+					id="lockOnSystemLock"
+					type="checkbox"
+					formControlName="lockOnSystemLock"
+				/>
+				<span class="slider"></span>
+			</label>
+		</div>
+		<div formGroupName="toggle" class="inputgroup checkbox">
+			<label class="label" for="saveOnLock"
+				>Save database before it gets locked due to inactivity:</label
+			>
+			<label class="switch">
+				<input id="saveOnLock" type="checkbox" formControlName="saveOnLock" />
+				<span class="slider"></span>
+			</label>
+		</div>
+		<div class="section-header">Other</div>
+		<div formGroupName="toggle" class="inputgroup checkbox">
+			<label class="label" for="protectWindowsFromCapture"
+				>Do not allow window screenshots:</label
+			>
+			<label class="switch">
+				<input
+					id="protectWindowsFromCapture"
+					type="checkbox"
+					formControlName="protectWindowsFromCapture"
+				/>
+				<span class="slider"></span>
+			</label>
+		</div>
+		<div class="section-header">Restore default settings</div>
+		<div class="restore">
+			<a href="#" (click)="restoreDefaults(); false;">Restore default settings</a>
+		</div>
+	</div>
 </form>

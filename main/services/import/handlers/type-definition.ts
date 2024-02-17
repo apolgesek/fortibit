@@ -1,4 +1,4 @@
 export const TYPE_DEF = {
-  String: '',
-  Number: 0,
+	String: '',
+	Number: 0,
 };

@@ -1,35 +1,33 @@
 <app-modal>
-  <div
-    class="dialog-header">
-    <h2>Remove group</h2>
-    <a
-      href="#"
-      role="button"
-      aria-label="Close"
-      class="close-dialog"
-      (click)="close(); false">&times;
-    </a>
-  </div>
-  <div
-    class="dialog-message">
-    Are you sure you want to remove this group?
-  </div>
-  <div
-    class="footer-container">
-    <button
-      type="button"
-      #autofocus
-      class="text-btn"
-      (click)="close()"
-      (keyup.enter)="close()">
-      Cancel
-    </button>
-    <button
-      type="button"
-      class="primary-btn"
-      (click)="removeGroup()"
-      (keyup.enter)="removeGroup()">
-      Remove
-    </button>
-  </div>
+	<div class="dialog-header">
+		<h2>Remove group</h2>
+		<a
+			href="#"
+			role="button"
+			aria-label="Close"
+			class="close-dialog"
+			(click)="close(); (false)"
+			>&times;
+		</a>
+	</div>
+	<div class="dialog-message">Are you sure you want to remove this group?</div>
+	<div class="footer-container">
+		<button
+			type="button"
+			#autofocus
+			class="text-btn"
+			(click)="close()"
+			(keyup.enter)="close()"
+		>
+			Cancel
+		</button>
+		<button
+			type="button"
+			class="primary-btn"
+			(click)="removeGroup()"
+			(keyup.enter)="removeGroup()"
+		>
+			Remove
+		</button>
+	</div>
 </app-modal>

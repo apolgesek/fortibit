@@ -1,59 +1,59 @@
 @import 'themes/base-variables';
 
 .password-container {
-  display: flex;
-  border: 1px solid var(--border-color);
-  padding: 0.5rem;
-  background-color: var(--input-modal-bg);
-  font-weight: bold;
-  font-size: 16px;
-  letter-spacing: 2px;
-  border-radius: 0.25rem;
-  align-items: center;
+	display: flex;
+	border: 1px solid var(--border-color);
+	padding: 0.5rem;
+	background-color: var(--input-modal-bg);
+	font-weight: bold;
+	font-size: 16px;
+	letter-spacing: 2px;
+	border-radius: 0.25rem;
+	align-items: center;
 
-  .password {
-    flex: 1;
-    word-break: break-all;
-  }
+	.password {
+		flex: 1;
+		word-break: break-all;
+	}
 
-  button {
-    background: none;
-    border: none;
-    padding: 0.25rem;
-    color: #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.25rem;
+	button {
+		background: none;
+		border: none;
+		padding: 0.25rem;
+		color: #ccc;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 0.25rem;
 
-    i-feather {
-      cursor: pointer;
-      width: 1rem !important;
-      height: 1rem !important;
-      margin-right: 0 !important;
-    }
+		i-feather {
+			cursor: pointer;
+			width: 1rem !important;
+			height: 1rem !important;
+			margin-right: 0 !important;
+		}
 
-    &:hover i-feather {
-      color: $blue-200;
-    }
+		&:hover i-feather {
+			color: $blue-200;
+		}
 
-    &:focus {
-      outline: 2px solid $barberry !important;
-    }
-  }
+		&:focus {
+			outline: 2px solid $barberry !important;
+		}
+	}
 }
 
 .inputgroup {
-  background-color: var(--modal-bg) !important;
-  box-shadow: none !important;
-  margin: 0;
-  padding: 0.25rem;
+	background-color: var(--modal-bg) !important;
+	box-shadow: none !important;
+	margin: 0;
+	padding: 0.25rem;
 }
 
 .switch {
-  margin-left: 0;
+	margin-left: 0;
 }
 
 .label {
-  min-width: 160px;
+	min-width: 160px;
 }

@@ -1,7 +1,7 @@
 export enum UpdateState {
-  Unknown,
-  ConnectionFailed,
-  NotAvailable,
-  Available,
-  Downloaded
+	Unknown,
+	ConnectionFailed,
+	NotAvailable,
+	Available,
+	Downloaded,
 }

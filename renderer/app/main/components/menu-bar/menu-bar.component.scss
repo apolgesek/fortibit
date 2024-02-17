@@ -20,7 +20,6 @@
 	font-size: 0.875rem;
 	color: var(--primary-text);
 	user-select: none;
-	border-bottom: 1px solid var(--border-color);
 	-webkit-app-region: drag;
 
 	&:host-context(.modal-open) {
@@ -90,20 +89,20 @@
 	ul.menu > .dropdown div:not(.submenu-container) {
 		border-bottom-left-radius: 0.25rem;
 		border-bottom-right-radius: 0.25rem;
-	
+
 		&.left {
 			left: 0rem;
 		}
-	
+
 		&.right {
 			right: 0rem;
 		}
-	
+
 		> li:last-of-type {
 			border-bottom-left-radius: 0.25rem;
 			border-bottom-right-radius: 0.25rem;
 		}
-	
+
 		&:has(+ *) {
 			> li {
 				border-bottom-left-radius: 0rem !important;
@@ -130,7 +129,9 @@
 .topbar .menu > .dropdown li.menu-bar-item {
 	background-color: var(--primary-bg);
 
-	&:hover:not(:disabled), &:focus, &.expanded {
+	&:hover:not(:disabled),
+	&:focus,
+	&.expanded {
 		background-color: var(--dropdown-list-item-bg--hover) !important;
 	}
 }

@@ -1,63 +1,57 @@
 {
-  "asar": false,
-  "productName": "fortibit",
-  "directories": {
-    "output": "release/"
-  },
-  "files": [
-    "**/*",
-    "!**/*.ts",
-    "!**/*.map",
-    "!package.json",
-    "!package-lock.json",
-    "!.vscode",
-    "!.github",
-    "!build",
-    "!obj",
-    "!release",
-    "!release-scripts",
-    "!renderer",
-    "!e2e",
-    "!**/win32/native-*",
-    "!.angular",
-    "!*.md",
-    "!*.json",
-    "!.gitignore",
-    "!.editorconfig",
-    "product.json",
-    "workspaces.json",
-    "tips.json",
-    "build/*.ico",
-    "build/*.node",
-    "*.scpt",
-    "assets",
-    "renderer/preload.js"
-  ],
-  "extraResources": [
-    {
-      "from": "dist",
-      "to": "app/renderer",
-      "filter": [
-        "**/*"
-      ]
-    }
-  ],
-  "mac": {
-    "target": [
-      "dmg"
-    ],
-    "fileAssociations": {
-      "ext": "fbit",
-      "icon": "build/icon.icns"
-    }
-  },
-  "dmg": {
-    "title": "${productName}"
-  },
-  "linux": {
-    "icon": "dist",
-    "target": [
-      "AppImage"
-    ]
-  }
+	"asar": false,
+	"productName": "fortibit",
+	"directories": {
+		"output": "release/"
+	},
+	"files": [
+		"**/*",
+		"!**/*.ts",
+		"!**/*.map",
+		"!package.json",
+		"!package-lock.json",
+		"!.vscode",
+		"!.github",
+		"!build",
+		"!obj",
+		"!release",
+		"!release-scripts",
+		"!renderer",
+		"!e2e",
+		"!**/win32/native-*",
+		"!.angular",
+		"!*.md",
+		"!*.json",
+		"!.gitignore",
+		"!.editorconfig",
+		"product.json",
+		"workspaces.json",
+		"tips.json",
+		"build/*.ico",
+		"build/*.node",
+		"*.scpt",
+		"assets",
+		"renderer/preload.js"
+	],
+	"extraResources": [
+		{
+			"from": "dist",
+			"to": "app/renderer",
+			"filter": ["**/*"]
+		}
+	],
+	"mac": {
+		"target": ["dmg"],
+		"fileAssociations": {
+			"ext": "fbit",
+			"icon": "build/icon.icns"
+		}
+	},
+	"dmg": {
+		"title": "${productName}"
+	},
+	"linux": {
+		"icon": "dist",
+		"target": ["AppImage"]
+	}
 }

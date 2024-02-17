@@ -24,13 +24,14 @@
 
 		.inputgroup {
 			background-color: var(--input-modal-bg);
-			input, textarea {
+			input,
+			textarea {
 				background-color: var(--input-modal-bg);
 			}
 		}
 	}
 }
-	
+
 .modal-backdrop {
 	position: fixed;
 	top: 32px;

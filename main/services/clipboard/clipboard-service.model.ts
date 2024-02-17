@@ -1,8 +1,9 @@
-import { createServiceDecorator } from '../../dependency-injection';
+import { createServiceDecorator } from '../../di';
 
-export const IClipboardService = createServiceDecorator<IClipboardService>('clipboardService');
+export const IClipboardService =
+	createServiceDecorator<IClipboardService>('clipboardService');
 
 export interface IClipboardService {
-  write(text: string): void;
-  clear(): void;
+	write(text: string): void;
+	clear(): void;
 }

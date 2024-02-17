@@ -6,43 +6,38 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 import { IpcChannel } from '@shared-renderer/index';
 
 @Component({
-  selector: 'app-confirm-exit-dialog',
-  templateUrl: './confirm-exit-dialog.component.html',
-  styleUrls: ['./confirm-exit-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    ModalComponent
-  ],
+	selector: 'app-confirm-exit-dialog',
+	templateUrl: './confirm-exit-dialog.component.html',
+	styleUrls: ['./confirm-exit-dialog.component.scss'],
+	standalone: true,
+	imports: [ModalComponent],
 })
 export class ConfirmExitDialogComponent implements IModal {
-  public readonly ref!: ComponentRef<ConfirmExitDialogComponent>;
-  public readonly additionalData!: IAdditionalData;
+	public readonly ref!: ComponentRef<ConfirmExitDialogComponent>;
+	public readonly additionalData!: IAdditionalData;
 
-  private readonly messageBroker = inject(MessageBroker);
-  private readonly workspaceService = inject(WorkspaceService);
-  private readonly modalRef = inject(ModalRef);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly modalRef = inject(ModalRef);
 
-  async saveChanges() {
-    this.messageBroker.ipcRenderer.once(IpcChannel.GetSaveStatus, () => {
-      setTimeout(() => {
-        this.executeTask();
-      }, 500);
-    });
+	async saveChanges() {
+		const result = await this.workspaceService.saveDatabase();
+		
+		setTimeout(() => {
+			this.executeTask();
+		}, 500);
+	}
 
-    await this.workspaceService.saveDatabase();
-  }
+	executeTask() {
+		this.modalRef.onActionResult.next(true);
+		this.modalRef.onActionResult.complete();
 
-  executeTask() {
-    this.modalRef.onActionResult.next(true);
-    this.modalRef.onActionResult.complete();
-    
-    this.modalRef.close();
-  }
+		this.modalRef.close();
+	}
 
-  close() {
-    this.modalRef.onActionResult.next(false);
-    this.modalRef.onActionResult.complete();
+	close() {
+		this.modalRef.onActionResult.next(false);
+		this.modalRef.onActionResult.complete();
 
-    this.modalRef.close();
-  }
+		this.modalRef.close();
+	}
 }

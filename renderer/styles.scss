@@ -1,33 +1,37 @@
-@import "themes/base-variables";
-@import "mixins";
-@import "input";
-@import "buttons";
-@import "components";
-@import "spinners";
-@import "themes";
+@import 'themes/base-variables';
+@import 'mixins';
+@import 'input';
+@import 'buttons';
+@import 'components';
+@import 'spinners';
+@import 'themes';
 
 @font-face {
 	font-family: 'roboto-regular';
-	src: url('~assets/fonts/roboto-regular.woff2') format('woff2'),
-	url('~assets/fonts/roboto-regular.woff') format('woff');
+	src:
+		url('~assets/fonts/roboto-regular.woff2') format('woff2'),
+		url('~assets/fonts/roboto-regular.woff') format('woff');
 }
 
 @font-face {
 	font-family: 'roboto-medium';
-	src: url('~assets/fonts/roboto-medium.woff2') format('woff2'),
-	url('~assets/fonts/roboto-medium.woff') format('woff');
+	src:
+		url('~assets/fonts/roboto-medium.woff2') format('woff2'),
+		url('~assets/fonts/roboto-medium.woff') format('woff');
 }
 
 @font-face {
 	font-family: 'roboto-bold';
-	src: url('~assets/fonts/roboto-bold.woff2') format('woff2'),
-	url('~assets/fonts/roboto-bold.woff') format('woff');
+	src:
+		url('~assets/fonts/roboto-bold.woff2') format('woff2'),
+		url('~assets/fonts/roboto-bold.woff') format('woff');
 }
 
 @font-face {
 	font-family: 'roboto-black';
-	src: url('~assets/fonts/roboto-black.woff2') format('woff2'),
-	url('~assets/fonts/roboto-black.woff') format('woff');
+	src:
+		url('~assets/fonts/roboto-black.woff2') format('woff2'),
+		url('~assets/fonts/roboto-black.woff') format('woff');
 }
 
 html,
@@ -57,7 +61,7 @@ body {
 
 .app-view {
 	flex: 1;
-	height: map-get($map: $layout, $key: "app");
+	height: map-get($map: $layout, $key: 'app');
 }
 
 a {
@@ -140,7 +144,7 @@ a {
 	padding: 0;
 	margin: -1px;
 	overflow: hidden;
-	clip: rect(0,0,0,0);
+	clip: rect(0, 0, 0, 0);
 	border: 0;
 }
 
@@ -148,20 +152,21 @@ a {
 	color: $blue-200;
 }
 
-app-root, app-workspace {
+app-root,
+app-workspace {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 }
 
-form [class*="-btn"] {
+form [class*='-btn'] {
 	margin-top: 1.625rem;
 }
 
 .section-header {
-  @include font-medium;
+	@include font-medium;
 	font-size: 1.25rem;
-  padding-bottom: 0.5rem;
+	padding-bottom: 0.5rem;
 
 	&:not(:first-child) {
 		margin-top: 1.5rem;

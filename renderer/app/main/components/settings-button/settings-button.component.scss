@@ -1,8 +1,9 @@
-@import 'themes/light/variables';;
+@import 'themes/light/variables';
 
 :host {
-	flex: 1;
-	justify-content: flex-end;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .settings {
@@ -37,9 +38,7 @@
 	}
 
 	.dropdown-content {
-		position: fixed;
 		margin-top: 0.5rem;
-		margin-right: 1rem;
 		border-radius: 0.25rem;
 		border-radius: 0.25rem;
 
@@ -73,24 +72,9 @@
 		background-color: transparent;
 		transition: color 200ms;
 		margin-left: auto;
-		transform: translateY(50%);
-		margin-bottom: 0.5rem;
-
-		&:hover {
-			i-feather {
-				color: var(--settings-btn-bg--hover);
-			}
-		}
 
 		&.expanded {
 			background-color: transparent !important;
-		}
-
-		i-feather {
-			width: 1.5rem !important;
-			height: 1.5rem !important;
-			color: var(--settings-btn-bg);
-			margin-right: 0 !important;
 		}
 	}
 }

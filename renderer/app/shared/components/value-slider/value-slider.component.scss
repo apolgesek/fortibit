@@ -1,37 +1,37 @@
 @import 'themes/base-variables';
 
 .slider-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 6px;
-  width: 200px;
-  background-color: var(--scrollbar-thumb);
-  border-radius: 0.25rem;
-  margin-left: 1rem;
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: 6px;
+	width: 200px;
+	background-color: var(--scrollbar-thumb);
+	border-radius: 0.25rem;
+	margin-left: 1rem;
 
-  .slider-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    background-color: $blue-300;
-    border-top-left-radius: 0.25rem;
-    border-bottom-left-radius: 0.25rem;
-    height: 100%;
-    width: 0;
-  }
+	.slider-fill {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 1;
+		background-color: $blue-300;
+		border-top-left-radius: 0.25rem;
+		border-bottom-left-radius: 0.25rem;
+		height: 100%;
+		width: 0;
+	}
 }
 
 .slider-handle {
-  width: 16px;
-  height: 16px;
-  border-radius: 100%;
-  background-color: $blue-300;
-  z-index: 99;
-  cursor: pointer;
+	width: 16px;
+	height: 16px;
+	border-radius: 100%;
+	background-color: $blue-300;
+	z-index: 99;
+	cursor: pointer;
 
-  &:focus {
-    outline: 4px solid adjust-color($blue-300, $alpha: -0.7);
-  }
+	&:focus {
+		outline: 4px solid adjust-color($blue-300, $alpha: -0.7);
+	}
 }

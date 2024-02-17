@@ -1,0 +1,127 @@
+<div
+	data-prevent-entry-deselect
+	class="details-container"
+	[ngClass]="{ 'database-summary': !isEntrySelected }"
+>
+	<ng-container *ngIf="isEntrySelected && group; else databaseDetails">
+		<div class="header">
+			<span [title]="group?.name">{{ group?.name }}</span>
+			<ng-container *ngIf="entry?.title">
+				<i-feather name="chevron-right"></i-feather>
+				<span [title]="entry.title">{{ entry.title }}</span>
+			</ng-container>
+		</div>
+		<div class="content entry-details">
+			<div class="section quick-actions">
+				<button
+					[disabled]="isReadonlyEntry"
+					#toggleStarBtn
+					[attr.aria-label]="
+						entry?.isStarred ? 'Remove from favorites' : 'Add to favorites'
+					"
+					appTooltip="Favorite"
+					id="add-favorites-btn"
+					class="action-btn star"
+					[ngClass]="{ active: entry?.isStarred, 'is-animating': isAnimating }"
+					(click)="toggleStarred(entry)"
+				>
+					<i-feather name="star"></i-feather>
+				</button>
+				<ng-container *ngIf="entry | isPassword">
+					<button
+						appTooltip="History"
+						aria-label="Entry history"
+						(click)="openEntryHistory()"
+						id="open-history-btn"
+						class="action-btn"
+					>
+						<i-feather name="book"></i-feather>
+					</button>
+					<button
+						*ngIf="entry.url"
+						appTooltip="Open {{ isUnsecured ? 'insecure' : '' }} link"
+						[attr.aria-label]="
+							'Open ' + (isUnsecured ? 'insecure' : '') + ' link'
+						"
+						(click)="openUrl(entry.url); (false)"
+						id="open-url-btn"
+						class="action-btn"
+					>
+						<i-feather name="link"></i-feather>
+					</button>
+				</ng-container>
+			</div>
+
+			<ng-container *ngComponentOutlet="detailsPartial; inputs: { entry }" />
+
+			<div class="small">
+				<div *ngIf="entry?.creationDate" class="section">
+					<p>
+						Creation date: {{ entry?.creationDate | date: 'dd/MM/yyyy HH:mm' }}
+					</p>
+				</div>
+				<div *ngIf="entry?.lastModificationDate" class="section">
+					<p>
+						Modification date:
+						{{ entry?.lastModificationDate | date: 'dd/MM/yyyy HH:mm' }}
+					</p>
+				</div>
+			</div>
+		</div>
+	</ng-container>
+</div>
+
+<ng-template #databaseDetails>
+	<div class="header">Database details</div>
+	<div class="content" *ngIf="config">
+		<div class="section">
+			<div class="subsection">
+				<p class="label">File name</p>
+				<p>{{ databaseInformation.name }}</p>
+			</div>
+		</div>
+		<div class="section">
+			<div class="subsection">
+				<p class="label">Encryption algorithm</p>
+				<p>AES-256</p>
+			</div>
+		</div>
+		<div class="section">
+			<div class="subsection">
+				<p class="label">Schema version</p>
+				<p>{{ config.schemaVersion | number: '1.1-3' }}</p>
+			</div>
+		</div>
+		<div class="section">
+			<div class="subsection">
+				<p class="label">Autotype</p>
+				<p>
+					<span class="subtype">Full:</span> {{ config.autocompleteShortcut }}
+					<span *ngIf="!config.autoTypeEnabled" class="validation-error"
+						>(disabled)</span
+					>
+					<i-feather
+						name="info"
+						(click)="openAutotypeInformation()"
+					></i-feather>
+				</p>
+				<p>
+					<span class="subtype">Username:</span>
+					{{ config.autocompleteUsernameOnlyShortcut }}
+					<span *ngIf="!config.autoTypeEnabled" class="validation-error"
+						>(disabled)</span
+					>
+				</p>
+				<p>
+					<span class="subtype">Password:</span>
+					{{ config.autocompletePasswordOnlyShortcut }}
+					<span *ngIf="!config.autoTypeEnabled" class="validation-error"
+						>(disabled)</span
+					>
+				</p>
+			</div>
+		</div>
+	</div>
+</ng-template>
+
+<app-sidebar-handle />

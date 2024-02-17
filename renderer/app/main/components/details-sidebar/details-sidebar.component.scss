@@ -24,26 +24,26 @@
 	width: 100%;
 	transition: background-color 50ms;
 
-	i-feather {
-		color: var(--link-text);
-		cursor: pointer;
-		margin-left: 0.25rem;
-	}
-
 	.content {
 		height: 100%;
-		border-color: rgba(0,0,0,0);
+		border-color: rgba(0, 0, 0, 0);
 		transition: border-color 150ms;
 		padding: 0 1rem;
 		overflow: auto;
 		@include scrollbar-hover;
-	
+
 		&:hover {
-			border-color: rgba(0,0,0,0.2);
+			border-color: rgba(0, 0, 0, 0.2);
 		}
 
 		p {
 			margin: 0.25rem 0;
+		}
+
+		i-feather {
+			color: var(--link-text);
+			cursor: pointer;
+			margin-left: 0.25rem;
 		}
 	}
 }
@@ -142,7 +142,7 @@
 }
 
 .header span {
-  max-width: 50%;
+	max-width: 50%;
 }
 
 .header i-feather {

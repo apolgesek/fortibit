@@ -6,4 +6,3 @@ export * from './history-repository';
 export * from './history-repository.model';
 export * from './report-repository';
 export * from './repository.model';
-

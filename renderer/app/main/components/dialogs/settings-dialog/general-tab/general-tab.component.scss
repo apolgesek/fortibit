@@ -1,92 +1,79 @@
 @import 'themes/light/variables';
 
 .change-password {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  align-items: flex-start;
-  border-radius: 0.25rem;
-  padding-right: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	align-items: flex-start;
+	border-radius: 0.25rem;
+	padding-right: 1.5rem;
 
-  > div {
-    width: 100%;
-  }
+	> div {
+		width: 100%;
+	}
 
-  > form {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-  }
+	> form {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+	}
 
-  p {
-    margin: 0;
-    padding: 0;
-  }
+	p {
+		margin: 0;
+		padding: 0;
+	}
 
-  .emp {
-    color: $blue-300;
-  }
+	.emp {
+		color: $blue-300;
+	}
 
-  .info-icon {
-    font-size: 2rem;
-    margin-right: 1rem;
-    color: $blue-300;
-  }
+	.info-icon {
+		font-size: 2rem;
+		margin-right: 1rem;
+		color: $blue-300;
+	}
 
-  .save {
-    margin-top: 0.5rem;
-    margin-left: auto;
-  }
+	.save {
+		margin-top: 0.5rem;
+		margin-left: auto;
+	}
 }
 
 .restore {
-  margin-top: 0.5rem;
-  margin-bottom: 2rem;
-
-  .restore-btn {
-    display: flex;
-    align-items: center;
-    margin-top: 0.5rem;
-    margin-left: 0.25rem;
-
-    i-feather {
-      margin-right: 0.5rem;
-      width: 16px !important;
-      height: 16px !important;
-    }
-  }
+	margin-top: 0.5rem;
+	margin-bottom: 2rem;
 }
 
 .container {
-  flex-direction: column;
-  flex: 1;
-  padding-right: 1.5rem;
+	flex-direction: column;
+	flex: 1;
+	padding-right: 1.5rem;
 }
 
 .label {
-  flex: 1;
+	flex: 1;
 }
 
 .inputgroup .number {
-  width: 2.5rem;
+	width: 2.5rem;
 }
 
 .validation-error {
-  margin-left: 0;
+	margin-left: 0;
 }
 
 .inputgroup {
-  background: none;
-  box-shadow: none;
-  padding: 0;
+	background: none;
+	box-shadow: none;
+	padding: 0;
 
-  input {
-    padding: 0.25rem;
-    background-color: var(--input-modal-bg);
-    height: 1rem;
-  }
+	input {
+		padding: 0.25rem;
+		background-color: var(--input-modal-bg);
+		height: 1rem;
+	}
 }
 
 .description {
-  margin-top: 0;
+	margin-top: 0;
 }

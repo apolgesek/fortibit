@@ -5,29 +5,35 @@ import { join } from 'path';
 
 type FileType = 'vaultExt' | 'csv' | 'xml';
 
-export function getFileFilter(config: Configuration, fileType: FileType): FileFilter {
-  let fileFilter = { name: 'Fortibit database file', extensions: [ config.fileExtension ]  }
+export function getFileFilter(
+	config: Configuration,
+	fileType: FileType,
+): FileFilter {
+	let fileFilter = {
+		name: 'Fortibit database file',
+		extensions: [config.fileExtension],
+	};
 
-  switch (fileType) {
-    case 'csv':
-      fileFilter = { name: 'Comma Separated Values File', extensions: ['csv'] };
-      break;
-    case 'xml':
-      fileFilter = { name: 'Extensible Markup Language', extensions: ['xml'] };
-    default:
-      break;
-  }
+	switch (fileType) {
+		case 'csv':
+			fileFilter = { name: 'Comma Separated Values File', extensions: ['csv'] };
+			break;
+		case 'xml':
+			fileFilter = { name: 'Extensible Markup Language', extensions: ['xml'] };
+		default:
+			break;
+	}
 
-  return fileFilter;
+	return fileFilter;
 }
 
 export function getDefaultPath(config: Configuration, path: string): string {
-  const pathParts: string[] = [];
-  
-  if (Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E))) {
-    pathParts.push(config.e2eFilesPath)
-  }
-  pathParts.push(path);
+	const pathParts: string[] = [];
 
-  return join(...pathParts);
+	if (Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E))) {
+		pathParts.push(config.e2eFilesPath);
+	}
+	pathParts.push(path);
+
+	return join(...pathParts);
 }

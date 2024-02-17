@@ -1,13 +1,13 @@
 @import 'themes/light/variables';
 
 .inputgroup {
-  align-items: center;
+	align-items: center;
 }
 
 #remove-group {
-  background-color: $bright-red;
+	background-color: $bright-red;
 
-  &:hover {
-    background-color: lighten($bright-red, 5);
-  }
+	&:hover {
+		background-color: lighten($bright-red, 5);
+	}
 }

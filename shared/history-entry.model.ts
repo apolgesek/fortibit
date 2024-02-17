@@ -1,7 +1,7 @@
-import { PasswordEntry } from "./password-entry.model";
+import { Entry } from './entry.model';
 
 export type HistoryEntry = {
-  entry: PasswordEntry;
-  entryId?: number;
-  id?: number;
-}
+	entry: Entry;
+	entryId?: number;
+	id?: number;
+};

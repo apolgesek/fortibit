@@ -1,6 +1,6 @@
 export type MenuItem = {
-  label?: string;
-  separator?: boolean;
-  disabled?: boolean;
-  command?: (event: Event) => void;
-}
+	label?: string;
+	separator?: boolean;
+	disabled?: boolean | (() => boolean);
+	command?: (event: Event) => void;
+};

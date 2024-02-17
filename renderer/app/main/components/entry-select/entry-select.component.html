@@ -1,9 +1,10 @@
 <app-secondary-menu-bar></app-secondary-menu-bar>
 <div class="password-table">
 	<h2>Select auto-type entry</h2>
-	<p class="description">More than one entry has been found matching active window.
-		 Select the one you want to be auto typed using keyboard up/down arrow keys
-		 and press Enter.</p>
+	<p class="description">
+		More than one entry has been found matching active window. Select the one
+		you want to be auto typed using keyboard up/down arrow keys and press Enter.
+	</p>
 	<cdk-virtual-scroll-viewport
 		itemSize="56"
 		appFocusableList
@@ -11,16 +12,25 @@
 		(keydown.enter)="confirmEntry()"
 		[selected]="selectedEntries"
 		[focusOnLoad]="true"
-		class="table-viewport">
-		<ng-container *cdkVirtualFor="let item of passwordList; let i = index; trackBy: trackingTag; templateCacheSize: 0">
+		class="table-viewport"
+	>
+		<ng-container
+			*cdkVirtualFor="
+				let item of passwordList;
+				let i = index;
+				trackBy: trackingTag;
+				templateCacheSize: 0
+			"
+		>
 			<div
 				data-prevent-entry-deselect
 				[appFocusableListItem]="item"
 				[attr.aria-setsize]="passwordList.length"
 				[attr.aria-posinset]="i + 1"
 				tabindex="0"
-				[ngClass]="{'selected': isEntrySelected(item)}"
-				class="row-entry">
+				[ngClass]="{ selected: isEntrySelected(item) }"
+				class="row-entry"
+			>
 				<div class="column">
 					<div class="row">
 						{{ item.title }}

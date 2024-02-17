@@ -1,12 +1,12 @@
 ﻿<div class="modal">
-  <div data-prevent-entry-deselect class="modal-body" [ngClass]="bodyClass">
-    <ng-content></ng-content>
-  </div>
+	<div data-prevent-entry-deselect class="modal-body" [ngClass]="bodyClass">
+		<ng-content></ng-content>
+	</div>
 </div>
 
 <div
-  *ngIf="showBackdrop"
-  #backdrop
-  data-prevent-entry-deselect
-  class="modal-backdrop">
-</div>
+	*ngIf="showBackdrop"
+	#backdrop
+	data-prevent-entry-deselect
+	class="modal-backdrop"
+></div>

@@ -18,345 +18,405 @@ import { HistoryManager } from './managers/history.manager';
 import { ReportManager } from './managers/report.manager';
 import { ModalService } from './modal.service';
 import { NotificationService } from './notification.service';
+import { SearchService } from './search.service';
 
 enum DirtyMarkType {
-  Entry,
-  Group,
-  History,
-  Report
+	Entry,
+	Group,
+	History,
+	Report,
 }
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceService {
-  public readonly loadedDatabase$: Observable<boolean>;  
-  public isSynced = true;
-  public file?: { filePath: string; filename: string };
-  public isLocked = true;
-  public isBiometricsAuthenticationInProgress = false;
+	public readonly loadedDatabase$: Observable<boolean>;
+	public isSynced = true;
+	public file?: { filePath: string; filename: string };
+	public isLocked = true;
+	public isBiometricsAuthenticationInProgress = false;
 
-  private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
-  private config: Configuration;
-  private _zoomFactor = 1;
+	private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
+	private config: Configuration;
+	private _zoomFactor = 1;
 
-  get zoomFactor(): number {
-    return Math.round(this._zoomFactor * 100);
-  }
+	get zoomFactor(): number {
+		return Math.round(this._zoomFactor * 100);
+	}
 
-  constructor(
-    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-    private readonly configService: ConfigService,
-    private readonly entryManager: EntryManager,
-    private readonly groupManager: GroupManager,
-    private readonly historyManager: HistoryManager,
-    private readonly reportManager: ReportManager,
-    private readonly dbManager: DbManager,
-    private readonly notificationService: NotificationService,
-    private readonly modalService: ModalService,
-    private readonly fileNamePipe: FileNamePipe,
-    private readonly zone: NgZone,
-    private readonly router: Router,
-  ) {
-    this.configService.configLoadedSource$.pipe().subscribe(config => {
-      this.config = config as Configuration;
-    });
+	constructor(
+		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
+		private readonly configService: ConfigService,
+		private readonly entryManager: EntryManager,
+		private readonly groupManager: GroupManager,
+		private readonly historyManager: HistoryManager,
+		private readonly reportManager: ReportManager,
+		private readonly dbManager: DbManager,
+		private readonly notificationService: NotificationService,
+		private readonly searchService: SearchService,
+		private readonly modalService: ModalService,
+		private readonly fileNamePipe: FileNamePipe,
+		private readonly zone: NgZone,
+		private readonly router: Router,
+	) {
+		this.configService.configLoadedSource$.pipe().subscribe((config) => {
+			this.config = config as Configuration;
+		});
 
-    merge(
-      this.entryManager.markDirtySource.pipe(map(() => DirtyMarkType.Entry)),
-      this.groupManager.markDirtySource.pipe(map(() => DirtyMarkType.Group)),
-      this.historyManager.markDirtySource.pipe(map(() => DirtyMarkType.History)),
-      this.reportManager.markDirtySource.pipe(map(() => DirtyMarkType.Report))
-    ).pipe().subscribe(() => {
-      this.isSynced = null;
-      this.saveDatabaseSnapshot();
-    });
+		merge(
+			this.entryManager.markDirtySource.pipe(map(() => DirtyMarkType.Entry)),
+			this.groupManager.markDirtySource.pipe(map(() => DirtyMarkType.Group)),
+			this.historyManager.markDirtySource.pipe(
+				map(() => DirtyMarkType.History),
+			),
+			this.reportManager.markDirtySource.pipe(map(() => DirtyMarkType.Report)),
+		)
+			.pipe()
+			.subscribe(() => {
+				this.isSynced = null;
+				this.saveDatabaseSnapshot();
+			});
 
-    this.loadedDatabase$ = this.loadedDatabaseSource.asObservable();
+		this.loadedDatabase$ = this.loadedDatabaseSource.asObservable();
+		this.messageBroker.ipcRenderer.on(IpcChannel.Lock, () => {
+			this.zone.run(async () => {
+				if (this.config.saveOnLock && this.file) {
+					if (!this.isSynced) {
+						await this.saveDatabase({ notify: false });
+					}
 
-    this.handleDatabaseLock();
-    this.handleDatabaseSaved();
+					await this.lock();
+				} else {
+					const success = await this.executeEvent();
+					if (success) {
+						await this.lock();
+					}
+				}
+			});
+		});
+	}
 
-    this.messageBroker.ipcRenderer.on(IpcChannel.Lock, () => {
-      this.zone.run(async () => {
-        if (this.config.saveOnLock && this.file) {
-          await this.saveDatabase({ notify: false });
-          await this.lock();
-        } else {
-          const success = await this.executeEvent();
-          if (success) {
-            this.lock();
-          }
-        }
-      });
-    });
-  }
+	get databaseFileName(): string {
+		return this.file?.filename ?? 'Database (new)';
+	}
 
-  get databaseFileName(): string {
-    return this.file?.filename ?? 'Database (new)';
-  }
+	async executeEvent(): Promise<boolean> {
+		if (this.isSynced) {
+			return Promise.resolve(true);
+		} else {
+			this.messageBroker.ipcRenderer.send(IpcChannel.TryClose);
+			return this.modalService.openConfirmExitWindow();
+		}
+	}
 
-  async executeEvent(): Promise<boolean> {
-    if (this.isSynced) {
-      return Promise.resolve(true);
-    } else {
-      this.messageBroker.ipcRenderer.send(IpcChannel.TryClose);
-      return this.modalService.openConfirmExitWindow();
-    }
-  }
+	setDatabaseLoaded(): void {
+		this.loadedDatabaseSource.next(true);
+	}
 
-  setDatabaseLoaded(): void {
-    this.loadedDatabaseSource.next(true);
-  }
+	async createNew(): Promise<void> {
+		await this.router.navigate(['/create-new'], {
+			queryParams: { explicitNew: true },
+		});
 
-  async createNew(): Promise<void> {
-    await this.router.navigate(['/master-password'], { queryParams: { explicitNew: true } });
+		this.groupManager.selectedGroup = null;
+		this.entryManager.entryHistory = null;
+		this.entryManager.editedEntry = null;
+		// this.file = null;
+		this.isSynced = true;
 
-    this.groupManager.selectedGroup = null;
-    this.entryManager.entryHistory = null;
-    this.entryManager.editedEntry = null;
-    this.file = null;
-    this.isSynced = true;
+		this.entryManager.selectedPasswords = [];
+		this.entryManager.passwordEntries = [];
+		this.groupManager.groups = [];
+		this.entryManager.updateEntriesSource();
 
-    this.entryManager.selectedPasswords = [];
-    this.entryManager.passwordEntries = [];
-    this.groupManager.groups = [];
-    this.entryManager.updateEntriesSource();
+		await this.dbManager.reset();
+		await this.setupDatabase();
+	}
 
-    await this.dbManager.reset();
-    await this.setupDatabase();
-  }
+	async lock(): Promise<void> {
+		this.messageBroker.ipcRenderer.send(IpcChannel.Lock);
+		await this.router.navigate(['/home']);
+		this.isLocked = true;
 
-  async lock(): Promise<void> {
-    this.messageBroker.ipcRenderer.send(IpcChannel.Lock);
-    await this.router.navigate(['/pass']);
-    this.isLocked = true;
+		this.groupManager.selectedGroup = null;
+		this.groupManager.groups = [];
+		this.searchService.reset();
+		this.entryManager.passwordEntries = [];
+		this.entryManager.updateEntriesSource();
 
-    this.groupManager.selectedGroup = null;
-    this.groupManager.groups = [];
-    this.entryManager.passwordEntries = [];
-    this.entryManager.updateEntriesSource();
+		await this.dbManager.reset();
+	}
 
-    await this.dbManager.reset();
-  }
+	async unlock(): Promise<void> {
+		this.isLocked = false;
 
-  async unlock(): Promise<void> {
-    this.isLocked = false;
+		await this.router.navigate(['/workspace']);
+		await new Promise((resolve) => setTimeout(resolve, 200));
+		this.messageBroker.ipcRenderer.send(IpcChannel.Unlock);
+		UiUtil.unlockInterface();
+		this.isBiometricsAuthenticationInProgress = false;
 
-    await this.router.navigate(['/workspace']);
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    this.messageBroker.ipcRenderer.send(IpcChannel.Unlock);
-    UiUtil.unlockInterface();
-    this.isBiometricsAuthenticationInProgress = false;
+		const path = await this.messageBroker.ipcRenderer.invoke(
+			IpcChannel.CheckRecoveryFile,
+		);
 
-    const path = await this.messageBroker.ipcRenderer.invoke(IpcChannel.CheckRecoveryFile);
-    if (path) {
-      setTimeout(() => {
-        this.modalService.openRecoveryWindow(path);
-      }, 1000);
-    }
-  }
+		if (path) {
+			setTimeout(() => {
+				// check if workspace is locked before showing the modal
+				if (this.isLocked) {
+					return;
+				}
 
-  async saveDatabase(config?: { forceNew?: boolean; notify?: boolean }, password?: string): Promise<true | Error> {
-    const blob = await exportDB(this.dbManager.context);
+				this.modalService.openRecoveryWindow(path);
+			}, 1000);
+		}
+	}
 
-    const fileReader = new FileReader();
-    fileReader.readAsText(blob);
-    fileReader.onloadend = () => {
-      this.messageBroker.ipcRenderer.send(IpcChannel.SaveFile, {
-        database: fileReader.result,
-        password,
-        config
-      });
-    };
+	async saveDatabase(
+		config?: { forceNew?: boolean; notify?: boolean },
+		password?: string,
+	): Promise<any | Error> {
+		const blob = await exportDB(this.dbManager.context);
 
-    return true;
-  }
+		return new Promise((resolve) => {
+			const fileReader = new FileReader();
+			fileReader.readAsText(blob);
+			fileReader.onloadend = async () => {
+				const result = await this.messageBroker.ipcRenderer.invoke(
+					IpcChannel.SaveFile,
+					{
+						database: fileReader.result,
+						password,
+						config,
+					},
+				);
 
-  async saveDatabaseSnapshot(): Promise<true | Error> {
-    const blob = await exportDB(this.dbManager.context);
+				this.handleDatabaseSaved(result);
+				resolve(result);
+			};
+		});
+	}
 
-    const fileReader = new FileReader();
-    fileReader.readAsText(blob);
-    fileReader.onloadend = () => {
-      this.messageBroker.ipcRenderer.send(IpcChannel.DatabaseChanged, { database: fileReader.result });
-    };
+	async saveDatabaseSnapshot(): Promise<void | Error> {
+		const blob = await exportDB(this.dbManager.context);
 
-    return true;
-  }
+		return new Promise((resolve) => {
+			const fileReader = new FileReader();
+			fileReader.readAsText(blob);
+			fileReader.onloadend = async () => {
+				await this.messageBroker.ipcRenderer.invoke(
+					IpcChannel.DatabaseChanged,
+					{
+						database: fileReader.result,
+					},
+				);
 
-  async loadVault(serialized: string) {
-    try {
-      const parsedVault: VaultSchema = JSON.parse(serialized);
-      this.configService.setConfig({ schemaVersion: parsedVault.schemaVersion });
-      const keys = Object.keys(this.dbManager.schemas);
+				resolve();
+			};
+		});
+	}
 
-      const databaseStructure: DexieExportJsonStructure = {
-        formatName: 'dexie',
-        formatVersion: 1,
-        data: {
-          databaseName: 'main',
-          databaseVersion: 1,
-          tables: keys.map(table => {
-            return {
-              name: table,
-              rowCount: parsedVault.tables[table].length,
-              schema: this.dbManager.schemas[table]
-            } 
-          }),
-          data: keys.map(table => {
-            return {
-              tableName: table,
-              inbound: true,
-              rows: parsedVault.tables[table]
-            };
-          })
-        }
-      }
+	async loadVault(serialized: string) {
+		try {
+			const parsedVault: VaultSchema = JSON.parse(serialized);
+			this.configService.setConfig({
+				schemaVersion: parsedVault.schemaVersion,
+			});
+			const keys = Object.keys(this.dbManager.schemas);
 
-      return this.loadDatabase(JSON.stringify(databaseStructure));
-    } catch (err) {
-      throw new Error('Vault cannot be loaded to database', { cause: err });
-    }
-  }
+			const databaseStructure: DexieExportJsonStructure = {
+				formatName: 'dexie',
+				formatVersion: 1,
+				data: {
+					databaseName: 'main',
+					databaseVersion: 1,
+					tables: keys.map((table) => {
+						return {
+							name: table,
+							rowCount: parsedVault.tables[table].length,
+							schema: this.dbManager.schemas[table],
+						};
+					}),
+					data: keys.map((table) => {
+						return {
+							tableName: table,
+							inbound: true,
+							rows: parsedVault.tables[table],
+						};
+					}),
+				},
+			};
 
-  async loadDatabase(jsonString: string) {
-    const blob = new Blob([jsonString]);
+			return this.loadDatabase(JSON.stringify(databaseStructure));
+		} catch (err) {
+			throw new Error('Vault cannot be loaded to database', { cause: err });
+		}
+	}
 
-    await importInto(this.dbManager.context, blob, {
-      acceptNameDiff: true,
-      acceptVersionDiff: true,
-      overwriteValues: true,
-      clearTablesBeforeImport: true
-    });
-    await this.groupManager.getGroupsTree();
+	async loadDatabase(jsonString: string) {
+		const blob = new Blob([jsonString]);
 
-    this.setDatabaseLoaded();
-  }
+		await importInto(this.dbManager.context, blob, {
+			acceptNameDiff: true,
+			acceptVersionDiff: true,
+			overwriteValues: true,
+			clearTablesBeforeImport: true
+		});
+		await this.groupManager.getGroupsTree();
 
-  async importDatabase(name: string, entries: PasswordEntry[]): Promise<boolean> {
-    try {
-      const groupId = await this.groupManager.addGroup({ name, isImported: true });
-      const mappedEntries = entries.map(e => ({ ...e, groupId }));
-      await this.entryManager.bulkAdd(mappedEntries);
-      const entriesWithIds = await this.entryManager.getAllByGroup(groupId);
+		this.setDatabaseLoaded();
+	}
 
-      for (const entry of entriesWithIds) {
-        this.entryManager.getIconPath(entry);
-      }
+	async importDatabase(
+		name: string,
+		entries: PasswordEntry[],
+	): Promise<boolean> {
+		try {
+			const groupId = await this.groupManager.addGroup({
+				name,
+				isImported: true,
+			});
+			const mappedEntries = entries.map((e) => ({ ...e, groupId }));
+			await this.entryManager.bulkAdd(mappedEntries);
+			const entriesWithIds = await this.entryManager.getAllByGroup(groupId);
 
-      // refresh All Items group after database import so new entries are visible on the list
-      // likely to be extended with Favorites group the same way in the future
-      if (this.groupManager.selectedGroup === GroupId.AllItems) {
-        await this.entryManager.setByGroup(GroupId.AllItems);
-        this.entryManager.updateEntriesSource();
-      }
+			for (const entry of entriesWithIds) {
+				if (entry.type === 'password') this.entryManager.getIconPath(entry);
+			}
 
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
+			// refresh All Items group after database import so new entries are visible on the list
+			// likely to be extended with Favorites group the same way in the future
+			if (this.groupManager.selectedGroup === GroupId.AllItems) {
+				await this.entryManager.setByGroup(GroupId.AllItems);
+				this.entryManager.updateEntriesSource();
+			}
 
-  async clearDatabase(): Promise<void[] | void> {
-    this.entryManager.passwordEntries = [];
-    return this.dbManager.reset();
-  }
+			return true;
+		} catch (err) {
+			return false;
+		}
+	}
 
-  async saveNewDatabase(newPassword: string, config: { forceNew?: boolean }): Promise<true | Error> {
-    return this.saveDatabase(config, newPassword);
-  }
+	async clearDatabase(): Promise<void[] | void> {
+		this.entryManager.passwordEntries = [];
+		return this.dbManager.reset();
+	}
 
-  async setupDatabase(): Promise<boolean> {
-    await this.messageBroker.ipcRenderer.invoke(IpcChannel.RegenerateKey);
+	async saveNewDatabase(
+		newPassword: string,
+		config: { forceNew?: boolean },
+	): Promise<any | Error> {
+		return this.saveDatabase(config, newPassword);
+	}
 
-    if (!this.file) {
-      await this.groupManager.setupGroups();
-    }
+	async setupDatabase(): Promise<boolean> {
+		await this.messageBroker.ipcRenderer.invoke(IpcChannel.RegenerateKey);
 
-    return true;
-  }
+		// if (!this.file) {
+		// 	await this.groupManager.setupGroups();
+		// }
 
-  setSynced() {
-    this.isSynced = true;
-  }
+		return true;
+	}
 
-  exitApp() {
-    window.onbeforeunload = null;
+	async openFile(path?: string) {
+		const success = await this.executeEvent();
 
-    setTimeout(() => {
-      this.messageBroker.ipcRenderer.send(IpcChannel.Exit);
-    });
-  }
+		if (success) {
+			const result = await this.messageBroker.ipcRenderer.invoke(
+				IpcChannel.OpenFile,
+				path,
+			);
+			await this.handleDatabaseLock(result);
+		}
+	}
 
-  toggleTheme() {
-    this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleTheme);
-  }
+	setSynced() {
+		this.isSynced = true;
+	}
 
-  async zoomIn() {
-    this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ZoomIn);
-  }
+	exitApp() {
+		window.onbeforeunload = null;
 
-  async zoomOut() {
-    this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ZoomOut);
-  }
+		setTimeout(() => {
+			this.messageBroker.ipcRenderer.send(IpcChannel.Exit);
+		});
+	}
 
-  async resetZoom() {
-    this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ResetZoom);
-  }
+	toggleTheme() {
+		this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleTheme);
+	}
 
-  toggleFullscreen() {
-    this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleFullscreen);
-  }
+	async zoomIn() {
+		this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(
+			IpcChannel.ZoomIn,
+		);
+	}
 
-  findEntries() {
-    this.entryManager.isGlobalSearch = false;
-    this.entryManager.selectedPasswords = [];
+	async zoomOut() {
+		this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(
+			IpcChannel.ZoomOut,
+		);
+	}
 
-    UiUtil.focusSearchbox();
-  }
+	async resetZoom() {
+		this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(
+			IpcChannel.ResetZoom,
+		);
+	}
 
-  findGlobalEntries() {
-    this.entryManager.isGlobalSearch = true;
-    this.entryManager.selectedPasswords = [];
+	toggleFullscreen() {
+		this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleFullscreen);
+	}
 
-    UiUtil.focusSearchbox();
-  }
+	findEntries() {
+		this.entryManager.isGlobalSearch = false;
+		this.entryManager.selectedPasswords = [];
 
-  private handleDatabaseLock() {
-    this.messageBroker.ipcRenderer.on(IpcChannel.ProvidePassword, (_, filePath: string) => {
-      this.zone.run(async () => {
-        this.file = { filePath, filename: this.fileNamePipe.transform(filePath) };
-        if (!this.isLocked) {
-          await this.lock();
-        }
+		UiUtil.focusSearchbox();
+	}
 
-        // navigation is needed when being on New Vault page
-        this.router.navigate(['/pass']);
-      });
-    });
-  }
+	findGlobalEntries() {
+		this.entryManager.isGlobalSearch = true;
+		this.entryManager.selectedPasswords = [];
 
-  private handleDatabaseSaved() {
-    this.messageBroker.ipcRenderer.on(IpcChannel.GetSaveStatus, (_, { status, error, file, notify }) => {
-      this.zone.run(() => {
-        if (status) {
-          this.file = { filePath: file, filename: this.fileNamePipe.transform(file)};
-          this.setSynced();
+		UiUtil.focusSearchbox();
+	}
 
-          if (notify) {
-            this.notificationService.add({
-              message: 'Database saved',
-              alive: 10 * 1000,
-              type: 'success'
-            });
-          }
-        } else if (error) {
-          this.notificationService.add({
-            type: 'error',
-            message: 'Error occured',
-            alive: 10 * 1000,
-          });
-        }
-      });
-    });
-  }
+	async handleDatabaseLock(filePath: string) {
+		this.file = {
+			filePath,
+			filename: this.fileNamePipe.transform(filePath),
+		};
+
+		if (!this.isLocked) {
+			await this.lock();
+		}
+
+		// navigation is needed when being on New Vault page
+		this.router.navigate(['/home']);
+	}
+
+	private handleDatabaseSaved(res: any) {
+		if (res.status) {
+			this.file = {
+				filePath: res.file,
+				filename: this.fileNamePipe.transform(res.file),
+			};
+			this.setSynced();
+
+			if (res.notify) {
+				this.notificationService.add({
+					message: 'Database saved',
+					alive: 10 * 1000,
+					type: 'success',
+				});
+			}
+		} else if (res.error) {
+			this.notificationService.add({
+				type: 'error',
+				message: 'Error occured',
+				alive: 10 * 1000,
+			});
+		}
+	}
 }

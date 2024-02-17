@@ -1,12 +1,12 @@
 @import 'themes/base-variables';
 
 :host {
-  position: absolute;
-  top: 0;
+	position: absolute;
+	top: 0;
 	right: 0;
-  min-width: $handle-width;
-  height: 100%;
-  z-index: 990;
+	min-width: $handle-width;
+	height: 100%;
+	z-index: 990;
 	justify-content: flex-end;
 	transition: background-color 50ms;
 	cursor: w-resize;
@@ -21,7 +21,8 @@
 		right: auto;
 	}
 
-	&:hover, &.active {
+	&:hover,
+	&.active {
 		.drag {
 			width: calc(4px / var(--device-pixel-ratio));
 		}

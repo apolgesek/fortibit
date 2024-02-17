@@ -22,7 +22,7 @@ var getDefaultConfig = function (platform) {
         autocompleteUsernameOnlyShortcut: platform === 'win32' ? 'Alt+[' : 'Option+[',
         autocompletePasswordOnlyShortcut: platform === 'win32' ? 'Alt+]' : 'Option+]',
         autocompleteShortcut: platform === 'win32' ? 'Alt+\\' : 'Option+\\',
-        showInsecureUrlPrompt: true
+        showInsecureUrlPrompt: true,
     };
 };
 exports.getDefaultConfig = getDefaultConfig;

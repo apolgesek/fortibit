@@ -1,7 +1,4 @@
-<div
-	data-prevent-entry-deselect
-	#topbar
-	class="topbar">
+<div data-prevent-entry-deselect #topbar class="topbar">
 	<ul appMenu class="menu">
 		<div class="brand-logo"></div>
 		<ul appDropdown class="dropdown">
@@ -11,41 +8,99 @@
 			<div *appDropdownMenu class="dropdown-content left">
 				<li appMenuItem (activate)="newFile()">New file...</li>
 				<li appMenuItem (activate)="openFile()">Open file...</li>
-				<div appDropdown class="dropdown" style="width: 100%;">
-					<li appDropdownToggle trigger="hover" appMenuItem class="submenu-open">
+				<div appDropdown class="dropdown" style="width: 100%">
+					<li
+						appDropdownToggle
+						trigger="hover"
+						appMenuItem
+						class="submenu-open"
+					>
 						Open recent <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<li *ngFor="let file of recentFiles; let i = index" aria-hidden="true" appMenuItem (activate)="openFile(file)">
+						<li
+							*ngFor="let file of recentFiles; let i = index"
+							aria-hidden="true"
+							appMenuItem
+							(activate)="openFile(file)"
+						>
 							{{ i + 1 }}: {{ file | fileName }}
 						</li>
 					</div>
 				</div>
 				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="save()" [disabled]="isDatabasePristine">Save <span class="secondary">{{ hotkeys['SaveDatabase'] }}</span></li>
-				<li appMenuItem [disabled]="isLocked" (activate)="saveAs()">Save as...</li>
-				<div appDropdown class="dropdown" style="width: 100%;">
-					<li appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
+				<li appMenuItem (activate)="save()" [disabled]="isDatabasePristine">
+					Save <span class="secondary">{{ hotkeys['SaveDatabase'] }}</span>
+				</li>
+				<li appMenuItem [disabled]="isLocked" (activate)="saveAs()">
+					Save as...
+				</li>
+				<div appDropdown class="dropdown" style="width: 100%">
+					<li
+						appDropdownToggle
+						trigger="hover"
+						appMenuItem
+						[disabled]="isLocked"
+						class="submenu-open"
+					>
 						Import <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.KeePass)">KeePass &bull; XML</li>
-						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.OnePassword)">1Password &bull; CSV</li>
-						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.Bitwarden)">Bitwarden &bull; CSV</li>
-						<li aria-hidden="true" appMenuItem (activate)="import(importHandler.Lastpass)">Lastpass &bull; CSV</li>
+						<li
+							aria-hidden="true"
+							appMenuItem
+							(activate)="import(importHandler.KeePass)"
+						>
+							KeePass &bull; XML
+						</li>
+						<li
+							aria-hidden="true"
+							appMenuItem
+							(activate)="import(importHandler.OnePassword)"
+						>
+							1Password &bull; CSV
+						</li>
+						<li
+							aria-hidden="true"
+							appMenuItem
+							(activate)="import(importHandler.Bitwarden)"
+						>
+							Bitwarden &bull; CSV
+						</li>
+						<li
+							aria-hidden="true"
+							appMenuItem
+							(activate)="import(importHandler.Lastpass)"
+						>
+							Lastpass &bull; CSV
+						</li>
 					</div>
 				</div>
-				<div appDropdown class="dropdown" style="width: 100%;">
-					<li appDropdownToggle trigger="hover" appMenuItem [disabled]="isLocked" class="submenu-open">
+				<div appDropdown class="dropdown" style="width: 100%">
+					<li
+						appDropdownToggle
+						trigger="hover"
+						appMenuItem
+						[disabled]="isLocked"
+						class="submenu-open"
+					>
 						Export <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
 						<li aria-hidden="true" appMenuItem (activate)="export()">CSV</li>
 					</div>
 				</div>
-				<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">Lock <span class="secondary">{{ hotkeys['Lock'] }}</span></li>
+				<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">
+					Lock <span class="secondary">{{ hotkeys['Lock'] }}</span>
+				</li>
 				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="openChangePasswordWindow()" [disabled]="isLocked">Change password</li>
+				<li
+					appMenuItem
+					(activate)="openChangePasswordWindow()"
+					[disabled]="isLocked"
+				>
+					Change password
+				</li>
 				<div class="divider"><hr /></div>
 				<li appMenuItem (activate)="exit()">Exit</li>
 			</div>
@@ -55,17 +110,40 @@
 				View
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
-				<li appMenuItem (activate)="searchGroup()" [disabled]="isLocked">Search group <span class="secondary">{{ hotkeys['FindInGroup'] }}</span></li>
-				<li appMenuItem (activate)="searchVault()" [disabled]="isLocked">Search vault <span class="secondary">{{ hotkeys['FindInVault'] }}</span></li>
-				<ul class="zoom-level" style="list-style-type: none; display: flex; align-items: center; padding: 0 0.5rem;">
-					<span style="margin-right: auto;">Zoom</span>
+				<li appMenuItem (activate)="searchGroup()" [disabled]="isLocked">
+					Search group
+					<span class="secondary">{{ hotkeys['FindInGroup'] }}</span>
+				</li>
+				<li appMenuItem (activate)="searchVault()" [disabled]="isLocked">
+					Search vault
+					<span class="secondary">{{ hotkeys['FindInVault'] }}</span>
+				</li>
+				<ul
+					class="zoom-level"
+					style="
+						list-style-type: none;
+						display: flex;
+						align-items: center;
+						padding: 0 0.5rem;
+					"
+				>
+					<span style="margin-right: auto">Zoom</span>
 					<li appMenuItem (activate)="zoomOut()" [closeOnSelect]="false">
-					<i-feather name="minus"></i-feather></li><span style="margin: 0 0.5rem">{{ zoomFactor }}%</span>
-					<li appMenuItem (activate)="zoomIn()" [closeOnSelect]="false"><i-feather name="plus"></i-feather></li>
+						<i-feather name="minus"></i-feather>
+					</li>
+					<span style="margin: 0 0.5rem">{{ zoomFactor }}%</span>
+					<li appMenuItem (activate)="zoomIn()" [closeOnSelect]="false">
+						<i-feather name="plus"></i-feather>
+					</li>
 				</ul>
-				<li appMenuItem (activate)="resetZoom()">Reset zoom <span class="secondary">{{ hotkeys['ResetZoom'] }}</span></li>
+				<li appMenuItem (activate)="resetZoom()">
+					Reset zoom <span class="secondary">{{ hotkeys['ResetZoom'] }}</span>
+				</li>
 				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="fullscreen()">Toggle fullscreen <span class="secondary">{{ hotkeys['ToggleFullscreen'] }}</span></li>
+				<li appMenuItem (activate)="fullscreen()">
+					Toggle fullscreen
+					<span class="secondary">{{ hotkeys['ToggleFullscreen'] }}</span>
+				</li>
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
@@ -73,22 +151,44 @@
 				Tools
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
-				<li appMenuItem (activate)="openGeneratorWindow()">Generator <span class="secondary">{{ hotkeys['Generator'] }}</span></li>
+				<li appMenuItem (activate)="openGeneratorWindow()">
+					Generator <span class="secondary">{{ hotkeys['Generator'] }}</span>
+				</li>
 				<div class="divider"><hr /></div>
-				<div appDropdown class="dropdown" style="width: 100%;">
-					<li appDropdownToggle trigger="hover" appMenuItem class="submenu-open" [disabled]="isLocked">
+				<div appDropdown class="dropdown" style="width: 100%">
+					<li
+						appDropdownToggle
+						trigger="hover"
+						appMenuItem
+						class="submenu-open"
+						[disabled]="isLocked"
+					>
 						Report <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<li aria-hidden="true" appMenuItem (activate)="openExposedPasswordsWindow()">
+						<li
+							aria-hidden="true"
+							appMenuItem
+							(activate)="openExposedPasswordsWindow()"
+						>
 							Leaked passwords
 						</li>
-						<li aria-hidden="true" appMenuItem (activate)="openWeakPasswordsWindow()">
+						<li
+							aria-hidden="true"
+							appMenuItem
+							(activate)="openWeakPasswordsWindow()"
+						>
 							Weak passwords
 						</li>
 					</div>
 				</div>
-				<li appMenuItem (activate)="openMaintenanceWindow()" [disabled]="isLocked">Maintenance</li>
+				<li
+					appMenuItem
+					(activate)="openMaintenanceWindow()"
+					[disabled]="isLocked"
+				>
+					Maintenance
+				</li>
 			</div>
 		</ul>
 		<ul appDropdown class="dropdown">
@@ -96,7 +196,9 @@
 				Help
 			</li>
 			<div *appDropdownMenu class="dropdown-content left">
-				<li appMenuItem (activate)="openKeyboardShortcuts()">Keyboard shortcuts</li>
+				<li appMenuItem (activate)="openKeyboardShortcuts()">
+					Keyboard shortcuts
+				</li>
 				<div class="divider"><hr /></div>
 				<li appMenuItem (activate)="openReleaseNotes()">Release notes</li>
 				<li appMenuItem (activate)="openReportIssue()">Report issue</li>

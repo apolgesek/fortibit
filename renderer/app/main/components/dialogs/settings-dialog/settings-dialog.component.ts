@@ -14,47 +14,47 @@ import { IntegrationTabComponent } from './integration-tab/integration-tab.compo
 import { ViewTabComponent } from './view-tab/view-tab.component';
 
 enum Tab {
-  Integration = 'Integration'
+	Integration = 'Integration',
 }
 
 @Component({
-  selector: 'app-settings-dialog',
-  templateUrl: './settings-dialog.component.html',
-  styleUrls: ['./settings-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    TabsetComponent,
-    TabComponent,
-    ModalComponent,
-    EncryptionTabComponent,
-    ViewTabComponent,
-    IntegrationTabComponent,
-    GeneralTabComponent
-  ]
+	selector: 'app-settings-dialog',
+	templateUrl: './settings-dialog.component.html',
+	styleUrls: ['./settings-dialog.component.scss'],
+	standalone: true,
+	imports: [
+		CommonModule,
+		TabsetComponent,
+		TabComponent,
+		ModalComponent,
+		EncryptionTabComponent,
+		ViewTabComponent,
+		IntegrationTabComponent,
+		GeneralTabComponent,
+	],
 })
 export class SettingsDialogComponent implements IModal {
-  public readonly ref!: ComponentRef<SettingsDialogComponent>;
-  public readonly additionalData!: IAdditionalData;
-  public readonly tab = Tab;
+	public readonly ref!: ComponentRef<SettingsDialogComponent>;
+	public readonly additionalData!: IAdditionalData;
+	public readonly tab = Tab;
 
-  constructor(
-    private readonly modalRef: ModalRef,
-    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker
-  ) { }
+	constructor(
+		private readonly modalRef: ModalRef,
+		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
+	) {}
 
-  close() {
-    this.modalRef.close();
-  }
+	close() {
+		this.modalRef.close();
+	}
 
-  shouldIncludeTab(tab: Tab): boolean {
-    switch (this.messageBroker.platform) {
-      case 'darwin':
-        if (tab === Tab.Integration) {
-          return false;
-        }
-      default:
-        return true;
-    }
-  }
+	shouldIncludeTab(tab: Tab): boolean {
+		switch (this.messageBroker.platform) {
+			case 'darwin':
+				if (tab === Tab.Integration) {
+					return false;
+				}
+			default:
+				return true;
+		}
+	}
 }

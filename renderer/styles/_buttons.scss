@@ -85,7 +85,8 @@ button {
 		background-color: var(--tabset-btn-bg--hover);
 	}
 
-	&:focus, &.active {
+	&:focus,
+	&.active {
 		color: var(--primary-text);
 		outline: 2px solid #aedaff !important;
 		outline-offset: 3px !important;
@@ -93,11 +94,11 @@ button {
 
 	&:disabled {
 		color: $grey-300;
-    cursor: default;
+		cursor: default;
 
-    &:hover {
-      background-color: transparent;
-    }
+		&:hover {
+			background-color: transparent;
+		}
 	}
 
 	.pi {
@@ -128,7 +129,7 @@ button {
 				fill: $barberry;
 				stroke: $barberry;
 			}
-	
+
 			&.is-animating svg {
 				animation-duration: calc(var(--base-animation-duration) * 1ms);
 				animation-timing-function: ease-in;
@@ -175,11 +176,11 @@ button {
 	display: flex;
 	align-items: center;
 	line-height: 1;
-  font-size: 0.875rem;
+	font-size: 0.875rem;
 	color: var(--primary-text);
 	background-color: var(--primary-bg);
-  border: none;
-  cursor: pointer;
+	border: none;
+	cursor: pointer;
 	transition: color 100ms;
 	width: auto;
 	padding: 0 0.5rem 0;
@@ -190,7 +191,9 @@ button {
 		background: $grey-100;
 	}
 
-	&:hover, &:visited, &.active {
+	&:hover,
+	&:visited,
+	&.active {
 		color: var(--primary-text);
 	}
 
@@ -201,23 +204,54 @@ button {
 
 	&:focus-visible {
 		color: var(--primary-text);
-	
-		&.icon-btn {
-			&:focus:not(:hover) {
-				outline: 2px solid $barberry !important;
-			}
+	}
+}
+
+.icon-btn {
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0 0.25rem;
+
+	&:hover:not(:disabled),
+	&:focus:not(:disabled),
+	&.expanded {
+		cursor: pointer;
+		i-feather {
+			background: var(--toolbar-btn-bg--hover);
 		}
-	
-		&.icon-btn .pi {
-			color: var(--primary-text);
+	}
+
+	&:disabled {
+		i-feather {
+			color: #b0b0b0;
 		}
+	}
+
+	i-feather {
+		padding: 0.5rem;
+		border-radius: 1rem;
+		width: 1.25rem !important;
+		height: 1.25rem !important;
+		color: var(--settings-btn-bg);
+		margin-right: 0 !important;
 	}
 }
 
 @keyframes star {
-	0%	{transform: scale(1);}
-	20%	{transform: scale(1.5);}
-	40%	{transform: scale(0.9);}
-	80%	{transform: scale(1.2);}
-	100%	{transform: scale(1);}
+	0% {
+		transform: scale(1);
+	}
+	20% {
+		transform: scale(1.5);
+	}
+	40% {
+		transform: scale(0.9);
+	}
+	80% {
+		transform: scale(1.2);
+	}
+	100% {
+		transform: scale(1);
+	}
 }

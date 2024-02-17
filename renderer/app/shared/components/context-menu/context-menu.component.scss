@@ -1,56 +1,54 @@
 @import 'themes/light/variables';
 
 :host {
-  position: absolute;
-  z-index: 9999;
-  display: block;
-  min-width: 200px;
-  background-color: var(--context-menu-bg);
-  color: var(--primary-text);
-  top: 0;
-  left: 0;
-  visibility: hidden;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-  border-radius: 0.25rem;
+	position: absolute;
+	z-index: 9999;
+	display: block;
+	min-width: 200px;
+	background-color: var(--context-menu-bg);
+	color: var(--primary-text);
+	top: 0;
+	left: 0;
+	visibility: hidden;
+	box-shadow:
+		0 3px 6px rgba(0, 0, 0, 0.16),
+		0 3px 6px rgba(0, 0, 0, 0.23);
+	border-radius: 0.25rem;
 
-  &.hidden {
-    visibility: hidden;
-  }
+	&.hidden {
+		visibility: hidden;
+	}
 }
 
 .items-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
 
-  li {
-    padding: 0.4rem 0.5rem;
-    color: var(--primary-text);
-    font-size: 0.875rem;
-    outline: none;
-    cursor: pointer;
+	li {
+		padding: 0.4rem 0.5rem;
+		color: var(--primary-text);
+		font-size: 0.875rem;
+		outline: none;
+		cursor: pointer;
 
-    &:first-child {
-      border-top-left-radius: 0.25rem;
-      border-top-right-radius: 0.25rem;
-    }
+		&:first-child {
+			border-top-left-radius: 0.25rem;
+			border-top-right-radius: 0.25rem;
+		}
 
-    &:last-child {
-      border-bottom-left-radius: 0.25rem;
-      border-bottom-right-radius: 0.25rem;
-    }
+		&:last-child {
+			border-bottom-left-radius: 0.25rem;
+			border-bottom-right-radius: 0.25rem;
+		}
 
-    &.disabled {
-      cursor: default;
-      color: $grey-300;
+		&.disabled {
+			cursor: default;
+			color: var(--dropdown-text--disabled);
+		}
 
-      &:hover {
-        background-color: var(--primary-bg);
-      }
-    }
-
-    &:focus {
-      background-color: var(--dropdown-list-item-bg--hover);
-    }
-  }
+		&:focus:not(.disabled) {
+			background-color: var(--dropdown-list-item-bg--hover);
+		}
+	}
 }

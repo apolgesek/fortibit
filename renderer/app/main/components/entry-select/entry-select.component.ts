@@ -12,51 +12,60 @@ import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 
 @Component({
-  selector: 'app-entry-select',
-  templateUrl: './entry-select.component.html',
-  styleUrls: ['./entry-select.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    ScrollingModule,
-    FeatherModule,
-    EntryIconDirective,
-    FocusableListDirective,
-    FocusableListItemDirective,
-    SecondaryMenuBarComponent,
-  ]
+	selector: 'app-entry-select',
+	templateUrl: './entry-select.component.html',
+	styleUrls: ['./entry-select.component.scss'],
+	standalone: true,
+	imports: [
+		CommonModule,
+		ScrollingModule,
+		FeatherModule,
+		EntryIconDirective,
+		FocusableListDirective,
+		FocusableListItemDirective,
+		SecondaryMenuBarComponent,
+	],
 })
 export class EntrySelectComponent implements OnInit {
-  public selectedEntries = [];
-  public passwordList: PasswordEntry[];
+	public selectedEntries: PasswordEntry[] = [];
+	public passwordList: PasswordEntry[] = [];
 
-  constructor(
-    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-    private readonly zone: NgZone,
-  ) { }
+	constructor(
+		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
+		private readonly zone: NgZone,
+	) {}
 
-  ngOnInit(): void {
-    this.messageBroker.ipcRenderer.on(IpcChannel.SendMatchingEntries, (_, entries: PasswordEntry[]) => {
-      this.zone.run(() => {
-        this.passwordList = entries;
-        this.selectEntry(null, this.passwordList[0]);
-      });
-    });
-  }
+	ngOnInit(): void {
+		this.messageBroker.ipcRenderer.on(
+			IpcChannel.SendMatchingEntries,
+			(_, entries: PasswordEntry[]) => {
+				this.zone.run(() => {
+					this.passwordList = entries;
+					this.selectEntry(null, this.passwordList[0]);
+				});
+			},
+		);
+	}
 
-  selectEntry(_: MouseEvent, entry: PasswordEntry) {
-    this.selectedEntries = [entry];
-  }
+	selectEntry(_: Event, entry: PasswordEntry) {
+		this.selectedEntries = [entry];
+	}
 
-  confirmEntry() {
-    this.messageBroker.ipcRenderer.send(IpcChannel.AutotypeEntrySelected, this.selectedEntries[0]);
-  }
+	confirmEntry() {
+		this.messageBroker.ipcRenderer.send(
+			IpcChannel.AutotypeEntrySelected,
+			this.selectedEntries[0],
+		);
 
-  isEntrySelected(entry: PasswordEntry): boolean {
-    return Boolean(this.selectedEntries.find(e => e.id === entry?.id));
-  }
+		this.passwordList = [];
+		this.selectedEntries = [];
+	}
 
-  trackingTag(_: number, entry: PasswordEntry): string {
-    return entry.id.toString();
-  }
+	isEntrySelected(entry: PasswordEntry): boolean {
+		return Boolean(this.selectedEntries.find((e) => e.id === entry?.id));
+	}
+
+	trackingTag(_: number, entry: PasswordEntry): string {
+		return entry.id.toString();
+	}
 }

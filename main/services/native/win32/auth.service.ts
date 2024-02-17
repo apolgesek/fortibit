@@ -1,90 +1,94 @@
-import { MessageEventType } from "./message-event-type.enum";
+import { MessageEventType } from './message-event-type.enum';
 
 type EventPayload = {
-  type: MessageEventType;
+	type: MessageEventType;
 };
 
 type GetPasswordEvent = EventPayload & {
-  windowHandleHex: string;
-  dbPath: string;
-}
+	windowHandleHex: string;
+	dbPath: string;
+};
 
 type SavePasswordEvent = EventPayload & {
-  password: string;
-  dbPath: string;
-}
+	password: string;
+	dbPath: string;
+};
 
 type RemovePasswordEvent = EventPayload & {
-  dbPath: string;
-}
+	dbPath: string;
+};
 
 type ListPathsEvent = EventPayload;
 
 class Main {
-  private readonly _messageListener: () => void;
-  private readonly _credentialPrefix = 'fbit:';
+	private readonly _messageListener: () => void;
+	private readonly _credentialPrefix = 'fbit:';
 
-  constructor() {
-    this._messageListener = this.execute.bind(this);
-  }
+	constructor() {
+		this._messageListener = this.execute.bind(this);
+	}
 
-  public setup(): NodeJS.Process {
-    return process.on('message', this._messageListener);
-  }
+	public setup(): NodeJS.Process {
+		return process.on('message', this._messageListener);
+	}
 
-  private execute(event: EventPayload): void {
-    switch (event.type) {
-      case MessageEventType.GetPassword:
-        this.getPassword(event as GetPasswordEvent);
-        break;
-      case MessageEventType.SavePassword:
-        this.savePassword(event as SavePasswordEvent);
-        break;
-      case MessageEventType.RemovePassword:
-        this.removePassword(event as RemovePasswordEvent);
-        break;
-      case MessageEventType.ListPaths:
-        this.listPaths(event as ListPathsEvent);
-        break;
-  
-      default:
-        break;
-    }
+	private execute(event: EventPayload): void {
+		switch (event.type) {
+			case MessageEventType.GetPassword:
+				this.getPassword(event as GetPasswordEvent);
+				break;
+			case MessageEventType.SavePassword:
+				this.savePassword(event as SavePasswordEvent);
+				break;
+			case MessageEventType.RemovePassword:
+				this.removePassword(event as RemovePasswordEvent);
+				break;
+			case MessageEventType.ListPaths:
+				this.listPaths(event as ListPathsEvent);
+				break;
 
-    process.exit();
-  }
+			default:
+				break;
+		}
 
-  private getPassword(event: GetPasswordEvent): void {
-    const { windowHandleHex, dbPath } = event;
-    const nativeAuth = require('bindings')('NativeAuth');
-    const verified: boolean = nativeAuth.verify(Buffer.from(windowHandleHex, 'hex'));
-    let password = '';
+		process.exit();
+	}
 
-    if (verified) {
-      password = nativeAuth.getCredential(this._credentialPrefix + dbPath);
-    }
+	private getPassword(event: GetPasswordEvent): void {
+		const { windowHandleHex, dbPath } = event;
+		const nativeAuth = require('bindings')('NativeAuth');
+		const verified: boolean = nativeAuth.verify(
+			Buffer.from(windowHandleHex, 'hex'),
+		);
+		let password = '';
 
-    process.send?.(password);
-  }
+		if (verified) {
+			password = nativeAuth.getCredential(this._credentialPrefix + dbPath);
+		}
 
-  private savePassword(event: SavePasswordEvent): void {
-    const { dbPath, password } = event;
-    const nativeAuth = require('bindings')('NativeAuth');
-    nativeAuth.saveCredential(this._credentialPrefix + dbPath, password);
-  }
+		process.send?.(password);
+	}
 
-  private removePassword(event: RemovePasswordEvent): void {
-    const { dbPath } = event;
-    const nativeAuth = require('bindings')('NativeAuth');
-    nativeAuth.removeCredential(this._credentialPrefix + dbPath);
-  }
+	private savePassword(event: SavePasswordEvent): void {
+		const { dbPath, password } = event;
+		const nativeAuth = require('bindings')('NativeAuth');
+		nativeAuth.saveCredential(this._credentialPrefix + dbPath, password);
+	}
 
-  private listPaths(event: ListPathsEvent): void {
-    const nativeAuth = require('bindings')('NativeAuth');
-    const paths = nativeAuth.listCredentials(this._credentialPrefix).map(x => x.replace(this._credentialPrefix, '').replace(/\\\\/g, '\\'));
-    
-    process.send?.(paths);
-  }
+	private removePassword(event: RemovePasswordEvent): void {
+		const { dbPath } = event;
+		const nativeAuth = require('bindings')('NativeAuth');
+		nativeAuth.removeCredential(this._credentialPrefix + dbPath);
+	}
+
+	private listPaths(event: ListPathsEvent): void {
+		const nativeAuth = require('bindings')('NativeAuth');
+		const paths = nativeAuth
+			.listCredentials(this._credentialPrefix)
+			.map((x) => x.replace(this._credentialPrefix, '').replace(/\\\\/g, '\\'));
+
+		process.send?.(paths);
+	}
 }
 
 new Main().setup();

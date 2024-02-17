@@ -1,61 +1,53 @@
 <div class="container">
-  <div class="section-header">
-    Password generator options
-  </div>
-  <form [formGroup]="encryptionForm">
-    <div class="inputgroup">
-      <label class="label" for="length">Password length:</label>
-      <input
-        id="passwordLength"
-        type="number"
-        class="number"
-        formControlName="passwordLength"
-        (input)="onNumberChange($event, 'passwordLength', 2)">
-    </div>
-    <div
-      *ngIf="isControlInvalid(encryptionForm.get('passwordLength'))"
-      class="validation-error">
-      Length must be between 6 and 32.
-    </div>
-    <div class="inputgroup checkbox">
-      <label class="label" for="uppercase">Uppercase letters:</label>
-      <label class="switch">
-        <input
-          id="uppercase"
-          type="checkbox"
-          formControlName="uppercase">
-          <span class="slider"></span>
-      </label>    
-    </div>
-    <div class="inputgroup checkbox">
-      <label class="label" for="lowercase">Lowercase letters:</label>
-      <label class="switch">
-        <input
-          id="lowercase"
-          type="checkbox"
-          formControlName="lowercase">
-          <span class="slider"></span>
-      </label>    
-    </div>
-    <div class="inputgroup checkbox">
-      <label class="label" for="specialchars">Special characters:</label>
-      <label class="switch">
-        <input
-          id="specialChars"
-          type="checkbox"
-          formControlName="specialChars">
-          <span class="slider"></span>
-      </label>    
-    </div>
-    <div class="inputgroup checkbox">
-      <label class="label" for="numbers">Numbers:</label>
-      <label class="switch">
-        <input
-          id="numbers"
-          type="checkbox"
-          formControlName="numbers">
-          <span class="slider"></span>
-      </label>    
-    </div>
-  </form>
+	<div class="section-header">Password generator options</div>
+	<form [formGroup]="encryptionForm">
+		<div class="inputgroup">
+			<label class="label" for="length">Password length:</label>
+			<input
+				id="passwordLength"
+				type="number"
+				class="number"
+				formControlName="passwordLength"
+				(input)="onNumberChange($event, 'passwordLength', 2)"
+			/>
+		</div>
+		<div
+			*ngIf="isControlInvalid(encryptionForm.get('passwordLength'))"
+			class="validation-error"
+		>
+			Length must be between 6 and 32.
+		</div>
+		<div class="inputgroup checkbox">
+			<label class="label" for="uppercase">Uppercase letters:</label>
+			<label class="switch">
+				<input id="uppercase" type="checkbox" formControlName="uppercase" />
+				<span class="slider"></span>
+			</label>
+		</div>
+		<div class="inputgroup checkbox">
+			<label class="label" for="lowercase">Lowercase letters:</label>
+			<label class="switch">
+				<input id="lowercase" type="checkbox" formControlName="lowercase" />
+				<span class="slider"></span>
+			</label>
+		</div>
+		<div class="inputgroup checkbox">
+			<label class="label" for="specialchars">Special characters:</label>
+			<label class="switch">
+				<input
+					id="specialChars"
+					type="checkbox"
+					formControlName="specialChars"
+				/>
+				<span class="slider"></span>
+			</label>
+		</div>
+		<div class="inputgroup checkbox">
+			<label class="label" for="numbers">Numbers:</label>
+			<label class="switch">
+				<input id="numbers" type="checkbox" formControlName="numbers" />
+				<span class="slider"></span>
+			</label>
+		</div>
+	</form>
 </div>

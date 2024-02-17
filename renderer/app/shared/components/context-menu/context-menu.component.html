@@ -1,29 +1,37 @@
 <div
-  *ngIf="model"
-  data-prevent-entry-deselect
-  class="context-menu"
-  data-testid="context-menu">
-  <ul class="items-list"
-    appFocusableList
-    role="menu"
-    [selected]="selected"
-    (focused)="setFocus($event.item)"
-    [focusOnLoad]="true">
-    <ng-container *ngFor="let item of model">
-      <li
-        *ngIf="!item.separator; else separator"
-        [appFocusableListItem]="item"
-        role="menuitem"
-        tabindex="0"
-        [ngClass]="{'separator': item.separator, 'disabled': item.disabled}"
-        (click)="!item.disabled && item.command && executeCommand(item.command, $event)"
-        (keyup.enter)="!item.disabled && item.command && executeCommand(item.command, $event)"
-        (mouseenter)="setFocus(item)">
-        {{ item.label }}
-      </li>
-      <ng-template #separator>
-        <div class="divider"><hr /></div>
-      </ng-template>
-    </ng-container>
-  </ul>
+	*ngIf="model?.length"
+	data-prevent-entry-deselect
+	class="context-menu"
+	data-testid="context-menu"
+>
+	<ul
+		class="items-list"
+		appFocusableList
+		role="menu"
+		[selected]="selected"
+		(focused)="setFocus($event.item)"
+		[focusOnLoad]="true"
+	>
+		<ng-container *ngFor="let item of model">
+			<li
+				*ngIf="!item.separator; else separator"
+				[appFocusableListItem]="item"
+				role="menuitem"
+				tabindex="0"
+				[ngClass]="{ separator: item.separator, disabled: item.disabled }"
+				(click)="
+					!item.disabled && item.command && executeCommand(item.command, $event)
+				"
+				(keyup.enter)="
+					!item.disabled && item.command && executeCommand(item.command, $event)
+				"
+				(mouseenter)="setFocus(item)"
+			>
+				{{ item.label }}
+			</li>
+			<ng-template #separator>
+				<div class="divider"><hr /></div>
+			</ng-template>
+		</ng-container>
+	</ul>
 </div>

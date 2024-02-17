@@ -1,103 +1,129 @@
-import { PasswordEntry } from '../../../../shared/index';
+import { Entry } from '../../../../shared/index';
 import { DbManager } from '../database/db-manager';
 import { GroupId } from '../enums';
 import { IEntryRepository, EntryPredicateFn } from './index';
 
 export class EntryRepository implements IEntryRepository {
-  constructor(private readonly db: DbManager) {}
+	constructor(private readonly db: DbManager) {}
 
-  getAll(): Promise<PasswordEntry[]> {
-    return this.db.context.transaction('r', this.db.entries,
-      () => this.db.entries.toArray());
-  }
+	getAll(): Promise<Entry[]> {
+		return this.db.context.transaction('r', this.db.entries, () =>
+			this.db.entries.toArray(),
+		);
+	}
 
-  getAllByGroup(groupId: number): Promise<PasswordEntry[]> {
-    return this.db.context.transaction('r', this.db.entries,
-      () => this.db.entries.where('groupId').equals(groupId).toArray());
-  }
+	getAllByGroup(groupId: number): Promise<Entry[]> {
+		return this.db.context.transaction('r', this.db.entries, () =>
+			this.db.entries.where('groupId').equals(groupId).toArray(),
+		);
+	}
 
-  getAllByPredicate(fn: EntryPredicateFn): Promise<PasswordEntry[]> {
-    return this.db.context.transaction('r', this.db.entries,
-      () => this.db.entries.filter(x => fn(x)).toArray());
-  }
+	getAllByPredicate(fn: EntryPredicateFn): Promise<Entry[]> {
+		return this.db.context.transaction('r', this.db.entries, () =>
+			this.db.entries.filter((x) => fn(x)).toArray(),
+		);
+	}
 
-  get(id: number): Promise<PasswordEntry | undefined> {
-    return this.db.context.transaction('r', this.db.entries, this.db.groups,
-      async () => {
-        const entry = await this.db.entries.get(id);
-        const group = await this.db.groups.get(entry.groupId);
-        
-        return { ...entry, group: group.name };
-      });
-  }
+	get(id: number): Promise<Entry | undefined> {
+		return this.db.context.transaction(
+			'r',
+			this.db.entries,
+			this.db.groups,
+			async () => {
+				const entry = await this.db.entries.get(id);
+				const group = await this.db.groups.get(entry.groupId);
 
-  add(item: Partial<PasswordEntry>): Promise<number> {
-    const { group, ...entity } = item;
-    return this.db.context.transaction('rw', this.db.entries,
-      () => this.db.entries.add(entity as PasswordEntry));
-  }
+				return { ...entry, group: group.name };
+			},
+		);
+	}
 
-  bulkAdd(items: PasswordEntry[]): Promise<number> {
-    return this.db.context.transaction('rw', this.db.entries,
-      () => this.db.entries.bulkAdd(items));
-  }
+	add(item: Partial<Entry>): Promise<number> {
+		const { group, ...entity } = item;
+		return this.db.context.transaction('rw', this.db.entries, () =>
+			this.db.entries.add(entity as Entry),
+		);
+	}
 
-  update(item: Partial<PasswordEntry>): Promise<number> {
-    const { group, ...entity } = item;
-    return this.db.context.transaction('rw', this.db.entries, this.db.groups, async () => {
-      if (!item.id) {
-        throw new Error('No id provided for the entry to update');
-      }
+	bulkAdd(items: Entry[]): Promise<number> {
+		return this.db.context.transaction('rw', this.db.entries, () =>
+			this.db.entries.bulkAdd(items),
+		);
+	}
 
-      const originalItem = await this.get(item.id);
-      const updatedItem = { ...originalItem, ...entity };
+	update(item: Partial<Entry>): Promise<number> {
+		const { group, ...entity } = item;
+		return this.db.context.transaction(
+			'rw',
+			this.db.entries,
+			this.db.groups,
+			async () => {
+				if (!item.id) {
+					throw new Error('No id provided for the entry to update');
+				}
 
-      return this.db.entries.put(updatedItem, item.id);
-    });
-  }
+				const originalItem = await this.get(item.id);
+				const updatedItem = { ...originalItem, ...entity };
 
-  delete(id: number): Promise<void> {
-    return this.db.context.transaction('rw', this.db.entries,
-      () => this.db.entries.delete(id));
-  }
+				return this.db.entries.put(updatedItem as Entry, item.id);
+			},
+		);
+	}
 
-  deleteAll(groupId: number): Promise<number> {
-    return this.db.context.transaction('rw', this.db.entries,
-      () => this.db.entries.where('groupId').equals(groupId).delete());
-  }
+	delete(id: number): Promise<void> {
+		return this.db.context.transaction('rw', this.db.entries, () =>
+			this.db.entries.delete(id),
+		);
+	}
 
-  bulkDelete(ids: number[]): Promise<void> {
-    return this.db.context.transaction('rw', this.db.entries,
-      () => this.db.entries.bulkDelete(ids));
-  }
+	deleteAll(groupId: number): Promise<number> {
+		return this.db.context.transaction('rw', this.db.entries, () =>
+			this.db.entries.where('groupId').equals(groupId).delete(),
+		);
+	}
 
-  moveEntries(ids: number[], targetGroupId: number): Promise<number[]> {
-    return this.db.context.transaction('rw', this.db.entries,
-      () => Promise.all(
-        ids.map(id => this.db.entries.update(id, { groupId: targetGroupId }))
-      ));
-  }
+	bulkDelete(ids: number[]): Promise<void> {
+		return this.db.context.transaction('rw', this.db.entries, () =>
+			this.db.entries.bulkDelete(ids),
+		);
+	}
 
-  softDelete(ids: number[]): Promise<number[]> {
-    return this.db.context.transaction('rw', this.db.entries,
-      () => Promise.all(ids.map(
-        id => this.db.entries.update(id,
-          { groupId: GroupId.RecycleBin, isStarred: false }
-        ))
-      ));
-  }
+	moveEntries(ids: number[], targetGroupId: number): Promise<number[]> {
+		return this.db.context.transaction('rw', this.db.entries, () =>
+			Promise.all(
+				ids.map((id) => this.db.entries.update(id, { groupId: targetGroupId })),
+			),
+		);
+	}
 
-  getSearchResults(searchPhrase: string): Promise<PasswordEntry[]> {
-    const lowerCasePhrase = searchPhrase.toLowerCase();
-    return this.db.context.transaction('r', this.db.entries, () => {
-      if (!lowerCasePhrase.length) {
-        return [];
-      }
+	softDelete(ids: number[]): Promise<number[]> {
+		return this.db.context.transaction('rw', this.db.entries, () =>
+			Promise.all(
+				ids.map((id) =>
+					this.db.entries.update(id, {
+						groupId: GroupId.RecycleBin,
+						isStarred: false,
+					}),
+				),
+			),
+		);
+	}
 
-      return this.db.entries
-        .filter(x => x.title?.toLowerCase().includes(lowerCasePhrase)
-          || x.username?.toLowerCase().includes(lowerCasePhrase)
-        ).toArray();
-    });
-  }
+	getSearchResults(searchPhrase: string): Promise<Entry[]> {
+		const lowerCasePhrase = searchPhrase.toLowerCase();
+		return this.db.context.transaction('r', this.db.entries, () => {
+			if (!lowerCasePhrase.length) {
+				return [];
+			}
+
+			return this.db.entries
+				.filter(
+					(x) =>
+						x.title?.toLowerCase().includes(lowerCasePhrase) ||
+						(x.type === 'password' &&
+							x.username?.toLowerCase().includes(lowerCasePhrase)),
+				)
+				.toArray();
+		});
+	}
 }

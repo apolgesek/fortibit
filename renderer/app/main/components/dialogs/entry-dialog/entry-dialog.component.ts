@@ -1,10 +1,38 @@
-import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, ComponentRef, DestroyRef, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
+import { CommonModule, NgComponentOutlet } from '@angular/common';
+import {
+	AfterViewInit,
+	Component,
+	ComponentRef,
+	DestroyRef,
+	ElementRef,
+	OnDestroy,
+	OnInit,
+	Type,
+	ViewChild,
+	inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+	FormBuilder,
+	FormControl,
+	FormGroup,
+	ReactiveFormsModule,
+	Validators,
+} from '@angular/forms';
 import { GroupId } from '@app/core/enums';
-import { ClipboardService, ConfigService, EntryManager, GroupManager, ModalRef, NotificationService } from '@app/core/services';
-import { IAdditionalData, IModal } from '@app/shared';
+import {
+	ConfigService,
+	EntryManager,
+	GroupManager,
+	ModalRef,
+	NotificationService,
+} from '@app/core/services';
+import { IEntryTypeComparer } from '@app/core/services/comparers/entry-type-comparer';
+import { PasswordEntryTypeComparer } from '@app/core/services/comparers/password-entry.comparer';
+import { IEntryTypeMapper } from '@app/core/services/mappers/entry-type-mapper';
+import { PasswordEntryMapper } from '@app/core/services/mappers/password-entry.mapper';
+import { PasswordEntryPartialFormComponent } from '@app/main/components/dialogs/entry-dialog/forms/password-entry-partial-form/password-entry-partial-form.component';
+import { EntryDialogDataPayload, IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { PasswordStrengthMeterComponent } from '@app/shared/components/password-strength-meter/password-strength-meter.component';
 import { DateMaskDirective } from '@app/shared/directives/date-mask.directive';
@@ -12,348 +40,319 @@ import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { Configuration } from '@config/configuration';
-import { HistoryEntry, PasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { Entry, HistoryEntry, PasswordEntry } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
-import { MessageBroker } from 'injection-tokens';
 import { fromEvent } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
-import * as zxcvbn from 'zxcvbn';
+import { filter } from 'rxjs/operators';
 
-export type EntryDialogDataPayload = {
-  decryptedPassword: string;
-  config?: {
-    readonly: boolean
-  };
-  historyEntry?: HistoryEntry;
-}
+type EntryTypeHandler = Map<
+	Entry['type'],
+	{
+		componentType: Type<any>;
+		comparer: IEntryTypeComparer<Entry, any, any>;
+		mapper: IEntryTypeMapper<EntryForm['value'], Entry>;
+	}
+>;
+
+export type PasswordFormGroup = {
+	username: FormControl<string>;
+	passwords: FormGroup<PasswordsFormGroup>;
+	url: FormControl<string>;
+	notes: FormControl<string>;
+	autotypeExp: FormControl<string>;
+	icon: FormControl<string>;
+};
+
+export type PasswordsFormGroup = {
+	password: FormControl<string>;
+	repeatPassword: FormControl<string>;
+};
+
+export type EntryForm = FormGroup<{
+	id: FormControl<number>;
+	groupId: FormControl<number>;
+	type: FormControl<Entry['type']>;
+	title: FormControl<string>;
+	creationDate: FormControl<number | Date>;
+	password: FormGroup<PasswordFormGroup>;
+	card: FormGroup;
+}>;
 
 @Component({
-  selector: 'app-entry-dialog',
-  templateUrl: './entry-dialog.component.html',
-  styleUrls: ['./entry-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FeatherModule,
-    ModalComponent,
-    DateMaskDirective,
-    TooltipDirective,
-    PasswordStrengthMeterComponent
-  ],
+	selector: 'app-entry-dialog',
+	templateUrl: './entry-dialog.component.html',
+	styleUrls: ['./entry-dialog.component.scss'],
+	standalone: true,
+	imports: [
+		CommonModule,
+		ReactiveFormsModule,
+		FeatherModule,
+		ModalComponent,
+		DateMaskDirective,
+		TooltipDirective,
+		PasswordStrengthMeterComponent,
+		NgComponentOutlet,
+		PasswordEntryPartialFormComponent,
+	],
 })
-export class EntryDialogComponent implements IModal, OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('entryForm') entryForm: ElementRef;
-  @ViewChildren('passwordInput') passwordInputs: QueryList<ElementRef>;
+export class EntryDialogComponent
+	implements IModal, OnInit, AfterViewInit, OnDestroy
+{
+	@ViewChild('entryForm') entryForm: ElementRef;
 
-  public passwordScore = -1;
-  public config: Configuration;
-  public saveLocked = false;
-  public isVisible = true;
-  public isReadOnly = false;
-  public passwordVisible = false;
+	public config: Configuration;
+	public saveLocked = false;
+	public isReadOnly = false;
+	public formPartialComponent: Type<any> = PasswordEntryPartialFormComponent;
 
-  public readonly ref!: ComponentRef<EntryDialogComponent>;
-  public readonly additionalData!: IAdditionalData<EntryDialogDataPayload>;
-  public readonly isControlInvalid = isControlInvalid;
+	public readonly ref!: ComponentRef<EntryDialogComponent>;
+	public readonly additionalData!: IAdditionalData<EntryDialogDataPayload>;
+	public readonly isControlInvalid = isControlInvalid;
+	public readonly entryTypes: Entry['type'][] = ['password', 'card'];
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly messageBroker = inject(MessageBroker);
-  private readonly configService = inject(ConfigService);
-  private readonly clipboardService = inject(ClipboardService);
-  private readonly modalRef = inject(ModalRef);
-  private readonly entryManager = inject(EntryManager);
-  private readonly groupManager = inject(GroupManager);
-  private readonly notificationService = inject(NotificationService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly fb = inject(FormBuilder);
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly configService = inject(ConfigService);
+	private readonly modalRef = inject(ModalRef);
+	private readonly entryManager = inject(EntryManager);
+	private readonly groupManager = inject(GroupManager);
+	private readonly notificationService = inject(NotificationService);
+	private readonly fb = inject(FormBuilder);
 
-  private readonly _newEntryForm = this.fb.group({
-    id: [null],
-    title: ['', Validators.required],
-    username: [''],
-    passwords: this.fb.group({
-      password: ['', Validators.required],
-      repeatPassword: [''],
-    }, { validators: [ valueMatchValidator('password', 'repeatPassword') ]}),
-    url: [''],
-    notes: [''],
-    autotypeExp: [''],
-    creationDate: [null as number | Date],
-  });
+	private readonly entryTypeHandlers: EntryTypeHandler = new Map<
+		Entry['type'],
+		{
+			componentType: Type<any>;
+			comparer: IEntryTypeComparer<Entry, EntryForm['value'], EntryDialogDataPayload>;
+			mapper: IEntryTypeMapper<EntryForm['value'], Entry>;
+		}
+	>([
+		[
+			'password',
+			{
+				componentType: PasswordEntryPartialFormComponent,
+				comparer: inject(PasswordEntryTypeComparer),
+				mapper: inject(PasswordEntryMapper),
+			},
+		],
+	]);
+	private entryTypeHandler = this.entryTypeHandlers.get('password');
 
-  private lastTrigger: 'click' | 'keydown';
+	private readonly _newEntryForm: EntryForm = this.fb.group({
+		id: [null],
+		groupId: [null],
+		type: [
+			{
+				value: 'password' as Entry['type'],
+				disabled: Boolean(this.entryManager.editedEntry) || this.isReadOnly,
+			},
+		],
+		title: ['', Validators.required],
+		creationDate: [null as number | Date],
+		password: this.fb.group({
+			username: [''],
+			passwords: this.fb.group(
+				{
+					password: ['', Validators.required],
+					repeatPassword: [''],
+				},
+				{ validators: [valueMatchValidator('password', 'repeatPassword')] },
+			),
+			url: [''],
+			notes: [''],
+			autotypeExp: [''],
+			icon: [''],
+		}),
+		card: this.fb.group({
+			cardholderName: [''],
+			number: [''],
+			expirationMonth: [0],
+			expirationYear: [0],
+			securityCode: [''],
+			notes: [''],
+		}),
+	});
 
-  get newEntryForm() {
-    return this._newEntryForm;
-  }
+	private lastTrigger: 'click' | 'keydown';
 
-  get header(): string {
-    if (this.entryManager.editedEntry) {
-      if (!this.isReadOnly) {
-        return 'Edit entry';
-      } else {
-        return 'Entry history';
-      }
-    } else {
-      return 'Add entry';
-    }
-  }
+	get newEntryForm() {
+		return this._newEntryForm;
+	}
 
-  get entryGroupName(): string {
-    return this.entryManager.editedEntry
-      ? this.entryManager.editedEntry?.group
-      : this.groupManager.selectedGroup !== GroupId.AllItems
-        ? this.groupManager.selectedGroupName
-        : this.groupManager.groups.find(g => g.id === GroupId.Root).name;
-  }
+	get header(): string {
+		if (this.entryManager.editedEntry) {
+			if (!this.isReadOnly) {
+				return 'Edit entry';
+			} else {
+				return 'Entry history';
+			}
+		} else {
+			return 'Add entry';
+		}
+	}
 
-  get passwordLength(): number {
-    return this.newEntryForm.controls.passwords.controls.password?.value?.length;
-  }
+	get entryGroupName(): string {
+		return this.entryManager.editedEntry
+			? this.entryManager.editedEntry?.group
+			: this.groupManager.selectedGroup !== GroupId.AllItems
+				? this.groupManager.selectedGroupName
+				: this.groupManager.groups.find((g) => g.id === GroupId.Root).name;
+	}
 
-  get passwordsGroup() {
-    return this.newEntryForm.controls.passwords;
-  }
+	get title() {
+		return this.newEntryForm.controls.title;
+	}
 
-  get title() {
-    return this.newEntryForm.controls.title;
-  }
+	ngOnInit() {
+		if (this.additionalData.payload?.config?.readonly) {
+			this.isReadOnly = true;
+		}
 
-  ngOnInit() {
-    if (this.additionalData.payload?.config?.readonly) {
-      this.isReadOnly = true;
-    }
+		this.config = this.configService.config;
+		this.prefillForm();
 
-    this.configService.configLoadedSource$.pipe(take(1)).subscribe(config => {
-      this.config = config;
-      const passwordMask = new Array(this.additionalData?.payload.decryptedPassword?.length
-        ?? Math.ceil(this.config.encryption.passwordLength / 2)).fill('*').join('');
+		this.newEntryForm.controls.type.valueChanges
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe((type) => {
+				this.entryTypeHandler = this.entryTypeHandlers.get(type);
+				this.formPartialComponent = this.entryTypeHandler.componentType;
 
-      this.newEntryForm.controls.passwords.controls.password.patchValue(passwordMask);
-      this.newEntryForm.controls.passwords.controls.repeatPassword.patchValue(passwordMask);
+				this.newEntryForm.controls.card.reset(null, { emitEvent: false });
+				this.newEntryForm.controls.password.reset(null, { emitEvent: false });
+			});
+	}
 
-      this.prefillForm();
-    });
-  }
+	ngAfterViewInit() {
+		fromEvent(document, 'mousedown')
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(() => {
+				this.lastTrigger = 'click';
+			});
 
-  ngAfterViewInit() {
-    this.passwordInputs.forEach(el => {
-      fromEvent(el.nativeElement, 'keydown')
-        .pipe(
-          filter((e: KeyboardEvent) => e.ctrlKey && e.key === 'z'),
-          takeUntilDestroyed(this.destroyRef)
-        )
-        .subscribe((event: KeyboardEvent) => {
-          event.preventDefault();
-        });
-    });
+		fromEvent(document, 'keydown')
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(() => {
+				this.lastTrigger = 'keydown';
+			});
 
-    fromEvent(document, 'mousedown')
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.lastTrigger = 'click';
-      });
+		fromEvent(this.entryForm.nativeElement, 'focusin')
+			.pipe(
+				filter(() => this.lastTrigger === 'keydown'),
+				takeUntilDestroyed(this.destroyRef),
+			)
+			.subscribe((event: FocusEvent) => {
+				const parentTop = (
+					this.entryForm.nativeElement as HTMLElement
+				).getBoundingClientRect().top;
+				const childTop = (event.target as HTMLElement).getBoundingClientRect()
+					.top;
 
-    fromEvent(document, 'keydown')
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.lastTrigger = 'keydown';
-      });
+				const y = childTop - parentTop;
+				this.entryForm.nativeElement.scrollTo({ top: y - 20 });
+			});
+	}
 
-    fromEvent(this.entryForm.nativeElement, 'focusin')
-      .pipe(
-        filter(() => this.lastTrigger === 'keydown'),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe((event: FocusEvent) => {
-        const parentTop = (this.entryForm.nativeElement as HTMLElement).getBoundingClientRect().top;
-        const childTop = (event.target as HTMLElement).getBoundingClientRect().top;
+	ngOnDestroy(): void {
+		this.newEntryForm.reset(null, { emitEvent: false });
+	}
 
-        const y = childTop - parentTop;
-        this.entryForm.nativeElement.scrollTo({ top: y - 20 });
-      });
-  }
+	async restore() {
+		await this.entryManager.saveEntry({
+			...this.entryManager.editedEntry,
+			icon: null,
+		} as PasswordEntry);
+		this.notificationService.add({
+			message: 'Entry restored',
+			type: 'success',
+			alive: 10 * 1000,
+		});
+		this.close();
+	}
 
-  ngOnDestroy(): void {
-    this.newEntryForm.reset();
-    this.entryManager.editedEntry = null;
-  }
+	async delete() {
+		const historyEntry = this.additionalData.payload
+			.historyEntry as HistoryEntry;
+		await this.entryManager.deleteEntryHistory(
+			historyEntry.id,
+			historyEntry.entry,
+		);
+		this.notificationService.add({
+			message: 'History entry removed',
+			type: 'success',
+			alive: 10 * 1000,
+		});
+		this.close();
+	}
 
-  onPasswordChange(event: Event) {
-    const password = (event.target as HTMLInputElement).value;
-    this.passwordScore = zxcvbn(password).score;
-  }
+	async addNewEntry() {
+		if (!this.groupManager.selectedGroup) {
+			throw new Error('No category has been selected!');
+		}
 
-  copyPassword() {
-    this.clipboardService.copyEntryDetails(this.entryManager.editedEntry, 'password');
-  }
+		markAllAsDirty(this.newEntryForm);
 
-  togglePasswordVisibility() {
-    this.passwordVisible = !this.passwordVisible;
-  }
+		if (this.newEntryForm.invalid) {
+			const el = (this.entryForm.nativeElement as HTMLElement).querySelector(
+				'input.ng-invalid, .form-group.ng-invalid',
+			);
+			const elToScroll =
+				el.tagName.toLowerCase() === 'div' ? el : el.parentElement;
+			elToScroll.scrollIntoView({ block: 'start', inline: 'nearest' });
 
-  async restore() {
-    await this.entryManager.saveEntry({ ...this.entryManager.editedEntry, icon: null });
-    this.notificationService.add({ message: 'Entry restored', type: 'success', alive: 10 * 1000  });
-    this.close();
-  }
+			return;
+		}
 
-  async delete() {
-    const historyEntry = this.additionalData.payload.historyEntry as HistoryEntry;
-    await this.entryManager.deleteEntryHistory(historyEntry.id, historyEntry.entry);
-    this.notificationService.add({ message: 'History entry removed', type: 'success', alive: 10 * 1000  });
-    this.close();
-  }
+		this.saveLocked = true;
 
-  async addNewEntry() {
-    if (!this.groupManager.selectedGroup) {
-      throw new Error('No category has been selected!');
-    }
+		if (
+			this.entryManager.editedEntry?.id &&
+			(await this.entryTypeHandler.comparer.compare(
+				this.entryManager.editedEntry,
+				this.newEntryForm.value,
+				this.additionalData.payload,
+			))
+		) {
+			this.close();
 
-    markAllAsDirty(this.newEntryForm);
+			return;
+		}
 
-    if (this.newEntryForm.invalid) {
-      const el = (this.entryForm.nativeElement as HTMLElement)
-        .querySelector('input.ng-invalid, .form-group.ng-invalid');
-      const elToScroll = el.tagName.toLowerCase() === 'div' ? el : el.parentElement;
-      elToScroll.scrollIntoView({ block: 'start', inline: 'nearest' });
+		const entry = await this.entryTypeHandler.mapper.map(
+			this.newEntryForm.value,
+		);
 
-      return;
-    }
+		await this.entryManager.saveEntry(entry);
 
-    this.saveLocked = true;
-    const date = new Date();
+		this.saveLocked = false;
+		this.close();
+	}
 
-    const encryptedPassword = await this.messageBroker.ipcRenderer
-      .invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
-    const formData = this.newEntryForm.value;
+	async close() {
+		this.modalRef.close();
+	}
 
-    if (this.entryManager.editedEntry?.id) {
-      if (this.isSame(formData, this.entryManager.editedEntry)) {
-        this.close();
+	closeReadOnly() {
+		this.modalRef.close();
+	}
 
-        return;
-      }
+	private async prefillForm() {
+		if (this.entryManager.editedEntry) {
+			this.fillExistingEntry();
+		} else {
+			this.fillNewEntry();
+		}
+	}
 
-      await this.entryManager.saveEntry({
-        id: formData.id,
-        title: formData.title,
-        username: formData.username,
-        url: formData.url,
-        notes: formData.notes,
-        autotypeExp: formData.autotypeExp,
-        password: encryptedPassword,
-        lastModificationDate: date,
-        icon: this.entryManager.editedEntry.icon,
-      });
-    } else {
-      const newEntry = {
-        title: formData.title,
-        username: formData.username,
-        url: formData.url,
-        notes: formData.notes,
-        autotypeExp: formData.autotypeExp,
-        password: encryptedPassword,
-        creationDate: date,
-        lastModificationDate: date,
-        groupId: this.getGroup(),
-        isStarred: false,
-      };
+	private fillExistingEntry() {
+		this.newEntryForm.patchValue({
+			id: this.entryManager.editedEntry.id,
+			groupId: this.entryManager.editedEntry.groupId,
+			creationDate: this.entryManager.editedEntry.creationDate,
+			title: this.entryManager.editedEntry.title,
+			type: this.entryManager.editedEntry.type,
+		});
+	}
 
-      const id = await this.entryManager.saveEntry(newEntry);
-    }
-
-    this.saveLocked = false;
-    this.close();
-  }
-
-  async close() {
-    if (this.entryManager.editedEntry) {
-      const encrypted = await this.messageBroker.ipcRenderer
-        .invoke(IpcChannel.EncryptPassword, this.newEntryForm.value.passwords.password);
-
-      this.entryManager.editedEntry.password = encrypted;
-    }
-
-    this.modalRef.close();
-  }
-
-  closeReadOnly() {
-    this.modalRef.close();
-  }
-
-  async regeneratePassword(): Promise<void> {
-    await this.fillNewEntry();
-    this.passwordScore = zxcvbn(this.newEntryForm.get('passwords.password').value).score;
-    this.notificationService.add({ type: 'success', alive: 5000, message: 'Password regenerated' });
-  }
-
-  private async prefillForm() {
-    if (this.entryManager.editedEntry) {
-      this.fillExistingEntry();
-    } else {
-      await this.fillNewEntry();
-    }
-
-    const password = this.newEntryForm.get('passwords.password')?.value;
-
-    if (password) {
-      this.passwordScore = zxcvbn(password).score;
-    }
-
-    this.cdRef.detectChanges();
-  }
-
-  private getGroup(): number {
-    if (this.groupManager.selectedGroup === GroupId.AllItems) {
-      return 1;
-    } else {
-      return this.groupManager.selectedGroup;
-    }
-  }
-
-  private async fillNewEntry() {
-    const password = await this.generatePassword();
-
-    this.newEntryForm.get('passwords')?.patchValue({
-      password,
-      repeatPassword: password
-    });
-  }
-
-  private fillExistingEntry() {
-    const password = this.additionalData.payload.decryptedPassword;
-
-    this.newEntryForm.patchValue({
-      ...this.entryManager.editedEntry,
-      passwords: {
-        password,
-        repeatPassword: password
-      }
-    });
-  }
-
-  private generatePassword(): Promise<string> {
-    const settings = this.config.encryption;
-
-    return this.messageBroker.ipcRenderer.invoke(IpcChannel.GeneratePassword, {
-      length: settings.passwordLength,
-      lowercase: settings.lowercase,
-      uppercase: settings.uppercase,
-      symbols: settings.specialChars,
-      numbers: settings.numbers,
-      strict: false,
-      excludeSimilarCharacters: true
-    });
-  }
-
-  private isSame(formData, entry: PasswordEntry): boolean {
-    return formData.title === entry.title
-      && formData.username === entry.username
-      && formData.passwords.password === this.additionalData.payload.decryptedPassword
-      && formData.url === entry.url
-      && formData.notes === entry.notes
-      && formData.autotypeExp === entry.autotypeExp;
-  }
+	private fillNewEntry() {
+		this.newEntryForm.patchValue({ groupId: this.groupManager.selectedGroup });
+	}
 }

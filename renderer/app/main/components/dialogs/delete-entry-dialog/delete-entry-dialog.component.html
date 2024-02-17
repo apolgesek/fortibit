@@ -1,41 +1,44 @@
 <app-modal>
-  <div
-    class="dialog-header">
-    <h2>Remove entry</h2>
-    <a
-      href="#"
-      role="button"
-      aria-label="Close"
-      class="close-dialog"
-      (click)="close(); false">&times;
-    </a>
-  </div>
-  <div
-    class="dialog-message">
-    <ng-container *ngIf="selectedRowsCount === 1; else bulkRemove">
-      Are you sure you want to <strong *ngIf="isInRecycleBin">permanently</strong> remove this entry?
-    </ng-container>
-    <ng-template #bulkRemove>
-      Are you sure you want to <strong *ngIf="isInRecycleBin">permanently</strong> remove <strong>{{ selectedRowsCount }}</strong> entries?
-    </ng-template>
-  </div>
-  <div
-    class="footer-container">
-    <button
-      type="button"
-      #autofocus
-      class="text-btn"
-      (click)="close()"
-      (keyup.enter)="close()">
-      Cancel
-    </button>
-    <button
-      type="button"
-      id="entry-remove"
-      class="primary-btn"
-      (click)="deleteEntry()"
-      (keyup.enter)="deleteEntry()">
-      Remove
-    </button>
-  </div>
+	<div class="dialog-header">
+		<h2>Remove entry</h2>
+		<a
+			href="#"
+			role="button"
+			aria-label="Close"
+			class="close-dialog"
+			(click)="close(); (false)"
+			>&times;
+		</a>
+	</div>
+	<div class="dialog-message">
+		<ng-container *ngIf="selectedRowsCount === 1; else bulkRemove">
+			Are you sure you want to
+			<strong *ngIf="isInRecycleBin">permanently</strong> remove this entry?
+		</ng-container>
+		<ng-template #bulkRemove>
+			Are you sure you want to
+			<strong *ngIf="isInRecycleBin">permanently</strong> remove
+			<strong>{{ selectedRowsCount }}</strong> entries?
+		</ng-template>
+	</div>
+	<div class="footer-container">
+		<button
+			type="button"
+			#autofocus
+			class="text-btn"
+			(click)="close()"
+			(keyup.enter)="close()"
+		>
+			Cancel
+		</button>
+		<button
+			type="button"
+			id="entry-remove"
+			class="primary-btn"
+			(click)="deleteEntry()"
+			(keyup.enter)="deleteEntry()"
+		>
+			Remove
+		</button>
+	</div>
 </app-modal>

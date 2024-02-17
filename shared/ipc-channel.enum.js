@@ -13,10 +13,8 @@ var IpcChannel;
     IpcChannel["DecryptBiometrics"] = "app:decryptBiometrics";
     IpcChannel["EncryptPassword"] = "app:encryptPassword";
     IpcChannel["Exit"] = "app:exit";
-    IpcChannel["GetSaveStatus"] = "app:saveStatus";
     IpcChannel["GetAutotypeFoundEntry"] = "app:getAutotypeFoundEntry";
     IpcChannel["AutotypeEntrySelected"] = "app:autotypeEntrySelected";
-    IpcChannel["ProvidePassword"] = "app:providePassword";
     IpcChannel["SaveFile"] = "app:saveFile";
     IpcChannel["Minimize"] = "app:minimize";
     IpcChannel["Maximize"] = "app:maximize";
@@ -75,5 +73,6 @@ var IpcChannel;
     IpcChannel["SendInput"] = "app:sendInput";
     IpcChannel["TestCleanup"] = "app:testCleanup";
     IpcChannel["ConfigChanged"] = "app:configChanged";
+    IpcChannel["OpenPrompt"] = "app:openPrompt";
 })(IpcChannel || (exports.IpcChannel = IpcChannel = {}));
 //# sourceMappingURL=ipc-channel.enum.js.map

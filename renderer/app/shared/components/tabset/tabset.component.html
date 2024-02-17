@@ -1,17 +1,18 @@
 <ul *ngIf="tabs.length">
-  <li *ngFor="let tab of tabs">
-    <button
-      #headerButton
-      type="button"
-      [attr.disabled]="tab.disabled"
-      [ngClass]="{ 'active': activeTab === tab }"
-      class="secondary-btn"
-      (click)="setTab(tab)">
-      {{ tab.header }}
-    </button>
-  </li>
+	<li *ngFor="let tab of tabs">
+		<button
+			#headerButton
+			type="button"
+			[attr.disabled]="tab.disabled"
+			[ngClass]="{ active: activeTab === tab }"
+			class="secondary-btn"
+			(click)="setTab(tab)"
+		>
+			{{ tab.header }}
+		</button>
+	</li>
 </ul>
 
 <div class="template-container">
-  <ng-content></ng-content>
+	<ng-content></ng-content>
 </div>

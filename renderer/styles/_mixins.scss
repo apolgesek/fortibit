@@ -1,93 +1,93 @@
 @mixin font-regular {
-  font-family: 'roboto-regular', sans-serif;
+	font-family: 'roboto-regular', sans-serif;
 }
 
 @mixin font-medium {
-  font-family: 'roboto-medium', sans-serif;
+	font-family: 'roboto-medium', sans-serif;
 }
 
 @mixin font-bold {
-  font-family: 'roboto-bold', sans-serif;
+	font-family: 'roboto-bold', sans-serif;
 }
 
 @mixin font-black {
-  font-family: 'roboto-black', sans-serif;
+	font-family: 'roboto-black', sans-serif;
 }
 
 @mixin scrollbar {
-  &::-webkit-scrollbar {
-    -webkit-appearance: none;
-  }
-  
-  &::-webkit-scrollbar{
-    position: relative;
-    height: 8px;
-    width: 8px;
-    z-index: 999;
-  }
+	&::-webkit-scrollbar {
+		-webkit-appearance: none;
+	}
 
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb);
-  }
+	&::-webkit-scrollbar {
+		position: relative;
+		height: 8px;
+		width: 8px;
+		z-index: 999;
+	}
 
-  &::-webkit-scrollbar-track {
-    display: none;
-  }
+	&::-webkit-scrollbar-thumb {
+		background-color: var(--scrollbar-thumb);
+	}
 
-  ::-webkit-scrollbar-corner {
-    background: rgba(0,0,0,0);
-  }
+	&::-webkit-scrollbar-track {
+		display: none;
+	}
+
+	::-webkit-scrollbar-corner {
+		background: rgba(0, 0, 0, 0);
+	}
 }
 
 @mixin scrollbar-hover {
-  &::-webkit-scrollbar {
-    -webkit-appearance: none;
-  }
-  
-  &::-webkit-scrollbar{
-    position: relative;
-    height: 8px;
-    width: 8px;
-    z-index: 999;
-  }
+	&::-webkit-scrollbar {
+		-webkit-appearance: none;
+	}
 
-  &::-webkit-scrollbar-thumb {
-    /* add border to act as background-color */
-    border-right-style: inset;
-    /* sum viewport dimensions to guarantee border will fill scrollbar */
-    border-right-width: calc(100vw + 100vh);
-    /* inherit border-color to inherit transitions */
-    border-color: inherit;
-  }
+	&::-webkit-scrollbar {
+		position: relative;
+		height: 8px;
+		width: 8px;
+		z-index: 999;
+	}
 
-  &::-webkit-scrollbar-track {
-    display: none;
-  }
+	&::-webkit-scrollbar-thumb {
+		/* add border to act as background-color */
+		border-right-style: inset;
+		/* sum viewport dimensions to guarantee border will fill scrollbar */
+		border-right-width: calc(100vw + 100vh);
+		/* inherit border-color to inherit transitions */
+		border-color: inherit;
+	}
+
+	&::-webkit-scrollbar-track {
+		display: none;
+	}
 }
 
 @mixin default-table-row {
-  display: flex;
-  align-items: center;
-  box-shadow: none;
-  outline: none;
-  transition: all 50ms;
-  user-select: none;
-  height: 54px;
-  
-  > div {
-    box-shadow: none !important;
-    outline: none !important;
-    user-select: none;
-  }
+	display: flex;
+	align-items: center;
+	box-shadow: none;
+	outline: none;
+	transition: all 50ms;
+	user-select: none;
+	height: 54px;
+
+	> div {
+		box-shadow: none !important;
+		outline: none !important;
+		user-select: none;
+	}
 }
 
 @mixin toolbar-btn {
-  @include font-regular;
-  position: relative;
-  border: 0;
-  outline: 0;
-  font-size: 0.875rem;
-  line-height: 0.875rem;
+	@include font-regular;
+	position: relative;
+	border: 0;
+	outline: 0;
+	font-size: 0.875rem;
+	line-height: 0.875rem;
 	padding: 1rem 1.625rem;
 	display: flex;
 	align-items: center;
@@ -96,16 +96,16 @@
 	border-radius: 0.25rem;
 	cursor: pointer;
 	transition: transform 100ms;
-  text-transform: uppercase;
-  justify-content: center;
+	text-transform: uppercase;
+	justify-content: center;
 
 	&:hover:not(:disabled) {
-    background-color: var(--toolbar-dropdown-bg);
-    color: var(--primary-btn-text--hover);
-  }
+		background-color: var(--toolbar-dropdown-bg);
+		color: var(--primary-btn-text--hover);
+	}
 
-  &:focus-visible {
-    background-color: var(--toolbar-dropdown-bg);
-    outline: 2px solid $barberry !important;
-  }
+	&:focus-visible {
+		background-color: var(--toolbar-dropdown-bg);
+		outline: 2px solid $barberry !important;
+	}
 }

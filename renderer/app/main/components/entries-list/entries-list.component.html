@@ -5,9 +5,13 @@
 		</div>
 		<app-table-filters></app-table-filters>
 	</div>
-	<div *ngIf="searchPhrase?.length && (!isSearching || wasSearched)" class="results-badge" @slideIn>
+	<div
+		*ngIf="searchPhrase?.length && (!isSearching || wasSearched)"
+		class="results-badge"
+		@slideIn
+	>
 		<div *ngIf="entriesFound$ | async as entriesCount">
-			Found {{ entriesCount }} {{ entriesCount === 1 ? 'entry' : 'entries' }}:				
+			Found {{ entriesCount }} {{ entriesCount === 1 ? 'entry' : 'entries' }}:
 		</div>
 	</div>
 	<ng-container *ngIf="passwordList$ | async as passwordList">
@@ -18,11 +22,19 @@
 			appFocusableList
 			(focused)="selectEntry($event.originalEvent, $event.item)"
 			[selected]="selectedEntries"
-			class="table-viewport">
-			<ng-container *cdkVirtualFor="let item of passwordList; let i = index; trackBy: trackingTag; templateCacheSize: 0">
+			class="table-viewport"
+		>
+			<ng-container
+				*cdkVirtualFor="
+					let item of passwordList;
+					let i = index;
+					trackBy: trackingTag;
+					templateCacheSize: 0
+				"
+			>
 				<div
 					[appFocusableListItem]="item"
-					[appContextMenuItem]="getContextMenu()"
+					[appContextMenuItem]="getContextMenu(item.type)"
 					(click)="selectEntry($event, item)"
 					(contextmenu)="showEntryContextMenu($event, item)"
 					[attr.draggable]="entriesDragEnabled"
@@ -31,46 +43,43 @@
 					tabindex="0"
 					(dragstart)="startDrag($event, item)"
 					(dragend)="endDrag()"
-					[ngClass]="{'selected': isEntrySelected(item), 'is-dragging': isEntryDragged(item)}"
-					class="row-entry">
-					<div *ngIf="iconsEnabled" class="column-icon">
-						<img
-							src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-							[appEntryIcon]="item"
-							width="28"
-							height="28"/>
-					</div>
-					<div class="column long-text">
-						<div class="row title" [appTextEmphasize]="searchPhrase$ | async">
-							{{ item.title }}
-						</div>
-						<div
-							class="row username"
-							[appTextEmphasize]="searchPhrase$ | async"
-							(dblclick)="copyToClipboard(item, 'username')">
-							{{ item.username }}
-						</div>
-					</div>
-					<div
-						(dblclick)="copyToClipboard(item, 'password')"
-						class="column password">••••••
-					</div>
+					[ngClass]="{
+						selected: isEntrySelected(item),
+						'is-dragging': isEntryDragged(item)
+					}"
+					class="row-entry"
+				>
+					<ng-container
+						*ngComponentOutlet="
+							getComponentType(item);
+							inputs: {
+								searchPhrase: searchPhrase$ | async,
+								item,
+								iconsEnabled
+							}
+						"
+					/>
 				</div>
 			</ng-container>
 		</cdk-virtual-scroll-viewport>
 		<ng-template #noPasswordsTemplate>
 			<div class="list-cta">
-				<ng-container *ngIf="(searchPhrase$ | async)?.length || activeFilters?.length; else noEntriesTemplate">
+				<ng-container
+					*ngIf="
+						(searchPhrase$ | async)?.length || activeFilters?.length;
+						else noEntriesTemplate
+					"
+				>
 					No matching entries found
 				</ng-container>
 				<ng-template #noEntriesTemplate>
-					<p class="no-entries">There are no entries in this group</p>
+					There are no entries in this group
 					<a
 						*ngIf="isAddPossible"
-						id="add-entry-list"
-						href="#" 
+						href="#"
 						class="add-entry-list-button"
-						(click)="addNewEntry(); false">
+						(click)="addNewEntry(); (false)"
+					>
 						Add entry
 					</a>
 				</ng-template>
@@ -80,7 +89,11 @@
 </div>
 
 <div id="mask">
-	<div #dragImage id="drag-image" [ngClass]="{'multi': movedEntries.length > 1 }">
+	<div
+		#dragImage
+		id="drag-image"
+		[ngClass]="{ multi: movedEntries.length > 1 }"
+	>
 		<div class="container">
 			<div class="image"></div>
 			<div class="content">

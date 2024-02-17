@@ -12,80 +12,90 @@ import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { FeatherModule } from 'angular-feather';
 
 type SortOption = {
-  name: string;
-  prop: 'username' | 'creationDate' | 'title';
-}
+	name: string;
+	prop: 'username' | 'creationDate' | 'title';
+};
 
 type SortDirectionOption = {
-  name: string;
-  state: Sort;
-}
+	name: string;
+	state: Sort;
+};
 
 @Component({
-  selector: 'app-table-filters',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FeatherModule,
-    MenuDirective,
-    DropdownDirective,
-    DropdownToggleDirective,
-    DropdownMenuDirective,
-    MenuItemDirective,
-    TooltipDirective
-  ],
-  templateUrl: './table-filters.component.html',
-  styleUrls: ['./table-filters.component.scss'],
-  animations: [
-    slideDown
-  ]
+	selector: 'app-table-filters',
+	standalone: true,
+	imports: [
+		CommonModule,
+		FeatherModule,
+		MenuDirective,
+		DropdownDirective,
+		DropdownToggleDirective,
+		DropdownMenuDirective,
+		MenuItemDirective,
+		TooltipDirective,
+	],
+	templateUrl: './table-filters.component.html',
+	styleUrls: ['./table-filters.component.scss'],
+	animations: [slideDown],
 })
 export class TableFiltersComponent {
-  @ViewChildren('sort') public readonly sortDropdowns: QueryList<DropdownDirective>;
-  @ViewChildren('filterDropdown') public readonly filterDropdowns: QueryList<DropdownDirective>;
+	@ViewChildren('sort')
+	public readonly sortDropdowns: QueryList<DropdownDirective>;
+	@ViewChildren('filterDropdown')
+	public readonly filterDropdowns: QueryList<DropdownDirective>;
 
-  public readonly sortOptions: SortOption[] = [
-    { name: 'Creation date', prop: 'creationDate' },
-    { name: 'Title', prop: 'title' },
-  ];
+	public readonly sortOptions: SortOption[] = [
+		{ name: 'Creation date', prop: 'creationDate' },
+		{ name: 'Title', prop: 'title' },
+	];
 
-  public readonly sortDirectionOptions: SortDirectionOption[] = [
-    { name: 'Ascending', state: Sort.Asc },
-    { name: 'Descending', state: Sort.Desc }
-  ];
+	public readonly sortDirectionOptions: SortDirectionOption[] = [
+		{ name: 'Ascending', state: Sort.Asc },
+		{ name: 'Descending', state: Sort.Desc },
+	];
 
-  public readonly sort = Sort;
-  public selectedSortOption: SortOption;
-  public selectedSortDirection: SortDirectionOption;
+	public readonly sort = Sort;
+	public selectedSortOption: SortOption;
+	public selectedSortDirection: SortDirectionOption;
 
-  constructor(private readonly searchService: SearchService) {
-    this.selectedSortOption = this.sortOptions.find(x => x.prop === this.searchService.sortProp);
-    this.selectedSortDirection = this.sortDirectionOptions.find(x => x.state === this.searchService.sortOrder);
-  }
+	constructor(private readonly searchService: SearchService) {
+		this.selectedSortOption = this.sortOptions.find(
+			(x) => x.prop === this.searchService.sortProp,
+		);
+		this.selectedSortDirection = this.sortDirectionOptions.find(
+			(x) => x.state === this.searchService.sortOrder,
+		);
+	}
 
-  public get filtersCount(): number {
-    return 0;
-  }
+	public get filtersCount(): number {
+		return 0;
+	}
 
-  setSort(option: SortOption) {
-    this.selectedSortOption = option;
-    this.searchService.setSort(this.selectedSortDirection.state, option.prop);
-  }
+	setSort(option: SortOption) {
+		this.selectedSortOption = option;
+		this.searchService.setSort(this.selectedSortDirection.state, option.prop);
+	}
 
-  setSortDirection(option: SortDirectionOption) {
-    this.selectedSortDirection = option;
-    this.searchService.setSort(option.state, this.selectedSortOption.prop);
-  }
+	setSortDirection(option: SortDirectionOption) {
+		this.selectedSortDirection = option;
+		this.searchService.setSort(option.state, this.selectedSortOption.prop);
+	}
 
-  onChildDropdownOpen(dropdown: DropdownDirective) {
-    this.sortDropdowns.toArray().filter(x => x !== dropdown).forEach(x => {
-      x.state.close();
-    });
-  }
+	onChildDropdownOpen(dropdown: DropdownDirective) {
+		this.sortDropdowns
+			.toArray()
+			.filter((x) => x !== dropdown)
+			.forEach((x) => {
+				x.state.close();
+			});
+	}
 
-  onDropdownOpen(dropdown: DropdownDirective) {
-    this.filterDropdowns.toArray().filter(x => x !== dropdown).forEach(x => {
-      x.state.close();
-    });
-  }
+	onDropdownOpen(dropdown: DropdownDirective) {
+		this.filterDropdowns
+			.toArray()
+			.filter((x) => x !== dropdown)
+			.forEach((x) => {
+				x.state.close();
+			});
+	}
 }

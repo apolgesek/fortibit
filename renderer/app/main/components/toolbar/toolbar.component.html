@@ -6,7 +6,8 @@
 			[disabled]="!isAddPossible"
 			class="secondary-btn add-entry"
 			id="add-entry"
-			(click)="openAddEntryWindow()">
+			(click)="openAddEntryWindow()"
+		>
 			<i-feather name="plus-circle"></i-feather>
 			<div class="label">Add entry</div>
 		</button>
@@ -14,29 +15,56 @@
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="isDatabaseInSync"
-			class="secondary-btn save-db"
-			(click)="trySaveDatabase()">
-			<i-feather name="save"></i-feather>
-			<span class="label">Save</span>
+			class="icon-btn save-db"
+			(click)="trySaveDatabase()"
+			appTooltip="Save"
+			container="body"
+		>
+			<i-feather name="save" style="padding-top: 9px"></i-feather>
 		</button>
 		<button
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="!(isAnyEntry && isOneEntrySelected)"
-			class="secondary-btn edit-entry"
-			(click)="openEditEntryWindow()">
+			class="icon-btn edit-entry"
+			(click)="openEditEntryWindow()"
+			appTooltip="Edit"
+			container="body"
+		>
 			<i-feather name="edit"></i-feather>
-			<span class="label">Edit</span>
 		</button>
 		<button
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="!(isAnyEntry && isAnyEntrySelected)"
-			class="secondary-btn remove-entry"
-			(click)="openDeleteEntryWindow()">
+			class="icon-btn remove-entry"
+			style="margin-right: 0.5rem"
+			(click)="openDeleteEntryWindow()"
+			appTooltip="Remove"
+			container="body"
+		>
 			<i-feather name="trash"></i-feather>
-			<span class="label">Remove</span>
 		</button>
+		<span
+			style="
+				width: 1px;
+				background-color: var(--border-color);
+				display: flex;
+				height: 70%;
+				align-self: center;
+			"
+		></span>
+		<button
+			data-prevent-entry-deselect
+			type="button"
+			class="icon-btn"
+			style="margin-left: 0.5rem"
+			appTooltip="Security hub"
+			container="body"
+		>
+			<i-feather name="shield"></i-feather>
+		</button>
+		<app-settings-button></app-settings-button>
 		<div class="searchbox">
 			<input
 				#searchInput
@@ -45,7 +73,10 @@
 				[(ngModel)]="searchPhrase"
 				(keydown)="handleSearchboxKeydown($event)"
 				class="search"
-				[attr.placeholder]="isGlobalSearchMode ? 'Search all' : 'Search in group' " />
+				[attr.placeholder]="
+					isGlobalSearchMode ? 'Search all' : 'Search in group'
+				"
+			/>
 			<div class="search-mode">
 				<i-feather
 					role="button"
@@ -54,7 +85,8 @@
 					(keydown.enter)="resetSearch()"
 					[style.visibility]="searchPhrase?.length ? 'visible' : 'hidden'"
 					name="x-circle"
-					class="clear-search">
+					class="clear-search"
+				>
 				</i-feather>
 				<i-feather
 					role="button"
@@ -64,12 +96,12 @@
 					[appTooltip]="searchMode"
 					container="body"
 					class="global-search-icon"
-					[ngClass]="{'active': isGlobalSearchMode}"
+					[ngClass]="{ active: isGlobalSearchMode }"
 					(click)="toggleSearchMode()"
-					(keydown.enter)="toggleSearchMode()">
+					(keydown.enter)="toggleSearchMode()"
+				>
 				</i-feather>
 			</div>
 		</div>
-		<app-settings-button></app-settings-button>
 	</div>
 </nav>

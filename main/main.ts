@@ -1,206 +1,257 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { IpcChannel } from '@shared-renderer/index';
-import { app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeTheme, shell } from 'electron';
+import {
+	app,
+	BrowserWindow,
+	globalShortcut,
+	ipcMain,
+	Menu,
+	nativeTheme,
+	shell,
+} from 'electron';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { platform } from 'os';
 import { basename, resolve } from 'path';
-import { SingleInstanceServices } from './dependency-injection';
+import { SingleInstanceServices } from './di';
 import { ProcessArgument } from './process-argument.enum';
 import { IAutotypeService } from './services/autotype';
 import { IClipboardService } from './services/clipboard';
 import { IConfigService } from './services/config';
 import { IDatabaseService } from './services/database';
-import { IEncryptionEventWrapper, MessageEventType } from './services/encryption';
+import {
+	IEncryptionEventWrapper,
+	MessageEventType,
+} from './services/encryption';
 import { IPerformanceService } from './services/performance/performance-service.model';
 import { IWindowService } from './services/window';
 
 class MainProcess {
-  private readonly _services: SingleInstanceServices;
-  private readonly _isDevMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.Serve));
-  private readonly _isTestMode = Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E));
+	private readonly _services: SingleInstanceServices;
+	private readonly _isDevMode = Boolean(
+		app.commandLine.hasSwitch(ProcessArgument.Serve),
+	);
+	private readonly _isTestMode = Boolean(
+		app.commandLine.hasSwitch(ProcessArgument.E2E),
+	);
 
-  private _fileArg: string;
+	private _fileArg: string;
 
-  private get _databaseService(): IDatabaseService {
-    return this._services.get(IDatabaseService);
-  }  
+	private get _databaseService(): IDatabaseService {
+		return this._services.get(IDatabaseService);
+	}
 
-  private get _windowService(): IWindowService {
-    return this._services.get(IWindowService);
-  }  
+	private get _windowService(): IWindowService {
+		return this._services.get(IWindowService);
+	}
 
-  private get _encryptionEventWrapper(): IEncryptionEventWrapper {
-    return this._services.get(IEncryptionEventWrapper);
-  }
+	private get _encryptionEventWrapper(): IEncryptionEventWrapper {
+		return this._services.get(IEncryptionEventWrapper);
+	}
 
-  private get _performanceService(): IPerformanceService {
-    return this._services.get(IPerformanceService);
-  }
+	private get _performanceService(): IPerformanceService {
+		return this._services.get(IPerformanceService);
+	}
 
-  private get _configService(): IConfigService {
-    return this._services.get(IConfigService);
-  }
+	private get _configService(): IConfigService {
+		return this._services.get(IConfigService);
+	}
 
-  private get _autotypeService(): IAutotypeService {
-    return this._services.get(IAutotypeService);
-  }
+	private get _autotypeService(): IAutotypeService {
+		return this._services.get(IAutotypeService);
+	}
 
-  private get _clipboardService(): IClipboardService {
-    return this._services.get(IClipboardService);
-  }
+	private get _clipboardService(): IClipboardService {
+		return this._services.get(IClipboardService);
+	}
 
-  constructor() {
-    this._services = new SingleInstanceServices();
-    this._fileArg = process.argv.find(x => x.endsWith(this._services.get(IConfigService).appConfig.fileExtension));
-  
-    // https://www.electronjs.org/docs/latest/tutorial/performance#8-call-menusetapplicationmenunull-when-you-do-not-need-a-default-menu
-    Menu.setApplicationMenu(null);
-    this.registerAppEvents();
-  }
+	constructor() {
+		this._services = new SingleInstanceServices();
+		this._fileArg = process.argv.find((x) =>
+			x.endsWith(this._services.get(IConfigService).appConfig.fileExtension),
+		);
 
-  private registerAppEvents() {
-    app.on('second-instance', (_: Electron.Event, argv) => {
-      const filePath = argv.find(x => x.endsWith(this._configService.appConfig.fileExtension));
-      const windowRef = this._windowService.createMainWindow();
-      this.setFile(windowRef, filePath);
+		// https://www.electronjs.org/docs/latest/tutorial/performance#8-call-menusetapplicationmenunull-when-you-do-not-need-a-default-menu
+		Menu.setApplicationMenu(null);
+		this.registerAppEvents();
+	}
 
-      this._windowService.loadWindow(windowRef, null);
-    });
+	private registerAppEvents() {
+		app.on('second-instance', (_: Electron.Event, argv) => {
+			const filePath = argv.find((x) =>
+				x.endsWith(this._configService.appConfig.fileExtension),
+			);
 
-    // disable creation of new windows for better security
-    app.on('web-contents-created', (_, contents) => {
-      contents.setWindowOpenHandler(() => {
-        return { action: 'deny' };
-      });
-    });
+			const isAlreadyOpenFile = Array.from(this._databaseService.fileMap.values()).find(x => x.file === filePath);
+			if (isAlreadyOpenFile) {
+				return;
+			}
 
-    app.on('open-file', (event, path) => {
-      event.preventDefault();
-      this._fileArg = path;
-    });
+			const windowRef = this._windowService.createMainWindow();
+			this.setFile(windowRef, filePath);
 
-    app.once('ready', () => this.onReady());
+			this._windowService.loadWindow(windowRef, null);
+		});
 
-    // exit listeners
-    app.once('window-all-closed', () => {
-      this.exitApp();
-    });
+		// disable creation of new windows for better security
+		app.on('web-contents-created', (_, contents) => {
+			contents.setWindowOpenHandler(() => {
+				return { action: 'deny' };
+			});
+		});
 
-    ['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach(event => {
-      process.once(event, () => this.exitApp());
-    });
+		app.on('open-file', (event, path) => {
+			event.preventDefault();
+			this._fileArg = path;
+		});
 
-    process.on('unhandledRejection', (reason, promise) => {
-      console.log('Unhandled promise rejection: ', reason);
-    });
-  }
+		app.once('ready', () => this.onReady());
 
-  private exitApp() {
-    globalShortcut.unregisterAll();
-    this._databaseService.onAppExit();
-    this._clipboardService.clear();
+		// exit listeners
+		app.once('window-all-closed', () => {
+			this.exitApp();
+		});
 
-    app.exit();
-  }
+		['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach((event) => {
+			process.once(event, () => this.exitApp());
+		});
 
-  private async onReady() {
-    const mainWindow = this._windowService.createMainWindow();
-    const entrySelectWindow = this._windowService.createEntrySelectWindow();
-    this.registerIpcEventListeners();
+		process.on('unhandledRejection', (reason, promise) => {
+			console.log('Unhandled promise rejection: ', reason);
+		});
+	}
 
-    if (this._configService.appConfig.theme === 'dark') {
-      nativeTheme.themeSource = 'dark';
-    } else if (this._configService.appConfig.theme === 'light') {
-      nativeTheme.themeSource = 'light';
-    }
+	private exitApp() {
+		globalShortcut.unregisterAll();
+		this._databaseService.onAppExit();
+		this._clipboardService.clear();
 
-    if (this._configService.appConfig.autoTypeEnabled) {
-      this._autotypeService.registerAutocompleteShortcut(
-        this._configService.appConfig.autocompleteShortcut,
-        this._configService.appConfig.autocompleteUsernameOnlyShortcut,
-        this._configService.appConfig.autocompletePasswordOnlyShortcut
-      );
-    }
+		app.exit();
+	}
 
-    this.setFile(mainWindow, this._fileArg);
-    await this._windowService.loadWindow(mainWindow, null);
+	private async onReady() {
+		const mainWindow = this._windowService.createMainWindow();
+		const entrySelectWindow = this._windowService.createEntrySelectWindow();
+		this.registerIpcEventListeners();
 
-    try {
-      this._performanceService.mark('firstWindowLoaded');
-    } catch (err) {
-      console.log(err);
-    }
+		if (this._configService.appConfig.theme === 'dark') {
+			nativeTheme.themeSource = 'dark';
+		} else if (this._configService.appConfig.theme === 'light') {
+			nativeTheme.themeSource = 'light';
+		}
 
-    this.openDevTools(mainWindow);
+		if (this._configService.appConfig.autoTypeEnabled) {
+			this._autotypeService.registerAutocompleteShortcut(
+				this._configService.appConfig.autocompleteShortcut,
+				this._configService.appConfig.autocompleteUsernameOnlyShortcut,
+				this._configService.appConfig.autocompletePasswordOnlyShortcut,
+			);
+		}
 
-    await this._windowService.loadWindow(entrySelectWindow, 'entry-select');
-    this.openDevTools(entrySelectWindow);
-  }
+		this.setFile(mainWindow, this._fileArg);
+		await this._windowService.loadWindow(mainWindow, null);
 
-  private openDevTools(window: BrowserWindow) {
-    if (this._isDevMode) {
-      window.webContents.openDevTools({ mode: 'detach' });
-    }
-  }
+		try {
+			this._performanceService.mark('firstWindowLoaded');
+		} catch (err) {
+			console.log(err);
+		}
 
-  private setFile(windowRef: BrowserWindow, filePath: string) {
-    if (filePath) {
-      this._databaseService.setDatabaseEntry(windowRef.webContents.id, filePath);
-      this._windowService.setTitle(windowRef.id, basename(filePath));
-    } else {
-      if (!existsSync(this._configService.workspacesPath)) {
-        writeFileSync(this._configService.workspacesPath, '{"recentlyOpened": [], "workspace": null}', { encoding: 'utf8' });
-      }
+		this.openDevTools(mainWindow);
 
-      const workspace = readFileSync(this._configService.workspacesPath, 'utf8');
-      const path = JSON.parse(workspace);
+		await this._windowService.loadWindow(entrySelectWindow, 'entry-select');
+		this.openDevTools(entrySelectWindow);
+	}
 
-      if (this._isTestMode) {
-        const absolutePath = resolve('..\\e2e\\files\\test.fbit');
-        path.workspace = absolutePath.slice(0, 1).toUpperCase() + absolutePath.slice(1);
-      }
+	private openDevTools(window: BrowserWindow) {
+		if (this._isDevMode) {
+			window.webContents.openDevTools({ mode: 'detach' });
+		}
+	}
 
-      if (path.workspace && existsSync(path.workspace)) {
-        this._databaseService.setDatabaseEntry(windowRef.webContents.id, path.workspace);
-        this._windowService.setTitle(windowRef.id, basename(path.workspace));
-      }
-    }
-  }
-  
-  private registerIpcEventListeners() {
-    ipcMain.handle(IpcChannel.GetWhitelistedChannels, () => {
-      return Object.values(IpcChannel);
-    });
+	private setFile(windowRef: BrowserWindow, filePath: string) {
+		if (filePath) {
+			this._databaseService.setDatabaseEntry(
+				windowRef.webContents.id,
+				filePath,
+			);
+			this._windowService.setTitle(windowRef.id, basename(filePath));
+		} else {
+			if (!existsSync(this._configService.workspacesPath)) {
+				writeFileSync(
+					this._configService.workspacesPath,
+					'{"recentlyOpened": [], "workspace": null}',
+					{ encoding: 'utf8' },
+				);
+			}
 
-    ipcMain.handle(IpcChannel.GetPlatformInfo, () => {
-      return platform();
-    });
+			const workspace = readFileSync(
+				this._configService.workspacesPath,
+				'utf8',
+			);
+			const path = JSON.parse(workspace);
 
-    ipcMain.handle(IpcChannel.EncryptPassword, async (event, password) => {
-      const encryptionEvent = { type: MessageEventType.EncryptString, plain: password };
-      const response = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, this._windowService.getWindowByWebContentsId(event.sender.id).key ) as { encrypted: string };
+			if (this._isTestMode) {
+				const absolutePath = resolve('..\\e2e\\files\\test.fbit');
+				path.workspace =
+					absolutePath.slice(0, 1).toUpperCase() + absolutePath.slice(1);
+			}
 
-      return response.encrypted;
-    });
+			if (path.workspace && existsSync(path.workspace)) {
+				this._databaseService.setDatabaseEntry(
+					windowRef.webContents.id,
+					path.workspace,
+				);
+				this._windowService.setTitle(windowRef.id, basename(path.workspace));
+			}
+		}
+	}
 
-    ipcMain.handle(IpcChannel.DecryptPassword, async (event, password) => {
-      const encryptionEvent = { type: MessageEventType.DecryptString, encrypted: password };
-      const response = await this._encryptionEventWrapper.processEventAsync(encryptionEvent, this._windowService.getWindowByWebContentsId(event.sender.id).key) as { decrypted: string };
+	private registerIpcEventListeners() {
+		ipcMain.handle(IpcChannel.GetWhitelistedChannels, () => {
+			return Object.values(IpcChannel);
+		});
 
-      return response.decrypted;
-    });
+		ipcMain.handle(IpcChannel.GetPlatformInfo, () => {
+			return platform();
+		});
 
-    ipcMain.on(IpcChannel.OpenUrl, async (_, url: string) => {
-      if (!/^https?/.test(url)) {
-        url = 'http://' + url;
-      }
+		ipcMain.handle(IpcChannel.EncryptPassword, async (event, password) => {
+			const encryptionEvent = {
+				type: MessageEventType.EncryptString,
+				plain: password,
+			};
+			const response = (await this._encryptionEventWrapper.processEventAsync(
+				encryptionEvent,
+				this._windowService.getWindowByWebContentsId(event.sender.id).key,
+			)) as { encrypted: string };
 
-      shell.openExternal(url);
-    });
-  }
+			return response.encrypted;
+		});
+
+		ipcMain.handle(IpcChannel.DecryptPassword, async (event, password) => {
+			const encryptionEvent = {
+				type: MessageEventType.DecryptString,
+				encrypted: password,
+			};
+			const response = (await this._encryptionEventWrapper.processEventAsync(
+				encryptionEvent,
+				this._windowService.getWindowByWebContentsId(event.sender.id).key,
+			)) as { decrypted: string };
+
+			return response.decrypted;
+		});
+
+		ipcMain.on(IpcChannel.OpenUrl, async (_, url: string) => {
+			if (!/^https?/.test(url)) {
+				url = 'http://' + url;
+			}
+
+			shell.openExternal(url);
+		});
+	}
 }
 
 export function bootstrapApp() {
-  new MainProcess();
+	new MainProcess();
 }

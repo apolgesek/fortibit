@@ -1,4 +1,4 @@
 export interface ServiceIdentifier<T> {
-  type: T;
+	type: T;
 	(...args: any[]): void;
 }

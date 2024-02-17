@@ -2,121 +2,132 @@ import { CommonModule } from '@angular/common';
 import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
 import { ReportType } from '@app/core/enums';
 import { IMessageBroker } from '@app/core/models';
-import { EntryManager, ModalRef, ModalService, NotificationService, ReportService, WorkspaceService } from '@app/core/services';
+import {
+	EntryManager,
+	ModalRef,
+	ModalService,
+	NotificationService,
+	ReportService,
+} from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { IpcChannel } from '@shared-renderer/index';
+import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
-import { combineLatest, from, take, timer } from 'rxjs';
+import { bufferTime, from } from 'rxjs';
 
 @Component({
-  selector: 'app-weak-passwords-dialog',
-  templateUrl: './weak-passwords-dialog.component.html',
-  styleUrls: ['./weak-passwords-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    FeatherModule,
-    ModalComponent
-  ]
+	selector: 'app-weak-passwords-dialog',
+	templateUrl: './weak-passwords-dialog.component.html',
+	styleUrls: ['./weak-passwords-dialog.component.scss'],
+	standalone: true,
+	imports: [CommonModule, FeatherModule, ModalComponent],
 })
 export class WeakPasswordsDialogComponent implements IModal, OnInit {
-  ref: ComponentRef<WeakPasswordsDialogComponent>;
-  additionalData?: IAdditionalData;
-  result = [];
-  weakPasswordsFound = [];
-  scanInProgress: boolean;
-  lastReportLoaded = false;
-  showDetails = false;
-  showError = false;
-  lastReport: any;
+	ref: ComponentRef<WeakPasswordsDialogComponent>;
+	additionalData?: IAdditionalData;
+	result = [];
+	weakPasswordsFound = [];
+	scanInProgress: boolean;
+	lastReportLoaded = false;
+	showDetails = false;
+	showError = false;
+	lastReport: any;
 
-  private scoreMap = {
-    0: 'High',
-    1: 'High',
-    2: 'Medium'
-  };
+	private scoreMap = {
+		0: 'High',
+		1: 'High',
+		2: 'Medium',
+	};
 
-  constructor(
-    @Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-    private readonly modalRef: ModalRef,
-    private readonly reportService: ReportService,
-    private readonly modalService: ModalService,
-    private readonly entryManager: EntryManager,
-    private readonly notificationService: NotificationService,
-  ) { }
+	constructor(
+		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
+		private readonly modalRef: ModalRef,
+		private readonly reportService: ReportService,
+		private readonly modalService: ModalService,
+		private readonly entryManager: EntryManager,
+		private readonly notificationService: NotificationService,
+	) {}
 
-  close() {
-    this.modalRef.close();
-  }
+	close() {
+		this.modalRef.close();
+	}
 
-  async scan() {
-    this.scanInProgress = true;
+	async scan() {
+		this.scanInProgress = true;
 
-    combineLatest([
-      from(this.reportService.scanForWeakPasswords()),
-      timer(1000).pipe(take(1)),
-    ]).subscribe({ next: async ([result]) => {
-      if (result.error) {
-        this.scanInProgress = false;
-        this.showError = true;
+		from(this.reportService.scanForWeakPasswords())
+			.pipe(bufferTime(1000))
+			.subscribe({
+				next: async ([result]) => {
+					if (result.error) {
+						this.scanInProgress = false;
+						this.showError = true;
 
-        return;
-      }
+						return;
+					}
 
-      const reportId = await this.reportService.addReport({
-        creationDate: new Date(),
-        type: ReportType.WeakPasswords,
-        payload: result.data
-      });
+					const reportId = await this.reportService.addReport({
+						creationDate: new Date(),
+						type: ReportType.WeakPasswords,
+						payload: result.data,
+					});
 
-      await this.getLastReport();
-      this.scanInProgress = false;
+					await this.getLastReport();
+					this.scanInProgress = false;
 
-      if (this.weakPasswordsFound.length) {
-        this.showDetails = true;
-      }
-    }, error: () => this.scanInProgress = false });
-  }
+					if (this.weakPasswordsFound.length) {
+						this.showDetails = true;
+					}
+				},
+				error: () => (this.scanInProgress = false),
+			});
+	}
 
-  async saveReport() {
-    const saved = await this.messageBroker.ipcRenderer.invoke(
-      IpcChannel.SaveWeakPasswordsReport,
-      this.weakPasswordsFound.map(x => ({ ...x, score: this.scoreMap[x.score] }))
-    );
+	async saveReport() {
+		const saved = await this.messageBroker.ipcRenderer.invoke(
+			IpcChannel.SaveWeakPasswordsReport,
+			this.weakPasswordsFound.map((x) => ({
+				...x,
+				score: this.scoreMap[x.score],
+			})),
+		);
 
-    if (saved) {
-      this.notificationService.add({ type: 'success', alive: 10 * 1000, message: 'Report exported' });
-    }
-  }
+		if (saved) {
+			this.notificationService.add({
+				type: 'success',
+				alive: 10 * 1000,
+				message: 'Report exported',
+			});
+		}
+	}
 
-  ngOnInit(): void {
-    this.getLastReport();
-  }
+	ngOnInit(): void {
+		this.getLastReport();
+	}
 
-  openUrl(url: string) {
-    this.messageBroker.ipcRenderer.send(IpcChannel.OpenUrl, url);
-  }
+	openUrl(url: string) {
+		this.messageBroker.ipcRenderer.send(IpcChannel.OpenUrl, url);
+	}
 
-  public trackByFn(_: number, item: { id: number }) {
-    return item.id;
-  }
+	public trackByFn(_: number, item: { id: number }) {
+		return item.id;
+	}
 
-  async editEntry(id: number) {
-    const entry = await this.entryManager.get(id);
-    this.modalService.openEditEntryWindow(entry);
-  }
+	async editEntry(id: number) {
+		const entry = await this.entryManager.get(id);
+		this.modalService.openEditEntryWindow(entry as PasswordEntry);
+	}
 
-  private async getLastReport() {
-    const entries = await this.reportService.getWeakPasswords();
+	private async getLastReport() {
+		const entries = await this.reportService.getWeakPasswords();
 
-    if (entries) {
-      this.lastReport = entries.report;
-      this.result = entries.entries;
-      this.weakPasswordsFound = this.result.filter(x => x.score <= 2);
-    }
+		if (entries) {
+			this.lastReport = entries.report;
+			this.result = entries.entries;
+			this.weakPasswordsFound = this.result.filter((x) => x.score <= 2);
+		}
 
-    this.lastReportLoaded = true;
-  }
+		this.lastReportLoaded = true;
+	}
 }

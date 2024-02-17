@@ -1,31 +1,31 @@
 @import 'themes/light/variables';
 
 .dialog-message {
-  padding: 0;
+	padding: 0;
 }
 
 .update-check {
-  display: flex;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-  align-items: center;
-  user-select: none;
+	display: flex;
+	font-size: 0.875rem;
+	margin-bottom: 1rem;
+	align-items: center;
+	user-select: none;
 }
 
 ul {
-  list-style-type: none;
-  padding-left: 0;
-  color: var(--primary-text);
-  font-size: 0.875rem;
+	list-style-type: none;
+	padding-left: 0;
+	color: var(--primary-text);
+	font-size: 0.875rem;
 
-  li {
-    margin-top: 0.4rem;
-    margin-bottom: 0.4rem;
-  }
+	li {
+		margin-top: 0.4rem;
+		margin-bottom: 0.4rem;
+	}
 }
 
 i-feather {
-  width: 1.25rem !important;
-  height: 1.25rem !important;
-  color: $jungle-green;
+	width: 1.25rem !important;
+	height: 1.25rem !important;
+	color: $jungle-green;
 }

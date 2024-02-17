@@ -7,21 +7,26 @@
 		cdkVirtualScrollingElement
 		appFocusableList
 		[selected]="[selectedGroup]"
-		(focused)="selectGroup($event.item)">
-		<cdk-virtual-scroll-viewport
-			class="group-viewport"
-			itemSize="32">
+		(focused)="selectGroup($event.item)"
+	>
+		<cdk-virtual-scroll-viewport class="group-viewport" itemSize="32">
 			<li
-				*ngFor="let group of builtInGroups; let i = index; trackBy: groupTrackFn"
+				*ngFor="
+					let group of builtInGroups;
+					let i = index;
+					trackBy: groupTrackFn
+				"
 				[appFocusableListItem]="group.id"
 				[attr.aria-setsize]="builtInGroups.length + groups.length"
 				[attr.aria-posinset]="i + 1"
 				tabindex="0"
 				[appContextMenuItem]="getContextMenu(group.id)"
 				class="group-item"
-				[ngClass]="{'active': group.id === this.selectedGroup}"
-				(focus)="selectGroup(group.id)">
-				<i-feather [name]="group.icon"></i-feather> <div class="group-name">{{ group.name }}</div>
+				[ngClass]="{ active: group.id === this.selectedGroup }"
+				(focus)="selectGroup(group.id)"
+			>
+				<i-feather [name]="group.icon"></i-feather>
+				<div class="group-name">{{ group.name }}</div>
 			</li>
 			<div class="separator" tabindex="0">
 				<span>Groups</span>
@@ -31,13 +36,19 @@
 						[attr.aria-label]="addGroupLabel"
 						class="add-group"
 						container="body"
-						(click)="addGroup(); false">
+						(click)="addGroup(); (false)"
+					>
 						<i-feather name="plus"></i-feather>
 					</button>
 				</div>
 			</div>
 			<li
-				*cdkVirtualFor="let group of groups; let i = index; trackBy: groupTrackFn; templateCacheSize: 0"
+				*cdkVirtualFor="
+					let group of groups;
+					let i = index;
+					trackBy: groupTrackFn;
+					templateCacheSize: 0
+				"
 				[appFocusableListItem]="group.id"
 				tabindex="0"
 				[attr.aria-setsize]="builtInGroups.length + groups.length"
@@ -45,19 +56,21 @@
 				appDroppable
 				[appContextMenuItem]="getContextMenu(group.id)"
 				class="group-item"
-				[ngClass]="{'active': group.id === this.selectedGroup}"
+				[ngClass]="{ active: group.id === this.selectedGroup }"
 				(focus)="selectGroup(group.id)"
-				(drop)="onEntryDrop(group.id)">
-				<i-feather name="folder"></i-feather> 
+				(drop)="onEntryDrop(group.id)"
+			>
+				<i-feather name="folder"></i-feather>
 				<div class="group-name">
-					{{ group.name }} 
+					{{ group.name }}
 				</div>
 				<i-feather
 					*ngIf="group.id === this.selectedGroup && group.id !== groupIds.Root"
 					(click)="editGroup()"
 					tabindex="0"
 					name="edit-2"
-					class="edit-icon">
+					class="edit-icon"
+				>
 				</i-feather>
 			</li>
 		</cdk-virtual-scroll-viewport>

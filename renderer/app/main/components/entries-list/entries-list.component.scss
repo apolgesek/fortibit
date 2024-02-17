@@ -15,7 +15,7 @@ $sidePanelOutDuration: 250ms;
 	@include scrollbar;
 
 	.table-viewport {
-		height: map-get($map: $layout, $key: "entry-table");
+		height: map-get($map: $layout, $key: 'entry-table');
 		// vertical scrollbar inside the table viewport
 		@include scrollbar;
 
@@ -37,8 +37,8 @@ $sidePanelOutDuration: 250ms;
 	@include font-regular;
 
 	::ng-deep .cdk-virtual-scroll-content-wrapper {
-    max-width: 100%;
-  }
+		max-width: 100%;
+	}
 
 	.row-entry {
 		font-size: 0.875rem;
@@ -68,9 +68,12 @@ $sidePanelOutDuration: 250ms;
 			}
 		}
 
-		&.selected:focus {
-			background-color: var(--list-item-bg--active);
+		&.selected {
 			border: 1px solid $blue-200;
+
+			&:focus {
+				background-color: var(--list-item-bg--active);
+			}
 		}
 
 		&:hover:not(.selected) {
@@ -138,7 +141,9 @@ $sidePanelOutDuration: 250ms;
 				margin: 0 0.5rem;
 			}
 
-			&:hover, &:focus, &.active {
+			&:hover,
+			&:focus,
+			&.active {
 				i {
 					display: block;
 				}
@@ -162,7 +167,9 @@ $sidePanelOutDuration: 250ms;
 }
 
 .list-cta {
-	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 	color: var(--primary-text);
 	font-size: 1rem;
 	user-select: none;
@@ -208,7 +215,7 @@ $sidePanelOutDuration: 250ms;
 	}
 
 	+ .table-viewport {
-		height: calc(map-get($map: $layout, $key: "entry-table") - 2rem);
+		height: calc(map-get($map: $layout, $key: 'entry-table') - 2rem);
 	}
 }
 
@@ -227,6 +234,7 @@ $sidePanelOutDuration: 250ms;
 }
 
 .add-entry-list-button {
+	margin-top: 1rem;
 	padding: 0.5rem;
 	border-radius: 0.25rem;
 
@@ -235,8 +243,8 @@ $sidePanelOutDuration: 250ms;
 	}
 
 	&:focus:not(:hover) {
-    outline: 2px solid $barberry !important;
-  }
+		outline: 2px solid $barberry !important;
+	}
 }
 
 #mask {

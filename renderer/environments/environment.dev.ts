@@ -4,14 +4,14 @@
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 
 export const AppConfig = {
-  production: false,
-  environment: 'DEV',
-  mocks: false,
-  urls: {
-    repositoryUrl: 'https://github.com/apolgesek/fortibit/',
-    releaseNotes: 'releases',
-    reportIssue: 'issues',
-    keyboardReference: 'wiki/Keyboard-shortcuts',
-    autotypeShortcut: '#global-autotype'
-  }
+	production: false,
+	environment: 'DEV',
+	mocks: false,
+	urls: {
+		repositoryUrl: 'https://github.com/apolgesek/fortibit/',
+		releaseNotes: 'releases',
+		reportIssue: 'issues',
+		keyboardReference: 'wiki/Keyboard-shortcuts',
+		autotypeShortcut: '#global-autotype',
+	},
 };

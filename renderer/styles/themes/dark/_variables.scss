@@ -1,107 +1,109 @@
-@import "../base-variables";
+@import '../base-variables';
 
 @mixin dark-theme {
-  // TYPOGRAPHY
-  --primary-text: #{$grey-200};
-  --secondary-text: #{$grey-500};
+	// TYPOGRAPHY
+	--primary-text: #{$grey-200};
+	--secondary-text: #{$grey-500};
 
-  // BACKGROUNDS
-  --primary-bg: #{$black-900};
-  --secondary-bg: #{$black-800};
-  --input-bg: #{$black-900};
-  --input-bg-secondary: #{$black-800};
-  --modal-bg: #{$black-800};
-  --input-modal-bg: #{$black-900};
-  --tooltip-bg: #{#000000b3};
-  --context-menu-bg: #{$black-800};
+	// BACKGROUNDS
+	--primary-bg: #{$black-900};
+	--secondary-bg: #{$black-800};
+	--input-bg: #{$black-900};
+	--input-bg-secondary: #{$black-800};
+	--modal-bg: #{$black-800};
+	--input-modal-bg: #{$black-900};
+	--tooltip-bg: #{#000000b3};
+	--context-menu-bg: #{$black-800};
 
-  // BRAND
-  --brand-color: #{$white};
+	// BRAND
+	--brand-color: #{$white};
 
-  // LIST ITEM
-  --list-item-bg--hover: #{$black-800};
-  --list-item-bg--active: #{$black-800};
+	// LIST ITEM
+	--list-item-bg--hover: #{$black-800};
+	--list-item-bg--active: #{$black-800};
 
-  // SCROLLBAR
-  --scrollbar-thumb: #{$grey-600};
-  --scrollbar-track: #{$black-800};
+	// SCROLLBAR
+	--scrollbar-thumb: #{$grey-600};
+	--scrollbar-track: #{$black-800};
 
-  // CHECKBOX
-  --checkbox-bg: #{$black-900};
-  --checkbox-bg--checked: #{$blue-300};
+	// CHECKBOX
+	--checkbox-bg: #{$black-900};
+	--checkbox-bg--checked: #{$blue-300};
 
-  // ADD ENTRY CTA BUTTON
-  --add-entry-cta-text: #{$white};
-  --add-entry-cta-bg: #{$blue-300};
-  --add-entry-text--disabled: #{rgba(255, 255, 255, 0.38)};
-  --add-entry-bg--disabled: #{#393939};
-  --add-entry-cta-bg--hover: #{lighten($blue-300, 7)};
+	// ADD ENTRY CTA BUTTON
+	--add-entry-cta-text: #{$white};
+	--add-entry-cta-bg: #{$blue-300};
+	--add-entry-text--disabled: #{rgba(255, 255, 255, 0.38)};
+	--add-entry-bg--disabled: #{#393939};
+	--add-entry-cta-bg--hover: #{lighten($blue-300, 7)};
 
-  // PRIMARY BUTTTON
-  --primary-btn-text: #{$white};
-  --primary-btn-text--hover: #{$white};
-  --primary-btn-bg: #{$blue-300};
-  --primary-btn-bg--hover: #{lighten($blue-300, 7)};
+	// PRIMARY BUTTTON
+	--primary-btn-text: #{$white};
+	--primary-btn-text--hover: #{$white};
+	--primary-btn-bg: #{$blue-300};
+	--primary-btn-bg--hover: #{lighten($blue-300, 7)};
 
-  // SECONDARY BUTTON
-  --secondary-btn-text: #{$grey-100};
-  --secondary-btn-bg: #{$grey-600};
-  --secondary-btn-bg--disabled: #2f2f2f;
-  --secondary-btn-text--disabled: #{rgba(255, 255, 255, 0.38)};
+	// SECONDARY BUTTON
+	--secondary-btn-text: #{$grey-100};
+	--secondary-btn-bg: #{$grey-600};
+	--secondary-btn-bg--disabled: #2f2f2f;
+	--secondary-btn-text--disabled: #{rgba(255, 255, 255, 0.38)};
 
-  // ACTION ICON BUTTON
-  --action-btn-text: #{$grey-200};
-  --action-btn-text--disabled: #{$grey-500};
-  --action-btn-bg: #{$black-800};
+	// ACTION ICON BUTTON
+	--action-btn-text: #{$grey-200};
+	--action-btn-text--disabled: #{$grey-500};
+	--action-btn-bg: #{$black-800};
 
-  // TEXT BUTTON
-  --text-btn-text: #{$grey-100};
-  --text-btn-bg: #{$grey-600};
+	// TEXT BUTTON
+	--text-btn-text: #{$grey-100};
+	--text-btn-bg: #{$grey-600};
 
-  // TABSET BUTTON
-  --tabset-btn-bg: #{$grey-600};
-  --tabset-btn-text--hover: #{$grey-100};
-  --tabset-btn-bg--hover: #{lighten($grey-600, 11)};
+	// TABSET BUTTON
+	--tabset-btn-bg: #{$grey-600};
+	--tabset-btn-text--hover: #{$grey-100};
+	--tabset-btn-bg--hover: #{lighten($grey-600, 11)};
 
-  // TOOLBAR BUTTON
-  --toolbar-dropdown-bg: #494949;
-  --toolbar-dropdown-item--hover: #494949;
+	// TOOLBAR BUTTON
+	--toolbar-dropdown-bg: #494949;
+	--toolbar-dropdown-item--hover: #494949;
 
-  // SETTINGS BUTTON
-  --settings-btn-bg: #{$grey-200};
-  --settings-btn-bg--hover: #{$white};
+	// SETTINGS BUTTON
+	--settings-btn-bg: #{$blue-250};
+	--settings-btn-bg--hover: #{$blue-400};
 
-  // DROPDOWN
-  --dropdown-shadow: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.23));
-  --dropdown-bg: #{$black-800};
-  --dropdown-text--disabled: #{$grey-500};
-  --dropdown-list-item-bg--hover: #{$grey-600};
+	--toolbar-btn-bg--hover: #{rgba($grey-600, 50%)};
 
-  // NOTIFICATION
-  --notification-bg: #{lighten($black-800, 2)};
-  --notification-bg--success: #{$black-800};
-  --notification-bg--error: #{$grey-600};
+	// DROPDOWN
+	--dropdown-shadow: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.23));
+	--dropdown-bg: #{$black-800};
+	--dropdown-text--disabled: #{$grey-500};
+	--dropdown-list-item-bg--hover: #{$grey-600};
 
-  // EXPANDABLE SECTION
-  --expandable-bg: #{$black-900};
-  --expandable-bg--hover: #{lighten($black-900, 2)};
+	// NOTIFICATION
+	--notification-bg: #{lighten($black-800, 2)};
+	--notification-bg--success: #{$black-800};
+	--notification-bg--error: #{$grey-600};
 
-  // DRAG IMAGE
-  --drag-image-bg: #{$grey-600};
-  --drag-image-back-bg: #{darken($grey-600, 5)};
-  --drag-image-element-bg: #{$grey-500};
+	// EXPANDABLE SECTION
+	--expandable-bg: #{$black-900};
+	--expandable-bg--hover: #{lighten($black-900, 2)};
 
-  // PASSWORD METER
-  --password-meter-bg: #{$grey-600};
-  --password-meter-border-color: #{darken($grey-600, 5)};
+	// DRAG IMAGE
+	--drag-image-bg: #{$grey-600};
+	--drag-image-back-bg: #{darken($grey-600, 5)};
+	--drag-image-element-bg: #{$grey-500};
 
-  // MISC
-  --link-text: #{$blue-250};
-  --label-text: #{$blue-200};
-  --error-text: #{#ff7a7a};
-  --border-color: #{$grey-600};
-  --icon-secondary: #{$grey-200};
-  --input-inset-shadow: #{$black-900};
+	// PASSWORD METER
+	--password-meter-bg: #{$grey-600};
+	--password-meter-border-color: #{darken($grey-600, 5)};
 
-  --base-animation-duration: #{$base-animation-duration};
+	// MISC
+	--link-text: #{$blue-250};
+	--label-text: #{$blue-200};
+	--error-text: #{#ff7a7a};
+	--border-color: #{$grey-600};
+	--icon-secondary: #{$grey-200};
+	--input-inset-shadow: #{$black-900};
+
+	--base-animation-duration: #{$base-animation-duration};
 }

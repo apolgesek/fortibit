@@ -1,213 +1,249 @@
 /* eslint-disable @angular-eslint/no-output-native */
 /* eslint-disable @angular-eslint/no-output-rename */
 /* eslint-disable @angular-eslint/no-output-on-prefix */
-import { AfterViewInit, ContentChildren, DestroyRef, Directive, ElementRef, EventEmitter, HostBinding, Input, Optional, Output, QueryList, SkipSelf } from '@angular/core';
-import { animationFrameScheduler, fromEvent, observeOn, Subject, takeUntil } from 'rxjs';
+import {
+	AfterViewInit,
+	ContentChildren,
+	DestroyRef,
+	Directive,
+	ElementRef,
+	EventEmitter,
+	HostBinding,
+	Input,
+	Optional,
+	Output,
+	QueryList,
+	SkipSelf,
+} from '@angular/core';
+import {
+	animationFrameScheduler,
+	fromEvent,
+	observeOn,
+	Subject,
+	takeUntil,
+} from 'rxjs';
 import { DropdownStateService } from '../services/dropdown-state.service';
 import { MenuService } from '../services/menu.service';
 import { MenuItemDirective } from './menu-item.directive';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Directive({
-  selector: '[appDropdown]',
-  providers: [DropdownStateService],
-  standalone: true,
-  exportAs: 'appDropdown'
+	selector: '[appDropdown]',
+	providers: [DropdownStateService],
+	standalone: true,
+	exportAs: 'appDropdown',
 })
 export class DropdownDirective implements AfterViewInit {
-  @Input() public select = false;
+	@Input() public select = false;
 
-  @Output('open') public onOpen: EventEmitter<DropdownDirective> = new EventEmitter();
-  @Output('close') public onClose: EventEmitter<DropdownDirective> = new EventEmitter();
+	@Output('open') public onOpen: EventEmitter<DropdownDirective> =
+		new EventEmitter();
+	@Output('close') public onClose: EventEmitter<DropdownDirective> =
+		new EventEmitter();
 
-  @ContentChildren(MenuItemDirective, { descendants: true })
-  public menuItems: QueryList<MenuItemDirective>;
-  
-  private dropdownClosed: Subject<void> = new Subject();
-  private _index: number;
+	@ContentChildren(MenuItemDirective, { descendants: true })
+	public menuItems: QueryList<MenuItemDirective>;
 
-  constructor(
-    private readonly destroyRef: DestroyRef,
-    private readonly el: ElementRef,
-    private readonly dropdownState: DropdownStateService,
-    @SkipSelf() @Optional() private readonly parentDropdownState: DropdownStateService,
-    @Optional() private readonly menuService: MenuService,
-  ) {}
+	private dropdownClosed: Subject<void> = new Subject();
+	private _index: number;
 
-  @HostBinding('class.open')
-  public get isOpen(): boolean {
-    return this.dropdownState.isOpen;
-  }
+	constructor(
+		private readonly destroyRef: DestroyRef,
+		private readonly el: ElementRef,
+		private readonly dropdownState: DropdownStateService,
+		@SkipSelf()
+		@Optional()
+		private readonly parentDropdownState: DropdownStateService,
+		@Optional() private readonly menuService: MenuService,
+	) {}
 
-  public get state(): DropdownStateService {
-    return this.dropdownState;
-  }
+	@HostBinding('class.open')
+	public get isOpen(): boolean {
+		return this.dropdownState.isOpen;
+	}
 
-  public get index(): number {
-    return this._index;
-  }
+	public get state(): DropdownStateService {
+		return this.dropdownState;
+	}
 
-  ngAfterViewInit(): void {
-    if (this.parentDropdownState) {
-      this.dropdownState.closeOnSelect = this.select;
-      this.dropdownState.parent = this.parentDropdownState;
-      this.parentDropdownState.child = this.dropdownState;
-    }
+	public get index(): number {
+		return this._index;
+	}
 
-    this.menuItems.changes
-      .pipe(
-        observeOn(animationFrameScheduler),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe((items: QueryList<MenuItemDirective>) => {
-        this.dropdownState.items = items.toArray();
-      });
+	ngAfterViewInit(): void {
+		if (this.parentDropdownState) {
+			this.dropdownState.closeOnSelect = this.select;
+			this.dropdownState.parent = this.parentDropdownState;
+			this.parentDropdownState.child = this.dropdownState;
+		}
 
-    this.dropdownState.stateChanges$
-      .pipe(
-        observeOn(animationFrameScheduler),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe(state => {
-        if (state.isOpen) {
-          this.dropdownState.currentItem = this.menuItems.first;
-          this.dropdownState.currentItem.focus();
-          this.enableKeyboardNavigation();
+		this.menuItems.changes
+			.pipe(
+				observeOn(animationFrameScheduler),
+				takeUntilDestroyed(this.destroyRef),
+			)
+			.subscribe((items: QueryList<MenuItemDirective>) => {
+				this.dropdownState.items = items.toArray();
+			});
 
-          if (this.menuService) {
-            this.menuService.focus(this);
-          }
+		this.dropdownState.stateChanges$
+			.pipe(
+				observeOn(animationFrameScheduler),
+				takeUntilDestroyed(this.destroyRef),
+			)
+			.subscribe((state) => {
+				if (state.isOpen) {
+					this.dropdownState.currentItem = this.menuItems.first;
+					this.dropdownState.currentItem.focus();
+					this.enableKeyboardNavigation();
 
-          this.onOpen.emit(this);
-        } else {
-          if (this.dropdownClosed) {
-            this.dropdownClosed.next();
-            this.dropdownClosed.complete();
+					if (this.menuService) {
+						this.menuService.focus(this);
+					}
 
-            this.dropdownClosed = null;
-            this.onClose.emit(this);
-          }
-        }
-      });
+					this.onOpen.emit(this);
+				} else {
+					if (this.dropdownClosed) {
+						this.dropdownClosed.next();
+						this.dropdownClosed.complete();
 
-    this.dropdownState.focusFirstItem$
-      .pipe(
-        observeOn(animationFrameScheduler),
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe(() => {
-        this.dropdownState.currentItem = this.menuItems.get(1);
+						this.dropdownClosed = null;
+						this.onClose.emit(this);
+					}
+				}
+			});
 
-        if (!this.dropdownState.currentItem) {
-          this.dropdownState.currentItem = this.menuItems.first;
-        }
+		this.dropdownState.focusFirstItem$
+			.pipe(
+				observeOn(animationFrameScheduler),
+				takeUntilDestroyed(this.destroyRef),
+			)
+			.subscribe(() => {
+				this.dropdownState.currentItem = this.menuItems.get(1);
 
-        this.dropdownState.currentItem.focus();
-      });
-  }
+				if (!this.dropdownState.currentItem) {
+					this.dropdownState.currentItem = this.menuItems.first;
+				}
 
-  enableKeyboardNavigation(): void {
-    this.dropdownClosed = new Subject();
+				this.dropdownState.currentItem.focus();
+			});
+	}
 
-    fromEvent(this.el.nativeElement, 'keydown')
-      .pipe(takeUntil(this.dropdownClosed))
-      .subscribe((event: KeyboardEvent) => {
-        event.stopPropagation();
-        this.handleKeyboardShortcuts(event);
-      });
-  }
+	enableKeyboardNavigation(): void {
+		this.dropdownClosed = new Subject();
 
-  focusNext() {
-    if (this.dropdownState.currentItem && this.dropdownState.currentItem.stateService !== this.dropdownState) {
-      this.dropdownState.currentItem.stateService.currentItem = null;
-    }
+		fromEvent(this.el.nativeElement, 'keydown')
+			.pipe(takeUntil(this.dropdownClosed))
+			.subscribe((event: KeyboardEvent) => {
+				event.stopPropagation();
+				this.handleKeyboardShortcuts(event);
+			});
+	}
 
-    const items = this.menuItems.toArray().filter(x => !x.isDisabled);
-    const index = items.findIndex(x => x === this.dropdownState.currentItem);
+	focusNext() {
+		if (
+			this.dropdownState.currentItem &&
+			this.dropdownState.currentItem.stateService !== this.dropdownState
+		) {
+			this.dropdownState.currentItem.stateService.currentItem = null;
+		}
 
-    this.dropdownState.currentItem = index >= items.length - 1 ? items.at(1) : items.at(index + 1);
-    this.dropdownState.currentItem.focus();
+		const items = this.menuItems.toArray().filter((x) => !x.isDisabled);
+		const index = items.findIndex((x) => x === this.dropdownState.currentItem);
 
-    if (this.dropdownState.currentItem.stateService !== this.dropdownState) {
-      this.dropdownState.currentItem.stateService.currentItem = this.dropdownState.currentItem;
-    }
-  }
+		this.dropdownState.currentItem =
+			index >= items.length - 1 ? items.at(1) : items.at(index + 1);
+		this.dropdownState.currentItem.focus();
 
-  focusPrevious() {
-    if (this.dropdownState.currentItem &&  this.dropdownState.currentItem.stateService !== this.dropdownState) {
-      this.dropdownState.currentItem.stateService.currentItem = null;
-    }
+		if (this.dropdownState.currentItem.stateService !== this.dropdownState) {
+			this.dropdownState.currentItem.stateService.currentItem =
+				this.dropdownState.currentItem;
+		}
+	}
 
-    const items = this.menuItems.toArray().filter(x => !x.isDisabled);
-    const index = items.findIndex(x => x === this.dropdownState.currentItem);
+	focusPrevious() {
+		if (
+			this.dropdownState.currentItem &&
+			this.dropdownState.currentItem.stateService !== this.dropdownState
+		) {
+			this.dropdownState.currentItem.stateService.currentItem = null;
+		}
 
-    this.dropdownState.currentItem = index <= 1 ? items.at(-1) : items.at(index - 1);
-    this.dropdownState.currentItem.focus();
+		const items = this.menuItems.toArray().filter((x) => !x.isDisabled);
+		const index = items.findIndex((x) => x === this.dropdownState.currentItem);
 
-    if (this.dropdownState.currentItem.stateService !== this.dropdownState) {
-      this.dropdownState.currentItem.stateService.currentItem = this.dropdownState.currentItem;
-    }
-  }
+		this.dropdownState.currentItem =
+			index <= 1 ? items.at(-1) : items.at(index - 1);
+		this.dropdownState.currentItem.focus();
 
-  onRightArrowDown() {
-    const currentItemService = this.dropdownState.currentItem?.stateService;
+		if (this.dropdownState.currentItem.stateService !== this.dropdownState) {
+			this.dropdownState.currentItem.stateService.currentItem =
+				this.dropdownState.currentItem;
+		}
+	}
 
-    if (currentItemService && currentItemService !== this.dropdownState) {
-      currentItemService.open();
-      currentItemService.focusFirstItem();
-    } else {
-      if (this.menuService) {
-        this.menuService.focusNext();
-      }
-    }
-  }
+	onRightArrowDown() {
+		const currentItemService = this.dropdownState.currentItem?.stateService;
 
-  onLeftArrowDown() {
-    if (this.dropdownState.parent) {
-      this.dropdownState.parent.currentItem.focus();
-      this.dropdownState.close();
-    } else {
-      if (this.menuService) {
-        this.menuService.focusPrevious();
-      }
-    }
-  }
+		if (currentItemService && currentItemService !== this.dropdownState) {
+			currentItemService.open();
+			currentItemService.focusFirstItem();
+		} else {
+			if (this.menuService) {
+				this.menuService.focusNext();
+			}
+		}
+	}
 
-  openDropdown() {
-    this.dropdownState.open();
-  }
+	onLeftArrowDown() {
+		if (this.dropdownState.parent) {
+			this.dropdownState.parent.currentItem.focus();
+			this.dropdownState.close();
+		} else {
+			if (this.menuService) {
+				this.menuService.focusPrevious();
+			}
+		}
+	}
 
-  closeDropdown() {
-    this.dropdownState.close();
-  }
+	openDropdown() {
+		this.dropdownState.open();
+	}
 
-  setIndex(index: number) {
-    if (this._index !== undefined) {
-      return;
-    }
+	closeDropdown() {
+		this.dropdownState.close();
+	}
 
-    this._index = index;
-  }
+	setIndex(index: number) {
+		if (this._index !== undefined) {
+			return;
+		}
 
-  private handleKeyboardShortcuts(event: KeyboardEvent) {
-    switch (event.key) {
-    case 'Tab':
-      event.preventDefault();
-      break;
-    case 'ArrowDown':
-      this.focusNext();
-      break;
-    case 'ArrowUp':
-      this.focusPrevious();
-      break;
-    case 'ArrowRight':
-      this.onRightArrowDown();
-      break;
-    case 'ArrowLeft':
-      this.onLeftArrowDown();
-      break;
-    case 'Escape':
-      this.dropdownState.closeAndFocusFirst();
-      break;
-    default:
-      break;
-    }
-  }
+		this._index = index;
+	}
+
+	private handleKeyboardShortcuts(event: KeyboardEvent) {
+		switch (event.key) {
+			case 'Tab':
+				event.preventDefault();
+				break;
+			case 'ArrowDown':
+				this.focusNext();
+				break;
+			case 'ArrowUp':
+				this.focusPrevious();
+				break;
+			case 'ArrowRight':
+				this.onRightArrowDown();
+				break;
+			case 'ArrowLeft':
+				this.onLeftArrowDown();
+				break;
+			case 'Escape':
+				this.dropdownState.closeAndFocusFirst();
+				break;
+			default:
+				break;
+		}
+	}
 }

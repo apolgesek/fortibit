@@ -7,48 +7,45 @@ import { HistoryEntry } from '@shared-renderer/history-entry.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export type EntryHistoryDialogDataPayload = {
-  id: number;
-}
+	id: number;
+};
 
 @Component({
-  selector: 'app-entry-history-dialog',
-  templateUrl: './entry-history-dialog.component.html',
-  styleUrls: ['./entry-history-dialog.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    ModalComponent
-  ]
+	selector: 'app-entry-history-dialog',
+	templateUrl: './entry-history-dialog.component.html',
+	styleUrls: ['./entry-history-dialog.component.scss'],
+	standalone: true,
+	imports: [CommonModule, ModalComponent],
 })
 export class EntryHistoryDialogComponent implements IModal, OnInit {
-  public readonly ref: ComponentRef<EntryHistoryDialogComponent>;
-  public readonly additionalData?: IAdditionalData<EntryHistoryDialogDataPayload>;
-  public history: HistoryEntry[];
+	public readonly ref: ComponentRef<EntryHistoryDialogComponent>;
+	public readonly additionalData?: IAdditionalData<EntryHistoryDialogDataPayload>;
+	public history: HistoryEntry[];
 
-  constructor(
-    private readonly destroyRef: DestroyRef,
-    private readonly entryManager: EntryManager,
-    private readonly modalService: ModalService,
-    private readonly modalRef: ModalRef
-  ) {}
+	constructor(
+		private readonly destroyRef: DestroyRef,
+		private readonly entryManager: EntryManager,
+		private readonly modalService: ModalService,
+		private readonly modalRef: ModalRef,
+	) {}
 
-  close() {
-    this.modalRef.close();
-  }
+	close() {
+		this.modalRef.close();
+	}
 
-  ngOnInit(): void {
-    this.history = this.entryManager.entryHistory;
-  }
+	ngOnInit(): void {
+		this.history = this.entryManager.entryHistory;
+	}
 
-  async openEntry(entry: HistoryEntry) {
-    const modalRef = await this.modalService.openHistoryEntryWindow(entry);
+	async openEntry(entry: HistoryEntry) {
+		const modalRef = await this.modalService.openHistoryEntryWindow(entry);
 
-    modalRef.onClose.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.getEntryHistory();
-    });
-  }
+		modalRef.onClose.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+			this.getEntryHistory();
+		});
+	}
 
-  private async getEntryHistory(): Promise<void> {
-    this.history = [...this.entryManager.entryHistory];
-  }
+	private async getEntryHistory(): Promise<void> {
+		this.history = [...this.entryManager.entryHistory];
+	}
 }

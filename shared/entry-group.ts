@@ -1,5 +1,5 @@
 export type EntryGroup = {
-  name: string;
-  id?: number;
-  isImported?: boolean;
-}
+	name: string;
+	id?: number;
+	isImported?: boolean;
+};
