@@ -95,8 +95,9 @@
 		<div class="section">
 			<div class="subsection">
 				<p class="label">Autotype</p>
-				<p>
-					<span class="subtype">Full:</span> {{ config.autocompleteShortcut }}
+				<div>
+					<span class="subtype">Full:</span>
+					<app-pretty-shortcut [shortcut]="config.autocompleteShortcut" />
 					<span *ngIf="!config.autoTypeEnabled" class="validation-error"
 						>(disabled)</span
 					>
@@ -104,21 +105,21 @@
 						name="info"
 						(click)="openAutotypeInformation()"
 					></i-feather>
-				</p>
-				<p>
+				</div>
+				<div>
 					<span class="subtype">Username:</span>
-					{{ config.autocompleteUsernameOnlyShortcut }}
+					<app-pretty-shortcut [shortcut]="config.autocompleteUsernameOnlyShortcut" />
 					<span *ngIf="!config.autoTypeEnabled" class="validation-error"
 						>(disabled)</span
 					>
-				</p>
-				<p>
+				</div>
+				<div>
 					<span class="subtype">Password:</span>
-					{{ config.autocompletePasswordOnlyShortcut }}
+					<app-pretty-shortcut [shortcut]="config.autocompletePasswordOnlyShortcut" />
 					<span *ngIf="!config.autoTypeEnabled" class="validation-error"
 						>(disabled)</span
 					>
-				</p>
+				</div>
 			</div>
 		</div>
 	</div>

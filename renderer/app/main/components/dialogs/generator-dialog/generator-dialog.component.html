@@ -12,11 +12,10 @@
 	</div>
 	<div class="dialog-message">
 		<div class="password-container">
-			<div
+			<app-pretty-password
+				[value]="password"
 				class="password"
-				data-testid="password"
-				[innerHTML]="password | prettyPassword"
-			></div>
+				data-testid="password" />
 			<button
 				type="button"
 				style="margin-right: 0.5rem"

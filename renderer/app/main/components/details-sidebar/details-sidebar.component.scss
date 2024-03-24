@@ -113,6 +113,12 @@
 .subsection {
 	flex: 1;
 	margin: 0;
+
+	div {
+		display: flex;
+		align-items: center;
+		margin-bottom: 0.5rem !important;
+	}
 }
 
 .small {

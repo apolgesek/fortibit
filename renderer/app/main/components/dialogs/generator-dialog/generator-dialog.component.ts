@@ -12,8 +12,8 @@ import { ClipboardService, ModalRef } from '@app/core/services';
 import { IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { ValueSliderComponent } from '@app/shared/components/value-slider/value-slider.component';
+import { PrettyPasswordComponent } from '@app/shared/components/pretty-password/pretty-password.component';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
-import { PrettyPasswordPipe } from '@app/shared/pipes/pretty-password.pipe';
 import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
@@ -28,8 +28,8 @@ import { debounceTime } from 'rxjs';
 		FeatherModule,
 		ModalComponent,
 		ValueSliderComponent,
-		PrettyPasswordPipe,
 		TooltipDirective,
+		PrettyPasswordComponent
 	],
 	templateUrl: './generator-dialog.component.html',
 	styleUrls: ['./generator-dialog.component.scss'],

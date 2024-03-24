@@ -4,8 +4,7 @@ import {
 	DestroyRef,
 	Inject,
 	OnInit,
-	Type,
-	ViewEncapsulation,
+	Type
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GroupId } from '@app/core/enums';
@@ -18,12 +17,12 @@ import {
 	WorkspaceService,
 } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
+import { PrettyShortcutComponent } from '@app/shared/components/pretty-shortcut/pretty-shortcut.component';
 import { SidebarHandleComponent } from '@app/shared/components/sidebar-handle/sidebar-handle.component';
 import { TooltipComponent } from '@app/shared/components/tooltip/tooltip.component';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { IsPasswordPipe } from '@app/shared/pipes/is-password.pipe';
 import { LinkPipe } from '@app/shared/pipes/link.pipe';
-import { TimeRemainingPipe } from '@app/shared/pipes/time-remaining.pipe';
 import { Configuration } from '@config/configuration';
 import { Entry, EntryGroup, IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
@@ -43,8 +42,8 @@ import { PasswordEntryDetailsComponent } from './password-entry-details/password
 		TooltipDirective,
 		TooltipComponent,
 		LinkPipe,
-		TimeRemainingPipe,
 		IsPasswordPipe,
+		PrettyShortcutComponent
 	],
 })
 export class DetailsSidebarComponent implements OnInit {

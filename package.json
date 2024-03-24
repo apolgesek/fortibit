@@ -85,7 +85,7 @@
 		"@types/node": "20.2.5",
 		"@types/zxcvbn": "4.4.1",
 		"conventional-changelog-cli": "2.1.1",
-		"electron": "26.6.3",
+		"electron": "27.3.5",
 		"electron-builder": "23.6.0",
 		"electron-reloader": "1.2.3",
 		"eslint": "8.42.0",

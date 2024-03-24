@@ -1,0 +1,40 @@
+@import 'themes/base-variables';
+
+.pretty-digit {
+	color: $barberry;
+}
+
+.pretty-special-char {
+	color: $blue-200;
+}
+
+.pretty-key {
+	position: relative;
+	background: $grey-600;
+	padding: calc(4px / var(--device-pixel-ratio));
+	font-size: 0.625rem;
+	margin: 0 0.25rem;
+	color: white;
+	border-radius: 0.25rem;
+	min-width: 20px;
+	text-align: center;
+	display: inline-block;
+	z-index: -2;
+	overflow: hidden;
+
+	&::after {
+		position: absolute;
+		left: 0;
+		margin: auto;
+		right: 0;
+		top: calc(1px / var(--device-pixel-ratio));
+		content: '';
+		width: 104%;
+		height: 84%;
+		border-radius: 6px;
+		background-color: $grey-600;
+		box-shadow: 0 4px 2px -3px darken($grey-600, 12);
+		z-index: -1;
+	}
+}
+
