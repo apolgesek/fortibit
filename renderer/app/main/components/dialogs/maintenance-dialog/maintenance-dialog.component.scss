@@ -7,10 +7,6 @@
 	padding-right: 1.5rem;
 }
 
-.label {
-	margin-right: 2rem;
-}
-
 .inputgroup .number {
 	width: 2.5rem;
 }
@@ -28,6 +24,10 @@
 	input {
 		padding: 0.25rem;
 		background-color: var(--input-modal-bg);
+
+		&.number {
+			margin-left: 1rem;
+		}
 	}
 }
 
@@ -63,4 +63,19 @@
 	&.success {
 		color: $jungle-green;
 	}
+}
+
+.dialog-message {
+	position: relative;
+}
+
+.overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: var(--modal-bg);
+	opacity: 0.4;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
 }

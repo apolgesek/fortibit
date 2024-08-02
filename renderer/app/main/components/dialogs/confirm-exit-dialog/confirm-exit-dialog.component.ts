@@ -1,9 +1,7 @@
 import { Component, ComponentRef, inject } from '@angular/core';
 import { WorkspaceService, ModalRef } from '@app/core/services';
-import { MessageBroker } from 'injection-tokens';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { IpcChannel } from '@shared-renderer/index';
 
 @Component({
 	selector: 'app-confirm-exit-dialog',
@@ -21,7 +19,7 @@ export class ConfirmExitDialogComponent implements IModal {
 
 	async saveChanges() {
 		const result = await this.workspaceService.saveDatabase();
-		
+
 		setTimeout(() => {
 			this.executeTask();
 		}, 500);

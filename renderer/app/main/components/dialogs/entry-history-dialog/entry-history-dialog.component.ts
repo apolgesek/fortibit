@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, DestroyRef, OnInit } from '@angular/core';
+import { Component, ComponentRef, DestroyRef, OnInit, inject } from '@angular/core';
 import { EntryManager, ModalRef, ModalService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
@@ -22,12 +22,10 @@ export class EntryHistoryDialogComponent implements IModal, OnInit {
 	public readonly additionalData?: IAdditionalData<EntryHistoryDialogDataPayload>;
 	public history: HistoryEntry[];
 
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		private readonly entryManager: EntryManager,
-		private readonly modalService: ModalService,
-		private readonly modalRef: ModalRef,
-	) {}
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly entryManager = inject(EntryManager);
+	private readonly modalService = inject(ModalService);
+	private readonly modalRef = inject(ModalRef);
 
 	close() {
 		this.modalRef.close();

@@ -9,4 +9,5 @@ export type Configuration = Product & {
 	chromiumVersion?: string;
 	os?: string;
 	e2eFilesPath: string;
+	organizationName: string | null;
 };

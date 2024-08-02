@@ -20,7 +20,7 @@ test.describe('Hotkeys after auth', async () => {
 
 	test.beforeEach(async () => {
 		setupTestFiles();
-		
+
 		app = await electron.launch({
 			args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
 			colorScheme: 'dark',

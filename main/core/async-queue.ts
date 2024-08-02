@@ -25,8 +25,6 @@ export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 
 	async process() {
 		if (!this.queue.length) {
-			console.log('Queue is empty. Waiting...');
-
 			await sleep(this.intervalSeconds * 1000);
 			this.process();
 
@@ -53,6 +51,7 @@ export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 								...batch[j],
 								[attempts]: batch[j][attempts as unknown as string] + 1,
 							};
+							
 							if (batch[j][attempts as unknown as string] < this.maxRetries) {
 								this.add({ ...batch[j], [toRetry]: true });
 							}

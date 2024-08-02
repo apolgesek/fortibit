@@ -8,6 +8,7 @@ import {
 	ElementRef,
 	OnInit,
 	ViewChild,
+	inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -39,24 +40,22 @@ import {
 })
 export class MoveEntryDialogComponent implements IModal, OnInit, AfterViewInit {
 	@ViewChild('searchPhrase') public searchText: ElementRef;
-	public readonly ref: ComponentRef<unknown>;
-	public readonly additionalData?: IAdditionalData;
 	public groups$: Observable<EntryGroup[]>;
 
+	public readonly ref: ComponentRef<unknown>;
+	public readonly additionalData?: IAdditionalData;
 	private readonly searchPhrase: BehaviorSubject<string> = new BehaviorSubject(
 		'',
 	);
 
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		private readonly modalRef: ModalRef,
-		private readonly groupManager: GroupManager,
-		private readonly entryManager: EntryManager,
-		private readonly notificationService: NotificationService,
-	) {}
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly modalRef = inject(ModalRef);
+	private readonly groupManager = inject(GroupManager);
+	private readonly entryManager = inject(EntryManager);
+	private readonly notificationService = inject(NotificationService);
 
 	get selectedPasswordsLength(): number {
-		return this.entryManager.selectedPasswords.length;
+		return this.entryManager.selectedEntries.length;
 	}
 
 	close() {
@@ -104,7 +103,7 @@ export class MoveEntryDialogComponent implements IModal, OnInit, AfterViewInit {
 
 	async moveTo(group: EntryGroup): Promise<void> {
 		this.entryManager.movedEntries = [
-			...this.entryManager.selectedPasswords.map((x) => x.id),
+			...this.entryManager.selectedEntries.map((x) => x.id),
 		];
 		const movedEntriesCount = this.entryManager.movedEntries.length;
 		await this.entryManager.moveEntry(group.id);

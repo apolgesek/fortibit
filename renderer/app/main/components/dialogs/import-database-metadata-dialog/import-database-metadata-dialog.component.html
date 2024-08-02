@@ -18,15 +18,16 @@
 	</div>
 	<div class="footer-container">
 		<button type="button" class="secondary-btn" (click)="close()">Close</button>
-		<button
-			*ngIf="additionalData.payload.size > 0"
-			type="button"
-			#autofocus
-			class="primary-btn"
-			[disabled]="isConfirmButtonLocked"
-			(click)="confirm()"
-		>
-			Confirm
-		</button>
+		@if (additionalData.payload.size > 0) {
+			<button
+				type="button"
+				#autofocus
+				class="primary-btn"
+				[disabled]="isConfirmButtonLocked"
+				(click)="confirm()"
+			>
+				Confirm
+			</button>
+		}
 	</div>
 </app-modal>

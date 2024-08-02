@@ -6,9 +6,9 @@ import {
 	ElementRef,
 	EmbeddedViewRef,
 	HostListener,
-	Inject,
 	Input,
 	Renderer2,
+	inject,
 } from '@angular/core';
 import { TooltipComponent } from '../components/tooltip/tooltip.component';
 import { DOCUMENT } from '@angular/common';
@@ -27,13 +27,11 @@ export class TooltipDirective {
 	private mouseEntered = false;
 	private observer: MutationObserver;
 
-	constructor(
-		private readonly appViewContainer: AppViewContainer,
-		private readonly elRef: ElementRef,
-		private readonly renderer: Renderer2,
-		private readonly appRef: ApplicationRef,
-		@Inject(DOCUMENT) private readonly document: Document,
-	) {}
+	private readonly appViewContainer = inject(AppViewContainer);
+	private readonly elRef = inject(ElementRef);
+	private readonly renderer = inject(Renderer2);
+	private readonly appRef = inject(ApplicationRef);
+	private readonly document = inject(DOCUMENT);
 
 	@HostListener('focusin', ['$event'])
 	@HostListener('mouseenter', ['$event'])

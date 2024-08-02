@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener } from '@angular/core';
+import { Directive, ElementRef, HostListener, inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 enum Key {
@@ -22,6 +22,7 @@ enum Key {
 })
 export class HotkeyBinderDirective implements ControlValueAccessor {
 	private static readonly keySeparator = '+';
+	private readonly el = inject(ElementRef);
 	private readonly ignoredKeys: string[] = ['Tab'];
 	private readonly noModifierKey = (e: KeyboardEvent) =>
 		!(e.ctrlKey || e.altKey || e.shiftKey || e.metaKey);
@@ -99,8 +100,6 @@ export class HotkeyBinderDirective implements ControlValueAccessor {
 	private get inputElement(): HTMLInputElement {
 		return this.el.nativeElement;
 	}
-
-	constructor(private readonly el: ElementRef) {}
 
 	writeValue(value: string): void {
 		if (!value?.length) {

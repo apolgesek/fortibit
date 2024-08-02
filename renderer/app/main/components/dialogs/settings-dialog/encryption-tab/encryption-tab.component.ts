@@ -1,22 +1,16 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfigService } from '@app/core/services';
 import { isControlInvalid } from '@app/utils';
 import { Product } from '@config/product';
-import {
-	Subject,
-	debounceTime,
-	distinctUntilChanged,
-	takeUntil,
-} from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 @Component({
 	selector: 'app-encryption-tab',
 	templateUrl: './encryption-tab.component.html',
 	styleUrls: ['./encryption-tab.component.scss'],
 	standalone: true,
-	imports: [CommonModule, ReactiveFormsModule],
+	imports: [ReactiveFormsModule],
 })
 export class EncryptionTabComponent implements OnInit, OnDestroy {
 	public readonly isControlInvalid = isControlInvalid;

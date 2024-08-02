@@ -1,17 +1,11 @@
-import { CommonModule } from '@angular/common';
-import {
-	Component,
-	inject,
-} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { GroupManager, WorkspaceService } from '@app/core/services';
 import { ShowPasswordIconComponent } from '@app/shared/components/show-password-icon/show-password-icon.component';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
-import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
-import { MessageBroker } from 'injection-tokens';
 
 @Component({
 	selector: 'app-master-password-setup',
@@ -19,11 +13,10 @@ import { MessageBroker } from 'injection-tokens';
 	styleUrls: ['./master-password-setup.component.scss'],
 	standalone: true,
 	imports: [
-		CommonModule,
 		ReactiveFormsModule,
 		FeatherModule,
 		ShowPasswordIconComponent,
-		RouterLink
+		RouterLink,
 	],
 })
 export class MasterPasswordSetupComponent {
@@ -31,7 +24,7 @@ export class MasterPasswordSetupComponent {
 	public readonly isControlInvalid = isControlInvalid;
 
 	private readonly fb = inject(FormBuilder);
-	private readonly messageBroker = inject(MessageBroker);
+	private readonly workspaceService = inject(WorkspaceService);
 	private readonly groupManager = inject(GroupManager);
 	private readonly _masterPasswordForm = this.fb.group(
 		{
@@ -51,16 +44,12 @@ export class MasterPasswordSetupComponent {
 		return this._masterPasswordForm;
 	}
 
-	constructor(private readonly workspaceService: WorkspaceService) {}
-
 	async saveNewDatabase() {
 		markAllAsDirty(this.masterPasswordForm);
 
 		if (this.masterPasswordForm.invalid) {
 			return;
 		}
-
-		// await this.messageBroker.ipcRenderer.invoke(IpcChannel.CreateNew);
 
 		const result = await this.workspaceService.saveNewDatabase(
 			this.masterPasswordForm.controls.newPassword?.value,

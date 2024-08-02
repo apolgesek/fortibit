@@ -1,5 +1,4 @@
-import { Inject, Pipe, PipeTransform } from '@angular/core';
-import { IMessageBroker } from '@app/core/models';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { MessageBroker } from 'injection-tokens';
 
 @Pipe({
@@ -7,9 +6,7 @@ import { MessageBroker } from 'injection-tokens';
 	standalone: true,
 })
 export class FileNamePipe implements PipeTransform {
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-	) {}
+	private readonly messageBroker = inject(MessageBroker);
 
 	transform(path: string): string {
 		return path

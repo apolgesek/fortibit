@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
 	AfterViewInit,
 	ChangeDetectionStrategy,
@@ -19,7 +18,7 @@ import { fromEvent } from 'rxjs';
 	templateUrl: './value-slider.component.html',
 	styleUrls: ['./value-slider.component.scss'],
 	standalone: true,
-	imports: [CommonModule],
+	imports: [],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [
 		{

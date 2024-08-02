@@ -6,7 +6,6 @@ import {
 	distinctUntilChanged,
 	map,
 	Observable,
-	Subject,
 	tap,
 } from 'rxjs';
 import { Sort } from '../enums';
@@ -36,9 +35,8 @@ interface ISearchService {
 	providedIn: 'root',
 })
 export class SearchService implements ISearchService {
-	public searchInputSource: Subject<string> = new Subject();
+	public searchInputSource: BehaviorSubject<string> = new BehaviorSubject<string>('');
 	public searchPhrase$: Observable<string>;
-	public searchPhraseValue = '';
 	public sortProp: SortableEntryProp = 'creationDate';
 	public sortOrder: Sort = Sort.Desc;
 	public isSearching = false;
@@ -46,6 +44,7 @@ export class SearchService implements ISearchService {
 	private searchPhraseSource: BehaviorSubject<string> =
 		new BehaviorSubject<string>('');
 	private _isGlobalSearchMode = false;
+	private _searchPhraseSnapshot = '';
 
 	constructor() {
 		this.searchPhrase$ = this.searchPhraseSource.asObservable();
@@ -54,19 +53,23 @@ export class SearchService implements ISearchService {
 		this.searchInputSource
 			.pipe(
 				map((x) => x.trim()),
-				tap((value) => {
-					this.searchPhraseValue = value;
+				tap(() => {
 					this.isSearching = true;
 				}),
 				distinctUntilChanged(),
 				debounceTime(500),
 				tap((value) => {
-					this.updateSearchResults();
 					this.wasSearched = value.length > 0;
 					this.isSearching = false;
+					this._searchPhraseSnapshot = value;
+					this.updateSearchResults(value);
 				}),
 			)
 			.subscribe();
+	}
+
+	get searchPhraseSnapshot(): string {
+		return this._searchPhraseSnapshot;
 	}
 
 	get isGlobalSearchMode(): boolean {
@@ -79,7 +82,10 @@ export class SearchService implements ISearchService {
 
 	public reset() {
 		this.isGlobalSearchMode = false;
-		this.searchPhraseValue = '';
+		// UI must be updated instantly
+		this._searchPhraseSnapshot = '';
+
+		this.searchInputSource.next('');
 		this.updateSearchResults();
 	}
 
@@ -174,7 +180,7 @@ export class SearchService implements ISearchService {
 		}
 	}
 
-	private updateSearchResults() {
-		this.searchPhraseSource.next(this.searchPhraseValue);
+	private updateSearchResults(value?: string) {
+		this.searchPhraseSource.next(value ?? this.searchInputSource.value);
 	}
 }

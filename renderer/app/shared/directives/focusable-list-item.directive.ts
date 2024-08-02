@@ -4,6 +4,7 @@ import {
 	HostBinding,
 	HostListener,
 	Input,
+	inject,
 } from '@angular/core';
 import { ListStateService } from '../services/list-state.service';
 
@@ -15,10 +16,8 @@ export class FocusableListItemDirective {
 	@HostBinding('attr.role') public readonly role = 'listitem';
 	@Input('appFocusableListItem') public item: any;
 
-	constructor(
-		private readonly listStateService: ListStateService,
-		private readonly elementRef: ElementRef,
-	) {}
+	private readonly listStateService = inject(ListStateService);
+	private readonly elementRef = inject(ElementRef);
 
 	public get elRef(): ElementRef {
 		return this.elementRef;

@@ -1,6 +1,6 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
 import { GroupId } from '@app/core/enums';
 import {
 	WorkspaceService,
@@ -17,10 +17,9 @@ import { FocusableListItemDirective } from '@app/shared/directives/focusable-lis
 import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { SidebarHandleComponent } from '@app/shared/components/sidebar-handle/sidebar-handle.component';
-import { EntryGroup, PasswordEntry } from '../../../../../shared/index';
+import { EntryGroup } from '../../../../../shared/index';
 import { FeatherModule } from 'angular-feather';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
-import { IHotkeyHandler } from '@app/core/models';
 import { HotkeyHandler } from 'injection-tokens';
 
 @Component({
@@ -29,8 +28,6 @@ import { HotkeyHandler } from 'injection-tokens';
 	styleUrls: ['./groups-sidebar.component.scss'],
 	standalone: true,
 	imports: [
-		NgIf,
-		NgFor,
 		NgClass,
 		ScrollingModule,
 		FeatherModule,
@@ -64,15 +61,13 @@ export class GroupsSidebarComponent implements OnInit {
 	public treeRootElement: HTMLElement | undefined;
 	public addGroupLabel = '';
 
-	constructor(
-		private readonly workspaceService: WorkspaceService,
-		private readonly entryManager: EntryManager,
-		private readonly groupManager: GroupManager,
-		private readonly searchService: SearchService,
-		private readonly contextMenuBuilderService: ContextMenuBuilderService,
-		private readonly modalService: ModalService,
-		@Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler,
-	) {}
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly entryManager = inject(EntryManager);
+	private readonly groupManager = inject(GroupManager);
+	private readonly searchService = inject(SearchService);
+	private readonly contextMenuBuilderService = inject(ContextMenuBuilderService);
+	private readonly modalService = inject(ModalService);
+	private readonly hotkeyHandler = inject(HotkeyHandler);
 
 	get selectedGroup(): number {
 		return this.groupManager.selectedGroup;
@@ -84,10 +79,6 @@ export class GroupsSidebarComponent implements OnInit {
 
 	get groups(): EntryGroup[] {
 		return this.groupManager.groups;
-	}
-
-	get selectedGroupName(): string {
-		return this.groupManager.selectedGroupName;
 	}
 
 	ngOnInit() {

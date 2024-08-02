@@ -11,12 +11,9 @@
 				(input)="onNumberChange($event, 'passwordLength', 2)"
 			/>
 		</div>
-		<div
-			*ngIf="isControlInvalid(encryptionForm.get('passwordLength'))"
-			class="validation-error"
-		>
-			Length must be between 6 and 32.
-		</div>
+		@if (isControlInvalid(encryptionForm.get('passwordLength'))) {
+			<div class="validation-error">Length must be between 6 and 32.</div>
+		}
 		<div class="inputgroup checkbox">
 			<label class="label" for="uppercase">Uppercase letters:</label>
 			<label class="switch">

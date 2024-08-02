@@ -10,10 +10,9 @@ import {
 	EventEmitter,
 	HostBinding,
 	Input,
-	Optional,
 	Output,
 	QueryList,
-	SkipSelf,
+	inject,
 } from '@angular/core';
 import {
 	animationFrameScheduler,
@@ -47,15 +46,11 @@ export class DropdownDirective implements AfterViewInit {
 	private dropdownClosed: Subject<void> = new Subject();
 	private _index: number;
 
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		private readonly el: ElementRef,
-		private readonly dropdownState: DropdownStateService,
-		@SkipSelf()
-		@Optional()
-		private readonly parentDropdownState: DropdownStateService,
-		@Optional() private readonly menuService: MenuService,
-	) {}
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly element = inject(ElementRef);
+	private readonly dropdownState = inject(DropdownStateService);
+	private readonly parentDropdownState = inject(DropdownStateService, { optional: true, skipSelf: true });
+	private readonly menuService = inject(MenuService, { optional: true });
 
 	@HostBinding('class.open')
 	public get isOpen(): boolean {
@@ -132,7 +127,7 @@ export class DropdownDirective implements AfterViewInit {
 	enableKeyboardNavigation(): void {
 		this.dropdownClosed = new Subject();
 
-		fromEvent(this.el.nativeElement, 'keydown')
+		fromEvent(this.element.nativeElement, 'keydown')
 			.pipe(takeUntil(this.dropdownClosed))
 			.subscribe((event: KeyboardEvent) => {
 				event.stopPropagation();

@@ -1,5 +1,4 @@
-import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
 import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { LinkPipe } from '@app/shared/pipes/link.pipe';
@@ -11,16 +10,19 @@ import {
 import { MessageBroker } from 'injection-tokens';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Configuration } from '@config/configuration';
+import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
+import { CommonModule } from '@angular/common';
 
 @Component({
 	selector: 'app-password-entry-details',
-	standalone: true,
-	imports: [CommonModule, FeatherModule, LinkPipe],
 	templateUrl: './password-entry-details.component.html',
 	styleUrls: ['./password-entry-details.component.scss'],
+	standalone: true,
+	imports: [FeatherModule, LinkPipe, TooltipDirective, CommonModule],
+	changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PasswordEntryDetailsComponent implements OnInit {
-	@Input() public readonly entry: PasswordEntry;
+	@Input({ required: true }) public readonly entry: PasswordEntry;
 
 	private readonly configService = inject(ConfigService);
 	private readonly modalService = inject(ModalService);
@@ -34,6 +36,10 @@ export class PasswordEntryDetailsComponent implements OnInit {
 		return (
 			this.entry.type === 'password' && !this.entry?.url?.startsWith('https://')
 		);
+	}
+
+	get isSecureProtocolAvailable(): boolean {
+		return Boolean(this.entry.isSecureProtocolAvailable);
 	}
 
 	ngOnInit(): void {

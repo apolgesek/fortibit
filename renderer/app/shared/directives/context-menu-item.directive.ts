@@ -6,10 +6,10 @@ import {
 	Directive,
 	EmbeddedViewRef,
 	HostListener,
-	Inject,
 	Input,
 	OnInit,
 	Renderer2,
+	inject,
 } from '@angular/core';
 import { AppViewContainer } from '@app/core/services';
 import { fromEvent, race } from 'rxjs';
@@ -27,14 +27,12 @@ export class ContextMenuItemDirective implements OnInit {
 	@Input('appContextMenuItem') model!: MenuItem[];
 	private componentRef!: ComponentRef<ContextMenuComponent>;
 
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		private readonly appRef: ApplicationRef,
-		private readonly renderer: Renderer2,
-		private readonly appViewContainer: AppViewContainer,
-		private readonly router: Router,
-		@Inject(DOCUMENT) private readonly document: Document,
-	) {}
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly appRef = inject(ApplicationRef);
+	private readonly renderer = inject(Renderer2);
+	private readonly appViewContainer = inject(AppViewContainer);
+	private readonly router = inject(Router);
+	private readonly document = inject(DOCUMENT);
 
 	@HostListener('contextmenu', ['$event'])
 	onContextMenu(event: Event) {

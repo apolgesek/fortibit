@@ -4,9 +4,6 @@
 	</div>
 </div>
 
-<div
-	*ngIf="showBackdrop"
-	#backdrop
-	data-prevent-entry-deselect
-	class="modal-backdrop"
-></div>
+@if (showBackdrop) {
+	<div #backdrop data-prevent-entry-deselect class="modal-backdrop"></div>
+}

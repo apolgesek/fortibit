@@ -5,6 +5,7 @@ import {
 	Directive,
 	HostBinding,
 	QueryList,
+	inject,
 } from '@angular/core';
 import { MenuService } from '../services/menu.service';
 import { DropdownDirective } from './dropdown.directive';
@@ -19,10 +20,8 @@ export class MenuDirective implements AfterViewInit {
 	@HostBinding('attr.role') public readonly role = 'menubar';
 	@ContentChildren(DropdownDirective) items: QueryList<DropdownDirective>;
 
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		private readonly menuService: MenuService,
-	) {}
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly menuService = inject(MenuService);
 
 	ngAfterViewInit() {
 		this.menuService.items = this.items.toArray();

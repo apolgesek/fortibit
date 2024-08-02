@@ -1,5 +1,13 @@
+/* before running this script for the first time run "npm config edit" command and check
+	"msvs_version" and "python" directory configs
+	
+	use --verbose argument to get detailed logs including errors
+*/
+
 const { spawn } = require('child_process');
 const { resolve } = require('path');
+
+var argv = require('minimist')(process.argv.slice(2));
 
 (function () {
 	const nativeDir = __dirname + '/../main/services/native/win32/';
@@ -12,21 +20,33 @@ const { resolve } = require('path');
 			{
 				cwd: resolve(nativeDir + m),
 				shell: true,
-				stdio: ['ignore', 'pipe', 'ignore'],
+				stdio: ['ignore', 'pipe', 'pipe'],
 			},
 		);
 
-		let output = '';
+		let infoOutput = '';
+		let errorOutput = '';
+
 		process.stdout.on('data', (data) => {
-			output += data.toString();
+			infoOutput += data.toString();
 		});
+
+		if (argv.verbose) {
+			process.stderr.on('data', (data) => {
+				errorOutput += data.toString();
+			});
+		}
 
 		process.on('error', function (error) {
 			console.error(error);
 		});
 
 		process.on('exit', () => {
-			console.log(output);
+			if (errorOutput) {
+				console.error('\x1b[31m', errorOutput ,'\x1b[0m');
+			}
+
+			console.log(infoOutput);
 		});
 	});
 })();

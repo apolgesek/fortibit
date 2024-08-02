@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, Inject, inject } from '@angular/core';
+import { Component, ComponentRef, inject } from '@angular/core';
 import {
 	AbstractControl,
 	FormBuilder,
@@ -8,7 +7,6 @@ import {
 	ValidatorFn,
 	Validators,
 } from '@angular/forms';
-import { IMessageBroker } from '@app/core/models';
 import { ModalRef, ModalService, WorkspaceService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
@@ -17,19 +15,14 @@ import { valueMatchValidator } from '@app/shared/validators/value-match.validato
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { Observable, delay, from, map, tap } from 'rxjs';
+import { Observable, delay, from, map, switchMap, tap, timer } from 'rxjs';
 
 @Component({
 	selector: 'app-password-change-dialog',
 	templateUrl: './password-change-dialog.component.html',
 	styleUrls: ['./password-change-dialog.component.scss'],
 	standalone: true,
-	imports: [
-		CommonModule,
-		ReactiveFormsModule,
-		ModalComponent,
-		ShowPasswordIconComponent,
-	],
+	imports: [ReactiveFormsModule, ModalComponent, ShowPasswordIconComponent],
 })
 export class PasswordChangeDialogComponent implements IModal {
 	public readonly isControlInvalid = isControlInvalid;
@@ -39,6 +32,11 @@ export class PasswordChangeDialogComponent implements IModal {
 	showBackdrop?: boolean;
 
 	private readonly fb = inject(FormBuilder);
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly modalService = inject(ModalService);
+	private readonly modalRef = inject(ModalRef);
+
 	private readonly _passwordForm = this.fb.group({
 		currentPassword: [
 			'',
@@ -69,13 +67,6 @@ export class PasswordChangeDialogComponent implements IModal {
 		return this._passwordForm;
 	}
 
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly workspaceService: WorkspaceService,
-		private readonly modalService: ModalService,
-		private readonly modalRef: ModalRef,
-	) {}
-
 	get passwordsGroup() {
 		return this.passwordForm.controls.newPassword;
 	}
@@ -105,15 +96,17 @@ export class PasswordChangeDialogComponent implements IModal {
 	private passwordValidator(): ValidatorFn {
 		return (control: AbstractControl): Observable<ValidationErrors | null> => {
 			const password = control.value;
+			control.markAsPristine();
 
-			return from(
-				this.messageBroker.ipcRenderer.invoke(
-					IpcChannel.ValidatePassword,
-					password,
-				),
-			).pipe(
-				tap(() => control.markAsPristine()),
-				delay(300),
+			return timer(300).pipe(
+				switchMap(() => {
+					return from(
+						this.messageBroker.ipcRenderer.invoke(
+							IpcChannel.ValidatePassword,
+							password,
+						),
+					);
+				}),
 				tap(() => control.markAsDirty()),
 				map((x) => (x ? null : { incorrectPassword: true })),
 			);

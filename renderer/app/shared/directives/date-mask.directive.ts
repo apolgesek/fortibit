@@ -3,6 +3,7 @@ import {
 	ElementRef,
 	forwardRef,
 	HostListener,
+	inject,
 	Input,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -32,7 +33,8 @@ export class DateMaskDirective implements ControlValueAccessor {
 		'End',
 		'Tab',
 	];
-	constructor(private readonly el: ElementRef) {}
+
+	private readonly el = inject(ElementRef);
 
 	private get separatorIndexes(): number[] {
 		return this.getAllIndexes(this.mask, this.separator);

@@ -1,14 +1,16 @@
-import { Inject, Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { UpdateState } from '@shared-renderer/index';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { MessageBroker } from 'injection-tokens';
-import { IMessageBroker } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
 	private _progress: string;
 	private _state: UpdateState;
 	private _version: string;
+
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly zone = inject(NgZone);
 
 	get progress(): string {
 		return this._progress;
@@ -34,11 +36,6 @@ export class UpdateService {
 			this._progress = progress;
 		});
 	};
-
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly zone: NgZone,
-	) {}
 
 	initialize() {
 		this.messageBroker.ipcRenderer.on(

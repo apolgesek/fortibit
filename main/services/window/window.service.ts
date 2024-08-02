@@ -24,6 +24,7 @@ import { INativeApiService } from '../native';
 import { IPerformanceService } from '../performance/performance-service.model';
 import { IWindowService } from './';
 import { IWindow } from './window-model';
+import { appendFileSync, writeFileSync } from 'fs';
 
 const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
 const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
@@ -49,7 +50,9 @@ export class WindowService implements IWindowService {
 	}
 
 	get vaultWindows(): IWindow[] {
-		return this.windows.filter((x) => x.browserWindow.id !== this.getWindow(1).id);
+		return this.windows.filter(
+			(x) => x.browserWindow.id !== this.getWindow(1).id,
+		);
 	}
 
 	constructor(
@@ -206,7 +209,7 @@ export class WindowService implements IWindowService {
 			async (event: IpcMainEvent, options: MessageBoxOptions) => {
 				return await dialog.showMessageBox(
 					this.getWindowByWebContentsId(event.sender.id).browserWindow,
-					options
+					options,
 				);
 			},
 		);
@@ -325,7 +328,7 @@ export class WindowService implements IWindowService {
 	}
 
 	setIdleTimer() {
-		if (this._idleTimer) {
+		if (this._idleTimer || this._isTestMode) {
 			return;
 		}
 

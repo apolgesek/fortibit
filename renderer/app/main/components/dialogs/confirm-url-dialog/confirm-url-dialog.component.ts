@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, ComponentRef, inject } from '@angular/core';
 import { ConfigService, ModalRef } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -9,7 +8,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 	templateUrl: './confirm-url-dialog.component.html',
 	styleUrls: ['./confirm-url-dialog.component.scss'],
 	standalone: true,
-	imports: [CommonModule, ModalComponent],
+	imports: [ModalComponent],
 })
 export class ConfirmUrlDialogComponent implements IModal {
 	public readonly ref!: ComponentRef<ConfirmUrlDialogComponent>;

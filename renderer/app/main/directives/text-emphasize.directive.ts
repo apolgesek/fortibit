@@ -1,4 +1,4 @@
-import { Directive, Input, ElementRef } from '@angular/core';
+import { Directive, Input, ElementRef, inject, ChangeDetectorRef } from '@angular/core';
 @Directive({
 	selector: '[appTextEmphasize]',
 	standalone: true,
@@ -6,17 +6,17 @@ import { Directive, Input, ElementRef } from '@angular/core';
 export class TextEmphasizeDirective {
 	private readonly openingTag = '<span class="emp">';
 	private readonly closingTag = '</span>';
+	private readonly element = inject(ElementRef);
+	private readonly cdRef = inject(ChangeDetectorRef);
 	private searchPhraseValue = '';
-
-	constructor(private readonly element: ElementRef) {}
 
 	@Input('appTextEmphasize') set searchPhrase(value: string | null) {
 		this.searchPhraseValue = value ? value.trim() : '';
+		this.cdRef.detectChanges(); // wait until new text is rendered inside directive's element
 		this.applyChanges();
 	}
 
 	private applyChanges() {
-		setTimeout(() => {
 			const elementTextContent = this.element.nativeElement as HTMLElement;
 
 			elementTextContent.innerHTML = elementTextContent.innerHTML
@@ -55,7 +55,6 @@ export class TextEmphasizeDirective {
 						this.openingTag + match + this.closingTag,
 					);
 			}
-		});
 	}
 
 	private isSubstringNotFound(elementTextContent: HTMLElement) {

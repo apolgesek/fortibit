@@ -10,11 +10,11 @@
 
 .pretty-key {
 	position: relative;
-	background: $grey-600;
+	background: var(--pretty-shortcut-bg);
 	padding: calc(4px / var(--device-pixel-ratio));
 	font-size: 0.625rem;
 	margin: 0 0.25rem;
-	color: white;
+	color: var(--primary-text);
 	border-radius: 0.25rem;
 	min-width: 20px;
 	text-align: center;
@@ -32,9 +32,8 @@
 		width: 104%;
 		height: 84%;
 		border-radius: 6px;
-		background-color: $grey-600;
-		box-shadow: 0 4px 2px -3px darken($grey-600, 12);
+		background-color: var(--pretty-shortcut-bg);
+		box-shadow: 0 4px 2px -3px var(--pretty-shortcut-box-shadow);
 		z-index: -1;
 	}
 }
-

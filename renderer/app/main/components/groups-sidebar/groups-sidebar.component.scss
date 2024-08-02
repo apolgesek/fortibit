@@ -157,6 +157,7 @@
 	margin-top: 0;
 	margin-right: 0.5rem;
 	height: 1rem;
+	line-height: 1rem;
 
 	&:hover {
 		background-color: var(--list-item-bg--hover);
@@ -171,9 +172,9 @@
 	}
 
 	&.active {
-		color: #fff;
+		color: var(--primary-text);
 		background-color: var(--list-item-bg--active);
-		@include font-medium;
+		@include font-bold;
 	}
 
 	i-feather {

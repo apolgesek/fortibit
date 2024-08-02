@@ -30,7 +30,7 @@ export class ConfigService implements IConfigService {
 	constructor(
 		@INativeApiService private readonly _nativeApiService: INativeApiService,
 	) {
-		const dir = join(app.getPath('appData'), app.getName(), 'config');
+		const dir = join(app.getPath('appData'), app.getName(), 'config'); // app.getName returns "Electron" in test mode
 		const productPath = join(dir, 'product.json');
 		const workspacePath = join(dir, 'workspaces.json');
 
@@ -78,6 +78,7 @@ export class ConfigService implements IConfigService {
 			commit: productInformation.commit,
 			updateUrl: productInformation.updateUrl,
 			webUrl: productInformation.webUrl,
+			webApiUrl: productInformation.webApiUrl,
 			iconServiceUrl: productInformation.iconServiceUrl,
 			signatureSubject: productInformation.signatureSubject,
 			leakedPasswordsUrl: productInformation.leakedPasswordsUrl,
@@ -106,11 +107,13 @@ export class ConfigService implements IConfigService {
 			showInsecureUrlPrompt: productInformation.showInsecureUrlPrompt,
 			biometricsProtectedFiles: [],
 			protectWindowsFromCapture: productInformation.protectWindowsFromCapture,
+			organizationName: null
 		} as Configuration);
 
 		ipcMain.handle(IpcChannel.GetAppConfig, async () => {
 			const paths = await this._nativeApiService.listCredentials();
 			this.appConfig.biometricsProtectedFiles = paths;
+			this.appConfig.organizationName = this._nativeApiService.readRegistryKey('SOFTWARE\\Fortibit', 'org');
 
 			return this.appConfig;
 		});
@@ -136,6 +139,7 @@ export class ConfigService implements IConfigService {
 			'temporaryFileExtension',
 			'workspaces',
 			'e2eFilesPath',
+			'organizationName'
 		];
 		writeFileSync(
 			this._productPath,

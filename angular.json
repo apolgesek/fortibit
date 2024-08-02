@@ -143,12 +143,7 @@
 						"scripts": [],
 						"styles": ["renderer/styles.scss"],
 						"assets": [
-							"renderer/assets",
-							"renderer/favicon.ico",
-							"renderer/favicon.png",
-							"renderer/favicon.icns",
-							"renderer/favicon.256x256.png",
-							"renderer/favicon.512x512.png"
+							"renderer/assets"
 						],
 						"customWebpackConfig": {
 							"path": "./angular.webpack.js"

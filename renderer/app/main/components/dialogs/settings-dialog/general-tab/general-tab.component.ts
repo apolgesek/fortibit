@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, Inject, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,7 +24,6 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 	styleUrls: ['./general-tab.component.scss'],
 	standalone: true,
 	imports: [
-		CommonModule,
 		ReactiveFormsModule,
 		FeatherModule,
 		MasterPasswordSetupComponent,
@@ -36,6 +34,11 @@ export class GeneralTabComponent implements OnInit {
 	public readonly isControlInvalid = isControlInvalid;
 
 	private readonly formBuilder = inject(FormBuilder);
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly notificationService = inject(NotificationService);
+	private readonly configService = inject(ConfigService);
+	private readonly workspaceService = inject(WorkspaceService);
 
 	private readonly debounceTimeMs = 500;
 	private readonly _passwordForm = this.formBuilder.group({
@@ -64,15 +67,6 @@ export class GeneralTabComponent implements OnInit {
 	get passwordForm() {
 		return this._passwordForm;
 	}
-
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly destroyRef: DestroyRef,
-		private readonly notificationService: NotificationService,
-		private readonly configService: ConfigService,
-		private readonly workspaceService: WorkspaceService,
-		private readonly modalService: ModalService,
-	) {}
 
 	get isLocked(): boolean {
 		return this.workspaceService.isLocked;
@@ -160,7 +154,7 @@ export class GeneralTabComponent implements OnInit {
 				message: 'Are you sure you want to restore default settings?',
 				detail: 'The default setup provides optimal level of security.',
 				buttons: ['Restore', 'Cancel'],
-				noLink: true
+				noLink: true,
 			},
 		);
 

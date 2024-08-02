@@ -7,6 +7,7 @@ import {
 	HostListener,
 	OnDestroy,
 	OnInit,
+	inject,
 } from '@angular/core';
 import { NotificationService } from '@app/core/services/notification.service';
 import { Toast } from '@app/core/models';
@@ -29,10 +30,8 @@ export class NotificationComponent implements OnInit, AfterViewInit, OnDestroy {
 	public timeLeft = 0;
 	private timer: any;
 
-	constructor(
-		private readonly element: ElementRef,
-		private readonly notificationService: NotificationService,
-	) {}
+	private readonly element = inject(ElementRef);
+	private readonly notificationService = inject(NotificationService); 
 
 	@HostBinding('style')
 	get style(): string {

@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
 import {
@@ -43,13 +43,11 @@ export class ToolbarComponent {
 		{ label: 'All groups', value: true },
 	];
 
-	constructor(
-		private readonly workspaceService: WorkspaceService,
-		private readonly entryManager: EntryManager,
-		private readonly groupManager: GroupManager,
-		private readonly searchService: SearchService,
-		private readonly modalService: ModalService,
-	) {}
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly entryManager = inject(EntryManager);
+	private readonly groupManager = inject(GroupManager);
+	private readonly searchService = inject(SearchService);
+	private readonly modalService = inject(ModalService);
 
 	get searchMode(): string {
 		return this.isGlobalSearchMode
@@ -66,19 +64,19 @@ export class ToolbarComponent {
 	}
 
 	get isAnyEntry(): boolean {
-		return this.entryManager.passwordEntries?.length > 0;
+		return this.entryManager.entries?.length > 0;
 	}
 
 	get isOneEntrySelected(): boolean {
-		return this.entryManager.selectedPasswords.length === 1;
+		return this.entryManager.selectedEntries.length === 1;
 	}
 
 	get isAnyEntrySelected(): boolean {
-		return this.entryManager.selectedPasswords.length > 0;
+		return this.entryManager.selectedEntries.length > 0;
 	}
 
 	get selectedPasswordsCount(): number {
-		return this.entryManager.selectedPasswords.length;
+		return this.entryManager.selectedEntries.length;
 	}
 
 	get isGlobalSearchMode(): boolean {
@@ -91,7 +89,7 @@ export class ToolbarComponent {
 
 	// eslint-disable-next-line @typescript-eslint/member-ordering
 	get searchPhrase(): string {
-		return this.searchService.searchPhraseValue;
+		return this.searchService.searchInputSource.value;
 	}
 
 	set searchPhrase(value: string) {
@@ -100,14 +98,6 @@ export class ToolbarComponent {
 
 	openAddEntryWindow() {
 		this.modalService.openNewEntryWindow();
-	}
-
-	openEditEntryWindow() {
-		this.modalService.openEditEntryWindow();
-	}
-
-	openDeleteEntryWindow() {
-		this.modalService.openDeleteEntryWindow();
 	}
 
 	trySaveDatabase() {

@@ -1,12 +1,12 @@
 import {
 	ApplicationRef,
 	ComponentRef,
-	Inject,
 	Injectable,
 	Injector,
 	Renderer2,
 	RendererFactory2,
 	Type,
+	inject,
 } from '@angular/core';
 import { IAdditionalData, IModal } from '@app/shared';
 import { fromEvent, Subject, take } from 'rxjs';
@@ -17,15 +17,16 @@ import { DOCUMENT } from '@angular/common';
 @Injectable({ providedIn: 'root' })
 export class ModalManager {
 	public openedModals: ComponentRef<any>[] = [];
+
 	private readonly renderer: Renderer2;
 	private readonly bodyClass = 'modal-open';
 
-	constructor(
-		private readonly appRef: ApplicationRef,
-		private readonly appViewContainer: AppViewContainer,
-		private readonly rendererFactory: RendererFactory2,
-		@Inject(DOCUMENT) private readonly document: Document,
-	) {
+	private readonly appRef = inject(ApplicationRef);
+	private readonly appViewContainer = inject(AppViewContainer);
+	private readonly rendererFactory = inject(RendererFactory2);
+	private readonly document = inject(DOCUMENT);
+
+	constructor() {
 		this.renderer = this.rendererFactory.createRenderer(null, null);
 
 		fromEvent(window, 'keydown').subscribe((event: Event) => {

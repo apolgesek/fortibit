@@ -1,13 +1,39 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ModalRef } from '@app/core/services';
+import { Component, ComponentRef, inject } from '@angular/core';
+import {
+	AbstractControl,
+	FormBuilder,
+	FormControl,
+	FormGroup,
+	ReactiveFormsModule,
+} from '@angular/forms';
+import { GroupId } from '@app/core/enums';
+import {
+	EntryManager,
+	GroupManager,
+	ModalRef,
+	NotificationService,
+} from '@app/core/services';
 import { HistoryManager } from '@app/core/services/managers/history.manager';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { isControlInvalid } from '@app/utils';
 import { FeatherModule } from 'angular-feather';
-import { combineLatest, from, take, timer } from 'rxjs';
+import {
+	Observable,
+	combineLatest,
+	forkJoin,
+	from,
+	switchMap,
+	take,
+	tap,
+	timer,
+} from 'rxjs';
+
+type ToggleableControls<K> = { [key in keyof K]: AbstractControl<any> } & {
+	enabled: FormControl<boolean>;
+};
+type ToggleableGroup<T extends ToggleableControls<T>> = FormGroup<T>;
 
 @Component({
 	selector: 'app-maintenance-dialog',
@@ -19,7 +45,6 @@ import { combineLatest, from, take, timer } from 'rxjs';
 export class MaintenanceDialogComponent implements IModal {
 	public readonly isControlInvalid = isControlInvalid;
 	public cleaningInProgress = false;
-	public removedHistoryEntries: number;
 
 	ref: ComponentRef<unknown>;
 	additionalData?: IAdditionalData;
@@ -27,10 +52,19 @@ export class MaintenanceDialogComponent implements IModal {
 
 	private readonly modalRef = inject(ModalRef);
 	private readonly formBuilder = inject(FormBuilder);
+	private readonly groupManager = inject(GroupManager);
 	private readonly historyManager = inject(HistoryManager);
+	private readonly entryManager = inject(EntryManager);
+	private readonly notificationService = inject(NotificationService);
 
 	private readonly _maintenanceForm = this.formBuilder.group({
-		historyDays: [30],
+		historyDays: this.formBuilder.group({
+			enabled: true,
+			value: 30,
+		}),
+		emptyRecycleBin: this.formBuilder.group({
+			enabled: true,
+		}),
 	});
 
 	get maintenanceForm() {
@@ -48,15 +82,40 @@ export class MaintenanceDialogComponent implements IModal {
 
 		this.cleaningInProgress = true;
 
-		combineLatest([
-			from(
-				this.historyManager.deleteOlderThanDays(
-					this.maintenanceForm.controls.historyDays.value,
+		const observables: Observable<any>[] = [];
+
+		if (this.isEnabled(this.maintenanceForm.controls.historyDays)) {
+			observables.push(
+				from(
+					this.historyManager.deleteOlderThanDays(
+						this.maintenanceForm.controls.historyDays.controls.value.value,
+					),
 				),
-			),
-			timer(1000).pipe(take(1)),
-		]).subscribe(([result]) => {
-			this.removedHistoryEntries = result;
+			);
+		}
+
+		if (this.isEnabled(this.maintenanceForm.controls.emptyRecycleBin)) {
+			observables.push(
+				from(this.entryManager.getAllByGroup(GroupId.RecycleBin)).pipe(
+					switchMap((entries) => {
+						return this.entryManager.bulkDelete(entries.map((e) => e.id));
+					}),
+					tap(async () => {
+						if (this.groupManager.selectedGroup === GroupId.RecycleBin) {
+							await this.entryManager.setByGroup(GroupId.RecycleBin);
+							this.entryManager.updateEntriesSource();
+						}
+					}),
+				),
+			);
+		}
+
+		forkJoin([...observables, timer(1000)]).subscribe(() => {
+			this.notificationService.add({
+				message: 'Maintenance completed',
+				type: 'success',
+				alive: 10 * 1000,
+			});
 			this.cleaningInProgress = false;
 		});
 	}
@@ -77,5 +136,11 @@ export class MaintenanceDialogComponent implements IModal {
 
 	onKeyDown(event: KeyboardEvent) {
 		if (/^[-e\.+\s]$/.test(event.key)) event.preventDefault();
+	}
+
+	private isEnabled<T extends ToggleableControls<T>>(
+		group: ToggleableGroup<T>,
+	): boolean {
+		return group.controls.enabled.value;
 	}
 }

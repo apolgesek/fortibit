@@ -1,7 +1,6 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, Inject, NgZone, OnInit } from '@angular/core';
-import { IMessageBroker } from '@app/core/models';
+import { Component, NgZone, OnInit, inject } from '@angular/core';
 import { SecondaryMenuBarComponent } from '@app/main/components/secondary-menu-bar/secondary-menu-bar.component';
 import { EntryIconDirective } from '@app/main/directives/entry-icon.directive';
 import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
@@ -30,10 +29,8 @@ export class EntrySelectComponent implements OnInit {
 	public selectedEntries: PasswordEntry[] = [];
 	public passwordList: PasswordEntry[] = [];
 
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly zone: NgZone,
-	) {}
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly zone = inject(NgZone);
 
 	ngOnInit(): void {
 		this.messageBroker.ipcRenderer.on(

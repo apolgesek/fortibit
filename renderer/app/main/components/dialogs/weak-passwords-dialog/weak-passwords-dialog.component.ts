@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
+import { Component, ComponentRef, OnInit, inject } from '@angular/core';
 import { ReportType } from '@app/core/enums';
-import { IMessageBroker } from '@app/core/models';
 import {
 	EntryManager,
 	ModalRef,
@@ -34,20 +33,18 @@ export class WeakPasswordsDialogComponent implements IModal, OnInit {
 	showError = false;
 	lastReport: any;
 
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly modalRef = inject(ModalRef);
+	private readonly reportService = inject(ReportService);
+	private readonly modalService = inject(ModalService);
+	private readonly entryManager = inject(EntryManager);
+	private readonly notificationService = inject(NotificationService);
+
 	private scoreMap = {
 		0: 'High',
 		1: 'High',
 		2: 'Medium',
 	};
-
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly modalRef: ModalRef,
-		private readonly reportService: ReportService,
-		private readonly modalService: ModalService,
-		private readonly entryManager: EntryManager,
-		private readonly notificationService: NotificationService,
-	) {}
 
 	close() {
 		this.modalRef.close();

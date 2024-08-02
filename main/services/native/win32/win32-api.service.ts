@@ -32,6 +32,10 @@ class NativeAuthProcess {
 }
 
 export class Win32ApiService implements INativeApiService {
+	readRegistryKey(key: string, value: string): string | null {
+		return NativeCore.getInstance().readRegistryKey(key, value);
+	}
+
 	pressPhraseKey(char: string): void {
 		NativeCore.getInstance().pressPhraseKey(char.charCodeAt(0));
 	}

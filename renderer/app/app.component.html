@@ -1,6 +1,6 @@
-<ng-container *ngIf="fontsLoaded">
+@if (fontsLoaded) {
 	<router-outlet></router-outlet>
-</ng-container>
+}
 
 <svg class="d-none">
 	<filter id="blur-shadow">

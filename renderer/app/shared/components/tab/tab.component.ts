@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { TabService } from '@app/shared/services/tab.service';
 
 @Component({
@@ -12,7 +12,9 @@ export class TabComponent {
 
 	public active = false;
 
-	constructor(private readonly tabService: TabService) {
+	private readonly tabService = inject(TabService);
+
+	constructor() {
 		this.tabService.addTab(this);
 	}
 }

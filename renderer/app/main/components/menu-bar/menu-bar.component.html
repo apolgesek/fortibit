@@ -18,14 +18,11 @@
 						Open recent <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<li
-							*ngFor="let file of recentFiles; let i = index"
-							aria-hidden="true"
-							appMenuItem
-							(activate)="openFile(file)"
-						>
-							{{ i + 1 }}: {{ file | fileName }}
-						</li>
+						@for (file of recentFiles; track file; let i = $index) {
+							<li aria-hidden="true" appMenuItem (activate)="openFile(file)">
+								{{ i + 1 }}: {{ file | fileName }}
+							</li>
+						}
 					</div>
 				</div>
 				<div class="divider"><hr /></div>

@@ -6,7 +6,7 @@ export const IDatabaseService =
 	createServiceDecorator<IDatabaseService>('databaseService');
 
 export interface IDatabaseService {
-	get fileMap(): Map<number, { file: string, password?: Buffer }>;
+	get fileMap(): Map<number, { file: string; password?: Buffer }>;
 	getPassword(windowId: number): string;
 	setPassword(value: string, windowId: number);
 	getFilePath(windowId: number): string;

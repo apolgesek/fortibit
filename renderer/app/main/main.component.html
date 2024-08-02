@@ -1,5 +1,7 @@
 <ng-container>
-	<app-menu-bar *ngIf="isElectron"></app-menu-bar>
+	@if (isElectron) {
+		<app-menu-bar></app-menu-bar>
+	}
 	<div class="app-view">
 		<router-outlet></router-outlet>
 	</div>

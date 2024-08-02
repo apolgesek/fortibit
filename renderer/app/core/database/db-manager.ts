@@ -57,7 +57,7 @@ export class DbManager {
 	public async reset(): Promise<void> {
 		if (this.instance) {
 			this.instance.close();
-			
+
 			await this.instance.delete();
 			await this.instance.open();
 		} else {

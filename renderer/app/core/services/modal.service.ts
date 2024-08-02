@@ -74,7 +74,7 @@ export class ModalService {
 
 	async openEditEntryWindow(entry?: PasswordEntry): Promise<ModalRef> {
 		this.entryManager.editedEntry =
-			entry ?? this.entryManager.selectedPasswords[0];
+			entry ?? this.entryManager.selectedEntries[0];
 		return this.openEntryWindow();
 	}
 
@@ -134,7 +134,7 @@ export class ModalService {
 	}
 
 	openEntryHistoryWindow(): ModalRef {
-		const selectedEntry = this.entryManager.selectedPasswords[0];
+		const selectedEntry = this.entryManager.selectedEntries[0];
 		if (selectedEntry.type !== 'password') {
 			return;
 		}

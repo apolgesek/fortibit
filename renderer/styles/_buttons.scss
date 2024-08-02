@@ -21,7 +21,7 @@ button {
 	min-width: 100px;
 	position: relative;
 	z-index: 100;
-	transition: all 150ms;
+	transition: background-color 150ms, color 150ms;
 	cursor: pointer;
 	text-transform: uppercase;
 
@@ -31,8 +31,7 @@ button {
 
 	&:focus-visible {
 		background-color: var(--primary-btn-bg--hover);
-		outline: 2px solid #aedaff !important;
-		outline-offset: 3px !important;
+		outline: 2px solid $barberry !important;
 	}
 
 	&:disabled {
@@ -75,7 +74,7 @@ button {
 	border: 1px solid transparent;
 	font-size: 0.875rem;
 	border-radius: 0.25rem;
-	transition: background-color 50ms;
+	// transition: background-color 50ms;
 	cursor: pointer;
 	text-transform: uppercase;
 	-webkit-font-smoothing: antialiased;
@@ -88,8 +87,7 @@ button {
 	&:focus,
 	&.active {
 		color: var(--primary-text);
-		outline: 2px solid #aedaff !important;
-		outline-offset: 3px !important;
+		outline: 2px solid $barberry !important;
 	}
 
 	&:disabled {

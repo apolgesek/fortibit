@@ -25,4 +25,5 @@ export interface INativeApiService {
 	saveCredential(dbPath: string, password: string): void;
 	removeCredential(dbPath: string): void;
 	listCredentials(): Promise<string[]>;
+	readRegistryKey(key: string, value: string): string | null;
 }

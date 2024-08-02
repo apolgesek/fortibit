@@ -4,10 +4,12 @@ import { IpcChannel } from '@shared-renderer/index';
 import {
 	app,
 	BrowserWindow,
+	desktopCapturer,
 	globalShortcut,
 	ipcMain,
 	Menu,
 	nativeTheme,
+	screen,
 	shell,
 } from 'electron';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
@@ -25,6 +27,9 @@ import {
 } from './services/encryption';
 import { IPerformanceService } from './services/performance/performance-service.model';
 import { IWindowService } from './services/window';
+import jsQR from 'jsqr';
+import { PNG } from 'pngjs';
+import * as OTPAuth from "otpauth";
 
 class MainProcess {
 	private readonly _services: SingleInstanceServices;
@@ -82,7 +87,9 @@ class MainProcess {
 				x.endsWith(this._configService.appConfig.fileExtension),
 			);
 
-			const isAlreadyOpenFile = Array.from(this._databaseService.fileMap.values()).find(x => x.file === filePath);
+			const isAlreadyOpenFile = Array.from(
+				this._databaseService.fileMap.values(),
+			).find((x) => x.file === filePath);
 			if (isAlreadyOpenFile) {
 				return;
 			}
@@ -192,9 +199,7 @@ class MainProcess {
 			const path = JSON.parse(workspace);
 
 			if (this._isTestMode) {
-				const absolutePath = resolve('..\\e2e\\files\\test.fbit');
-				path.workspace =
-					absolutePath.slice(0, 1).toUpperCase() + absolutePath.slice(1);
+				path.workspace = resolve('./e2e/files/test.fbit');
 			}
 
 			if (path.workspace && existsSync(path.workspace)) {
@@ -248,6 +253,23 @@ class MainProcess {
 			}
 
 			shell.openExternal(url);
+		});
+
+		ipcMain.on(IpcChannel.ScanQrCode, async () => {
+			const { width, height } = screen.getPrimaryDisplay().size;
+			const sources = await desktopCapturer.getSources({ types: ['window'], thumbnailSize: { width, height } });
+			const buffer = sources[0].thumbnail.toPNG();
+			const png = PNG.sync.read(buffer);
+
+			const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
+			
+			if (!code) {
+				return;
+				// TODO
+			}
+
+			console.log(code.data);
+			// expose otpauth to renderer
 		});
 	}
 }

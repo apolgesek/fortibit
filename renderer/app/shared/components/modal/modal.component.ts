@@ -10,6 +10,7 @@ import {
 	OnDestroy,
 	ViewChild,
 	ViewEncapsulation,
+	inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ModalRef } from '@app/core/services';
@@ -39,12 +40,12 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
 
 	private focusTrap: focusTrap.FocusTrap;
 
-	constructor(
-		private readonly el: ElementRef,
-		private readonly modalManager: ModalManager,
-		private readonly modalRef: ModalRef,
-		private readonly destroyRef: DestroyRef,
-	) {
+	private readonly el = inject(ElementRef);
+	private readonly modalManager = inject(ModalManager);
+	private readonly modalRef = inject(ModalRef);
+	private readonly destroyRef = inject(DestroyRef);
+
+	constructor() {
 		this.showBackdrop = this.modalRef.showBackdrop;
 	}
 

@@ -6,6 +6,7 @@ import {
 	HostListener,
 	Input,
 	Output,
+	inject,
 } from '@angular/core';
 import { DropdownStateService } from '../services/dropdown-state.service';
 
@@ -23,11 +24,9 @@ export class MenuItemDirective {
 	@Input() closeMode: 'tree' | 'subtree' = 'tree';
 	@Output() activate = new EventEmitter();
 	private _isDisabled = false;
-
-	constructor(
-		private readonly dropdownState: DropdownStateService,
-		private readonly el: ElementRef,
-	) {}
+	
+	private readonly dropdownState = inject(DropdownStateService);
+	private readonly el = inject(ElementRef);
 
 	@HostBinding('class.disabled')
 	@HostBinding('attr.aria-disabled')

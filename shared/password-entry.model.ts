@@ -9,4 +9,6 @@ export type PasswordEntry = EntryBase & {
 	autotypeExp?: string;
 	icon?: string;
 	history?: PasswordEntry[];
+	isExposed?: boolean;
+	isSecureProtocolAvailable?: boolean;
 };

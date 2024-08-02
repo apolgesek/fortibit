@@ -13,23 +13,34 @@
 	<div class="dialog-message">
 		<app-tabset>
 			<app-tab header="General" #generalTab>
-				<app-general-tab *ngIf="generalTab.active"></app-general-tab>
+				@if (generalTab.active) {
+					<app-general-tab></app-general-tab>
+				}
 			</app-tab>
 			<app-tab header="Encryption" #encryptionTab>
-				<app-encryption-tab *ngIf="encryptionTab.active"></app-encryption-tab>
+				@if (encryptionTab.active) {
+					<app-encryption-tab></app-encryption-tab>
+				}
 			</app-tab>
 			<app-tab header="View" #viewTab>
-				<app-view-tab *ngIf="viewTab.active"></app-view-tab>
+				@if (viewTab.active) {
+					<app-view-tab></app-view-tab>
+				}
 			</app-tab>
-			<app-tab
-				header="Integration"
-				#integrationTab
-				*ngIf="shouldIncludeTab(tab.Integration)"
-			>
-				<app-integration-tab
-					*ngIf="integrationTab.active"
-				></app-integration-tab>
-			</app-tab>
+			@if (shouldIncludeTab(tab.Integration)) {
+				<app-tab header="Integration" #integrationTab>
+					@if (integrationTab.active) {
+						<app-integration-tab></app-integration-tab>
+					}
+				</app-tab>
+			}
+			@if (shouldIncludeTab(tab.Organization)) {
+				<app-tab header="Organization" #organizationTab>
+					@if (organizationTab.active) {
+						<app-organization-tab></app-organization-tab>
+					}
+				</app-tab>
+			}
 		</app-tabset>
 	</div>
 </app-modal>

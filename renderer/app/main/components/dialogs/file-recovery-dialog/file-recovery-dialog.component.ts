@@ -1,6 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, Inject } from '@angular/core';
-import { IMessageBroker } from '@app/core/models';
+import { Component, ComponentRef, inject } from '@angular/core';
 import {
 	EntryManager,
 	GroupManager,
@@ -20,7 +18,7 @@ export type FileRecoveryDialogDataPayload = {
 @Component({
 	selector: 'app-file-recovery-dialog',
 	standalone: true,
-	imports: [CommonModule, ModalComponent],
+	imports: [ModalComponent],
 	templateUrl: './file-recovery-dialog.component.html',
 	styleUrls: ['./file-recovery-dialog.component.scss'],
 })
@@ -29,14 +27,12 @@ export class FileRecoveryDialogComponent implements IModal {
 	additionalData?: IAdditionalData<FileRecoveryDialogDataPayload>;
 	showBackdrop?: boolean;
 
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly workspaceService: WorkspaceService,
-		private readonly modalService: ModalService,
-		private readonly entryManager: EntryManager,
-		private readonly groupManager: GroupManager,
-		private readonly modalRef: ModalRef,
-	) {}
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly modalService = inject(ModalService);
+	private readonly entryManager = inject(EntryManager);
+	private readonly groupManager = inject(GroupManager);
+	private readonly modalRef = inject(ModalRef);
 
 	async recover() {
 		const recoveredDbContent = await this.messageBroker.ipcRenderer.invoke(

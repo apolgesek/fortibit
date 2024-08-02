@@ -41,16 +41,19 @@
 						<i-feather name="chevron-down"></i-feather>
 					</button>
 					<div *appDropdownMenu class="dropdown-content select right">
-						<li
-							*ngFor="let option of sortOptions"
-							[ngClass]="{ selected: selectedSortOption.prop === option.prop }"
-							appMenuItem
-							closeMode="subtree"
-							class="option-item"
-							(activate)="setSort(option)"
-						>
-							{{ option.name }}
-						</li>
+						@for (option of sortOptions; track option) {
+							<li
+								[ngClass]="{
+									selected: selectedSortOption.prop === option.prop
+								}"
+								appMenuItem
+								closeMode="subtree"
+								class="option-item"
+								(activate)="setSort(option)"
+							>
+								{{ option.name }}
+							</li>
+						}
 					</div>
 				</div>
 			</div>
@@ -77,18 +80,19 @@
 						<i-feather name="chevron-down"></i-feather>
 					</button>
 					<div *appDropdownMenu class="dropdown-content select right">
-						<li
-							*ngFor="let option of sortDirectionOptions"
-							[ngClass]="{
-								selected: selectedSortDirection.state === option.state
-							}"
-							appMenuItem
-							closeMode="subtree"
-							class="option-item"
-							(activate)="setSortDirection(option)"
-						>
-							{{ option.name }}
-						</li>
+						@for (option of sortDirectionOptions; track option) {
+							<li
+								[ngClass]="{
+									selected: selectedSortDirection.state === option.state
+								}"
+								appMenuItem
+								closeMode="subtree"
+								class="option-item"
+								(activate)="setSortDirection(option)"
+							>
+								{{ option.name }}
+							</li>
+						}
 					</div>
 				</div>
 			</div>

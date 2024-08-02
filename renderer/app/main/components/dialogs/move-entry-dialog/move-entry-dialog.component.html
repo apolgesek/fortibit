@@ -27,37 +27,38 @@
 				placeholder="Search group..."
 			/>
 		</div>
-		<ng-container *ngIf="groups$ | async as groups">
-			<div class="list" *ngIf="groups.length > 0; else notFound">
-				<cdk-virtual-scroll-viewport
-					itemSize="36"
-					class="list-viewport"
-					role="rowgroup"
-				>
-					<a
-						href="#"
-						*cdkVirtualFor="
-							let group of groups;
-							let i = index;
-							trackBy: trackingTag;
-							templateCacheSize: 0
-						"
-						class="list-item"
-						role="row"
-						tabindex="0"
-						(click)="moveTo(group); (false)"
+		@if (groups$ | async; as groups) {
+			@if (groups.length > 0) {
+				<div class="list">
+					<cdk-virtual-scroll-viewport
+						itemSize="36"
+						class="list-viewport"
+						role="rowgroup"
 					>
-						<i
-							class="pi"
-							[ngClass]="group.isImported ? 'pi-download' : 'pi-folder'"
-						></i>
-						{{ group.name }}
-					</a>
-				</cdk-virtual-scroll-viewport>
-			</div>
-			<ng-template #notFound>
+						<a
+							href="#"
+							*cdkVirtualFor="
+								let group of groups;
+								let i = index;
+								trackBy: trackingTag;
+								templateCacheSize: 0
+							"
+							class="list-item"
+							role="row"
+							tabindex="0"
+							(click)="moveTo(group); (false)"
+						>
+							<i
+								class="pi"
+								[ngClass]="group.isImported ? 'pi-download' : 'pi-folder'"
+							></i>
+							{{ group.name }}
+						</a>
+					</cdk-virtual-scroll-viewport>
+				</div>
+			} @else {
 				<div class="not-found">No group found</div>
-			</ng-template>
-		</ng-container>
+			}
+		}
 	</div>
 </app-modal>

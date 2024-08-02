@@ -2,13 +2,12 @@ import { CommonModule } from '@angular/common';
 import {
 	Component,
 	DestroyRef,
-	Inject,
 	NgZone,
 	OnDestroy,
 	OnInit,
+	inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { IHotkeyHandler, IMessageBroker } from '@app/core/models';
 import { ModalService } from '@app/core/services';
 import { slideDown } from '@app/shared';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
@@ -48,6 +47,7 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
 	public readonly notifications$: Observable<Notification[]>;
 	public updateAvailable = '';
 	public settingsLabel: string;
+
 	private readonly notificationsSource = new Subject<Notification>();
 	private updateListener: (
 		event: any,
@@ -55,13 +55,13 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
 		version: string,
 	) => void;
 
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		@Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler,
-		private readonly destroyRef: DestroyRef,
-		private readonly zone: NgZone,
-		private readonly modalService: ModalService,
-	) {
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly hotkeyHandler = inject(HotkeyHandler);
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly zone = inject(NgZone);
+	private readonly modalService = inject(ModalService);
+
+	constructor() {
 		this.notifications$ = this.notificationsSource.asObservable().pipe(
 			scan((acc, n: Notification) => {
 				const updateNotificationIndex = acc.findIndex(

@@ -4,10 +4,10 @@ import {
 	Component,
 	ElementRef,
 	HostListener,
-	Inject,
 	OnInit,
 	QueryList,
 	ViewChildren,
+	inject,
 } from '@angular/core';
 import { MenuItem } from '@app/shared';
 import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
@@ -28,10 +28,8 @@ export class ContextMenuComponent implements OnInit, AfterViewInit {
 	public selected: MenuItem[];
 	private readonly sourceEvent!: MouseEvent;
 
-	constructor(
-		@Inject(DOCUMENT) private readonly document: Document,
-		private readonly element: ElementRef,
-	) {}
+	private readonly document = inject(DOCUMENT);
+	private readonly element = inject(ElementRef);
 
 	get nativeElement(): HTMLElement {
 		return this.element.nativeElement;
@@ -49,7 +47,7 @@ export class ContextMenuComponent implements OnInit, AfterViewInit {
 
 		for (const item of this.model) {
 			if (item.disabled !== undefined) {
-				item.disabled =
+				item['_disabled'] =
 					typeof item.disabled === 'function' ? item.disabled() : item.disabled;
 			}
 		}

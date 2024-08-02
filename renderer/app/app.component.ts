@@ -1,11 +1,11 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { DOCUMENT } from '@angular/common';
 import {
 	AfterViewInit,
 	Component,
 	HostListener,
-	Inject,
 	OnInit,
 	ViewContainerRef,
+	inject,
 } from '@angular/core';
 import { NavigationStart, Router, RouterModule } from '@angular/router';
 import { Configuration } from '@config/configuration';
@@ -13,7 +13,6 @@ import { IpcChannel } from '@shared-renderer/index';
 import { HotkeyHandler, MessageBroker } from 'injection-tokens';
 import { filter, fromEvent, take, tap } from 'rxjs';
 import { AppConfig } from '../environments/environment';
-import { IHotkeyHandler, IMessageBroker } from './core/models';
 import {
 	AppViewContainer,
 	ConfigService,
@@ -29,28 +28,24 @@ import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component'
 	selector: 'app-root',
 	templateUrl: './app.component.html',
 	standalone: true,
-	imports: [RouterModule, CommonModule, MenuBarComponent],
+	imports: [RouterModule, MenuBarComponent],
 })
 export class AppComponent implements OnInit, AfterViewInit {
 	public fontsLoaded = false;
 	private config: Configuration;
 
-	constructor(
-		@Inject(MessageBroker) public readonly messageBroker: IMessageBroker,
-		@Inject(HotkeyHandler) public readonly hotkeyHandler: IHotkeyHandler,
-		@Inject(DOCUMENT) private readonly document: Document,
-		private readonly router: Router,
-		private readonly configService: ConfigService,
-		private readonly modalManager: ModalManager,
-		private readonly appViewContainer: AppViewContainer,
-		private readonly viewContainerRef: ViewContainerRef,
-		private readonly workspaceService: WorkspaceService,
-		private readonly entryManager: EntryManager,
-		private readonly updateService: UpdateService,
-		private readonly notificationService: NotificationService,
-	) {
-		this.appViewContainer.appViewContainerRef = this.viewContainerRef;
-	}
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly hotkeyHandler = inject(HotkeyHandler);
+	private readonly document = inject(DOCUMENT);
+	private readonly router = inject(Router);
+	private readonly configService = inject(ConfigService);
+	private readonly modalManager = inject(ModalManager);
+	private readonly appViewContainer = inject(AppViewContainer);
+	private readonly viewContainerRef = inject(ViewContainerRef);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly entryManager = inject(EntryManager);
+	private readonly updateService = inject(UpdateService);
+	private readonly notificationService = inject(NotificationService);
 
 	// preventing dragenter and dragover events is neccesary to fire drop event for file drag&drop
 	@HostListener('document:dragenter', ['$event'])
@@ -60,6 +55,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 	}
 
 	async ngOnInit(): Promise<void> {
+		this.appViewContainer.appViewContainerRef = this.viewContainerRef;
+
 		this.closeModalsOnRouteChange();
 		this.configService.configLoadedSource$.pipe(take(1)).subscribe((config) => {
 			this.config = config;
@@ -159,7 +156,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 		fromEvent(this.document, 'mousedown').subscribe(
 			() => (event: MouseEvent) => {
 				if (this.isOutsideClick(event)) {
-					this.entryManager.selectedPasswords = [];
+					this.entryManager.selectedEntries = [];
 				}
 			},
 		);
@@ -179,7 +176,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 				const success = await this.workspaceService.executeEvent();
 				if (success) {
-					const result = await this.messageBroker.ipcRenderer.invoke(IpcChannel.DropFile, file.path);
+					const result = await this.messageBroker.ipcRenderer.invoke(
+						IpcChannel.DropFile,
+						file.path,
+					);
 					await this.workspaceService.handleDatabaseLock(result);
 				}
 			}

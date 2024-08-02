@@ -5,6 +5,7 @@ import {
 	ElementRef,
 	QueryList,
 	ViewChildren,
+	inject,
 } from '@angular/core';
 import { TabComponent } from '../tab/tab.component';
 import { TabService } from '../../services/tab.service';
@@ -23,7 +24,7 @@ export class TabsetComponent implements AfterContentInit {
 	@ContentChildren(TabComponent) tabs: QueryList<TabComponent>;
 	public headers: string[] = [];
 
-	constructor(private readonly tabService: TabService) {}
+	private readonly tabService = inject(TabService);
 
 	public get activeTab(): TabComponent {
 		return this.tabService.activeTab;

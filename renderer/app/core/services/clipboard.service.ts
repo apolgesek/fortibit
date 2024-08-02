@@ -1,9 +1,8 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NotificationService } from '@app/core/services/notification.service';
 import { Configuration } from '@config/configuration';
 import { PasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { IMessageBroker } from '../models';
 import { ConfigService } from './config.service';
 
 type CopyText = {
@@ -18,14 +17,13 @@ type CopyText = {
 })
 export class ClipboardService {
 	private config: Configuration;
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly notificationService: NotificationService,
-		private readonly configService: ConfigService,
-	) {
-		this.configService.configLoadedSource$.subscribe((config) => {
-			this.config = config;
-		});
+
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly notificationService = inject(NotificationService);
+	private readonly configService = inject(ConfigService);
+	
+	constructor() {
+		this.configService.configLoadedSource$.subscribe((config) => this.config = config);
 	}
 
 	async copyText(model: CopyText) {

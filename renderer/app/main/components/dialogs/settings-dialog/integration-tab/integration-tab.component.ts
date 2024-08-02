@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Inject, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { IMessageBroker } from '@app/core/models';
 import {
 	ConfigService,
 	NotificationService,
@@ -26,6 +25,12 @@ export class IntegrationTabComponent implements OnInit {
 	public isUnlocked = false;
 
 	private readonly formBuilder = inject(FormBuilder);
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly configService = inject(ConfigService);
+	private readonly notificationService = inject(NotificationService);
+
 	private readonly _integrationForm = this.formBuilder.group({
 		biometricsAuthenticationEnabled: [false],
 	});
@@ -33,14 +38,6 @@ export class IntegrationTabComponent implements OnInit {
 	get integrationForm() {
 		return this._integrationForm;
 	}
-
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly workspaceService: WorkspaceService,
-		private readonly destroyRef: DestroyRef,
-		private readonly configService: ConfigService,
-		private readonly notificationService: NotificationService,
-	) {}
 
 	get filePath(): string {
 		return this.workspaceService.file?.filePath ?? '';

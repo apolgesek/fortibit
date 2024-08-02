@@ -2,10 +2,9 @@ import {
 	AfterViewInit,
 	Directive,
 	ElementRef,
-	Inject,
 	Input,
+	inject,
 } from '@angular/core';
-import { IMessageBroker } from '@app/core/models';
 import { EntryManager } from '@app/core/services';
 import { PasswordEntry, IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
@@ -18,11 +17,9 @@ export class EntryIconDirective implements AfterViewInit {
 	private _entry: PasswordEntry;
 	private iconExists = false;
 
-	constructor(
-		private readonly el: ElementRef,
-		private readonly entryManager: EntryManager,
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-	) {}
+	private readonly el = inject(ElementRef);
+	private readonly entryManager = inject(EntryManager);
+	private readonly messageBroker = inject(MessageBroker);
 
 	@Input('appEntryIcon') set entry(value: PasswordEntry) {
 		if (this._entry && this.detailsChanged(value)) {
@@ -83,7 +80,7 @@ export class EntryIconDirective implements AfterViewInit {
 			iconText = entry.title.slice(0, 2);
 		}
 
-		return this.createImage(iconText).toDataURL('image/png', 1);
+		return this.createImage(iconText.trim()).toDataURL('image/png', 1);
 	}
 
 	private createImage(text: string): HTMLCanvasElement {
@@ -110,6 +107,7 @@ export class EntryIconDirective implements AfterViewInit {
 		context.textAlign = 'center';
 		context.textBaseline = 'top';
 		context.fillStyle = textColor;
+
 		context.fillText(text.length > 0 ? text : '?', 16, 10);
 
 		return canvas;

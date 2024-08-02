@@ -96,6 +96,19 @@
 	--password-meter-bg: #{$grey-300};
 	--password-meter-border-color: #{darken($grey-300, 5)};
 
+	// PRETTY SHORTCUT
+	--pretty-shortcut-text: #{$blue-400};
+	--pretty-shortcut-bg: #{$grey-100};
+	--pretty-shortcut-box-shadow: #{darken($grey-100, 12)};
+
+	// WARNING BOX
+	--warning-box-bg: #{#ffcbcb};
+	--warning-box-text: #{$red-orange};
+
+	// WARNING BOX
+	--alert-box-bg: #{#ffe9cb};
+	--alert-box-text: #{$tulip-tree};
+
 	// MISC
 	--link-text: #{$blue-300};
 	--label-text: #{#47639e};

@@ -1,10 +1,10 @@
-import { Directive, ElementRef, HostListener } from '@angular/core';
+import { Directive, ElementRef, HostListener, inject } from '@angular/core';
 @Directive({
 	selector: '[appBlurEnter]',
 	standalone: true,
 })
 export class BlurEnterDirective {
-	constructor(private readonly element: ElementRef) {}
+	private readonly element = inject(ElementRef);
 
 	@HostListener('keydown.enter', ['$event']) onEnterDown() {
 		this.element.nativeElement.blur();

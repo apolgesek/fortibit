@@ -1,4 +1,3 @@
-import { NgIf } from '@angular/common';
 import {
 	Component,
 	ComponentRef,
@@ -33,7 +32,7 @@ export type GroupDialogDataPayload = {
 	templateUrl: './group-dialog.component.html',
 	styleUrls: ['./group-dialog.component.scss'],
 	standalone: true,
-	imports: [NgIf, ReactiveFormsModule, FeatherModule, ModalComponent],
+	imports: [ReactiveFormsModule, FeatherModule, ModalComponent],
 })
 export class GroupDialogComponent implements IModal, OnInit {
 	public readonly ref!: ComponentRef<GroupDialogComponent>;
@@ -51,13 +50,11 @@ export class GroupDialogComponent implements IModal, OnInit {
 		return this._groupForm;
 	}
 
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		private readonly modalRef: ModalRef,
-		private readonly groupManager: GroupManager,
-		private readonly notificationService: NotificationService,
-		private readonly modalService: ModalService,
-	) {}
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly modalRef = inject(ModalRef);
+	private readonly groupManager = inject(GroupManager);
+	private readonly notificationService = inject(NotificationService);
+	private readonly modalService = inject(ModalService);
 
 	get name(): FormControl {
 		return this.groupForm.get('name') as FormControl;

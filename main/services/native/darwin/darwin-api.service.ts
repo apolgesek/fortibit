@@ -3,6 +3,10 @@ import { INativeApiService } from '../native-api.model';
 import { systemPreferences } from 'electron';
 
 export class DarwinApiService implements INativeApiService {
+	readRegistryKey(key: string, value: string): string {
+		return '';
+	}
+	
 	setWindowAffinity(handle: Buffer, enabled: boolean): void {}
 
 	async getPassword(windowHandleHex: Buffer, dbPath: string): Promise<string> {

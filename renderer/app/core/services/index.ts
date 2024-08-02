@@ -3,6 +3,7 @@ export * from './clipboard.service';
 export * from './config.service';
 export * from './electron/electron.service';
 export * from './hotkey/windows-hotkey-handler';
+export * from './icon.service';
 export * from './managers/entry.manager';
 export * from './managers/group.manager';
 export * from './modal-manager';

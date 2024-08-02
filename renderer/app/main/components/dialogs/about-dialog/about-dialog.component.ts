@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, ComponentRef, OnInit, inject } from '@angular/core';
 import { ModalRef, UpdateService, WorkspaceService } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
@@ -15,7 +14,7 @@ import { take } from 'rxjs';
 	templateUrl: './about-dialog.component.html',
 	styleUrls: ['./about-dialog.component.scss'],
 	standalone: true,
-	imports: [ModalComponent, CommonModule, FeatherModule],
+	imports: [ModalComponent, FeatherModule],
 })
 export class AboutDialogComponent implements IModal, OnInit {
 	public readonly ref!: ComponentRef<AboutDialogComponent>;

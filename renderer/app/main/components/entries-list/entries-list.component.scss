@@ -57,6 +57,14 @@ $sidePanelOutDuration: 250ms;
 			&:hover {
 				background-color: var(--list-item-bg--active);
 			}
+
+			+ .selected {
+				border-top-color: transparent;
+			}
+
+			&:has(+ .selected) {
+				border-bottom-color: transparent;
+			}
 		}
 
 		.column.password {
@@ -197,25 +205,6 @@ $sidePanelOutDuration: 250ms;
 
 	span {
 		margin-right: 0.6rem;
-	}
-}
-
-.results-badge {
-	display: flex;
-	align-items: center;
-	background: var(--input-bg-secondary);
-	font-size: 0.75rem;
-	padding-left: 1rem;
-	z-index: 0;
-
-	> div {
-		box-sizing: border-box;
-		padding-top: 0.5625rem;
-		height: 2rem;
-	}
-
-	+ .table-viewport {
-		height: calc(map-get($map: $layout, $key: 'entry-table') - 2rem);
 	}
 }
 

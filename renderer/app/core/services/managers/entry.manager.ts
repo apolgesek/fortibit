@@ -1,6 +1,5 @@
-import { Inject, Injectable, NgZone, inject } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { GroupId } from '@app/core/enums';
-import { IMessageBroker } from '@app/core/models';
 import { EntryRepository, EntryPredicateFn } from '@app/core/repositories';
 import { HistoryEntry } from '@shared-renderer/history-entry.model';
 import { MessageBroker } from 'injection-tokens';
@@ -21,6 +20,7 @@ import { GroupManager } from './group.manager';
 import { DbManager } from '@app/core/database';
 import { HistoryManager } from './history.manager';
 import { Entry, IpcChannel, PasswordEntry } from '@shared-renderer/index';
+import { IProcessor, PasswordProcessor } from '../processors';
 
 type SearchResults = {
 	passwords: Entry[];
@@ -41,8 +41,8 @@ export class EntryManager {
 
 	public movedEntries: number[] = [];
 	public editedEntry?: Entry;
-	public passwordEntries: Entry[] = [];
-	public selectedPasswords: Entry[] = [];
+	public entries: Entry[] = [];
+	public selectedEntries: Entry[] = [];
 	public entryHistory: HistoryEntry[];
 
 	private readonly entryRepository: EntryRepository = new EntryRepository(
@@ -52,22 +52,25 @@ export class EntryManager {
 	private readonly scrollTopEntriesSource: Subject<void> = new Subject();
 	private readonly firstEntrySelectedSource: Subject<void> = new Subject();
 	private readonly entrySelectedSource: BehaviorSubject<Entry> =
-		new BehaviorSubject(this.selectedPasswords[0]);
-	private readonly passwordListSource: BehaviorSubject<Entry[]> =
+		new BehaviorSubject(this.selectedEntries[0]);
+	private readonly entryListSource: BehaviorSubject<Entry[]> =
 		new BehaviorSubject<Entry[]>([]);
 
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly zone: NgZone,
-		private readonly searchService: SearchService,
-		private readonly notificationService: NotificationService,
-		private readonly historyManager: HistoryManager,
-		private readonly groupManager: GroupManager,
-	) {
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly zone = inject(NgZone);
+	private readonly searchService = inject(SearchService);
+	private readonly notificationService = inject(NotificationService);
+	private readonly historyManager = inject(HistoryManager);
+	private readonly groupManager = inject(GroupManager);
+	private readonly processors: Partial<Record<Entry['type'], IProcessor<any>>> = {
+		password: inject(PasswordProcessor)
+	}
+
+	constructor() {
 		this.markDirtySource = new Subject();
 
 		this.entries$ = combineLatest([
-			this.passwordListSource,
+			this.entryListSource,
 			this.searchService.searchPhrase$,
 		]).pipe(
 			switchMap(([passwords, searchPhrase]) =>
@@ -93,7 +96,7 @@ export class EntryManager {
 			IpcChannel.UpdateIcon,
 			(_, id: number, iconPath: string) => {
 				this.zone.run(async () => {
-					const entry = this.passwordEntries.find(
+					const entry = this.entries.find(
 						(x) => x.id === id,
 					) as PasswordEntry;
 					if (!entry) {
@@ -101,13 +104,27 @@ export class EntryManager {
 					}
 
 					await this.entryRepository.update({ id, icon: iconPath });
-					entry.lastModificationDate = new Date();
 					entry.icon = iconPath;
+					entry.lastModificationDate = new Date();
 
 					this.updateEntriesSource();
 				});
 			},
 		);
+
+		this.messageBroker.ipcRenderer.on(IpcChannel.UpdateSecureProtocolAvailability, (_, urls: string) => {
+			this.zone.run(async () => {
+				console.log(urls);
+				for (const url of urls) {
+					await this.entryRepository.markSecureProtocolAvailable(url);
+				}
+
+				this.entries = await this.getEntries();
+				this.updateEntriesSource();
+
+				this.markDirty();
+			});
+		});
 	}
 
 	get isGlobalSearch(): boolean {
@@ -118,26 +135,20 @@ export class EntryManager {
 		this.searchService.isGlobalSearchMode = value;
 	}
 
-	async saveEntry(entry: Partial<Entry>): Promise<number> {
+	async saveEntry(entry: Partial<Entry>, changes?: string[]): Promise<number> {
 		let id: number;
+		const entryProcessor = this.processors[entry.type];
 
 		if (entry.id) {
 			const editedEntry = { ...this.editedEntry };
+			
+			entryProcessor.beforeUpdate(entry, this.editedEntry, changes);
 
 			id = await this.entryRepository.update(entry);
-			this.passwordEntries = await this.getEntries();
-			this.selectedPasswords = [{ ...editedEntry, ...entry } as Entry];
+			this.entries = await this.getEntries();
+			this.selectedEntries = [{ ...editedEntry, ...entry } as Entry];
 
-			if (entry.type === 'password' && editedEntry.type === 'password') {
-				if (
-					editedEntry.icon &&
-					!editedEntry.icon.startsWith('data:image/png')
-				) {
-					this.replaceIconPath(id, editedEntry, entry);
-				} else {
-					this.getIconPath(entry);
-				}
-			}
+			entryProcessor.afterUpdate(entry, this.editedEntry, changes);
 
 			const historyEntry: HistoryEntry = {
 				entry: editedEntry,
@@ -152,14 +163,14 @@ export class EntryManager {
 			}
 
 			// reselect entry to update details in the sidebar
-			this.selectEntry(this.selectedPasswords[0] as Entry);
+			this.selectEntry(this.selectedEntries[0] as Entry);
 		} else {
 			id = await this.entryRepository.add(entry);
+			const newEntry = { ...entry, id };
 
-			if (entry.type === 'password') {
-				this.getIconPath({ ...entry, id });
-			}
-			this.passwordEntries = await this.getEntries();
+			entryProcessor.afterAdd(newEntry);
+			
+			this.entries = await this.getEntries();
 			this.searchService.reset();
 		}
 
@@ -169,15 +180,15 @@ export class EntryManager {
 	}
 
 	async setByGroup(id: number): Promise<void> {
-		this.selectedPasswords = [];
-		this.passwordEntries = await this.getEntries(id);
+		this.selectedEntries = [];
+		this.entries = await this.getEntries(id);
 	}
 
 	async bulkAdd(entries: Entry[]): Promise<number> {
 		const addedEntries = await this.entryRepository.bulkAdd(entries);
 
 		if (entries.some((x) => x.groupId === this.groupManager.selectedGroup)) {
-			this.passwordEntries = await this.getEntries();
+			this.entries = await this.getEntries();
 			this.updateEntriesSource();
 		}
 
@@ -186,30 +197,33 @@ export class EntryManager {
 		return addedEntries;
 	}
 
-	async deleteEntry(): Promise<void> {
+	async deleteEntry(): Promise<number[]> {
+		const selectedIds = this.selectedEntries.map((x) => x.id);
+
 		if (this.groupManager.selectedGroup === GroupId.RecycleBin) {
-			await this.historyManager.bulkDelete(
-				this.selectedPasswords.map((x) => x.id),
-			);
-			await this.entryRepository.bulkDelete(
-				this.selectedPasswords.map((p) => p.id),
-			);
+			await this.historyManager.bulkDelete(selectedIds);
+			await this.entryRepository.bulkDelete(selectedIds);
 
-			this.passwordEntries = await this.getEntries();
+			this.entries = await this.getEntries();
 
-			// icons must be removed only after removal of entries
-			for (const entry of this.selectedPasswords) {
-				this.removeIconPath(entry);
-			}
+			this.selectedEntries.forEach(entry => {
+				this.processors[entry.type].afterDelete(entry);
+			});
 		} else {
 			await this.entryRepository.softDelete(
-				this.selectedPasswords.map((p) => p.id) as number[],
+				this.selectedEntries.map((p) => p.id) as number[],
 			);
-			this.passwordEntries = await this.getEntries();
+			this.entries = await this.getEntries();
 		}
 
-		this.selectedPasswords = [];
+		this.selectedEntries = [];
 		this.markDirty();
+
+		return selectedIds;
+	}
+
+	async bulkDelete(ids: number[]): Promise<void> {
+		return this.entryRepository.bulkDelete(ids);
 	}
 
 	async moveEntry(targetGroupId: number): Promise<void> {
@@ -217,7 +231,7 @@ export class EntryManager {
 			this.groupManager.selectedGroup !== GroupId.AllItems &&
 			this.groupManager.selectedGroup !== GroupId.Starred
 		) {
-			this.passwordEntries = this.passwordEntries.filter(
+			this.entries = this.entries.filter(
 				(e) => !this.movedEntries.includes(e.id as number),
 			);
 			this.updateEntriesSource();
@@ -226,7 +240,7 @@ export class EntryManager {
 		const draggedEntries = [...this.movedEntries];
 		await this.entryRepository.moveEntries(draggedEntries, targetGroupId);
 
-		this.passwordEntries = await this.getEntries();
+		this.entries = await this.getEntries();
 		this.notificationService.add({
 			message: `${this.movedEntries.length > 1 ? 'Entries' : 'Entry'} moved`,
 			type: 'success',
@@ -234,7 +248,7 @@ export class EntryManager {
 		});
 
 		this.movedEntries = [];
-		this.selectedPasswords = [];
+		this.selectedEntries = [];
 
 		this.markDirty();
 	}
@@ -267,22 +281,20 @@ export class EntryManager {
 		this.markDirty();
 	}
 
+	async bulkMarkExposed(ids: number[]): Promise<void> {
+		await this.entryRepository.markExposed(ids);
+		this.entries = await this.getEntries();
+		this.updateEntriesSource();
+		
+		this.markDirty();
+	}
+
 	updateEntriesSource() {
-		this.passwordListSource.next([...(this.passwordEntries as Entry[])]);
+		this.entryListSource.next([...(this.entries as Entry[])]);
 	}
 
 	reloadEntries() {
 		this.scrollTopEntriesSource.next();
-	}
-
-	getIconPath(entry: Partial<PasswordEntry>): void {
-		if (entry.url) {
-			this.messageBroker.ipcRenderer.send(
-				IpcChannel.TryGetIcon,
-				entry.id,
-				entry.url,
-			);
-		}
 	}
 
 	updateIcon(id: number, icon: string): Promise<number> {
@@ -326,7 +338,7 @@ export class EntryManager {
 		searchPhrase,
 	]: GetSearchResultsModel): Observable<SearchResults> {
 		if (searchPhrase.length) {
-			this.selectedPasswords = [];
+			this.selectedEntries = [];
 		}
 
 		if (this.isGlobalSearch) {
@@ -369,23 +381,6 @@ export class EntryManager {
 		}
 
 		return false;
-	}
-
-	private replaceIconPath(
-		id: number,
-		editedEntry: PasswordEntry,
-		newEntry: Partial<PasswordEntry>,
-	): void {
-		this.messageBroker.ipcRenderer.send(
-			IpcChannel.TryReplaceIcon,
-			id,
-			editedEntry.icon,
-			newEntry.url,
-		);
-	}
-
-	private removeIconPath(entry: Partial<Entry>): void {
-		this.messageBroker.ipcRenderer.send(IpcChannel.RemoveIcon, entry);
 	}
 
 	private markDirty() {

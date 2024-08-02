@@ -14,6 +14,10 @@ import { FeatherModule } from 'angular-feather';
 })
 export class ViewTabComponent implements OnInit {
 	private readonly formBuilder = inject(FormBuilder);
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly configService = inject(ConfigService);
+
 	private readonly _viewForm = this.formBuilder.group({
 		darkTheme: [false],
 		displayIcons: [false],
@@ -22,12 +26,6 @@ export class ViewTabComponent implements OnInit {
 	get viewForm() {
 		return this._viewForm;
 	}
-
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		private readonly workspaceService: WorkspaceService,
-		private readonly configService: ConfigService,
-	) {}
 
 	ngOnInit(): void {
 		this.viewForm.setValue({

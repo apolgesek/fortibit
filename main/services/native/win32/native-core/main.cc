@@ -460,6 +460,47 @@ namespace NativeCore
     args.GetReturnValue().Set(String::NewFromTwoByte(isolate, (const uint16_t *)pSubjectName).ToLocalChecked());
   }
 
+  void ReadRegistryKey(const FunctionCallbackInfo<Value> &args)
+  {
+    Isolate *isolate = args.GetIsolate();
+
+    // Convert V8 strings to std::string
+    v8::String::Utf8Value subkeyStr(isolate, args[0]);
+    std::string subkey = *subkeyStr;
+
+    v8::String::Utf8Value nameStr(isolate, args[1]);
+    std::string name = *nameStr;
+
+    // Convert std::string to std::wstring
+    std::wstring subkeyWstr(subkey.begin(), subkey.end());
+    std::wstring nameWstr(name.begin(), name.end());
+
+    // Get LPCWSTR from std::wstring
+    LPCWSTR subkeyCStr = subkeyWstr.c_str();
+    LPCWSTR nameCStr = nameWstr.c_str();
+
+    HKEY hKey;
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, subkeyCStr, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
+    {
+      args.GetReturnValue().Set(NULL);
+      return;
+    }
+
+    BYTE valueData[8192];
+    DWORD dataSize = sizeof(valueData);
+    
+    if (RegQueryValueEx(hKey, nameCStr, NULL, NULL, valueData, &dataSize) != ERROR_SUCCESS)
+    {
+      args.GetReturnValue().SetNull();
+      return;
+    }
+
+    Local<String> result = String::NewFromTwoByte(isolate, (const uint16_t *)valueData).ToLocalChecked();
+    RegCloseKey(hKey);
+
+    args.GetReturnValue().Set(result);
+  }
+
   void Initialize(Local<Object> exports)
   {
     NODE_SET_METHOD(exports, "pressPhraseKey", PressPhraseKey);
@@ -472,6 +513,7 @@ namespace NativeCore
     NODE_SET_METHOD(exports, "setLivePreviewBitmap", SetLivePreviewBitmap);
     NODE_SET_METHOD(exports, "verifySignature", VerifySignature);
     NODE_SET_METHOD(exports, "certificateInfo", CertificateInfo);
+    NODE_SET_METHOD(exports, "readRegistryKey", ReadRegistryKey);
   }
 
   NODE_MODULE(NODE_GYP_MODULE_NAME, Initialize);

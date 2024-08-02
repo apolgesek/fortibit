@@ -85,7 +85,7 @@ test.describe('Workspace > Entry & group', async () => {
 
 	test('Check entry modal opened', async () => {
 		await firstWindow.getByRole('button', { name: /add entry/i }).click();
-		const modalHeader = firstWindow.getByText(/add entry in general/i);
+		const modalHeader = firstWindow.getByText(/add\s*entry\s*in\s*general/i);
 		await modalHeader.waitFor({ state: 'visible', timeout: 4000 });
 
 		expect(modalHeader).toBeVisible();
@@ -111,7 +111,7 @@ test.describe('Workspace > Entry & group', async () => {
 		await firstWindow.getByRole('main').getByRole('listitem').first().click();
 		await firstWindow.keyboard.press('Control+E');
 		await firstWindow
-			.getByText(/edit entry in general/i)
+			.getByText(/edit\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'visible', timeout: 4000 });
 		await firstWindow.getByPlaceholder(/title/i).fill('Different title');
 		await firstWindow.getByText(/confirm/i).click();
@@ -133,11 +133,11 @@ test.describe('Workspace > Entry & group', async () => {
 	test('Check entry modal closed', async () => {
 		await firstWindow.getByRole('button', { name: /add entry/i }).click();
 		await firstWindow
-			.getByText(/add entry in general/i)
+			.getByText(/add\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'visible', timeout: 4000 });
 		await firstWindow.keyboard.press('Escape');
 		await firstWindow
-			.getByText(/add entry in general/i)
+			.getByText(/add\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'hidden', timeout: 4000 });
 	});
 
@@ -323,10 +323,10 @@ test.describe('Workspace > Entry & group', async () => {
 			username: 'Bbbb',
 			config: { close: true },
 		});
-		await firstWindow.getByPlaceholder(/search in group/i).focus();
+
 		const searchPhrase = 'User';
-		await firstWindow.keyboard.insertText(searchPhrase);
-		const resultsBadge = firstWindow.getByText(/found \d entr(y|ies)/i);
+		await firstWindow.getByPlaceholder(/search in group/i).fill(searchPhrase);
+		const resultsBadge = firstWindow.getByText(/\d found/i);
 		const resultsBadgeText = await resultsBadge.innerText();
 		const row = firstWindow.getByText(/username1/i);
 		const rowHTML = await row.innerHTML();
@@ -345,7 +345,7 @@ test.describe('Workspace > Entry & group', async () => {
 			.getByRole('button', { name: /search (all|selected) groups?/i })
 			.click();
 		await firstWindow.getByPlaceholder(/search all/i).type('User');
-		const resultsBadge = firstWindow.getByText(/found \d entr(y|ies)/i);
+		const resultsBadge = firstWindow.getByText(/\d found/i);
 		const resultsBadgeText = await resultsBadge.innerText();
 
 		expect(resultsBadgeText).toMatch('2');
@@ -355,7 +355,7 @@ test.describe('Workspace > Entry & group', async () => {
 		await addEntry(firstWindow);
 		const title = await firstWindow.getByPlaceholder(/title/i).inputValue();
 		await firstWindow
-			.getByText(/add entry in general/i)
+			.getByText(/add\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'hidden', timeout: 4000 });
 		await firstWindow.getByRole('main').getByRole('listitem').first().click();
 		const header = await firstWindow.getByText(/general\s*title1/i).innerText();
@@ -363,7 +363,7 @@ test.describe('Workspace > Entry & group', async () => {
 		expect(header).toMatch(title);
 
 		const entryHistoryButton = await firstWindow
-			.getByRole('button', { name: /entry history/i })
+			.getByText(/show history/i)
 			.count();
 		const favoriteButton = await firstWindow
 			.getByRole('button', { name: /add to favorites/i })
@@ -479,7 +479,7 @@ test.describe('Workspace > Entry & group', async () => {
 	});
 
 	test('Check password generated on modal open', async () => {
-		await firstWindow.getByText(/tools/i).click();
+		await firstWindow.getByText(/^\s*tools\s*$/i).click();
 		await firstWindow.getByText(/generator/i).click();
 		await firstWindow
 			.getByRole('dialog')
@@ -491,7 +491,7 @@ test.describe('Workspace > Entry & group', async () => {
 	});
 
 	test('Check password generated when settings changed', async () => {
-		await firstWindow.getByText(/tools/i).click();
+		await firstWindow.getByText(/^\s*tools\s*$/i).click();
 		await firstWindow.getByText(/generator/i).click();
 		await firstWindow
 			.getByRole('dialog')
@@ -549,7 +549,7 @@ test.describe('Workspace > Entry & group', async () => {
 		await editButton.click();
 
 		await firstWindow
-			.getByText(/edit entry in general/i)
+			.getByText(/edit\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'visible', timeout: 4000 });
 	});
 
@@ -558,12 +558,12 @@ test.describe('Workspace > Entry & group', async () => {
 		await firstWindow.getByRole('main').getByRole('listitem').first().click();
 		await firstWindow.keyboard.press('Control+E');
 		await firstWindow
-			.getByText(/edit entry in general/i)
+			.getByText(/edit\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'visible', timeout: 4000 });
 		await firstWindow.getByPlaceholder(/title/i).type('Mail');
 		await firstWindow.getByText(/confirm/i).click();
 		await firstWindow
-			.getByText(/edit entry in general/i)
+			.getByText(/edit\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'hidden', timeout: 4000 });
 
 		await firstWindow.getByRole('menubar').getByText(/tools/i).click();
@@ -574,18 +574,17 @@ test.describe('Workspace > Entry & group', async () => {
 		await firstWindow.getByRole('button', { name: /delete/i }).click();
 
 		await expect(
-			firstWindow.getByRole('dialog').getByText(/no entry to delete found/i),
+			firstWindow.getByRole('alert').getByText(/maintenance completed/i),
 		).toBeVisible();
 
 		const daysInput = firstWindow
 			.getByRole('dialog')
-			.getByLabel(/delete history entries older than/i);
-		await daysInput.clear();
-		await daysInput.type('0');
+			.getByTestId('history-days');
+		await daysInput.fill('0');
 		await firstWindow.getByRole('button', { name: /delete/i }).click();
 
 		await expect(
-			firstWindow.getByRole('dialog').getByText(/1\s+entry\s+deleted/i),
+			firstWindow.getByRole('alert').getByText(/maintenance completed/i),
 		).toBeVisible();
 	});
 });
@@ -595,7 +594,7 @@ test.describe('Workspace > Entry history', async () => {
 		await firstWindow.getByRole('main').getByRole('listitem').first().click();
 		await firstWindow.keyboard.press('Control+E');
 		await firstWindow
-			.getByText(/edit entry in general/i)
+			.getByText(/edit\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'visible', timeout: 4000 });
 		await firstWindow.getByPlaceholder(/title/i).type('Aaaaa');
 		await firstWindow
@@ -603,9 +602,9 @@ test.describe('Workspace > Entry history', async () => {
 			.getByRole('button', { name: /confirm/i })
 			.click();
 		await firstWindow
-			.getByText(/edit entry in general/i)
+			.getByText(/edit\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'hidden', timeout: 4000 });
-		await firstWindow.getByLabel(/entry history/i).click();
+		await firstWindow.getByText(/show history/i).click();
 		await firstWindow
 			.getByRole('dialog')
 			.getByText(/entry history/i)
@@ -638,7 +637,7 @@ test.describe('Workspace > Entry history', async () => {
 		await addHistoryEntry();
 		await firstWindow.getByRole('dialog').getByText(/view/i).click();
 		await firstWindow
-			.getByText(/entry history/i)
+			.getByText(/show history/i)
 			.waitFor({ state: 'visible', timeout: 4000 });
 		await firstWindow
 			.getByRole('dialog')
@@ -662,7 +661,7 @@ test.describe('Workspace > Entry history', async () => {
 		await addHistoryEntry();
 		await firstWindow.getByRole('dialog').getByText(/view/i).click();
 		await firstWindow
-			.getByText(/entry history/i)
+			.getByText(/show history/i)
 			.waitFor({ state: 'visible', timeout: 4000 });
 		await firstWindow
 			.getByRole('dialog')
@@ -735,7 +734,10 @@ test.describe('Workspace > File', async () => {
 		await authenticate(firstWindow);
 		await addEntry(firstWindow, { config: { close: true } });
 		await firstWindow.getByRole('menubar').getByText(/file/i).click();
-		await firstWindow.getByRole('menubar').getByText(/save ctrl\+s/i).click();
+		await firstWindow
+			.getByRole('menubar')
+			.getByText(/save ctrl\+s/i)
+			.click();
 
 		expect(await firstWindow.getByRole('alert').innerText()).toMatch(
 			/database saved/i,

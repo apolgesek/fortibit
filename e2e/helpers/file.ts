@@ -1,6 +1,6 @@
-import { copyFileSync } from "fs";
+import { copyFileSync } from 'fs';
 
 export function setupTestFiles() {
-  copyFileSync('./files/templates/test.fbit', './files/test.fbit');
-	copyFileSync('./files/templates/test.fbit', './files/test_copy.fbit');
+	copyFileSync('./e2e/files/templates/test.fbit', './e2e/files/test.fbit');
+	copyFileSync('./e2e/files/templates/test.fbit', './e2e/files/test_copy.fbit');
 }

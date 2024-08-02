@@ -32,6 +32,7 @@ import {
 	UpdateService,
 	Win32CommandHandler,
 } from '../services/update';
+import { IWebApiService, WebApiService } from '../services/web-api';
 import { IWindowService, WindowService } from '../services/window';
 import { ServiceCollection } from './index';
 
@@ -61,6 +62,11 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(IPerformanceService),
 				this.get(INativeApiService),
 			),
+		);
+
+		this.set(
+			IWebApiService,
+			new WebApiService(this.get(IConfigService), this.get(IWindowService)),
 		);
 
 		this.set(
@@ -106,6 +112,7 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(IConfigService),
 				this.get(IWindowService),
 				this.get(IIconService),
+				this.get(IWebApiService),
 				this.get(IImportService),
 				this.get(IExportService),
 				this.get(INativeApiService),

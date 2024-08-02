@@ -1,14 +1,7 @@
 import { CommonModule } from '@angular/common';
-import {
-	Component,
-	DestroyRef,
-	Inject,
-	OnInit,
-	Type
-} from '@angular/core';
+import { Component, DestroyRef, OnInit, Type, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GroupId } from '@app/core/enums';
-import { IMessageBroker } from '@app/core/models';
 import {
 	EntryManager,
 	GroupManager,
@@ -43,7 +36,7 @@ import { PasswordEntryDetailsComponent } from './password-entry-details/password
 		TooltipComponent,
 		LinkPipe,
 		IsPasswordPipe,
-		PrettyShortcutComponent
+		PrettyShortcutComponent,
 	],
 })
 export class DetailsSidebarComponent implements OnInit {
@@ -58,19 +51,17 @@ export class DetailsSidebarComponent implements OnInit {
 	public entry: Entry;
 	public detailsPartial: Type<unknown> = PasswordEntryDetailsComponent;
 
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly workspaceService: WorkspaceService,
-		private readonly entryManager: EntryManager,
-		private readonly groupManager: GroupManager,
-		private readonly modalService: ModalService,
-		private readonly configService: ConfigService,
-		private readonly notificationService: NotificationService,
-	) {}
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly entryManager = inject(EntryManager);
+	private readonly groupManager = inject(GroupManager);
+	private readonly modalService = inject(ModalService);
+	private readonly configService = inject(ConfigService);
+	private readonly notificationService = inject(NotificationService);
 
-	get isEntrySelected(): boolean {
-		return this.entryManager.selectedPasswords.length === 1;
+	get selectedEntries(): number {
+		return this.entryManager.selectedEntries.length;
 	}
 
 	get databaseInformation(): { name: string } {
@@ -113,10 +104,6 @@ export class DetailsSidebarComponent implements OnInit {
 				this.entryManager.getEntryHistory(entry.id);
 				this.detailsPartial = this.detailsComponents.get(this.entry.type);
 			});
-	}
-
-	openEntryHistory() {
-		this.modalService.openEntryHistoryWindow();
 	}
 
 	openAutotypeInformation() {
@@ -171,5 +158,21 @@ export class DetailsSidebarComponent implements OnInit {
 				alive: 10 * 1000,
 			});
 		}
+	}
+
+	openEditEntryWindow() {
+		this.modalService.openEditEntryWindow();
+	}
+
+	openDeleteEntryWindow() {
+		this.modalService.openDeleteEntryWindow();
+	}
+
+	openMoveEntryWindow() {
+		this.modalService.openMoveEntryWindow();
+	}
+
+	openEntryHistoryWindow() {
+		this.modalService.openEntryHistoryWindow();
 	}
 }

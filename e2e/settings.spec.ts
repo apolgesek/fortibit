@@ -82,9 +82,15 @@ test.describe('Settings', async () => {
 			.getByRole('dialog')
 			.getByLabel(/locked due to inactivity/i);
 
-		await firstWindow.getByRole('dialog').getByLabel(/idle time lock/i).fill('60');
+		await firstWindow
+			.getByRole('dialog')
+			.getByLabel(/idle time lock/i)
+			.fill('60');
 		if (!(await lockedDueInactivityCheckbox.isChecked())) {
-			await firstWindow.getByRole('dialog').getByText(/locked due to inactivity/i).click();
+			await firstWindow
+				.getByRole('dialog')
+				.getByText(/locked due to inactivity/i)
+				.click();
 		}
 
 		await firstWindow.waitForTimeout(1000);
@@ -93,12 +99,18 @@ test.describe('Settings', async () => {
 		await authenticate(firstWindow);
 		await firstWindow.getByRole('banner').waitFor({ state: 'visible' });
 
-		const entries = await firstWindow.getByRole('main').getByRole('listitem').count();
+		const entries = await firstWindow
+			.getByRole('main')
+			.getByRole('listitem')
+			.count();
 		expect(entries).toBe(1);
 	});
 
 	test('Check open insecure URL prompt dialog', async () => {
-		await addEntry(firstWindow, { config: { close: true }, url: 'http://fortibit.com' });
+		await addEntry(firstWindow, {
+			config: { close: true },
+			url: 'http://fortibit.com',
+		});
 		await firstWindow.keyboard.press('Control+.');
 		await firstWindow
 			.getByRole('dialog')
@@ -108,16 +120,20 @@ test.describe('Settings', async () => {
 			.getByRole('dialog')
 			.getByLabel(/show insecure url prompt/i);
 
-			if (!(await showInsecureUrlPromptCheckbox.isChecked())) {
-				await firstWindow.getByRole('dialog').getByText(/show insecure url prompt/i);
-			}
+		if (!(await showInsecureUrlPromptCheckbox.isChecked())) {
+			await firstWindow
+				.getByRole('dialog')
+				.getByText(/show insecure url prompt/i);
+		}
 
-			await firstWindow.keyboard.press('Escape');
-			const entry = firstWindow.getByRole('listitem').getByText(/username1/i);
-			await entry.click();
-			await firstWindow.getByText(/fortibit.com/i).click();
-			const insecureUrlDialog = firstWindow.getByRole('dialog').getByRole('heading', { name: /open url/i });
+		await firstWindow.keyboard.press('Escape');
+		const entry = firstWindow.getByRole('listitem').getByText(/username1/i);
+		await entry.click();
+		await firstWindow.getByText(/fortibit.com/i).click();
+		const insecureUrlDialog = firstWindow
+			.getByRole('dialog')
+			.getByRole('heading', { name: /open url/i });
 
-			await expect(insecureUrlDialog).toBeVisible();
+		await expect(insecureUrlDialog).toBeVisible();
 	});
 });

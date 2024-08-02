@@ -34,6 +34,7 @@ import { IExportService } from '../export';
 import { IIconService } from '../icon';
 import { IImportService } from '../import';
 import { INativeApiService } from '../native';
+import { IWebApiService } from '../web-api';
 import { IWindowService } from '../window';
 import { IDatabaseService } from './database-service.model';
 import { SaveFilePayload } from './save-file-payload';
@@ -90,6 +91,7 @@ export class DatabaseService implements IDatabaseService {
 		@IConfigService private readonly _configService: IConfigService,
 		@IWindowService private readonly _windowService: IWindowService,
 		@IWindowService private readonly _iconService: IIconService,
+		@IWebApiService private readonly _webApiService: IWebApiService,
 		@IImportService private readonly _importService: IImportService,
 		@IExportService private readonly _exportService: IExportService,
 		@INativeApiService private readonly _nativeApiService: INativeApiService,
@@ -124,9 +126,12 @@ export class DatabaseService implements IDatabaseService {
 			},
 		);
 
-		ipcMain.handle(IpcChannel.DecryptBiometrics, async (event: IpcMainEvent) => {
-			return await this.biometricsDecrypt(event);
-		});
+		ipcMain.handle(
+			IpcChannel.DecryptBiometrics,
+			async (event: IpcMainEvent) => {
+				return await this.biometricsDecrypt(event);
+			},
+		);
 
 		ipcMain.handle(
 			IpcChannel.ValidatePassword,
@@ -150,16 +155,22 @@ export class DatabaseService implements IDatabaseService {
 			},
 		);
 
-		ipcMain.handle(IpcChannel.OpenFile, async (event: IpcMainEvent, path: string) => {
-			return await this.openDatabase(event, path);
-		});
+		ipcMain.handle(
+			IpcChannel.OpenFile,
+			async (event: IpcMainEvent, path: string) => {
+				return await this.openDatabase(event, path);
+			},
+		);
 
-		ipcMain.handle(IpcChannel.DropFile, (event: IpcMainEvent, filePath: string) => {
-			this.setDatabaseEntry(event.sender.id, filePath);
-			this._windowService.setTitle(event.sender.id, basename(filePath));
+		ipcMain.handle(
+			IpcChannel.DropFile,
+			(event: IpcMainEvent, filePath: string) => {
+				this.setDatabaseEntry(event.sender.id, filePath);
+				this._windowService.setTitle(event.sender.id, basename(filePath));
 
-			return this.getFilePath(event.sender.id);
-		});
+				return this.getFilePath(event.sender.id);
+			},
+		);
 
 		ipcMain.handle(
 			IpcChannel.ToggleBiometricsUnlock,
@@ -503,13 +514,17 @@ export class DatabaseService implements IDatabaseService {
 			}
 
 			this._windowService.windows.forEach((w) =>
-			w.browserWindow.webContents.send(
-				IpcChannel.GetRecentFiles,
-				this._configService.appConfig.workspaces.recentlyOpened,
-			),
-		);
+				w.browserWindow.webContents.send(
+					IpcChannel.GetRecentFiles,
+					this._configService.appConfig.workspaces.recentlyOpened,
+				),
+			);
 
-		return { status: true, file: finalFilePath, notify: saveFilePayload.config?.notify ?? true };
+			return {
+				status: true,
+				file: finalFilePath,
+				notify: saveFilePayload.config?.notify ?? true,
+			};
 		} catch (err) {
 			return { status: false, error: err };
 		}
@@ -537,7 +552,10 @@ export class DatabaseService implements IDatabaseService {
 		);
 	}
 
-	public async openDatabase(event: IpcMainEvent, path: string): Promise<string> {
+	public async openDatabase(
+		event: IpcMainEvent,
+		path: string,
+	): Promise<string> {
 		let openDialogReturnValue;
 
 		if (!path) {
@@ -584,7 +602,7 @@ export class DatabaseService implements IDatabaseService {
 				event.sender.id,
 				openDialogReturnValue?.filePaths[0] ?? path,
 			);
-			
+
 			return this.getFilePath(event.sender.id);
 		}
 	}
@@ -620,10 +638,17 @@ export class DatabaseService implements IDatabaseService {
 				}
 
 				payload.decrypted = JSON.stringify(parsedDb);
+
 				this._iconService.getIcons(
 					window.browserWindow.id,
 					parsedDb.tables.entries.filter((x) => x.type === 'password'),
 				);
+
+				this._webApiService.checkSecureProtocol(
+					window.browserWindow.id,
+					parsedDb.tables.entries.filter((x) => x.type === 'password'),
+				);
+				
 				this._windowService.setIdleTimer();
 
 				window.browserWindow.webContents.send(IpcChannel.DecryptedContent, {

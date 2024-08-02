@@ -104,7 +104,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 	@noOpenModal
 	@authenticated
 	public deleteEntry() {
-		if (this.entryManager.selectedPasswords.length) {
+		if (this.entryManager.selectedEntries.length) {
 			this.modalService.openDeleteEntryWindow();
 		}
 	}
@@ -117,7 +117,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 			!this.groupManager.builtInGroups
 				.map((x) => x.id)
 				.includes(this.groupManager.selectedGroup) &&
-			this.entryManager.selectedPasswords.length === 0
+			this.entryManager.selectedEntries.length === 0
 		) {
 			this.modalService.openDeleteGroupWindow();
 		}
@@ -139,7 +139,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 	@noOpenModal
 	@authenticated
 	public editEntry() {
-		if (this.entryManager.selectedPasswords.length === 1) {
+		if (this.entryManager.selectedEntries.length === 1) {
 			this.modalService.openEditEntryWindow();
 		}
 	}
@@ -147,7 +147,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 	@noOpenModal
 	@authenticated
 	public moveEntry() {
-		if (this.entryManager.selectedPasswords.length) {
+		if (this.entryManager.selectedEntries.length) {
 			this.modalService.openMoveEntryWindow();
 		}
 	}
@@ -156,11 +156,11 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 	@authenticated
 	public copyPassword() {
 		if (
-			this.entryManager.selectedPasswords.length === 1 &&
-			this.entryManager.selectedPasswords[0].type === 'password'
+			this.entryManager.selectedEntries.length === 1 &&
+			this.entryManager.selectedEntries[0].type === 'password'
 		) {
 			this.clipboardService.copyEntryDetails(
-				this.entryManager.selectedPasswords[0],
+				this.entryManager.selectedEntries[0],
 				'password',
 			);
 		}
@@ -170,11 +170,11 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 	@authenticated
 	public copyUsername() {
 		if (
-			this.entryManager.selectedPasswords.length === 1 &&
-			this.entryManager.selectedPasswords[0].type === 'password'
+			this.entryManager.selectedEntries.length === 1 &&
+			this.entryManager.selectedEntries[0].type === 'password'
 		) {
 			this.clipboardService.copyEntryDetails(
-				this.entryManager.selectedPasswords[0],
+				this.entryManager.selectedEntries[0],
 				'username',
 			);
 		}
@@ -197,10 +197,10 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 	@noOpenModal
 	@authenticated
 	public selectAllEntries() {
-		if (this.entryManager.selectedPasswords.length) {
-			this.entryManager.selectedPasswords = [];
-			this.entryManager.selectedPasswords.push(
-				...this.entryManager.passwordEntries,
+		if (this.entryManager.selectedEntries.length) {
+			this.entryManager.selectedEntries = [];
+			this.entryManager.selectedEntries.push(
+				...this.entryManager.entries,
 			);
 		}
 	}

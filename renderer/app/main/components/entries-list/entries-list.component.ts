@@ -8,16 +8,15 @@ import {
 	Component,
 	DestroyRef,
 	ElementRef,
-	Inject,
 	OnInit,
 	QueryList,
 	Type,
 	ViewChild,
 	ViewChildren,
+	inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GroupId } from '@app/core/enums';
-import { IHotkeyHandler } from '@app/core/models';
 import {
 	ConfigService,
 	EntryManager,
@@ -54,15 +53,6 @@ import { ToolbarComponent } from '../toolbar/toolbar.component';
 	templateUrl: './entries-list.component.html',
 	styleUrls: ['./entries-list.component.scss'],
 	animations: [
-		trigger('slideIn', [
-			transition(':enter', [
-				style({ transform: 'translateY(-100%)', height: 'auto' }),
-				animate('150ms ease-in', style({ transform: 'translateY(0)' })),
-			]),
-			transition(':leave', [
-				animate('150ms ease-out', style({ transform: 'translateY(-100%)' })),
-			]),
-		]),
 		slideDown,
 	],
 	standalone: true,
@@ -99,18 +89,18 @@ export class EntriesTableComponent implements OnInit {
 	public multiEntryMenuItems: MenuItem[] = [];
 	public iconsEnabled: boolean;
 
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		private readonly workspaceService: WorkspaceService,
-		private readonly entryManager: EntryManager,
-		private readonly groupManager: GroupManager,
-		private readonly searchService: SearchService,
-		private readonly configService: ConfigService,
-		private readonly clipboardService: ClipboardService,
-		private readonly contextMenuBuilderService: ContextMenuBuilderService,
-		private readonly modalService: ModalService,
-		@Inject(HotkeyHandler) private readonly hotkeyService: IHotkeyHandler,
-	) {
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly entryManager = inject(EntryManager);
+	private readonly groupManager = inject(GroupManager);
+	private readonly searchService = inject(SearchService);
+	private readonly configService = inject(ConfigService);
+	private readonly clipboardService = inject(ClipboardService);
+	private readonly contextMenuBuilderService = inject(ContextMenuBuilderService);
+	private readonly modalService = inject(ModalService);
+	private readonly hotkeyHandler = inject(HotkeyHandler);
+
+	constructor() {
 		this.passwordList$ = this.entryManager.entries$;
 		this.searchPhrase$ = this.searchService.searchPhrase$;
 	}
@@ -120,7 +110,7 @@ export class EntriesTableComponent implements OnInit {
 	}
 
 	get selectedEntries(): Entry[] {
-		return this.entryManager.selectedPasswords;
+		return this.entryManager.selectedEntries;
 	}
 
 	get movedEntries(): number[] {
@@ -128,15 +118,15 @@ export class EntriesTableComponent implements OnInit {
 	}
 
 	get passwordEntries(): Entry[] {
-		return this.entryManager.passwordEntries ?? [];
+		return this.entryManager.entries ?? [];
 	}
 
 	get fileName(): string {
 		return this.workspaceService.databaseFileName;
 	}
 
-	get searchPhrase(): string {
-		return this.searchService.searchPhraseValue;
+	get searchPhraseSnapshot(): string {
+		return this.searchService.searchPhraseSnapshot;
 	}
 
 	get entriesFound$(): Observable<number> {
@@ -200,7 +190,7 @@ export class EntriesTableComponent implements OnInit {
 	}
 
 	selectEntry(event: Event, entry: PasswordEntry) {
-		if (this.hotkeyService.isMultiselectionKeyDown(event)) {
+		if (this.hotkeyHandler.isMultiselectionKeyDown(event)) {
 			const foundIndex = this.selectedEntries.findIndex(
 				(p) => p.id === entry.id,
 			);
@@ -212,7 +202,7 @@ export class EntriesTableComponent implements OnInit {
 
 			this.selectedEntries.push(entry);
 		} else {
-			this.entryManager.selectedPasswords = [entry];
+			this.entryManager.selectedEntries = [entry];
 			this.entryManager.selectEntry(entry);
 		}
 	}

@@ -1,17 +1,15 @@
-import { CommonModule } from '@angular/common';
 import {
 	AfterViewInit,
 	Component,
 	DestroyRef,
 	ElementRef,
-	Inject,
 	NgZone,
 	OnInit,
 	ViewChild,
+	inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DbManager } from '@app/core/database';
-import { IHotkeyHandler, IMessageBroker } from '@app/core/models';
 import {
 	ConfigService,
 	NotificationService,
@@ -30,7 +28,7 @@ import { FeatherModule } from 'angular-feather';
 import { exportDB } from 'dexie-export-import';
 import { AppConfig } from 'environments/environment';
 import { HotkeyHandler, MessageBroker } from 'injection-tokens';
-import { Observable, fromEvent, merge, skip } from 'rxjs';
+import { Observable, fromEvent, merge } from 'rxjs';
 
 @Component({
 	selector: 'app-menu-bar',
@@ -38,7 +36,6 @@ import { Observable, fromEvent, merge, skip } from 'rxjs';
 	styleUrls: ['./menu-bar.component.scss'],
 	standalone: true,
 	imports: [
-		CommonModule,
 		FeatherModule,
 		MenuDirective,
 		DropdownDirective,
@@ -56,17 +53,15 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 	public hotkeys: { [key in keyof Partial<typeof HotkeyLabel>]: string };
 	public recentFiles: string[];
 
-	constructor(
-		private readonly zone: NgZone,
-		private readonly destroyRef: DestroyRef,
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		@Inject(HotkeyHandler) private readonly hotkeyHandler: IHotkeyHandler,
-		private readonly configService: ConfigService,
-		private readonly workspaceService: WorkspaceService,
-		private readonly modalService: ModalService,
-		private readonly db: DbManager,
-		private readonly notificationService: NotificationService,
-	) {}
+	private readonly zone = inject(NgZone);
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly hotkeyHandler = inject(HotkeyHandler);
+	private readonly configService = inject(ConfigService);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly modalService = inject(ModalService);
+	private readonly db = inject(DbManager);
+	private readonly notificationService = inject(NotificationService);
 
 	get isDatabasePristine(): boolean {
 		return !!this.workspaceService.isSynced;
@@ -192,7 +187,7 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 			this.notificationService.add({
 				type: 'error',
 				message: err,
-				alive: 8000,
+				alive: 10 * 1000,
 			});
 		}
 	}

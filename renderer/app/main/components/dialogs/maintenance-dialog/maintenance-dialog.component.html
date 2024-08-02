@@ -18,65 +18,72 @@
 					If you want to delete all history entries type "0" in the input below.
 				</div>
 			</div>
-			<div class="inputgroup" style="margin-top: 2rem">
-				<div style="display: flex; flex-direction: column">
-					<label class="label" for="historyDays"
-						>Delete history entries older than (days):</label
-					>
-					<span style="color: #63797d">Range: 0-999</span>
+			<div style="position: relative">
+				<div
+					class="inputgroup"
+					style="margin-top: 2rem; position: relative"
+					formGroupName="historyDays"
+				>
+					<input
+						type="checkbox"
+						style="margin-left: 0"
+						id="deleteHistory"
+						formControlName="enabled"
+					/>
+					<label class="label" for="deleteHistory"></label>
+					<label style="display: flex; flex-direction: column" class="complex-label" for="deleteHistory">
+						<span
+							>Delete history entries older than (days):</span>
+						<span style="color: #63797d">Range: 0-999</span>
+					</label>
+					<input
+						id="historyDays"
+						data-testid="history-days"
+						type="number"
+						[attr.aria-invalid]="
+							isControlInvalid(maintenanceForm.get('historyDays'))
+						"
+						aria-describedby="history-days-invalid"
+						class="number"
+						formControlName="value"
+						(keydown)="onKeyDown($event)"
+						(paste)="$event.preventDefault()"
+						(input)="onNumberChange($event, 'historyDays', 3)"
+					/>
 				</div>
-				<input
-					id="historyDays"
-					type="number"
-					[attr.aria-invalid]="
-						isControlInvalid(maintenanceForm.get('historyDays'))
-					"
-					aria-describedby="history-days-invalid"
-					class="number"
-					formControlName="historyDays"
-					(keydown)="onKeyDown($event)"
-					(paste)="$event.preventDefault()"
-					(input)="onNumberChange($event, 'historyDays', 3)"
-				/>
-			</div>
-			<div
-				*ngIf="isControlInvalid(maintenanceForm.get('historyDays'))"
-				class="validation-error"
-				id="history-days-invalid"
-			>
-				Invalid value
-			</div>
-			<button type="submit" class="primary-btn" [disabled]="cleaningInProgress">
-				Delete
-			</button>
-		</form>
+				@if (isControlInvalid(maintenanceForm.get('historyDays'))) {
+					<div class="validation-error" id="history-days-invalid">
+						Invalid value
+					</div>
+				}
 
-		<ng-container *ngIf="cleaningInProgress === false">
-			<div *ngIf="removedHistoryEntries > 0" class="result info">
-				<div class="status">
-					{{ removedHistoryEntries }}
-					<ng-container [ngPlural]="removedHistoryEntries">
-						<ng-template ngPluralCase="=1">entry</ng-template>
-						<ng-template ngPluralCase="few">entries</ng-template>
-					</ng-container>
-					deleted
+				<div
+					class="inputgroup"
+					style="margin-top: 2rem"
+					formGroupName="emptyRecycleBin"
+				>
+					<div style="display: flex; flex-direction: column">
+						<input
+							type="checkbox"
+							style="margin-left: 0"
+							id="emptyRecycleBin"
+							formControlName="enabled"
+						/>
+						<label class="label" for="emptyRecycleBin">Empty recycle bin</label>
+					</div>
 				</div>
+				<button
+					type="submit"
+					class="primary-btn"
+					[disabled]="cleaningInProgress"
+				>
+					Delete
+				</button>
+				@if (cleaningInProgress) {
+					<div class="overlay"></div>
+				}
 			</div>
-			<div *ngIf="removedHistoryEntries === 0" class="result success">
-				<div class="status">No entry to delete found</div>
-			</div>
-		</ng-container>
-		<ng-container *ngIf="cleaningInProgress">
-			<div class="result row">
-				<div class="lds-ring">
-					<div></div>
-					<div></div>
-					<div></div>
-					<div></div>
-				</div>
-				Cleaning... Please wait.
-			</div>
-		</ng-container>
+		</form>
 	</div>
 	<div class="footer-container">
 		<button #autofocus type="button" class="secondary-btn" (click)="close()">

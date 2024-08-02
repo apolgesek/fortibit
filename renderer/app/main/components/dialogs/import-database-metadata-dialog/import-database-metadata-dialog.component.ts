@@ -1,6 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, Inject } from '@angular/core';
-import { IMessageBroker } from '@app/core/models';
+import { Component, ComponentRef, inject } from '@angular/core';
 import { ModalRef, WorkspaceService } from '@app/core/services';
 import { NotificationService } from '@app/core/services/notification.service';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -23,19 +21,17 @@ export type ImportDatabaseMetadataDialogDataPayload = {
 	templateUrl: './import-database-metadata-dialog.component.html',
 	styleUrls: ['./import-database-metadata-dialog.component.scss'],
 	standalone: true,
-	imports: [CommonModule, ModalComponent],
+	imports: [ModalComponent],
 })
 export class ImportDatabaseMetadataDialogComponent implements IModal {
 	ref!: ComponentRef<ImportDatabaseMetadataDialogComponent>;
 	additionalData?: IAdditionalData<ImportDatabaseMetadataDialogDataPayload>;
 	isConfirmButtonLocked = false;
 
-	constructor(
-		private readonly workspaceService: WorkspaceService,
-		private readonly modalRef: ModalRef,
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly notificationService: NotificationService,
-	) {}
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly modalRef = inject(ModalRef);
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly notificationService = inject(NotificationService);
 
 	async confirm() {
 		try {
@@ -70,7 +66,7 @@ export class ImportDatabaseMetadataDialogComponent implements IModal {
 			this.notificationService.add({
 				type: 'error',
 				message: err,
-				alive: 8000,
+				alive: 10 * 1000,
 			});
 			this.isConfirmButtonLocked = false;
 		}

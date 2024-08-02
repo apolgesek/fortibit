@@ -47,6 +47,7 @@ import {
 	Key,
 	Plus,
 	Minus,
+	Move,
 	PlusCircle,
 	RefreshCw,
 	RefreshCcw,
@@ -64,7 +65,7 @@ import {
 	Shield,
 	File,
 	Lock,
-	ChevronLeft
+	ChevronLeft,
 } from 'angular-feather/icons';
 import { MessageBroker, HotkeyHandler } from 'injection-tokens';
 import 'zone.js';
@@ -93,6 +94,8 @@ function initializeApp(
 		const config = await messageBroker.ipcRenderer.invoke(
 			IpcChannel.GetAppConfig,
 		);
+
+		console.log(config);
 		configService.setConfig(config);
 
 		await db.delete();
@@ -146,7 +149,8 @@ const icons = {
 	Heart,
 	Shield,
 	File,
-	Lock
+	Lock,
+	Move
 };
 
 bootstrapApplication(AppComponent, {

@@ -5,6 +5,7 @@ import {
 	Injectable,
 	Renderer2,
 	RendererFactory2,
+	inject,
 } from '@angular/core';
 import { NotificationComponent } from '../../shared/components/notification/notification.component';
 import { Toast } from '../models';
@@ -17,11 +18,11 @@ export class NotificationService {
 	private renderer: Renderer2;
 	private toasts: ComponentRef<NotificationComponent>[] = [];
 
-	constructor(
-		private readonly rendererFactory: RendererFactory2,
-		private readonly appRef: ApplicationRef,
-		private readonly appViewContainer: AppViewContainer,
-	) {
+	private readonly rendererFactory = inject(RendererFactory2);
+	private readonly appRef = inject(ApplicationRef);
+	private readonly appViewContainer = inject(AppViewContainer);
+
+	constructor() {
 		this.renderer = this.rendererFactory.createRenderer(null, null);
 	}
 

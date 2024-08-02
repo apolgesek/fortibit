@@ -10,6 +10,7 @@ import {
 	Input,
 	Output,
 	QueryList,
+	inject,
 } from '@angular/core';
 import { fromEvent } from 'rxjs';
 import { ListStateService } from '../services/list-state.service';
@@ -36,11 +37,9 @@ export class FocusableListDirective implements AfterViewInit {
 		new EventEmitter<ItemFocusedEvent>();
 	private _selected: any;
 
-	constructor(
-		private readonly destroyRef: DestroyRef,
-		private readonly elementRef: ElementRef,
-		private readonly listStateService: ListStateService,
-	) {}
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly elementRef = inject(ElementRef);
+	private readonly listStateService = inject(ListStateService);
 
 	@Input()
 	public set selected(value: any[]) {

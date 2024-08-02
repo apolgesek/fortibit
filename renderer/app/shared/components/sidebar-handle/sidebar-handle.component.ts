@@ -4,11 +4,11 @@ import {
 	Component,
 	ElementRef,
 	HostBinding,
-	Inject,
 	Input,
 	NgZone,
 	OnDestroy,
 	Renderer2,
+	inject,
 } from '@angular/core';
 
 @Component({
@@ -26,12 +26,10 @@ export class SidebarHandleComponent implements AfterViewInit, OnDestroy {
 	private unlisteners: (() => void)[] = [];
 	private maxWidth = 600;
 
-	constructor(
-		private readonly renderer: Renderer2,
-		private readonly el: ElementRef,
-		private readonly zone: NgZone,
-		@Inject(DOCUMENT) private readonly document: Document,
-	) {}
+	private readonly renderer = inject(Renderer2);
+	private readonly el = inject(ElementRef);
+	private readonly zone = inject(NgZone);
+	private readonly document = inject(DOCUMENT);
 
 	@HostBinding('class.right')
 	get isLeftSidebar(): boolean {

@@ -21,6 +21,7 @@ export class PasswordEntryMapper
 		);
 
 		const entry: Partial<PasswordEntry> = {
+			type: 'password',
 			title: form.title,
 			username: form.password.username,
 			password: encryptedPassword,
@@ -34,7 +35,6 @@ export class PasswordEntryMapper
 		if (form.id) {
 			entry.id = form.id;
 		} else {
-			entry.type = 'password';
 			entry.creationDate = currentTime;
 		}
 

@@ -20,30 +20,10 @@
 			appTooltip="Save"
 			container="body"
 		>
+			@if (!isDatabaseInSync) {
+				<div class="badge"></div>
+			}
 			<i-feather name="save" style="padding-top: 9px"></i-feather>
-		</button>
-		<button
-			data-prevent-entry-deselect
-			type="button"
-			[disabled]="!(isAnyEntry && isOneEntrySelected)"
-			class="icon-btn edit-entry"
-			(click)="openEditEntryWindow()"
-			appTooltip="Edit"
-			container="body"
-		>
-			<i-feather name="edit"></i-feather>
-		</button>
-		<button
-			data-prevent-entry-deselect
-			type="button"
-			[disabled]="!(isAnyEntry && isAnyEntrySelected)"
-			class="icon-btn remove-entry"
-			style="margin-right: 0.5rem"
-			(click)="openDeleteEntryWindow()"
-			appTooltip="Remove"
-			container="body"
-		>
-			<i-feather name="trash"></i-feather>
 		</button>
 		<span
 			style="

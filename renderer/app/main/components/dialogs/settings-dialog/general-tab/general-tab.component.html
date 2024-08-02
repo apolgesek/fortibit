@@ -17,13 +17,11 @@
 				(input)="onNumberChange($event, 'input.clipboardTime', 4)"
 			/>
 		</div>
-		<div
-			*ngIf="isControlInvalid(passwordForm.get('input.clipboardTime'))"
-			class="validation-error"
-			id="clipboard-time-invalid"
-		>
-			Please enter at least 0 seconds.
-		</div>
+		@if (isControlInvalid(passwordForm.get('input.clipboardTime'))) {
+			<div class="validation-error" id="clipboard-time-invalid">
+				Please enter at least 0 seconds.
+			</div>
+		}
 		<div class="section-header">Auto-type settings</div>
 		<div formGroupName="toggle" class="inputgroup checkbox">
 			<label class="label" for="auto-type">Enable auto-type:</label>
@@ -93,13 +91,11 @@
 				(input)="onNumberChange($event, 'input.idleTime', 4)"
 			/>
 		</div>
-		<div
-			*ngIf="isControlInvalid(passwordForm.get('input.idleTime'))"
-			class="validation-error"
-			id="idle-time-invalid"
-		>
-			Please enter at least 60 seconds.
-		</div>
+		@if (isControlInvalid(passwordForm.get('input.idleTime'))) {
+			<div class="validation-error" id="idle-time-invalid">
+				Please enter at least 60 seconds.
+			</div>
+		}
 		<div formGroupName="toggle" class="inputgroup checkbox">
 			<label class="label" for="lockOnSystemLock"
 				>Lock database when locking the computer:</label
@@ -138,7 +134,9 @@
 		</div>
 		<div class="section-header">Restore default settings</div>
 		<div class="restore">
-			<a href="#" (click)="restoreDefaults(); false;">Restore default settings</a>
+			<a href="#" (click)="restoreDefaults(); (false)"
+				>Restore default settings</a
+			>
 		</div>
 	</div>
 </form>

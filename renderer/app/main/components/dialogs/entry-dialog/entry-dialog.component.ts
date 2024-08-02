@@ -27,7 +27,7 @@ import {
 	ModalRef,
 	NotificationService,
 } from '@app/core/services';
-import { IEntryTypeComparer } from '@app/core/services/comparers/entry-type-comparer';
+import { CompareResult, IEntryTypeComparer } from '@app/core/services/comparers/entry-type-comparer';
 import { PasswordEntryTypeComparer } from '@app/core/services/comparers/password-entry.comparer';
 import { IEntryTypeMapper } from '@app/core/services/mappers/entry-type-mapper';
 import { PasswordEntryMapper } from '@app/core/services/mappers/password-entry.mapper';
@@ -118,14 +118,7 @@ export class EntryDialogComponent
 	private readonly notificationService = inject(NotificationService);
 	private readonly fb = inject(FormBuilder);
 
-	private readonly entryTypeHandlers: EntryTypeHandler = new Map<
-		Entry['type'],
-		{
-			componentType: Type<any>;
-			comparer: IEntryTypeComparer<Entry, EntryForm['value'], EntryDialogDataPayload>;
-			mapper: IEntryTypeMapper<EntryForm['value'], Entry>;
-		}
-	>([
+	private readonly entryTypeHandlers: EntryTypeHandler = new Map([
 		[
 			'password',
 			{
@@ -192,14 +185,24 @@ export class EntryDialogComponent
 
 	get entryGroupName(): string {
 		return this.entryManager.editedEntry
-			? this.entryManager.editedEntry?.group
-			: this.groupManager.selectedGroup !== GroupId.AllItems
-				? this.groupManager.selectedGroupName
-				: this.groupManager.groups.find((g) => g.id === GroupId.Root).name;
+			? this.editedGroupName
+			: this.selectedGroupName;
 	}
 
 	get title() {
 		return this.newEntryForm.controls.title;
+	}
+
+	private get editedGroupName(): string {
+		return this.entryManager.editedEntry.groupId !== GroupId.AllItems
+			? this.entryManager.editedEntry.group
+			: this.groupManager.groups.find((g) => g.id === GroupId.Root).name;
+	}
+
+	private get selectedGroupName(): string {
+		return this.groupManager.selectedGroup !== GroupId.AllItems
+			? this.groupManager.selectedGroupName
+			: this.groupManager.groups.find((g) => g.id === GroupId.Root).name;
 	}
 
 	ngOnInit() {
@@ -302,25 +305,27 @@ export class EntryDialogComponent
 		}
 
 		this.saveLocked = true;
+		let compareResult: CompareResult;
 
-		if (
-			this.entryManager.editedEntry?.id &&
-			(await this.entryTypeHandler.comparer.compare(
+		if (this.entryManager.editedEntry?.id) {
+			compareResult = await this.entryTypeHandler.comparer.compare(
 				this.entryManager.editedEntry,
 				this.newEntryForm.value,
 				this.additionalData.payload,
-			))
-		) {
-			this.close();
-
-			return;
+			);
+	
+			if (compareResult.isEqual) {
+				this.close();
+	
+				return;
+			}
 		}
 
 		const entry = await this.entryTypeHandler.mapper.map(
 			this.newEntryForm.value,
 		);
 
-		await this.entryManager.saveEntry(entry);
+		await this.entryManager.saveEntry(entry, compareResult?.changes);
 
 		this.saveLocked = false;
 		this.close();
@@ -353,6 +358,11 @@ export class EntryDialogComponent
 	}
 
 	private fillNewEntry() {
-		this.newEntryForm.patchValue({ groupId: this.groupManager.selectedGroup });
+		this.newEntryForm.patchValue({
+			groupId:
+				this.groupManager.selectedGroup === GroupId.AllItems
+					? GroupId.Root
+					: this.groupManager.selectedGroup,
+		});
 	}
 }

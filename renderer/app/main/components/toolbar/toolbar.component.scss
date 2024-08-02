@@ -33,7 +33,8 @@
 .main-nav {
 	width: 100%;
 	height: $toolbar-height;
-	background-color: var(--primary-bg);
+	// background-color: var(--primary-bg);
+	background: var(--input-bg-secondary);
 	display: flex;
 	position: relative;
 	z-index: 3;
@@ -133,6 +134,23 @@
 			stroke: var(--primary-text);
 		}
 	}
+}
+
+.save-db {
+	position: relative;
+}
+
+.badge {
+	background-color: $tulip-tree;
+	box-shadow: 0px 0px 1px 0px var(--primary-bg);
+	height: 0.5625rem;
+	width: 0.5625rem;
+	border-radius: 100%;
+	font-weight: bold;
+	position: absolute;
+	z-index: 990;
+	top: 12px;
+	right: 6px;
 }
 
 @media screen and (max-width: 859px) {

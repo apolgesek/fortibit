@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, QueryList, ViewChildren, inject } from '@angular/core';
 import { Sort } from '@app/core/enums';
 import { SearchService } from '@app/core/services';
 import { slideDown } from '@app/shared';
@@ -37,6 +37,7 @@ type SortDirectionOption = {
 	templateUrl: './table-filters.component.html',
 	styleUrls: ['./table-filters.component.scss'],
 	animations: [slideDown],
+	changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableFiltersComponent {
 	@ViewChildren('sort')
@@ -58,7 +59,9 @@ export class TableFiltersComponent {
 	public selectedSortOption: SortOption;
 	public selectedSortDirection: SortDirectionOption;
 
-	constructor(private readonly searchService: SearchService) {
+	private readonly searchService = inject(SearchService);
+
+	constructor() {
 		this.selectedSortOption = this.sortOptions.find(
 			(x) => x.prop === this.searchService.sortProp,
 		);

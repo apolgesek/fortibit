@@ -1,13 +1,13 @@
-import { PasswordEntry, IpcChannel } from '@shared-renderer/index';
+import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
 import { app, ipcMain, IpcMainEvent } from 'electron';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { join } from 'path';
-import * as psl from 'psl';
+import { AsyncQueue } from '../../core/async-queue';
+import { IAsyncQueue } from '../../core/async-queue.model';
+import { getDomain } from '../../util';
 import { IConfigService } from '../config';
 import { IFileService } from '../file';
 import { IWindowService } from '../window';
-import { AsyncQueue } from './async-queue';
-import { IAsyncQueue } from './async-queue.model';
 import { IIconService } from './icon-service.model';
 
 type Icon = {
@@ -15,6 +15,8 @@ type Icon = {
 	id: number;
 	url: string;
 };
+
+const dataUrlPrefix = 'data:image/png';
 
 export class IconService implements IIconService {
 	private readonly iconDirectory: string;
@@ -94,6 +96,7 @@ export class IconService implements IIconService {
 					);
 			},
 		);
+
 		this.iconQueue.process();
 	}
 
@@ -101,7 +104,7 @@ export class IconService implements IIconService {
 		for (const entry of entries) {
 			if (
 				entry.url &&
-				(!entry.icon || entry.icon.startsWith('data:image/png'))
+				(!entry.icon || entry.icon.startsWith(dataUrlPrefix))
 			) {
 				this.iconQueue.add({ windowId, id: entry.id, url: entry.url });
 			}
@@ -134,13 +137,13 @@ export class IconService implements IIconService {
 	fixIcon(entry: PasswordEntry): void {
 		if (
 			entry.icon &&
-			!entry.icon.startsWith('data:image/png') &&
+			!entry.icon.startsWith(dataUrlPrefix) &&
 			!existsSync(entry.icon)
 		) {
 			entry.icon = null;
 		} else if (entry.url) {
 			const filePath =
-				join(this.iconDirectory, this.getFileName(entry.url)) + '.png';
+				join(this.iconDirectory, getDomain(entry.url)) + '.png';
 			if (existsSync(filePath)) {
 				entry.icon = filePath;
 			}
@@ -148,7 +151,7 @@ export class IconService implements IIconService {
 	}
 
 	private async getFile(url: string): Promise<string> {
-		const formattedHostname = await this.getFileName(url);
+		const formattedHostname = getDomain(url);
 
 		const fileUrl =
 			this._configService.appConfig.iconServiceUrl +
@@ -162,14 +165,5 @@ export class IconService implements IIconService {
 		}
 
 		return this._fileService.download(fileUrl, filePath);
-	}
-
-	private getFileName(url: string): string {
-		if (!/^https?:\/\//.test(url)) {
-			url = 'https://' + url;
-		}
-
-		url = psl.parse(new URL(url).hostname).domain;
-		return url;
 	}
 }

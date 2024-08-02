@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import {
 	Component,
 	DestroyRef,
-	Inject,
 	NgZone,
 	OnDestroy,
 	OnInit,
@@ -12,7 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { GroupId } from '@app/core/enums';
-import { IMessageBroker, Toast } from '@app/core/models';
+import { Toast } from '@app/core/models';
 import {
 	EntryManager,
 	GroupManager,
@@ -52,8 +51,19 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 	public passwordVisible = false;
 	public oneOfTips = '';
 
-	private readonly defaultGroup = GroupId.AllItems;
 	private readonly formBuilder = inject(FormBuilder);
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly workspaceService = inject(WorkspaceService);
+	private readonly groupManager = inject(GroupManager);
+	private readonly entryManager = inject(EntryManager);
+	private readonly zone = inject(NgZone);
+	private readonly route = inject(ActivatedRoute);
+	private readonly configService = inject(ConfigService);
+	private readonly modalService = inject(ModalService);
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly notifcationService = inject(NotificationService);
+
+	private readonly defaultGroup = GroupId.AllItems;
 	private readonly _loginForm = this.formBuilder.group({
 		password: ['', Validators.required],
 	});
@@ -93,18 +103,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 		return this.workspaceService.isBiometricsAuthenticationInProgress;
 	}
 
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly workspaceService: WorkspaceService,
-		private readonly groupManager: GroupManager,
-		private readonly entryManager: EntryManager,
-		private readonly zone: NgZone,
-		private readonly route: ActivatedRoute,
-		private readonly configService: ConfigService,
-		private readonly modalService: ModalService,
-		private readonly destroyRef: DestroyRef,
-		private readonly notifcationService: NotificationService,
-	) {
+	constructor() {
 		this.onDecryptedContent = (
 			_,
 			{ decrypted, error }: { decrypted: string; error: string },
@@ -194,7 +193,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 	async biometricsUnlock() {
 		UiUtil.lockInterface();
 		this.workspaceService.isBiometricsAuthenticationInProgress = true;
-		
+
 		await this.messageBroker.ipcRenderer.invoke(IpcChannel.DecryptBiometrics);
 	}
 
@@ -223,5 +222,9 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 			IpcChannel.DecryptDatabase,
 			this.loginForm.value.password,
 		);
+	}
+
+	test() {
+		this.messageBroker.ipcRenderer.send(IpcChannel.ScanQrCode);
 	}
 }

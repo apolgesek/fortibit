@@ -19,27 +19,25 @@
 				<span class="slider"></span>
 			</label>
 		</div>
-		<div *ngIf="isUnlocked" style="margin-top: 2rem">
-			<div style="display: flex">
-				<label class="label">Credential name:</label> fbit:{{ filePath }}
-			</div>
-			<button
-				type="button"
-				class="primary-btn"
-				[ngClass]="{ danger: isBiometricsEnabledForCurrentDatabase }"
-				(click)="toggleBiometrics()"
-				[disabled]="credentialButtonDisabled"
-			>
-				<ng-container
-					*ngIf="
-						isBiometricsEnabledForCurrentDatabase;
-						else addDatabaseCredential
-					"
+		@if (isUnlocked) {
+			<div style="margin-top: 2rem">
+				<div style="display: flex">
+					<label class="label">Credential name:</label> fbit:{{ filePath }}
+				</div>
+				<button
+					type="button"
+					class="primary-btn"
+					[ngClass]="{ danger: isBiometricsEnabledForCurrentDatabase }"
+					(click)="toggleBiometrics()"
+					[disabled]="credentialButtonDisabled"
 				>
-					Remove credential
-				</ng-container>
-				<ng-template #addDatabaseCredential> Add credential </ng-template>
-			</button>
-		</div>
+					@if (isBiometricsEnabledForCurrentDatabase) {
+						Remove credential
+					} @else {
+						Add credential
+					}
+				</button>
+			</div>
+		}
 	</form>
 </div>

@@ -1,8 +1,10 @@
 import {
+	ChangeDetectorRef,
 	Directive,
 	OnInit,
 	TemplateRef,
 	ViewContainerRef,
+	inject,
 } from '@angular/core';
 import { DropdownStateService } from '../services/dropdown-state.service';
 
@@ -13,11 +15,10 @@ import { DropdownStateService } from '../services/dropdown-state.service';
 export class DropdownMenuDirective implements OnInit {
 	private hasView = false;
 
-	constructor(
-		private readonly dropdownState: DropdownStateService,
-		private readonly templateRef: TemplateRef<any>,
-		private readonly viewContainer: ViewContainerRef,
-	) {}
+	private readonly dropdownState = inject(DropdownStateService);
+	private readonly templateRef = inject(TemplateRef<any>);
+	private readonly viewContainer = inject(ViewContainerRef);
+	private readonly cdRef = inject(ChangeDetectorRef);
 
 	ngOnInit(): void {
 		this.dropdownState.stateChanges$.pipe().subscribe((state) => {
@@ -32,6 +33,8 @@ export class DropdownMenuDirective implements OnInit {
 					this.hasView = false;
 				}
 			}
+
+			this.cdRef.markForCheck();
 		});
 	}
 }

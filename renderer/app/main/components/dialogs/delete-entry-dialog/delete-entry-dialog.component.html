@@ -11,15 +11,19 @@
 		</a>
 	</div>
 	<div class="dialog-message">
-		<ng-container *ngIf="selectedRowsCount === 1; else bulkRemove">
+		@if (selectedRowsCount === 1) {
 			Are you sure you want to
-			<strong *ngIf="isInRecycleBin">permanently</strong> remove this entry?
-		</ng-container>
-		<ng-template #bulkRemove>
+			@if (isInRecycleBin) {
+				<strong>permanently</strong>
+			}
+			remove this entry?
+		} @else {
 			Are you sure you want to
-			<strong *ngIf="isInRecycleBin">permanently</strong> remove
-			<strong>{{ selectedRowsCount }}</strong> entries?
-		</ng-template>
+			@if (isInRecycleBin) {
+				<strong>permanently</strong>
+			}
+			remove <strong>{{ selectedRowsCount }}</strong> entries?
+		}
 	</div>
 	<div class="footer-container">
 		<button

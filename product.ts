@@ -11,6 +11,7 @@ export type Product = {
 	temporaryFileExtension: string;
 	commit: string;
 	webUrl: string;
+	webApiUrl: string;
 	iconServiceUrl: string;
 	updateUrl: string;
 	signatureSubject: string;

@@ -1,3 +1,4 @@
 export { CsvWriter } from './csv-writer';
-export { getFileFilter, getDefaultPath } from './file-dialog';
+export { getDefaultPath, getFileFilter } from './file-dialog';
 export { getHashCode } from './string-util';
+export { getDomain } from './url-util';

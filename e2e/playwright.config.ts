@@ -7,12 +7,11 @@ const config: PlaywrightTestConfig = {
 	outputDir: './screenshots',
 	updateSnapshots: 'none',
 	use: {
-		headless: false,
 		viewport: { width: 1280, height: 720 },
 		launchOptions: {
 			slowMo: 1000,
 		},
-		trace: 'off',
+		trace: 'off'
 	},
 	expect: {
 		toMatchSnapshot: { threshold: 0.2 },

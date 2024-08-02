@@ -1,5 +1,4 @@
-import { Component, ComponentRef, Inject, OnInit } from '@angular/core';
-import { IMessageBroker } from '@app/core/models';
+import { Component, ComponentRef, OnInit, inject } from '@angular/core';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { bufferTime, from } from 'rxjs';
@@ -34,14 +33,12 @@ export class ExposedPasswordsDialogComponent implements IModal, OnInit {
 	showDetails = false;
 	showError = false;
 
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly modalRef: ModalRef,
-		private readonly reportService: ReportService,
-		private readonly modalService: ModalService,
-		private readonly entryManager: EntryManager,
-		private readonly notificationService: NotificationService,
-	) {}
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly modalRef = inject(ModalRef);
+	private readonly reportService = inject(ReportService);
+	private readonly modalService = inject(ModalService);
+	private readonly entryManager = inject(EntryManager);
+	private readonly notificationService = inject(NotificationService);
 
 	ngOnInit(): void {
 		this.getLastReport();
@@ -75,6 +72,8 @@ export class ExposedPasswordsDialogComponent implements IModal, OnInit {
 					});
 
 					await this.getLastReport();
+					await this.entryManager.bulkMarkExposed(this.exposedPasswordsFound.map(x => x.id));
+
 					this.scanInProgress = false;
 
 					if (this.exposedPasswordsFound.length) {

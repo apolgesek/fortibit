@@ -1,128 +1,184 @@
 <div
 	data-prevent-entry-deselect
 	class="details-container"
-	[ngClass]="{ 'database-summary': !isEntrySelected }"
+	[ngClass]="{ 'database-summary': !(selectedEntries === 1) }"
 >
-	<ng-container *ngIf="isEntrySelected && group; else databaseDetails">
+	@if (selectedEntries === 1 && group) {
 		<div class="header">
 			<span [title]="group?.name">{{ group?.name }}</span>
-			<ng-container *ngIf="entry?.title">
+			@if (entry?.title) {
 				<i-feather name="chevron-right"></i-feather>
 				<span [title]="entry.title">{{ entry.title }}</span>
-			</ng-container>
+			}
 		</div>
 		<div class="content entry-details">
 			<div class="section quick-actions">
-				<button
-					[disabled]="isReadonlyEntry"
-					#toggleStarBtn
-					[attr.aria-label]="
-						entry?.isStarred ? 'Remove from favorites' : 'Add to favorites'
-					"
-					appTooltip="Favorite"
-					id="add-favorites-btn"
-					class="action-btn star"
-					[ngClass]="{ active: entry?.isStarred, 'is-animating': isAnimating }"
-					(click)="toggleStarred(entry)"
-				>
-					<i-feather name="star"></i-feather>
-				</button>
-				<ng-container *ngIf="entry | isPassword">
+				<div style="display: flex; gap: 0.5rem">
 					<button
-						appTooltip="History"
-						aria-label="Entry history"
-						(click)="openEntryHistory()"
-						id="open-history-btn"
-						class="action-btn"
-					>
-						<i-feather name="book"></i-feather>
-					</button>
-					<button
-						*ngIf="entry.url"
-						appTooltip="Open {{ isUnsecured ? 'insecure' : '' }} link"
-						[attr.aria-label]="
-							'Open ' + (isUnsecured ? 'insecure' : '') + ' link'
-						"
-						(click)="openUrl(entry.url); (false)"
+						appTooltip="Edit"
+						aria-label="Edit"
 						id="open-url-btn"
 						class="action-btn"
+						(click)="openEditEntryWindow()"
 					>
-						<i-feather name="link"></i-feather>
+						<i-feather name="edit"></i-feather>
 					</button>
-				</ng-container>
+					<button
+						appTooltip="Remove"
+						aria-label="Remove"
+						id="open-url-btn"
+						class="action-btn"
+						(click)="openDeleteEntryWindow()"
+					>
+						<i-feather name="trash"></i-feather>
+					</button>
+				</div>
+
+				<div style="display: flex; gap: 0.5rem; margin-left: auto">
+					<button
+						[disabled]="isReadonlyEntry"
+						#toggleStarBtn
+						[attr.aria-label]="
+							entry?.isStarred ? 'Remove from favorites' : 'Add to favorites'
+						"
+						appTooltip="Favorite"
+						id="add-favorites-btn"
+						class="action-btn star"
+						[ngClass]="{
+							active: entry?.isStarred,
+							'is-animating': isAnimating
+						}"
+						(click)="toggleStarred(entry)"
+					>
+						<i-feather name="star"></i-feather>
+					</button>
+				</div>
 			</div>
 
 			<ng-container *ngComponentOutlet="detailsPartial; inputs: { entry }" />
 
-			<div class="small">
-				<div *ngIf="entry?.creationDate" class="section">
-					<p>
-						Creation date: {{ entry?.creationDate | date: 'dd/MM/yyyy HH:mm' }}
-					</p>
-				</div>
-				<div *ngIf="entry?.lastModificationDate" class="section">
-					<p>
-						Modification date:
-						{{ entry?.lastModificationDate | date: 'dd/MM/yyyy HH:mm' }}
-					</p>
-				</div>
-			</div>
-		</div>
-	</ng-container>
-</div>
+			@if (entry | isPassword) {
+				<a href="#" (click)="openEntryHistoryWindow(); (false)" class="show-history">
+					<svg
+					width="18px"
+					height="18px"
+					viewBox="0 0 24 24"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						fill-rule="evenodd"
+						clip-rule="evenodd"
+						d="M5.07868 5.06891C8.87402 1.27893 15.0437 1.31923 18.8622 5.13778C22.6824 8.95797 22.7211 15.1313 18.9262 18.9262C15.1312 22.7211 8.95793 22.6824 5.13774 18.8622C2.87389 16.5984 1.93904 13.5099 2.34047 10.5812C2.39672 10.1708 2.775 9.88377 3.18537 9.94002C3.59575 9.99627 3.88282 10.3745 3.82658 10.7849C3.4866 13.2652 4.27782 15.881 6.1984 17.8016C9.44288 21.0461 14.6664 21.0646 17.8655 17.8655C21.0646 14.6664 21.046 9.44292 17.8015 6.19844C14.5587 2.95561 9.33889 2.93539 6.13935 6.12957L6.88705 6.13333C7.30126 6.13541 7.63535 6.47288 7.63327 6.88709C7.63119 7.3013 7.29372 7.63539 6.87951 7.63331L4.33396 7.62052C3.92269 7.61845 3.58981 7.28556 3.58774 6.8743L3.57495 4.32874C3.57286 3.91454 3.90696 3.57707 4.32117 3.57498C4.73538 3.5729 5.07285 3.907 5.07493 4.32121L5.07868 5.06891ZM11.9999 7.24992C12.4141 7.24992 12.7499 7.58571 12.7499 7.99992V11.6893L15.0302 13.9696C15.3231 14.2625 15.3231 14.7374 15.0302 15.0302C14.7373 15.3231 14.2624 15.3231 13.9696 15.0302L11.2499 12.3106V7.99992C11.2499 7.58571 11.5857 7.24992 11.9999 7.24992Z"
+						fill="var(--link-text)"
+					/>
+				</svg>&nbsp;Show history</a>
+			}
 
-<ng-template #databaseDetails>
-	<div class="header">Database details</div>
-	<div class="content" *ngIf="config">
-		<div class="section">
-			<div class="subsection">
-				<p class="label">File name</p>
-				<p>{{ databaseInformation.name }}</p>
+			<div class="small">
+				@if (entry?.creationDate) {
+					<div class="section">
+						<p>
+							Creation date:
+							{{ entry?.creationDate | date: 'dd/MM/yyyy HH:mm' }}
+						</p>
+					</div>
+				}
+				@if (entry?.lastModificationDate) {
+					<div class="section">
+						<p>
+							Modification date:
+							{{ entry?.lastModificationDate | date: 'dd/MM/yyyy HH:mm' }}
+						</p>
+					</div>
+				}
 			</div>
 		</div>
-		<div class="section">
-			<div class="subsection">
-				<p class="label">Encryption algorithm</p>
-				<p>AES-256</p>
-			</div>
-		</div>
-		<div class="section">
-			<div class="subsection">
-				<p class="label">Schema version</p>
-				<p>{{ config.schemaVersion | number: '1.1-3' }}</p>
-			</div>
-		</div>
-		<div class="section">
-			<div class="subsection">
-				<p class="label">Autotype</p>
-				<div>
-					<span class="subtype">Full:</span>
-					<app-pretty-shortcut [shortcut]="config.autocompleteShortcut" />
-					<span *ngIf="!config.autoTypeEnabled" class="validation-error"
-						>(disabled)</span
+	} @else if (selectedEntries > 1) {
+		<div class="header">{{ selectedEntries }} entries selected</div>
+		<div class="content entry-details">
+			<div class="section quick-actions">
+				<div style="display: flex; gap: 0.5rem">
+					<button
+						appTooltip="Remove"
+						aria-label="Remove"
+						id="open-url-btn"
+						class="action-btn"
+						(click)="openDeleteEntryWindow()"
 					>
-					<i-feather
-						name="info"
-						(click)="openAutotypeInformation()"
-					></i-feather>
-				</div>
-				<div>
-					<span class="subtype">Username:</span>
-					<app-pretty-shortcut [shortcut]="config.autocompleteUsernameOnlyShortcut" />
-					<span *ngIf="!config.autoTypeEnabled" class="validation-error"
-						>(disabled)</span
+						<i-feather name="trash"></i-feather>
+					</button>
+					<button
+						appTooltip="Move"
+						aria-label="Move"
+						id="move-btn"
+						class="action-btn"
+						(click)="openMoveEntryWindow()"
 					>
-				</div>
-				<div>
-					<span class="subtype">Password:</span>
-					<app-pretty-shortcut [shortcut]="config.autocompletePasswordOnlyShortcut" />
-					<span *ngIf="!config.autoTypeEnabled" class="validation-error"
-						>(disabled)</span
-					>
+						<i-feather name="move"></i-feather>
+					</button>
 				</div>
 			</div>
 		</div>
-	</div>
-</ng-template>
+	} @else {
+		<div class="header">Database details</div>
+		@if (config) {
+			<div class="content">
+				<div class="section">
+					<div class="subsection">
+						<p class="label">File name</p>
+						<p>{{ databaseInformation.name }}</p>
+					</div>
+				</div>
+				<div class="section">
+					<div class="subsection">
+						<p class="label">Encryption algorithm</p>
+						<p>AES-256</p>
+					</div>
+				</div>
+				<div class="section">
+					<div class="subsection">
+						<p class="label">Schema version</p>
+						<p>{{ config.schemaVersion | number: '1.1-3' }}</p>
+					</div>
+				</div>
+				<div class="section">
+					<div class="subsection">
+						<p class="label">Autotype</p>
+						<div>
+							<span class="subtype">Full:</span>
+							<app-pretty-shortcut [shortcut]="config.autocompleteShortcut" />
+							@if (!config.autoTypeEnabled) {
+								<span class="validation-error">(disabled)</span>
+							}
+							<i-feather
+								name="info"
+								(click)="openAutotypeInformation()"
+							></i-feather>
+						</div>
+						<div>
+							<span class="subtype">Username:</span>
+							<app-pretty-shortcut
+								[shortcut]="config.autocompleteUsernameOnlyShortcut"
+							/>
+							@if (!config.autoTypeEnabled) {
+								<span class="validation-error">(disabled)</span>
+							}
+						</div>
+						<div>
+							<span class="subtype">Password:</span>
+							<app-pretty-shortcut
+								[shortcut]="config.autocompletePasswordOnlyShortcut"
+							/>
+							@if (!config.autoTypeEnabled) {
+								<span class="validation-error">(disabled)</span>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+	}
+</div>
 
 <app-sidebar-handle />

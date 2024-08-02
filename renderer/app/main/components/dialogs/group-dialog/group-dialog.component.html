@@ -26,18 +26,16 @@
 					placeholder="Name"
 				/>
 			</div>
-			<div
-				*ngIf="isControlInvalid(name)"
-				class="validation-error"
-				id="name-invalid"
-			>
-				<ng-container *ngIf="name.hasError('required')">
-					Group name is required.
-				</ng-container>
-				<ng-container *ngIf="name.hasError('maxlength')">
-					Group name must not exceed 40 characters.
-				</ng-container>
-			</div>
+			@if (isControlInvalid(name)) {
+				<div class="validation-error" id="name-invalid">
+					@if (name.hasError('required')) {
+						Group name is required.
+					}
+					@if (name.hasError('maxlength')) {
+						Group name must not exceed 40 characters.
+					}
+				</div>
+			}
 		</div>
 	</div>
 	<div class="footer-container">
@@ -49,16 +47,17 @@
 		>
 			Cancel
 		</button>
-		<button
-			*ngIf="additionalData?.payload?.mode === 'edit'"
-			type="button"
-			id="remove-group"
-			class="primary-btn"
-			(click)="removeGroup()"
-			(keyup.enter)="removeGroup()"
-		>
-			Remove
-		</button>
+		@if (additionalData?.payload?.mode === 'edit') {
+			<button
+				type="button"
+				id="remove-group"
+				class="primary-btn"
+				(click)="removeGroup()"
+				(keyup.enter)="removeGroup()"
+			>
+				Remove
+			</button>
+		}
 		<button
 			type="button"
 			id="save-group"

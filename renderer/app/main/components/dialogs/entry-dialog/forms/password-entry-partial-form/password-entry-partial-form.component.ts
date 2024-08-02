@@ -69,7 +69,7 @@ export class PasswordEntryPartialFormComponent implements OnInit {
 
 	private config: Configuration;
 
-	ngOnInit(): void {		
+	ngOnInit(): void {
 		this.passwordForm = (
 			this.controlContainer.control as EntryForm
 		).controls.password;
@@ -130,7 +130,7 @@ export class PasswordEntryPartialFormComponent implements OnInit {
 		).score;
 		this.notificationService.add({
 			type: 'success',
-			alive: 5000,
+			alive: 10 * 1000,
 			message: 'Password regenerated',
 		});
 	}

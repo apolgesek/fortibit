@@ -1,11 +1,10 @@
-import { Inject, Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DbManager } from '@app/core/database';
-import { IMessageBroker } from '@app/core/models';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { UiUtil } from '@app/utils';
 import { Configuration } from '@config/configuration';
-import { PasswordEntry, IpcChannel, VaultSchema } from '@shared-renderer/index';
+import { PasswordEntry, IpcChannel, VaultSchema, Entry } from '@shared-renderer/index';
 import { exportDB, importInto } from 'dexie-export-import';
 import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
 import { MessageBroker } from 'injection-tokens';
@@ -19,6 +18,8 @@ import { ReportManager } from './managers/report.manager';
 import { ModalService } from './modal.service';
 import { NotificationService } from './notification.service';
 import { SearchService } from './search.service';
+import { IconService } from './icon.service';
+import { IProcessor, PasswordProcessor } from './processors';
 
 enum DirtyMarkType {
 	Entry,
@@ -35,7 +36,6 @@ export class WorkspaceService {
 	public isLocked = true;
 	public isBiometricsAuthenticationInProgress = false;
 
-	private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
 	private config: Configuration;
 	private _zoomFactor = 1;
 
@@ -43,21 +43,26 @@ export class WorkspaceService {
 		return Math.round(this._zoomFactor * 100);
 	}
 
-	constructor(
-		@Inject(MessageBroker) private readonly messageBroker: IMessageBroker,
-		private readonly configService: ConfigService,
-		private readonly entryManager: EntryManager,
-		private readonly groupManager: GroupManager,
-		private readonly historyManager: HistoryManager,
-		private readonly reportManager: ReportManager,
-		private readonly dbManager: DbManager,
-		private readonly notificationService: NotificationService,
-		private readonly searchService: SearchService,
-		private readonly modalService: ModalService,
-		private readonly fileNamePipe: FileNamePipe,
-		private readonly zone: NgZone,
-		private readonly router: Router,
-	) {
+	private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
+	private readonly processors: Partial<Record<Entry['type'], IProcessor<any>>> = {
+		password: inject(PasswordProcessor)
+	}
+	private readonly messageBroker = inject(MessageBroker);
+	private readonly configService = inject(ConfigService);
+	private readonly entryManager = inject(EntryManager);
+	private readonly groupManager = inject(GroupManager);
+	private readonly historyManager = inject(HistoryManager);
+	private readonly reportManager = inject(ReportManager);
+	private readonly dbManager = inject(DbManager);
+	private readonly notificationService = inject(NotificationService);
+	private readonly searchService = inject(SearchService);
+	private readonly modalService = inject(ModalService);
+	private readonly fileNamePipe = inject(FileNamePipe);
+	private readonly iconService = inject(IconService);
+	private readonly zone = inject(NgZone);
+	private readonly router = inject(Router);
+
+	constructor() {
 		this.configService.configLoadedSource$.pipe().subscribe((config) => {
 			this.config = config as Configuration;
 		});
@@ -123,8 +128,8 @@ export class WorkspaceService {
 		// this.file = null;
 		this.isSynced = true;
 
-		this.entryManager.selectedPasswords = [];
-		this.entryManager.passwordEntries = [];
+		this.entryManager.selectedEntries = [];
+		this.entryManager.entries = [];
 		this.groupManager.groups = [];
 		this.entryManager.updateEntriesSource();
 
@@ -140,7 +145,7 @@ export class WorkspaceService {
 		this.groupManager.selectedGroup = null;
 		this.groupManager.groups = [];
 		this.searchService.reset();
-		this.entryManager.passwordEntries = [];
+		this.entryManager.entries = [];
 		this.entryManager.updateEntriesSource();
 
 		await this.dbManager.reset();
@@ -259,7 +264,7 @@ export class WorkspaceService {
 			acceptNameDiff: true,
 			acceptVersionDiff: true,
 			overwriteValues: true,
-			clearTablesBeforeImport: true
+			clearTablesBeforeImport: true,
 		});
 		await this.groupManager.getGroupsTree();
 
@@ -280,7 +285,8 @@ export class WorkspaceService {
 			const entriesWithIds = await this.entryManager.getAllByGroup(groupId);
 
 			for (const entry of entriesWithIds) {
-				if (entry.type === 'password') this.entryManager.getIconPath(entry);
+				const entryProcessor = this.processors[entry.type];
+				entryProcessor.afterAdd(entry);
 			}
 
 			// refresh All Items group after database import so new entries are visible on the list
@@ -297,7 +303,7 @@ export class WorkspaceService {
 	}
 
 	async clearDatabase(): Promise<void[] | void> {
-		this.entryManager.passwordEntries = [];
+		this.entryManager.entries = [];
 		return this.dbManager.reset();
 	}
 
@@ -370,14 +376,14 @@ export class WorkspaceService {
 
 	findEntries() {
 		this.entryManager.isGlobalSearch = false;
-		this.entryManager.selectedPasswords = [];
+		this.entryManager.selectedEntries = [];
 
 		UiUtil.focusSearchbox();
 	}
 
 	findGlobalEntries() {
 		this.entryManager.isGlobalSearch = true;
-		this.entryManager.selectedPasswords = [];
+		this.entryManager.selectedEntries = [];
 
 		UiUtil.focusSearchbox();
 	}

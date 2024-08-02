@@ -9,13 +9,15 @@ import {
 @Component({
 	selector: 'app-pretty-shortcut',
 	template: '',
-	styles: [`
-		:host {
-			user-select: none;
-			display: flex;
-			align-items: center;
-		}
-	`],
+	styles: [
+		`
+			:host {
+				user-select: none;
+				display: flex;
+				align-items: center;
+			}
+		`,
+	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
 })

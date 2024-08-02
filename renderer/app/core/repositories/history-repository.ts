@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core';
 import { HistoryEntry } from '../../../../shared';
 import { DbManager } from '../database/db-manager';
 import {
@@ -6,7 +5,6 @@ import {
 	IHistoryRepository,
 } from './history-repository.model';
 
-@Injectable({ providedIn: 'root' })
 export class HistoryRepository implements IHistoryRepository {
 	constructor(private readonly db: DbManager) {}
 

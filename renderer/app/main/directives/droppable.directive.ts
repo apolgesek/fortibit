@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, HostListener, Renderer2, inject } from '@angular/core';
 import { EntryManager, GroupManager } from '@app/core/services';
 import { UiUtil } from '@app/utils';
 
@@ -7,12 +7,10 @@ import { UiUtil } from '@app/utils';
 	standalone: true,
 })
 export class DroppableDirective {
-	constructor(
-		private readonly el: ElementRef,
-		private readonly renderer: Renderer2,
-		private readonly entryManager: EntryManager,
-		private readonly groupManager: GroupManager,
-	) {}
+	private readonly el = inject(ElementRef);
+	private readonly renderer = inject(Renderer2);
+	private readonly entryManager = inject(EntryManager);
+	private readonly groupManager = inject(GroupManager);
 
 	@HostListener('dragenter', ['$event'])
 	public onDragEnter() {

@@ -17,7 +17,7 @@
 
 		.dropdown-btn .badge {
 			background-color: $red-orange;
-			outline: 2px solid var(--primary-bg);
+			box-shadow: 0px 0px 1px 0px var(--primary-bg);
 			height: 0.5625rem;
 			width: 0.5625rem;
 			border-radius: 100%;

@@ -6,6 +6,7 @@ import {
 	Input,
 	OnDestroy,
 	Renderer2,
+	inject,
 } from '@angular/core';
 import { DropdownStateService } from '../services/dropdown-state.service';
 
@@ -23,11 +24,9 @@ export class DropdownToggleDirective implements AfterViewInit, OnDestroy {
 
 	private listeners: (() => void)[] = [];
 
-	constructor(
-		private readonly element: ElementRef,
-		private readonly renderer: Renderer2,
-		private readonly dropdownState: DropdownStateService,
-	) {}
+	private readonly element = inject(ElementRef);
+	private readonly renderer = inject(Renderer2);
+	private readonly dropdownState = inject(DropdownStateService);
 
 	@HostBinding('attr.aria-expanded')
 	@HostBinding('class.expanded')

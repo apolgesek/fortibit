@@ -113,11 +113,6 @@
 	}
 }
 
-#sort-by.focused:focus-visible:not(:hover) {
-	outline: 2px solid #aedaff !important;
-	outline-offset: 3px !important;
-}
-
 .filter-label {
 	@include font-medium;
 	width: 100%;

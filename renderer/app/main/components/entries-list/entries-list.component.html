@@ -1,91 +1,85 @@
 <div class="password-table">
 	<div id="table-header" data-prevent-entry-deselect>
 		<div class="group-data">
-			{{ passwordEntries.length }}
+			@if (
+				searchPhraseSnapshot?.length && (!isSearching || wasSearched) && entriesFound$
+					| async;
+				as entriesCount
+			) {
+				{{ entriesCount }} found
+			} @else {
+				{{ passwordEntries.length }}
+			}
 		</div>
 		<app-table-filters></app-table-filters>
 	</div>
-	<div
-		*ngIf="searchPhrase?.length && (!isSearching || wasSearched)"
-		class="results-badge"
-		@slideIn
-	>
-		<div *ngIf="entriesFound$ | async as entriesCount">
-			Found {{ entriesCount }} {{ entriesCount === 1 ? 'entry' : 'entries' }}:
-		</div>
-	</div>
-	<ng-container *ngIf="passwordList$ | async as passwordList">
-		<cdk-virtual-scroll-viewport
-			*ngIf="passwordList.length > 0; else noPasswordsTemplate"
-			data-prevent-entry-deselect
-			itemSize="56"
-			appFocusableList
-			(focused)="selectEntry($event.originalEvent, $event.item)"
-			[selected]="selectedEntries"
-			class="table-viewport"
-		>
-			<ng-container
-				*cdkVirtualFor="
-					let item of passwordList;
-					let i = index;
-					trackBy: trackingTag;
-					templateCacheSize: 0
-				"
+	@if (passwordList$ | async; as passwordList) {
+		@if (passwordList.length > 0) {
+			<cdk-virtual-scroll-viewport
+				data-prevent-entry-deselect
+				itemSize="56"
+				appFocusableList
+				(focused)="selectEntry($event.originalEvent, $event.item)"
+				[selected]="selectedEntries"
+				class="table-viewport"
 			>
-				<div
-					[appFocusableListItem]="item"
-					[appContextMenuItem]="getContextMenu(item.type)"
-					(click)="selectEntry($event, item)"
-					(contextmenu)="showEntryContextMenu($event, item)"
-					[attr.draggable]="entriesDragEnabled"
-					[attr.aria-setsize]="passwordList.length"
-					[attr.aria-posinset]="i + 1"
-					tabindex="0"
-					(dragstart)="startDrag($event, item)"
-					(dragend)="endDrag()"
-					[ngClass]="{
-						selected: isEntrySelected(item),
-						'is-dragging': isEntryDragged(item)
-					}"
-					class="row-entry"
-				>
-					<ng-container
-						*ngComponentOutlet="
-							getComponentType(item);
-							inputs: {
-								searchPhrase: searchPhrase$ | async,
-								item,
-								iconsEnabled
-							}
-						"
-					/>
-				</div>
-			</ng-container>
-		</cdk-virtual-scroll-viewport>
-		<ng-template #noPasswordsTemplate>
-			<div class="list-cta">
 				<ng-container
-					*ngIf="
-						(searchPhrase$ | async)?.length || activeFilters?.length;
-						else noEntriesTemplate
+					*cdkVirtualFor="
+						let item of passwordList;
+						let i = index;
+						trackBy: trackingTag;
+						templateCacheSize: 0
 					"
 				>
-					No matching entries found
-				</ng-container>
-				<ng-template #noEntriesTemplate>
-					There are no entries in this group
-					<a
-						*ngIf="isAddPossible"
-						href="#"
-						class="add-entry-list-button"
-						(click)="addNewEntry(); (false)"
+					<div
+						[appFocusableListItem]="item"
+						[appContextMenuItem]="getContextMenu(item.type)"
+						(click)="selectEntry($event, item)"
+						(contextmenu)="showEntryContextMenu($event, item)"
+						[attr.draggable]="entriesDragEnabled"
+						[attr.aria-setsize]="passwordList.length"
+						[attr.aria-posinset]="i + 1"
+						tabindex="0"
+						(dragstart)="startDrag($event, item)"
+						(dragend)="endDrag()"
+						[ngClass]="{
+							selected: isEntrySelected(item),
+							'is-dragging': isEntryDragged(item)
+						}"
+						class="row-entry"
 					>
-						Add entry
-					</a>
-				</ng-template>
+						<ng-container
+							*ngComponentOutlet="
+								getComponentType(item);
+								inputs: {
+									searchPhrase: searchPhrase$ | async,
+									item,
+									iconsEnabled
+								}
+							"
+						/>
+					</div>
+				</ng-container>
+			</cdk-virtual-scroll-viewport>
+		} @else {
+			<div class="list-cta">
+				@if ((searchPhrase$ | async)?.length || activeFilters?.length) {
+					No matching entries found
+				} @else {
+					There are no entries in this group
+					@if (isAddPossible) {
+						<a
+							href="#"
+							class="add-entry-list-button"
+							(click)="addNewEntry(); (false)"
+						>
+							Add entry
+						</a>
+					}
+				}
 			</div>
-		</ng-template>
-	</ng-container>
+		}
+	}
 </div>
 
 <div id="mask">

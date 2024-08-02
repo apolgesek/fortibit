@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
 	Component,
 	ComponentRef,
@@ -23,13 +22,12 @@ import { debounceTime } from 'rxjs';
 	selector: 'app-generator-dialog',
 	standalone: true,
 	imports: [
-		CommonModule,
 		ReactiveFormsModule,
 		FeatherModule,
 		ModalComponent,
 		ValueSliderComponent,
 		TooltipDirective,
-		PrettyPasswordComponent
+		PrettyPasswordComponent,
 	],
 	templateUrl: './generator-dialog.component.html',
 	styleUrls: ['./generator-dialog.component.scss'],
