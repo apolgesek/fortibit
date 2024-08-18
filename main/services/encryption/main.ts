@@ -2,7 +2,6 @@ import { createHash } from 'crypto';
 import { Entry, VaultSchema } from '../../../shared';
 import { IExposedPasswordsService } from '../exposed-passwords/exposed-passwords-service.model';
 import { ExposedPasswordsService } from '../exposed-passwords/exposed-passwords.service';
-import { MockExposedPasswordsService } from '../exposed-passwords/mock-exposed-passwords.service';
 import { WeakPasswordsService } from '../weak-passwords/weak-passwords.service';
 import { IEncryptionService } from './encryption-service.model';
 import { EncryptionService } from './encryption.service';
@@ -39,10 +38,7 @@ class Main {
 	constructor() {
 		this._encryptionService = new EncryptionService();
 		this._inMemoryEncryptionService = new InMemoryEncryptionService();
-		this._exposedPasswordsService =
-			process.env.TEST_MODE === '0'
-				? new ExposedPasswordsService()
-				: new MockExposedPasswordsService();
+		this._exposedPasswordsService = new ExposedPasswordsService()
 		this._weakPasswordsService = new WeakPasswordsService();
 
 		this._messageListener = this.execute.bind(this);
@@ -216,6 +212,7 @@ class Main {
 						entry.password,
 						process.env.ENCRYPTION_KEY,
 					);
+					break;
 				default:
 					break;
 			}

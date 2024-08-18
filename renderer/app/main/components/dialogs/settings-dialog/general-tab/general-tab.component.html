@@ -1,5 +1,13 @@
 <form [formGroup]="passwordForm">
 	<div class="change-password">
+		<div class="section-header">Workspace settings</div>
+		<div formGroupName="toggle" class="inputgroup checkbox">
+			<label class="label" for="autosave">Enable autosave:</label>
+			<label class="switch">
+				<input id="autosave" type="checkbox" formControlName="autoSave" />
+				<span class="slider"></span>
+			</label>
+		</div>
 		<div class="section-header">Clipboard settings</div>
 		<div formGroupName="input" class="inputgroup">
 			<label class="label" for="clipboardTime"

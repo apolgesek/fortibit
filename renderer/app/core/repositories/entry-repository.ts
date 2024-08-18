@@ -1,4 +1,4 @@
-import { Entry } from '../../../../shared/index';
+import { Entry, PasswordEntry } from '../../../../shared/index';
 import { DbManager } from '../database/db-manager';
 import { GroupId } from '../enums';
 import { IEntryRepository, EntryPredicateFn } from './index';
@@ -72,14 +72,18 @@ export class EntryRepository implements IEntryRepository {
 
 	markSecureProtocolAvailable(url: string) {
 		return this.db.context.transaction('rw', this.db.entries, () => {
-			this.db.entries.filter(x => x.type === 'password' && new RegExp(url).test(x.url)).modify({ isSecureProtocolAvailable: true });
+			this.db.entries.filter(x => x.type === 'password' && new RegExp(url).test(x.url)).modify((e: PasswordEntry) => {
+				e.isSecureProtocolAvailable = true;
+			});
 		});		
 	}
 
 	markExposed(ids: number[]): Promise<number | number[]> {
 		return this.db.context.transaction('rw', this.db.entries, () =>
 			Promise.all(
-				ids.map((id) => this.db.entries.update(id, { isExposed: true })),
+				ids.map((id) => this.db.entries.update(id, (e: PasswordEntry) => {
+					e.isExposed = true;
+				})),
 			));
 	}
 

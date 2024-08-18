@@ -25,6 +25,7 @@ export class PasswordProcessor implements IProcessor<PasswordEntry> {
 
   afterUpdate(entry: PasswordEntry, oldEntry: PasswordEntry, changes: (keyof PasswordEntry)[]): void {
     if (
+      oldEntry &&
       oldEntry.icon &&
       !oldEntry.icon.startsWith('data:image/png')
     ) {

@@ -18,7 +18,6 @@ import { ReportManager } from './managers/report.manager';
 import { ModalService } from './modal.service';
 import { NotificationService } from './notification.service';
 import { SearchService } from './search.service';
-import { IconService } from './icon.service';
 import { IProcessor, PasswordProcessor } from './processors';
 
 enum DirtyMarkType {
@@ -43,7 +42,7 @@ export class WorkspaceService {
 		return Math.round(this._zoomFactor * 100);
 	}
 
-	private readonly loadedDatabaseSource: Subject<boolean> = new Subject();
+	private readonly loadedDatabaseSource = new Subject<boolean>();
 	private readonly processors: Partial<Record<Entry['type'], IProcessor<any>>> = {
 		password: inject(PasswordProcessor)
 	}
@@ -58,7 +57,6 @@ export class WorkspaceService {
 	private readonly searchService = inject(SearchService);
 	private readonly modalService = inject(ModalService);
 	private readonly fileNamePipe = inject(FileNamePipe);
-	private readonly iconService = inject(IconService);
 	private readonly zone = inject(NgZone);
 	private readonly router = inject(Router);
 
@@ -79,6 +77,10 @@ export class WorkspaceService {
 			.subscribe(() => {
 				this.isSynced = null;
 				this.saveDatabaseSnapshot();
+
+				if (this.config.autosaveEnabled) {
+					this.saveDatabase({ notify: false });
+				}
 			});
 
 		this.loadedDatabase$ = this.loadedDatabaseSource.asObservable();
@@ -297,7 +299,7 @@ export class WorkspaceService {
 			}
 
 			return true;
-		} catch (err) {
+		} catch {
 			return false;
 		}
 	}

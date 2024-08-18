@@ -223,8 +223,4 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 			this.loginForm.value.password,
 		);
 	}
-
-	test() {
-		this.messageBroker.ipcRenderer.send(IpcChannel.ScanQrCode);
-	}
 }

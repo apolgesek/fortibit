@@ -1,12 +1,11 @@
 import { expect, test } from '@playwright/test';
+import PATH from 'path';
 import { ElectronApplication, Page, _electron as electron } from 'playwright';
 import { ProcessArgument } from '../main/process-argument.enum';
 import { addEntry } from './helpers/add-entry';
 import { authenticate } from './helpers/auth';
-import { getInvoke } from './helpers/ipc';
 import { setupTestFiles } from './helpers/file';
-
-const PATH = require('path');
+import { getInvoke } from './helpers/ipc';
 
 let app: ElectronApplication;
 let firstWindow: Page;
@@ -95,7 +94,7 @@ test.describe('Workspace > Entry & group', async () => {
 		await addEntry(firstWindow, { config: { close: true } });
 		const entryTitle = await firstWindow.getByText(/title1/i).count();
 		const entryUsername = await firstWindow.getByText(/username1/i).count();
-		const password = await firstWindow.getByText(/\•{6}/i).count();
+		const password = await firstWindow.getByText(/•{6}/i).count();
 		const noEntriesText = await firstWindow
 			.getByText(/there are no entries in this group/i)
 			.count();
@@ -233,7 +232,7 @@ test.describe('Workspace > Entry & group', async () => {
 
 	test('Check entry password copied', async () => {
 		await addEntry(firstWindow, { config: { close: true } });
-		const entryPassword = firstWindow.getByText(/\•{6}/i);
+		const entryPassword = firstWindow.getByText(/•{6}/i);
 		await entryPassword.dblclick();
 		const notification = firstWindow.getByRole('alert');
 
@@ -301,7 +300,7 @@ test.describe('Workspace > Entry & group', async () => {
 			.getByText(/recycle bin/i);
 		const emailGroup = firstWindow.getByRole('listitem').getByText(/email/i);
 		await trashGroup.click();
-		let addNewButton = firstWindow.getByRole('link', { name: /add entry/i });
+		const addNewButton = firstWindow.getByRole('link', { name: /add entry/i });
 		const addEntryBtn = firstWindow.getByRole('button', { name: /add entry/i });
 		let toolbarAddNewButtonDisabled =
 			await addEntryBtn.getAttribute('disabled');
@@ -586,6 +585,18 @@ test.describe('Workspace > Entry & group', async () => {
 		await expect(
 			firstWindow.getByRole('alert').getByText(/maintenance completed/i),
 		).toBeVisible();
+	});
+
+	test("Check secure protocol availability should mark entries", async () => {
+		await addEntry(firstWindow, { config: { close: true }, url: 'http://google.com' });
+		await firstWindow.keyboard.press('Control+S');
+		await firstWindow.waitForSelector('[role=alert]');
+		await firstWindow.keyboard.press('Control+L');
+		await authenticate(firstWindow);
+		await firstWindow.getByRole('main').waitFor({ state: 'visible' });
+		await firstWindow.getByText(/username1/i).click();
+
+		await expect(firstWindow.getByText('https protocol is available')).toBeVisible({ timeout: 10_000 });
 	});
 });
 

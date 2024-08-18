@@ -16,6 +16,7 @@ var getDefaultConfig = function (platform) {
         lockOnSystemLock: true,
         displayIcons: true,
         biometricsAuthenticationEnabled: false,
+        autosaveEnabled: false,
         autoTypeEnabled: true,
         saveOnLock: false,
         compressionEnabled: false,

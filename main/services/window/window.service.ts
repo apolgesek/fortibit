@@ -24,7 +24,6 @@ import { INativeApiService } from '../native';
 import { IPerformanceService } from '../performance/performance-service.model';
 import { IWindowService } from './';
 import { IWindow } from './window-model';
-import { appendFileSync, writeFileSync } from 'fs';
 
 const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
 const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
@@ -119,7 +118,7 @@ export class WindowService implements IWindowService {
 		});
 
 		ipcMain.handle(IpcChannel.ZoomOut, (event: IpcMainEvent) => {
-			let currentFactor = parseFloat(event.sender.getZoomFactor().toFixed(2));
+			const currentFactor = parseFloat(event.sender.getZoomFactor().toFixed(2));
 			if (currentFactor === zoomLevels[0]) return zoomLevels[0];
 
 			const idx = zoomLevels.findIndex((x) => x === currentFactor);

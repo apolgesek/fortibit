@@ -15,8 +15,7 @@ export class ConfigService {
 	}
 
 	private readonly messageBroker = inject(MessageBroker);
-	private readonly configLoaded: BehaviorSubject<Configuration> =
-	new BehaviorSubject(null);
+	private readonly configLoaded = new BehaviorSubject<Configuration>(null);
 
 	constructor() {
 		this.configLoadedSource$ = this.configLoaded.asObservable();

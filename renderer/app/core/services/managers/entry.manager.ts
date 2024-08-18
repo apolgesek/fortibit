@@ -49,10 +49,10 @@ export class EntryManager {
 		inject(DbManager),
 	);
 
-	private readonly scrollTopEntriesSource: Subject<void> = new Subject();
-	private readonly firstEntrySelectedSource: Subject<void> = new Subject();
-	private readonly entrySelectedSource: BehaviorSubject<Entry> =
-		new BehaviorSubject(this.selectedEntries[0]);
+	private readonly scrollTopEntriesSource = new Subject<void>();
+	private readonly firstEntrySelectedSource = new Subject<void>();
+	private readonly entrySelectedSource =
+		new BehaviorSubject<Entry>(this.selectedEntries[0]);
 	private readonly entryListSource: BehaviorSubject<Entry[]> =
 		new BehaviorSubject<Entry[]>([]);
 
@@ -114,14 +114,13 @@ export class EntryManager {
 
 		this.messageBroker.ipcRenderer.on(IpcChannel.UpdateSecureProtocolAvailability, (_, urls: string) => {
 			this.zone.run(async () => {
-				console.log(urls);
 				for (const url of urls) {
 					await this.entryRepository.markSecureProtocolAvailable(url);
 				}
 
 				this.entries = await this.getEntries();
 				this.updateEntriesSource();
-
+				this.updateSelectedEntry();
 				this.markDirty();
 			});
 		});
@@ -285,7 +284,7 @@ export class EntryManager {
 		await this.entryRepository.markExposed(ids);
 		this.entries = await this.getEntries();
 		this.updateEntriesSource();
-		
+		this.updateSelectedEntry();
 		this.markDirty();
 	}
 
@@ -299,6 +298,10 @@ export class EntryManager {
 
 	updateIcon(id: number, icon: string): Promise<number> {
 		return this.entryRepository.update({ id, icon });
+	}
+
+	selectFirstEntry() {
+		this.firstEntrySelectedSource.next();
 	}
 
 	async get(id: number): Promise<Entry> {
@@ -327,10 +330,6 @@ export class EntryManager {
 		} else {
 			return this.entryRepository.getAllByGroup(id);
 		}
-	}
-
-	selectFirstEntry() {
-		this.firstEntrySelectedSource.next();
 	}
 
 	private getSearchResults$([
@@ -386,5 +385,12 @@ export class EntryManager {
 	private markDirty() {
 		this.updateEntriesSource();
 		this.markDirtySource.next();
+	}
+
+	private updateSelectedEntry() {
+		if (this.selectedEntries.length === 1) {
+			const entry = this.entries.find(x => x.id === this.selectedEntries[0].id);
+			this.selectEntry(entry);
+		}
 	}
 }

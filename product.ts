@@ -33,4 +33,5 @@ export type Product = {
 	workspaces: any;
 	showInsecureUrlPrompt: boolean;
 	protectWindowsFromCapture: boolean;
+	autosaveEnabled: boolean;
 };

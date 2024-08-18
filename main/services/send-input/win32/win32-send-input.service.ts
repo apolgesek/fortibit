@@ -2,6 +2,7 @@ import { ProcessArgument } from '@root/main/process-argument.enum';
 import { IpcMainEvent, app, ipcMain } from 'electron';
 import { INativeApiService } from '../../native';
 import { ISendInputService } from './../send-input.model';
+import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 
 export class Win32SendInputService implements ISendInputService {
 	private readonly _keypressDelayMs = 0;
@@ -14,7 +15,7 @@ export class Win32SendInputService implements ISendInputService {
 	) {
 		if (this._isTestMode) {
 			ipcMain.handle(
-				'app:sendInput',
+				IpcChannel.SendInput,
 				async (_: IpcMainEvent, token: string | number) => {
 					if (typeof token === 'string') {
 						return await this.typeWord(token);

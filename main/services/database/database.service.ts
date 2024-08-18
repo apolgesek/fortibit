@@ -1,5 +1,6 @@
 import {
 	CsvWriter,
+	getDateString,
 	getDefaultPath,
 	getFileFilter,
 	getHashCode,
@@ -229,12 +230,7 @@ export class DatabaseService implements IDatabaseService {
 					{
 						defaultPath: getDefaultPath(
 							this._configService.appConfig,
-							`exposed_passwords_report_${date
-								.getDate()
-								.toString()
-								.padStart(2, '0')}-${(date.getMonth() + 1)
-								.toString()
-								.padStart(2, '0')}-${date.getFullYear()}`,
+							`exposed_passwords_report_${getDateString(date)}`,
 						),
 						filters: [getFileFilter(this._configService.appConfig, 'csv')],
 					},
@@ -268,12 +264,7 @@ export class DatabaseService implements IDatabaseService {
 					{
 						defaultPath: getDefaultPath(
 							this._configService.appConfig,
-							`weak_passwords_report_${date
-								.getDate()
-								.toString()
-								.padStart(2, '0')}-${(date.getMonth() + 1)
-								.toString()
-								.padStart(2, '0')}-${date.getFullYear()}`,
+							`weak_passwords_report_${getDateString(date)}`,
 						),
 						filters: [getFileFilter(this._configService.appConfig, 'csv')],
 					},
@@ -288,7 +279,7 @@ export class DatabaseService implements IDatabaseService {
 						]);
 
 						return true;
-					} catch (err) {
+					} catch {
 						throw new Error('Failed to save weak passwords report');
 					}
 				}
@@ -341,10 +332,6 @@ export class DatabaseService implements IDatabaseService {
 		ipcMain.handle(
 			IpcChannel.DatabaseChanged,
 			async (event: IpcMainEvent, payload: SaveFilePayload) => {
-				if (this._isTestMode) {
-					return;
-				}
-
 				return await this.saveDatabaseSnapshot(event, payload);
 			},
 		);
@@ -354,7 +341,7 @@ export class DatabaseService implements IDatabaseService {
 		}
 
 		if (this._isTestMode) {
-			ipcMain.handle(IpcChannel.TestCleanup, (_: IpcMainEvent) => {
+			ipcMain.handle(IpcChannel.TestCleanup, () => {
 				try {
 					const files = readdirSync(this._configService.appConfig.e2eFilesPath);
 					files
@@ -364,7 +351,7 @@ export class DatabaseService implements IDatabaseService {
 						);
 
 					return true;
-				} catch (err) {
+				} catch {
 					return false;
 				}
 			});
@@ -487,14 +474,14 @@ export class DatabaseService implements IDatabaseService {
 
 			try {
 				writeFileSync(temporaryPath, payload.encrypted, { encoding: 'base64' });
-			} catch (err) {
+			} catch {
 				unlinkSync(temporaryPath);
 				return;
 			}
 
 			try {
 				copyFileSync(temporaryPath, finalFilePath);
-			} catch (err) {
+			} catch {
 				renameSync(temporaryPath, finalFilePath);
 				return;
 			}
@@ -568,7 +555,7 @@ export class DatabaseService implements IDatabaseService {
 
 		if (!openDialogReturnValue?.canceled || path) {
 			if (path && !existsSync(path)) {
-				let workspaces = {
+				const workspaces = {
 					workspace: this._configService.appConfig.workspaces.workspace,
 					recentlyOpened:
 						this._configService.appConfig.workspaces.recentlyOpened.filter(
@@ -620,7 +607,7 @@ export class DatabaseService implements IDatabaseService {
 			const fileData = readFileSync(this.getFilePath(event.sender.id), {
 				encoding: 'base64',
 			});
-			let payload = await this._encryptionEventService.decryptDatabase(
+			const payload = await this._encryptionEventService.decryptDatabase(
 				fileData,
 				password,
 				key,

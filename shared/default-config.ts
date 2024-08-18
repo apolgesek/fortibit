@@ -15,6 +15,7 @@ export const getDefaultConfig = (platform: string): Partial<Configuration> => {
 		lockOnSystemLock: true,
 		displayIcons: true,
 		biometricsAuthenticationEnabled: false,
+		autosaveEnabled: false,
 		autoTypeEnabled: true,
 		saveOnLock: false,
 		compressionEnabled: false,

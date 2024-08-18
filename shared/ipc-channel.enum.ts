@@ -71,5 +71,6 @@ export enum IpcChannel {
 	ConfigChanged = 'app:configChanged',
 	OpenPrompt = 'app:openPrompt',
 	UpdateSecureProtocolAvailability = 'app:updateSecureProtocolAvailability',
-	ScanQrCode = 'app:scanQrCode'
+	ScanQrCode = 'app:scanQrCode',
+	LogError = 'app:logError'
 }

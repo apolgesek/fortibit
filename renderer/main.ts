@@ -2,6 +2,7 @@ import { HttpClientModule } from '@angular/common/http';
 import {
 	APP_INITIALIZER,
 	enableProdMode,
+	ErrorHandler,
 	importProvidersFrom,
 } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -21,60 +22,61 @@ import {
 	WorkspaceService,
 } from '@app/core/services';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
+import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import {
 	AlertCircle,
+	ArrowDown,
+	ArrowRight,
+	ArrowUp,
 	Book,
-	BookOpen,
 	Bookmark,
+	BookOpen,
 	Check,
 	CheckCircle,
 	ChevronDown,
+	ChevronLeft,
 	ChevronRight,
 	ChevronUp,
 	Code,
 	Copy,
 	Edit,
 	Edit2,
-	Link,
 	Eye,
 	EyeOff,
+	File,
 	FilePlus,
 	Folder,
 	Globe,
 	Grid,
+	Heart,
 	Info,
 	Key,
-	Plus,
+	Link,
+	Lock,
 	Minus,
 	Move,
+	Plus,
 	PlusCircle,
-	RefreshCw,
 	RefreshCcw,
+	RefreshCw,
 	Save,
 	Settings,
+	Share,
+	Shield,
 	Star,
 	Trash,
 	User,
 	XCircle,
-	ArrowDown,
-	ArrowUp,
-	ArrowRight,
-	Share,
-	Heart,
-	Shield,
-	File,
-	Lock,
-	ChevronLeft,
 } from 'angular-feather/icons';
-import { MessageBroker, HotkeyHandler } from 'injection-tokens';
+import { HotkeyHandler, MessageBroker } from 'injection-tokens';
+import isElectron from 'is-electron';
 import 'zone.js';
+import { DefaultErrorHandler } from './app/core/errors/default-error-handler';
 import { WebService } from './app/core/services/electron/web.service';
 import { DarwinHotkeyHandler } from './app/core/services/hotkey/darwin-hotkey-handler';
 import { routes } from './app/routes';
 import { AppConfig } from './environments/environment';
-import { IpcChannel } from '@shared-renderer/index';
-import isElectron from 'is-electron';
 
 function initializeApp(
 	db: DbManager,
@@ -219,5 +221,8 @@ bootstrapApplication(AppComponent, {
 				ClipboardService,
 			],
 		},
+		{
+			provide: ErrorHandler, useClass: DefaultErrorHandler
+		}
 	],
 }).catch((err) => console.error(err));

@@ -18,12 +18,13 @@ export type Config = {
 	labelId?: HotkeyLabelKey;
 };
 
-export type HotkeyRegister = {
-	[hotkey: string]: {
+export type HotkeyRegister = Record<
+	string,
+	{
 		actionOrActions: ActionOrActions;
 		config: Config;
-	};
-};
+	}
+>;
 
 function capitalizeFirstLetter(text: string): string {
 	return text.charAt(0).toUpperCase() + text.slice(1);
@@ -199,9 +200,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 	public selectAllEntries() {
 		if (this.entryManager.selectedEntries.length) {
 			this.entryManager.selectedEntries = [];
-			this.entryManager.selectedEntries.push(
-				...this.entryManager.entries,
-			);
+			this.entryManager.selectedEntries.push(...this.entryManager.entries);
 		}
 	}
 

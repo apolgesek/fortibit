@@ -1,10 +1,8 @@
-import { Component, DestroyRef, Inject, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IMessageBroker } from '@app/core/models';
 import {
 	ConfigService,
-	ModalService,
 	NotificationService,
 	WorkspaceService,
 } from '@app/core/services';
@@ -43,6 +41,7 @@ export class GeneralTabComponent implements OnInit {
 	private readonly debounceTimeMs = 500;
 	private readonly _passwordForm = this.formBuilder.group({
 		toggle: this.formBuilder.group({
+			autoSave: [false],
 			autoType: [false],
 			lockOnSystemLock: [false],
 			saveOnLock: [false],
@@ -84,6 +83,7 @@ export class GeneralTabComponent implements OnInit {
 				this.passwordForm.setValue(
 					{
 						toggle: {
+							autoSave: config.autosaveEnabled,
 							autoType: config.autoTypeEnabled,
 							lockOnSystemLock: config.lockOnSystemLock,
 							saveOnLock: config.saveOnLock,
@@ -112,6 +112,7 @@ export class GeneralTabComponent implements OnInit {
 				}
 
 				const configPartial = {
+					autosaveEnabled: form.autoSave,
 					autoTypeEnabled: form.autoType,
 					lockOnSystemLock: form.lockOnSystemLock,
 					saveOnLock: form.saveOnLock,

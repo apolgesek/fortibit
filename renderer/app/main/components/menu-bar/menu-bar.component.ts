@@ -15,7 +15,7 @@ import {
 	NotificationService,
 	WorkspaceService,
 } from '@app/core/services';
-import { HotkeyLabel } from '@app/core/services/hotkey/hotkey-label';
+import type { HotkeyLabel } from '@app/core/services/hotkey/hotkey-label';
 import { ModalService } from '@app/core/services/modal.service';
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';

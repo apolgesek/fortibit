@@ -140,6 +140,21 @@
 	position: relative;
 }
 
+.loader-a {
+	position: absolute;
+	top: 16px;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	width: 12px;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	border: 3px solid #b0b0b0;
+	border-right-color: var(--primary-btn-bg);
+	animation: l2 1s infinite linear;
+}
+
 .badge {
 	background-color: $tulip-tree;
 	box-shadow: 0px 0px 1px 0px var(--primary-bg);
@@ -164,5 +179,11 @@
 		i-feather {
 			margin-right: 0 !important;
 		}
+	}
+}
+
+@keyframes l2 {
+	to {
+		transform: rotate(1turn);
 	}
 }

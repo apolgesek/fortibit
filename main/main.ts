@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 import { IpcChannel } from '@shared-renderer/index';
 import {
 	app,
@@ -12,9 +10,9 @@ import {
 	screen,
 	shell,
 } from 'electron';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { platform } from 'os';
-import { basename, resolve } from 'path';
+import { basename, join, resolve } from 'path';
 import { SingleInstanceServices } from './di';
 import { ProcessArgument } from './process-argument.enum';
 import { IAutotypeService } from './services/autotype';
@@ -29,7 +27,7 @@ import { IPerformanceService } from './services/performance/performance-service.
 import { IWindowService } from './services/window';
 import jsQR from 'jsqr';
 import { PNG } from 'pngjs';
-import * as OTPAuth from "otpauth";
+import { getDateString } from './util';
 
 class MainProcess {
 	private readonly _services: SingleInstanceServices;
@@ -71,6 +69,8 @@ class MainProcess {
 	}
 
 	constructor() {
+		process.env.TEST_MODE = this._isTestMode ? '1' : '0'
+
 		this._services = new SingleInstanceServices();
 		this._fileArg = process.argv.find((x) =>
 			x.endsWith(this._services.get(IConfigService).appConfig.fileExtension),
@@ -123,7 +123,7 @@ class MainProcess {
 			process.once(event, () => this.exitApp());
 		});
 
-		process.on('unhandledRejection', (reason, promise) => {
+		process.on('unhandledRejection', (reason) => {
 			console.log('Unhandled promise rejection: ', reason);
 		});
 	}
@@ -270,6 +270,13 @@ class MainProcess {
 
 			console.log(code.data);
 			// expose otpauth to renderer
+		});
+
+		ipcMain.on(IpcChannel.LogError, (_, error) => {
+			const logPath = app.getPath('logs');
+			if (!existsSync(logPath)) mkdirSync(logPath, { recursive: true });
+
+			writeFileSync(join(logPath, `error_log_report_${getDateString()}`), error);
 		});
 	}
 }

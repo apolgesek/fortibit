@@ -107,6 +107,7 @@ export class ConfigService implements IConfigService {
 			showInsecureUrlPrompt: productInformation.showInsecureUrlPrompt,
 			biometricsProtectedFiles: [],
 			protectWindowsFromCapture: productInformation.protectWindowsFromCapture,
+			autosaveEnabled: productInformation.autosaveEnabled,
 			organizationName: null
 		} as Configuration);
 

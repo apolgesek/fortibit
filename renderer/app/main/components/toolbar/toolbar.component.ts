@@ -5,6 +5,7 @@ import {
 	WorkspaceService,
 	EntryManager,
 	GroupManager,
+	ConfigService,
 } from '@app/core/services';
 import { SettingsButtonComponent } from '../settings-button/settings-button.component';
 import { CommonModule } from '@angular/common';
@@ -48,6 +49,11 @@ export class ToolbarComponent {
 	private readonly groupManager = inject(GroupManager);
 	private readonly searchService = inject(SearchService);
 	private readonly modalService = inject(ModalService);
+	private readonly configService = inject(ConfigService);
+
+	get autosaveEnabled(): boolean {
+		return this.configService.config.autosaveEnabled;
+	}
 
 	get searchMode(): string {
 		return this.isGlobalSearchMode
@@ -87,7 +93,6 @@ export class ToolbarComponent {
 		this.searchService.isGlobalSearchMode = value;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/member-ordering
 	get searchPhrase(): string {
 		return this.searchService.searchInputSource.value;
 	}

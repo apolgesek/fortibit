@@ -1,15 +1,14 @@
 import { expect, test } from '@playwright/test';
+import PATH from 'path';
 import {
 	ElectronApplication,
 	Page,
 	_electron as electron,
 } from 'playwright-core';
 import { ProcessArgument } from '../main/process-argument.enum';
-import { getInvoke } from './helpers/ipc';
 import { authenticate } from './helpers/auth';
 import { setupTestFiles } from './helpers/file';
-
-const PATH = require('path');
+import { getInvoke } from './helpers/ipc';
 
 let app: ElectronApplication;
 let firstWindow: Page;

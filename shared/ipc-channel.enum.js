@@ -76,5 +76,6 @@ var IpcChannel;
     IpcChannel["OpenPrompt"] = "app:openPrompt";
     IpcChannel["UpdateSecureProtocolAvailability"] = "app:updateSecureProtocolAvailability";
     IpcChannel["ScanQrCode"] = "app:scanQrCode";
+    IpcChannel["LogError"] = "app:logError";
 })(IpcChannel || (exports.IpcChannel = IpcChannel = {}));
 //# sourceMappingURL=ipc-channel.enum.js.map
