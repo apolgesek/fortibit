@@ -2,6 +2,7 @@ import {
 	AfterViewInit,
 	Directive,
 	ElementRef,
+	HostBinding,
 	Input,
 	inject,
 } from '@angular/core';
@@ -28,6 +29,9 @@ export class EntryIconDirective implements AfterViewInit {
 
 		this._entry = value;
 	}
+
+	@HostBinding('data-testid')
+	readonly elementClass = 'entry-icon'; 
 
 	async ngAfterViewInit(): Promise<void> {
 		// icon check can't be async to avoid load delay

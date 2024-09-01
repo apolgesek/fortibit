@@ -1,7 +1,7 @@
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ConfigService, WorkspaceService } from '@app/core/services';
+import { ConfigService } from '@app/core/services';
 import { Product } from '@config/product';
 import { FeatherModule } from 'angular-feather';
 
@@ -15,7 +15,6 @@ import { FeatherModule } from 'angular-feather';
 export class ViewTabComponent implements OnInit {
 	private readonly formBuilder = inject(FormBuilder);
 	private readonly destroyRef = inject(DestroyRef);
-	private readonly workspaceService = inject(WorkspaceService);
 	private readonly configService = inject(ConfigService);
 
 	private readonly _viewForm = this.formBuilder.group({
@@ -45,15 +44,5 @@ export class ViewTabComponent implements OnInit {
 					this.configService.setConfig(configPartial);
 				}
 			});
-
-		this.viewForm.controls.darkTheme.valueChanges
-			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe(() => {
-				this.toggleTheme();
-			});
-	}
-
-	toggleTheme() {
-		this.workspaceService.toggleTheme();
 	}
 }

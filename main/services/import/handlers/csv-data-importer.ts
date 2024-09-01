@@ -1,8 +1,8 @@
 import { getDefaultPath, getFileFilter } from '@root/main/util';
-import * as csv from 'csv-parser';
+import csv from 'csv-parser';
 import { dialog } from 'electron';
 import { createReadStream } from 'fs-extra';
-import { PasswordEntry, ImportHandler } from '../../../../shared';
+import { ImportHandler, PasswordEntry } from '../../../../shared';
 import { IConfigService } from '../../config';
 import { IEncryptionEventWrapper, MessageEventType } from '../../encryption';
 import { IWindowService } from '../../window';
@@ -61,7 +61,7 @@ export abstract class CsvDataImporter<T> implements IImportHandler {
 
 	import(event: Electron.IpcMainEvent, path: string): Promise<string> {
 		return new Promise((resolve, reject) => {
-			let results: T[] = [];
+			const results: T[] = [];
 			let output: Partial<PasswordEntry>[] = [];
 
 			createReadStream(path)
@@ -102,7 +102,7 @@ export abstract class CsvDataImporter<T> implements IImportHandler {
 								};
 							}),
 						);
-					} catch (err) {
+					} catch {
 						reject('Encryption error occured');
 					}
 

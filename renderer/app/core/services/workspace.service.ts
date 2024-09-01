@@ -350,10 +350,6 @@ export class WorkspaceService {
 		});
 	}
 
-	toggleTheme() {
-		this.messageBroker.ipcRenderer.invoke(IpcChannel.ToggleTheme);
-	}
-
 	async zoomIn() {
 		this._zoomFactor = await this.messageBroker.ipcRenderer.invoke(
 			IpcChannel.ZoomIn,

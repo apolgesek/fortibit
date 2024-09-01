@@ -15,7 +15,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./card-entry.model"), exports);
-__exportStar(require("./default-config"), exports);
 __exportStar(require("./entry-group"), exports);
 __exportStar(require("./entry.model"), exports);
 __exportStar(require("./history-entry.model"), exports);

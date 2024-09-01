@@ -77,5 +77,6 @@ var IpcChannel;
     IpcChannel["UpdateSecureProtocolAvailability"] = "app:updateSecureProtocolAvailability";
     IpcChannel["ScanQrCode"] = "app:scanQrCode";
     IpcChannel["LogError"] = "app:logError";
+    IpcChannel["GetDefaultConfig"] = "app:GetDefaultConfig";
 })(IpcChannel || (exports.IpcChannel = IpcChannel = {}));
 //# sourceMappingURL=ipc-channel.enum.js.map

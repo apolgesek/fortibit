@@ -15,6 +15,7 @@
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="isDatabaseInSync"
+			aria-label="Save"
 			class="icon-btn save-db"
 			(click)="trySaveDatabase()"
 			[appTooltip]="autosaveEnabled ? 'Autosave is on' : 'Save'"
@@ -48,6 +49,7 @@
 			class="icon-btn"
 			style="margin-left: 0.5rem"
 			appTooltip="Security hub"
+			aria-label="Open security hub"
 			container="body"
 		>
 			<i-feather name="shield"></i-feather>

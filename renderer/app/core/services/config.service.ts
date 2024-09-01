@@ -43,9 +43,22 @@ export class ConfigService {
 					fullConfig,
 				),
 			),
+			from(
+				this.messageBroker.ipcRenderer.invoke(
+					IpcChannel.ToggleTheme,
+					fullConfig,
+				),
+			),
 		]).subscribe(() => {
 			this.messageBroker.ipcRenderer.send(IpcChannel.ConfigChanged, config);
 			this.configLoaded.next(fullConfig);
 		});
+	}
+
+	async resetConfig() {
+		const config = await this.messageBroker.ipcRenderer.invoke(
+			IpcChannel.GetDefaultConfig,
+		);
+		this.setConfig(config);
 	}
 }

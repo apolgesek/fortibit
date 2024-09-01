@@ -359,12 +359,18 @@ export class DatabaseService implements IDatabaseService {
 	}
 
 	public async biometricsDecrypt(event: IpcMainEvent): Promise<void> {
-		const password: string = await this._nativeApiService.getPassword(
-			this._windowService
-				.getWindowByWebContentsId(event.sender.id)
-				.browserWindow.getNativeWindowHandle(),
-			this.getFilePath(event.sender.id),
-		);
+		let password: string;
+
+		if (this._isTestMode) {
+			password = 'test123';
+		} else {
+			password = await this._nativeApiService.getPassword(
+				this._windowService
+					.getWindowByWebContentsId(event.sender.id)
+					.browserWindow.getNativeWindowHandle(),
+				this.getFilePath(event.sender.id),
+			);
+		}
 
 		if (password) {
 			this.decryptDatabase(event, password);

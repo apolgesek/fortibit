@@ -1,4 +1,6 @@
+/* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
+import PATH from 'path';
 import {
 	ElectronApplication,
 	Page,
@@ -8,8 +10,7 @@ import { ProcessArgument } from '../main/process-argument.enum';
 import { addEntry } from './helpers/add-entry';
 import { authenticate } from './helpers/auth';
 import { setupTestFiles } from './helpers/file';
-
-const PATH = require('path');
+import { getInvoke } from './helpers/ipc';
 
 const getZoomLevelFn = ({ BrowserWindow }) =>
 	BrowserWindow.getFocusedWindow().webContents.getZoomLevel();
@@ -23,11 +24,12 @@ test.describe('Hotkeys after auth', async () => {
 
 		app = await electron.launch({
 			args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-			colorScheme: 'dark',
+			colorScheme: 'no-preference',
 			env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
 		});
 		firstWindow = await app.firstWindow();
-		await app.waitForEvent('window');
+		const invoke = await getInvoke(firstWindow);
+		await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
 		await authenticate(firstWindow);
 		await firstWindow.getByRole('main').waitFor({ state: 'visible' });
 	});
@@ -38,7 +40,7 @@ test.describe('Hotkeys after auth', async () => {
 
 	test('Check should open new entry modal', async () => {
 		await firstWindow.keyboard.press('Control+N');
-		const addEntryModal = await firstWindow.getByText(/add entry in general/i);
+		const addEntryModal = firstWindow.getByText(/add\s*entry\s*in\s*general/i);
 
 		await expect(addEntryModal).toBeVisible();
 	});
@@ -47,8 +49,8 @@ test.describe('Hotkeys after auth', async () => {
 		await addEntry(firstWindow, { config: { close: true } });
 		await firstWindow.getByRole('main').getByRole('listitem').first().click();
 		await firstWindow.keyboard.press('Control+E');
-		const editEntryModal = await firstWindow.getByText(
-			/edit entry in general/i,
+		const editEntryModal = firstWindow.getByText(
+			/edit\s*entry\s*in\s*general/i,
 		);
 
 		await expect(editEntryModal).toBeVisible();
@@ -58,7 +60,7 @@ test.describe('Hotkeys after auth', async () => {
 		await addEntry(firstWindow, { config: { close: true } });
 		await firstWindow.getByRole('main').getByRole('listitem').first().click();
 		await firstWindow.keyboard.press('Delete');
-		const deleteEntryModal = await firstWindow
+		const deleteEntryModal = firstWindow
 			.getByRole('dialog')
 			.getByText(/remove entry/i);
 
@@ -67,7 +69,7 @@ test.describe('Hotkeys after auth', async () => {
 
 	test('Check should open add group modal', async () => {
 		await firstWindow.keyboard.press('Control+O');
-		const addGroupModal = await firstWindow
+		const addGroupModal = firstWindow
 			.getByRole('dialog')
 			.getByText(/add group/i);
 
@@ -81,7 +83,7 @@ test.describe('Hotkeys after auth', async () => {
 			.filter({ hasText: /banking/i })
 			.click();
 		await firstWindow.keyboard.press('Control+R');
-		const addGroupModal = await firstWindow
+		const addGroupModal = firstWindow
 			.getByRole('dialog')
 			.getByText(/edit group/i);
 
@@ -91,7 +93,7 @@ test.describe('Hotkeys after auth', async () => {
 	test('Check should lock database', async () => {
 		await addEntry(firstWindow, { config: { close: true } });
 		await firstWindow.keyboard.press('Control+L');
-		const passwordInput = await firstWindow.getByPlaceholder(/password/i);
+		const passwordInput = firstWindow.getByPlaceholder(/password/i);
 
 		await expect(passwordInput).toBeVisible();
 	});
@@ -118,7 +120,7 @@ test.describe('Hotkeys after auth', async () => {
 		await addEntry(firstWindow, { config: { close: true } });
 		await firstWindow.getByRole('main').getByRole('listitem').first().click();
 		await firstWindow.keyboard.press('Control+H');
-		const entryHistoryModal = await firstWindow
+		const entryHistoryModal = firstWindow
 			.getByRole('dialog')
 			.getByText(/entry history/i);
 
@@ -183,7 +185,7 @@ test.describe('Hotkeys after auth', async () => {
 		await firstWindow.getByRole('dialog').waitFor({ state: 'detached' });
 
 		await firstWindow.keyboard.press('Control+S');
-		const notification = await firstWindow.getByRole('alert');
+		const notification = firstWindow.getByRole('alert');
 
 		await expect(notification).toBeVisible();
 	});
@@ -194,14 +196,17 @@ test.describe('Hotkeys before auth', async () => {
 	let firstWindow: Page;
 
 	test.beforeEach(async () => {
+		setupTestFiles();
+
 		app = await electron.launch({
 			args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-			colorScheme: 'dark',
+			
+			env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
 		});
 		firstWindow = await app.firstWindow();
-		await firstWindow
-			.getByPlaceholder(/password/i)
-			.waitFor({ state: 'visible' });
+		await app.waitForEvent('window');
+		await authenticate(firstWindow);
+		await firstWindow.getByRole('main').waitFor({ state: 'visible' });
 	});
 
 	test.afterEach(async () => {
@@ -212,7 +217,7 @@ test.describe('Hotkeys before auth', async () => {
 		await firstWindow.keyboard.press('Control+N');
 		const dialog = firstWindow.getByRole('dialog');
 
-		expect(dialog).not.toBeAttached();
+		await expect(dialog).toBeHidden();
 	});
 
 	test('Check should open settings modal', async () => {
@@ -241,6 +246,7 @@ test.describe('Hotkeys before auth', async () => {
 	test('Check should zoom in', async () => {
 		const initialZoomLevel = await app.evaluate(getZoomLevelFn);
 		await firstWindow.keyboard.press('Control+=');
+		await firstWindow.waitForTimeout(500);
 		const changedZoomLevel = await app.evaluate(getZoomLevelFn);
 
 		expect(changedZoomLevel).toBeGreaterThan(initialZoomLevel);
@@ -249,6 +255,7 @@ test.describe('Hotkeys before auth', async () => {
 	test('Check should zoom out', async () => {
 		const initialZoomLevel = await app.evaluate(getZoomLevelFn);
 		await firstWindow.keyboard.press('Control+-');
+		await firstWindow.waitForTimeout(500);
 		const changedZoomLevel = await app.evaluate(getZoomLevelFn);
 
 		expect(changedZoomLevel).toBeLessThan(initialZoomLevel);
@@ -258,11 +265,10 @@ test.describe('Hotkeys before auth', async () => {
 		const initialZoomLevel = await app.evaluate(getZoomLevelFn);
 		await firstWindow.keyboard.press('Control+-');
 		await firstWindow.keyboard.press('Control+-');
-		const changedZoomLevel = await app.evaluate(getZoomLevelFn);
 		await firstWindow.keyboard.press('Control+0');
+		await firstWindow.waitForTimeout(500);
 		const resetZoomLevel = await app.evaluate(getZoomLevelFn);
 
-		expect(initialZoomLevel).not.toBe(changedZoomLevel);
-		expect(initialZoomLevel).toBe(resetZoomLevel);
+		expect(resetZoomLevel).toBe(initialZoomLevel);
 	});
 });

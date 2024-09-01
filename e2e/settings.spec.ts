@@ -1,4 +1,6 @@
+/* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
+import PATH from 'path';
 import {
 	ElectronApplication,
 	Page,
@@ -8,8 +10,7 @@ import { ProcessArgument } from '../main/process-argument.enum';
 import { addEntry } from './helpers/add-entry';
 import { authenticate } from './helpers/auth';
 import { setupTestFiles } from './helpers/file';
-
-const PATH = require('path');
+import { getInvoke } from './helpers/ipc';
 
 let app: ElectronApplication;
 let firstWindow: Page;
@@ -19,10 +20,13 @@ test.beforeEach(async () => {
 
 	app = await electron.launch({
 		args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-		colorScheme: 'dark',
+		colorScheme: 'no-preference',
 		env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
 	});
+
 	firstWindow = await app.firstWindow();
+	const invoke = await getInvoke(firstWindow);
+	await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
 	await authenticate(firstWindow);
 });
 
@@ -34,7 +38,11 @@ test.describe('Settings', async () => {
 	test('Check open settings modal', async () => {
 		await firstWindow.getByRole('banner').waitFor({ state: 'visible' });
 		await firstWindow.keyboard.press('Control+.');
-		await firstWindow.getByRole('dialog').getByText(/settings/i);
+		const dialogHeader = firstWindow
+			.getByRole('dialog')
+			.getByRole('heading', { name: 'Settings' });
+
+		await expect(dialogHeader).toBeVisible();
 	});
 
 	test('Check clipboard clear time change', async () => {
@@ -48,7 +56,7 @@ test.describe('Settings', async () => {
 		await clipboardTimeInput.type('5');
 		await firstWindow.keyboard.press('Escape');
 		await addEntry(firstWindow, { config: { close: true } });
-		await firstWindow.getByText(/\•{6}/i).dblclick();
+		await firstWindow.getByText(/•{6}/i).dblclick();
 		const notificationSeconds = await firstWindow
 			.getByRole('alert')
 			.innerText();
@@ -63,47 +71,42 @@ test.describe('Settings', async () => {
 			.getByRole('dialog')
 			.getByText(/^Settings$/)
 			.waitFor({ state: 'visible' });
+
 		await firstWindow
 			.getByRole('dialog')
 			.getByText(/enable auto-type/i)
 			.click();
+
 		await firstWindow.keyboard.press('Escape');
-		await firstWindow.getByText(/(disabled)/i);
+		const autotypeDisabledStatus = firstWindow.getByText(/(disabled)/i).first();
+
+		await expect(autotypeDisabledStatus).toBeVisible();
 	});
 
 	test('Check save vault on idle timeout', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
+		test.slow();
+
 		await firstWindow.keyboard.press('Control+.');
 		await firstWindow
 			.getByRole('dialog')
-			.getByText(/^Settings$/)
-			.waitFor({ state: 'visible' });
-		const lockedDueInactivityCheckbox = firstWindow
-			.getByRole('dialog')
-			.getByLabel(/locked due to inactivity/i);
+			.getByText(/enable autosave/i)
+			.click();
+		await firstWindow.keyboard.press('Escape');
+		await addEntry(firstWindow, { config: { close: true } });
 
+		await firstWindow.keyboard.press('Control+.');
 		await firstWindow
 			.getByRole('dialog')
 			.getByLabel(/idle time lock/i)
 			.fill('60');
-		if (!(await lockedDueInactivityCheckbox.isChecked())) {
-			await firstWindow
-				.getByRole('dialog')
-				.getByText(/locked due to inactivity/i)
-				.click();
-		}
-
 		await firstWindow.waitForTimeout(1000);
 		await firstWindow.keyboard.press('Escape');
 		await firstWindow.waitForTimeout(61 * 1000);
 		await authenticate(firstWindow);
-		await firstWindow.getByRole('banner').waitFor({ state: 'visible' });
 
-		const entries = await firstWindow
-			.getByRole('main')
-			.getByRole('listitem')
-			.count();
-		expect(entries).toBe(1);
+		const entries = firstWindow.getByRole('main').getByRole('listitem');
+
+		await expect(entries).toHaveCount(1);
 	});
 
 	test('Check open insecure URL prompt dialog', async () => {
@@ -111,22 +114,6 @@ test.describe('Settings', async () => {
 			config: { close: true },
 			url: 'http://fortibit.com',
 		});
-		await firstWindow.keyboard.press('Control+.');
-		await firstWindow
-			.getByRole('dialog')
-			.getByText(/^Settings$/)
-			.waitFor({ state: 'visible' });
-		const showInsecureUrlPromptCheckbox = firstWindow
-			.getByRole('dialog')
-			.getByLabel(/show insecure url prompt/i);
-
-		if (!(await showInsecureUrlPromptCheckbox.isChecked())) {
-			await firstWindow
-				.getByRole('dialog')
-				.getByText(/show insecure url prompt/i);
-		}
-
-		await firstWindow.keyboard.press('Escape');
 		const entry = firstWindow.getByRole('listitem').getByText(/username1/i);
 		await entry.click();
 		await firstWindow.getByText(/fortibit.com/i).click();
@@ -135,5 +122,55 @@ test.describe('Settings', async () => {
 			.getByRole('heading', { name: /open url/i });
 
 		await expect(insecureUrlDialog).toBeVisible();
+	});
+
+	test('Check disable autosave should stop saving changes', async () => {
+		await firstWindow.keyboard.press('Control+.');
+		const enableAutosaveCheckbox = firstWindow
+			.getByRole('dialog')
+			.getByText(/enable autosave/i);
+		await enableAutosaveCheckbox.click();
+		await addEntry(firstWindow, {
+			config: { close: true },
+		});
+		await firstWindow.waitForTimeout(1000);
+
+		await expect(firstWindow.getByLabel('Save')).toBeEnabled();
+	});
+
+	test('Check theme toggle should change used theme', async () => {
+		await firstWindow.keyboard.press('Control+.');
+		const viewTab = firstWindow
+			.getByRole('dialog')
+			.getByRole('button', { name: /view/i });
+		await viewTab.click();
+		const themeCheckboxHandle = firstWindow
+			.getByRole('dialog')
+			.getByText(/dark theme/i);
+		await themeCheckboxHandle.click();
+		await firstWindow.waitForTimeout(1_000);
+		const isThemeSet = await firstWindow.evaluate(
+			() =>
+				window.matchMedia &&
+				window.matchMedia('(prefers-color-scheme: light)').matches,
+		);
+
+		expect(isThemeSet).toBe(true);
+	});
+
+	test('Check icons display toggle should hide icons', async () => {
+		await addEntry(firstWindow, { config: { close: true } });
+		await firstWindow.keyboard.press('Control+.');
+		const viewTab = firstWindow
+			.getByRole('dialog')
+			.getByRole('button', { name: /view/i });
+		await viewTab.click();
+		const displayIconsCheckboxHandle = firstWindow
+			.getByRole('dialog')
+			.getByText(/display entry icons/i);
+		await displayIconsCheckboxHandle.click();
+		await firstWindow.keyboard.press('Escape');
+
+		await expect(firstWindow.getByTestId('entry-icon')).toHaveCount(0);
 	});
 });

@@ -1,4 +1,6 @@
+/* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
+import PATH from 'path';
 import {
 	ElectronApplication,
 	Page,
@@ -7,8 +9,7 @@ import {
 import { ProcessArgument } from '../main/process-argument.enum';
 import { authenticate } from './helpers/auth';
 import { setupTestFiles } from './helpers/file';
-
-const PATH = require('path');
+import { getInvoke } from './helpers/ipc';
 
 let app: ElectronApplication;
 let firstWindow: Page;
@@ -18,10 +19,12 @@ test.beforeEach(async () => {
 
 	app = await electron.launch({
 		args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-		colorScheme: 'dark',
+		colorScheme: 'no-preference',
 		env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
 	});
 	firstWindow = await app.firstWindow();
+	const invoke = await getInvoke(firstWindow);
+	await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
 	await authenticate(firstWindow);
 });
 
@@ -39,7 +42,7 @@ test.describe('Keyboard navigation/menu', async () => {
 		await focusedItem.waitFor({ state: 'visible' });
 		await firstWindow.waitForTimeout(100);
 
-		expect(focusedItem).toBeFocused();
+		await expect(focusedItem).toBeFocused();
 	});
 
 	test('Check arrow up navigation should focus first item', async () => {
@@ -52,7 +55,7 @@ test.describe('Keyboard navigation/menu', async () => {
 			.getByText(/new file.../i);
 		await focusedItem.waitFor({ state: 'visible' });
 
-		expect(focusedItem).toBeFocused();
+		await expect(focusedItem).toBeFocused();
 	});
 
 	test('Check arrow up navigation should focus last item', async () => {
@@ -61,7 +64,7 @@ test.describe('Keyboard navigation/menu', async () => {
 		const focusedItem = firstWindow.getByRole('menubar').getByText(/exit/i);
 		await focusedItem.waitFor({ state: 'visible' });
 
-		expect(focusedItem).toBeFocused();
+		await expect(focusedItem).toBeFocused();
 	});
 
 	test('Check arrow right navigation open menu to the right', async () => {
@@ -71,7 +74,7 @@ test.describe('Keyboard navigation/menu', async () => {
 		const focusedItem = firstWindow.getByRole('menubar').getByText(/view/i);
 		await focusedItem.waitFor({ state: 'visible' });
 
-		expect(focusedItem).toBeFocused();
+		await expect(focusedItem).toBeFocused();
 	});
 
 	test('Check arrow right navigation open submenu to the right', async () => {
@@ -85,7 +88,7 @@ test.describe('Keyboard navigation/menu', async () => {
 		const focusedItem = firstWindow.getByRole('menubar').getByText(/keepass/i);
 		await focusedItem.waitFor({ state: 'visible' });
 
-		expect(focusedItem).toBeFocused();
+		await expect(focusedItem).toBeFocused();
 	});
 
 	test('Check disabled menu item skipped', async () => {
@@ -94,13 +97,13 @@ test.describe('Keyboard navigation/menu', async () => {
 		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
 		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
 		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		const menuItem = await firstWindow
+		const menuItem = firstWindow
 			.getByRole('menubar')
 			.getByText(/save/i)
 			.first();
 		await menuItem.waitFor({ state: 'visible' });
 
-		expect(menuItem).toBeDisabled();
+		await expect(menuItem).toBeDisabled();
 	});
 
 	test('Check arrow left close submenu', async () => {
@@ -114,7 +117,8 @@ test.describe('Keyboard navigation/menu', async () => {
 		const focusedItem = firstWindow.getByRole('menubar').getByText(/keepass/i);
 		await focusedItem.waitFor({ state: 'visible' });
 		await firstWindow.keyboard.press('ArrowLeft', { delay: 100 });
-		await focusedItem.waitFor({ state: 'hidden' });
+
+		await expect(focusedItem).toBeHidden();
 	});
 });
 
@@ -124,7 +128,7 @@ test.describe('Keyboard navigation/focusable list', async () => {
 		await groups.first().click();
 		await firstWindow.keyboard.press('ArrowDown');
 
-		expect(groups.nth(1)).toHaveClass(/active/i);
+		await expect(groups.nth(1)).toHaveClass(/active/i);
 	});
 
 	test('Check arrow up navigation', async () => {
@@ -132,7 +136,7 @@ test.describe('Keyboard navigation/focusable list', async () => {
 		await groups.nth(2).click();
 		await firstWindow.keyboard.press('ArrowUp');
 
-		expect(groups.nth(1)).toHaveClass(/active/);
+		await expect(groups.nth(1)).toHaveClass(/active/);
 	});
 
 	test('Check arrow down custom group selection', async () => {
@@ -142,7 +146,7 @@ test.describe('Keyboard navigation/focusable list', async () => {
 		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
 		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
 
-		expect(groups.nth(3)).toHaveClass(/active/);
-		expect(await groups.nth(3).innerText()).toBe('General');
+		await expect(groups.nth(3)).toHaveClass(/active/);
+		await expect(groups.nth(3)).toHaveText('General');
 	});
 });

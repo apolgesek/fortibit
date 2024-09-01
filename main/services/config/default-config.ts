@@ -1,6 +1,9 @@
-import { Configuration } from '../configuration';
+import { nativeTheme } from 'electron';
+import { platform } from 'os';
+import { Configuration } from '../../../configuration';
 
-export const getDefaultConfig = (platform: string): Partial<Configuration> => {
+export const getDefaultConfig = (): Partial<Configuration> => {
+	const os = platform();
 	return {
 		schemaVersion: 1,
 		encryption: {
@@ -20,10 +23,11 @@ export const getDefaultConfig = (platform: string): Partial<Configuration> => {
 		saveOnLock: false,
 		compressionEnabled: false,
 		autocompleteUsernameOnlyShortcut:
-			platform === 'win32' ? 'Alt+[' : 'Option+[',
+			os === 'win32' ? 'Alt+[' : 'Option+[',
 		autocompletePasswordOnlyShortcut:
-			platform === 'win32' ? 'Alt+]' : 'Option+]',
-		autocompleteShortcut: platform === 'win32' ? 'Alt+\\' : 'Option+\\',
+			os === 'win32' ? 'Alt+]' : 'Option+]',
+		autocompleteShortcut: platform() === 'win32' ? 'Alt+\\' : 'Option+\\',
 		showInsecureUrlPrompt: true,
+		theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
 	};
 };

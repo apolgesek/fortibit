@@ -89,9 +89,12 @@ export class WindowService implements IWindowService {
 			const win = this._windows.find(
 				(x) => x.browserWindow.webContents.id === event.sender.id,
 			);
-			win.browserWindow.isMaximized()
-				? win.browserWindow.unmaximize()
-				: win.browserWindow.maximize();
+
+			if (win.browserWindow.isMaximized()) {
+				win.browserWindow.unmaximize()
+			} else {
+				win.browserWindow.maximize();
+			}
 		});
 
 		ipcMain.on(IpcChannel.Close, (event: IpcMainEvent) => {
@@ -107,7 +110,7 @@ export class WindowService implements IWindowService {
 		});
 
 		ipcMain.handle(IpcChannel.ZoomIn, (event: IpcMainEvent) => {
-			let currentFactor = parseFloat(event.sender.getZoomFactor().toFixed(2));
+			const currentFactor = parseFloat(event.sender.getZoomFactor().toFixed(2));
 			if (currentFactor === zoomLevels[zoomLevels.length - 1])
 				return zoomLevels[zoomLevels.length - 1];
 
@@ -161,27 +164,26 @@ export class WindowService implements IWindowService {
 			},
 		);
 
-		ipcMain.handle(IpcChannel.ToggleTheme, () => {
-			if (nativeTheme.shouldUseDarkColors) {
-				nativeTheme.themeSource = 'light';
-				this._configService.set({ theme: 'light' });
-			} else {
+		ipcMain.handle(IpcChannel.ToggleTheme, (_, config: Configuration) => {
+			if (this._configService.appConfig.theme === config.theme)
+				return;
+			
+			if (config.theme === 'dark') {
 				nativeTheme.themeSource = 'dark';
-				this._configService.set({ theme: 'dark' });
-			}
 
-			if (this._configService.appConfig.theme === 'light') {
-				this.windows.forEach((w) =>
-					w.browserWindow.setTitleBarOverlay({
-						color: '#fcfcfc',
-						symbolColor: '#364f63',
-					}),
-				);
-			} else {
 				this.windows.forEach((w) =>
 					w.browserWindow.setTitleBarOverlay({
 						color: '#191d1e',
 						symbolColor: '#dadada',
+					}),
+				);
+			} else {
+				nativeTheme.themeSource = 'light';
+
+				this.windows.forEach((w) =>
+					w.browserWindow.setTitleBarOverlay({
+						color: '#fcfcfc',
+						symbolColor: '#364f63',
 					}),
 				);
 			}
@@ -195,8 +197,6 @@ export class WindowService implements IWindowService {
 					);
 				}
 			});
-
-			return nativeTheme.shouldUseDarkColors;
 		});
 
 		ipcMain.handle(IpcChannel.RegenerateKey, (event: IpcMainEvent) => {
@@ -304,7 +304,8 @@ export class WindowService implements IWindowService {
 		let url = '';
 
 		if (this._isDevMode) {
-			require('electron-reloader')(module, { ignore: /.*\.json$/ });
+			// eslint-disable-next-line @typescript-eslint/no-require-imports
+			require('electron-reloader')(module, { ignore: [/.*\.json$/] });
 			url = formatURL({
 				protocol: 'http:',
 				host: 'localhost',
@@ -327,7 +328,7 @@ export class WindowService implements IWindowService {
 	}
 
 	setIdleTimer() {
-		if (this._idleTimer || this._isTestMode) {
+		if (this._idleTimer) {
 			return;
 		}
 

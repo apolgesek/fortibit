@@ -1,14 +1,15 @@
 import { Configuration } from '@root/configuration';
 import { Product } from '@root/product';
-import { IpcChannel, getDefaultConfig } from '@shared-renderer/index';
-import * as merge from 'deepmerge';
+import { IpcChannel } from '@shared-renderer/index';
+import deepmerge from 'deepmerge';
 import { IpcMainEvent, app, ipcMain } from 'electron';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { writeFileSync } from 'fs-extra';
 import * as os from 'os';
 import { join } from 'path';
 import { INativeApiService } from '../native';
-import { IConfigService } from './index';
+import { IConfigService, getDefaultConfig } from './index';
+import { ProcessArgument } from '@root/main/process-argument.enum';
 
 export class ConfigService implements IConfigService {
 	public get appConfig(): Configuration {
@@ -25,6 +26,9 @@ export class ConfigService implements IConfigService {
 
 	private readonly _productPath: string;
 	private readonly _workspacesPath: string;
+	private readonly _isTestMode = Boolean(
+		app.commandLine.hasSwitch(ProcessArgument.E2E),
+	);
 	private _appConfig: Configuration;
 
 	constructor(
@@ -57,14 +61,13 @@ export class ConfigService implements IConfigService {
 		this._productPath = productPath;
 		this._workspacesPath = workspacePath;
 
-		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const productInformation: Product = merge(
+		const productInformation: Product = deepmerge(
 			JSON.parse(productFileContent),
 			require(this._productPath),
 		);
 		const workspacesInformation: any = require(this._workspacesPath);
 
-		this._appConfig = merge(getDefaultConfig(process.platform), {
+		this._appConfig = deepmerge(getDefaultConfig(), {
 			version: app.getVersion(),
 			electronVersion: process.versions.electron,
 			nodeVersion: process.versions.node,
@@ -103,7 +106,7 @@ export class ConfigService implements IConfigService {
 			saveOnLock: productInformation.saveOnLock,
 			displayIcons: productInformation.displayIcons,
 			autoTypeEnabled: productInformation.autoTypeEnabled,
-			theme: productInformation.theme ?? 'light',
+			theme: productInformation.theme,
 			showInsecureUrlPrompt: productInformation.showInsecureUrlPrompt,
 			biometricsProtectedFiles: [],
 			protectWindowsFromCapture: productInformation.protectWindowsFromCapture,
@@ -117,6 +120,10 @@ export class ConfigService implements IConfigService {
 			this.appConfig.organizationName = this._nativeApiService.readRegistryKey('SOFTWARE\\Fortibit', 'org');
 
 			return this.appConfig;
+		});
+
+		ipcMain.handle(IpcChannel.GetDefaultConfig, async () => {
+			return getDefaultConfig();
 		});
 
 		ipcMain.on(

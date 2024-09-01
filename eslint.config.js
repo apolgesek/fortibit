@@ -2,6 +2,7 @@
 const eslint = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
+const playwright = require("eslint-plugin-playwright");
 
 module.exports = tseslint.config(
   {
@@ -41,5 +42,10 @@ module.exports = tseslint.config(
       ...angular.configs.templateAccessibility,
     ],
     rules: {},
-  }
+  },
+  {
+    // @ts-ignore
+    ...playwright.configs['flat/recommended'],
+    files: ['e2e/**/*.spec.ts'],
+  },
 );

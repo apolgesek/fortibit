@@ -10,7 +10,6 @@ import { MasterPasswordSetupComponent } from '@app/main/components/master-passwo
 import { HotkeyBinderDirective } from '@app/main/directives/hotkey-binder.directive';
 import { isControlInvalid } from '@app/utils';
 import { Configuration } from '@config/configuration';
-import { getDefaultConfig } from '@shared-renderer/default-config';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
@@ -160,9 +159,7 @@ export class GeneralTabComponent implements OnInit {
 		);
 
 		if (result.response === 0) {
-			this.configService.setConfig(
-				getDefaultConfig(this.messageBroker.platform),
-			);
+			await this.configService.resetConfig();
 			this.notificationService.add({
 				type: 'success',
 				alive: 10 * 1000,

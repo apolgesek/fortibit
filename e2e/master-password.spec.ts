@@ -1,3 +1,4 @@
+/* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
 import PATH from 'path';
 import {
@@ -18,10 +19,12 @@ test.beforeEach(async () => {
 
 	app = await electron.launch({
 		args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-		colorScheme: 'dark',
+		colorScheme: 'no-preference',
 		env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
 	});
 	firstWindow = await app.firstWindow();
+	const invoke = await getInvoke(firstWindow);
+	await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
 });
 
 test.afterEach(async () => {
@@ -43,17 +46,14 @@ test.describe('Master password', async () => {
 		await firstWindow.keyboard.press('Control+.');
 		const dialog = firstWindow.getByRole('dialog');
 		await dialog.getByRole('button', { name: /integration/i }).click();
-		const biometricsAuthCheckbox = dialog.getByLabel(/windows hello/i);
 
-		if (!(await biometricsAuthCheckbox.isChecked())) {
-			await dialog.getByText(/windows hello/i).click();
-			const addCredentialButton = dialog.getByRole('button', {
-				name: /add credential/i,
-			});
+		const addCredentialButton = dialog.getByRole('button', {
+			name: /add credential/i,
+		});
 
-			if (await addCredentialButton.isVisible()) {
-				await addCredentialButton.click();
-			}
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if (await addCredentialButton.isVisible()) {
+			await addCredentialButton.click();
 		}
 
 		await firstWindow.keyboard.press('Control+L');
@@ -70,15 +70,15 @@ test.describe('Master password', async () => {
 		await firstWindow.getByPlaceholder(/password/i).focus();
 		await firstWindow.keyboard.insertText('wr0ng_password');
 		await firstWindow.keyboard.press('Enter');
-		await firstWindow.waitForTimeout(500); // wait to make sure this notification replaces the startup dummy one
+		await firstWindow.waitForTimeout(1 * 1000); // wait to make sure this notification replaces the startup dummy one
 		const notification = firstWindow.getByRole('alert');
 
-		expect(await notification.innerText()).toMatch(/password is invalid/i);
+		await expect(notification).toHaveText(/password is invalid/i);
 	});
 
 	test('Check settings modal open when not authenticated', async () => {
 		await firstWindow.getByRole('button', { name: /settings/i }).click();
-		const dialogHeader = await firstWindow
+		const dialogHeader = firstWindow
 			.getByRole('dialog')
 			.getByRole('heading', { name: /settings/i });
 
@@ -111,16 +111,14 @@ test.describe('Master password', async () => {
 
 		await firstWindow.getByRole('button', { name: /save/i }).click();
 		// give electron time to open native window
-		await firstWindow.waitForTimeout(2000);
+		await firstWindow.waitForTimeout(3_000);
 		const invoke = await getInvoke(firstWindow);
 		await invoke.evaluate((invoke) =>
 			invoke('app:sendInput', 'test_' + Date.now()),
 		);
 		await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
 
-		expect(await firstWindow.getByRole('alert').innerText()).toMatch(
-			/database saved/i,
-		);
+		await expect(firstWindow.getByRole('alert')).toHaveText(/database saved/i);
 		await expect(firstWindow.getByRole('main')).toBeVisible();
 
 		await invoke.evaluate((invoke) => invoke('app:testCleanup'));

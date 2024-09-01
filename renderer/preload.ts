@@ -11,6 +11,15 @@ const getLeakedPasswords = (args) => {
 	return { data: JSON.stringify(mock) };
 }
 
+const getWeakPasswords = (args) => {
+	const exportedVault = JSON.parse(args[1]);
+	const mock = exportedVault.data.data.find(x => x.tableName === 'entries').rows
+		.filter(x => x.type === 'password')
+		.map(x => ({ id: x.id, score: Math.floor(Math.random() * 5)}));
+
+	return { data: JSON.stringify(mock) };
+}
+
 const handler = {
 	get: function (target, prop) {
 		if (prop === 'then') {
@@ -27,6 +36,8 @@ const handler = {
 			switch (args[0]) {
 				case 'app:scanLeaks':
 					return getLeakedPasswords(args);
+				case 'app:getWeakPasswords':
+					return getWeakPasswords(args);
 				case 'app:databaseChanged':
 				case 'app:getUpdateState':
 					return;

@@ -1,0 +1,35 @@
+{
+	"encryption": {
+		"passwordLength": 15,
+		"lowercase": true,
+		"uppercase": true,
+		"specialChars": true,
+		"numbers": true
+	},
+	"idleSeconds": 9999,
+	"clipboardClearTimeMs": 5000,
+	"lockOnSystemLock": false,
+	"displayIcons": true,
+	"biometricsAuthenticationEnabled": true,
+	"autosaveEnabled": true,
+	"autoTypeEnabled": true,
+	"saveOnLock": true,
+	"autocompleteUsernameOnlyShortcut": "Alt+[",
+	"autocompletePasswordOnlyShortcut": "Alt+]",
+	"autocompleteShortcut": "Alt+\\",
+	"showInsecureUrlPrompt": true,
+	"theme": "dark",
+	"name": "Fortibit",
+	"commit": "df3e5263babc01dbe44889937fbad7049962cf1a",
+	"updateUrl": "https://fortibit.com/update/version.txt",
+	"webUrl": "https://fortibit.com",
+	"webApiUrl": "https://oqlfrjr5ft2uywwhw57ts4ave40yfsyv.lambda-url.eu-central-1.on.aws",
+	"iconServiceUrl": "https://d368f7is8rwkbe.cloudfront.net",
+	"signatureSubject": "Open Source Developer, Arkadiusz Półgęsek",
+	"leakedPasswordsUrl": "https://api.pwnedpasswords.com/range",
+	"biometricsProtectedFiles": [
+		"G:\\Mój dysk\\hasła.fbit",
+		"c:\\Users\\icema\\fortibit\\e2e\\files\\test.fbit"
+	],
+	"protectWindowsFromCapture": false
+}

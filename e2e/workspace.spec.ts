@@ -1,3 +1,4 @@
+/* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
 import PATH from 'path';
 import { ElectronApplication, Page, _electron as electron } from 'playwright';
@@ -29,10 +30,12 @@ test.beforeEach(async () => {
 
 	app = await electron.launch({
 		args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-		colorScheme: 'dark',
+		colorScheme: 'no-preference',
 		env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
 	});
 	firstWindow = await app.firstWindow();
+	const invoke = await getInvoke(firstWindow);
+	await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
 	await authenticate(firstWindow);
 });
 
@@ -79,7 +82,7 @@ test.describe('Workspace > Entry & group', async () => {
 		);
 		await noEntriesText.waitFor({ state: 'visible', timeout: 4000 });
 
-		expect(noEntriesText).toBeVisible();
+		await expect(noEntriesText).toBeVisible();
 	});
 
 	test('Check entry modal opened', async () => {
@@ -87,7 +90,7 @@ test.describe('Workspace > Entry & group', async () => {
 		const modalHeader = firstWindow.getByText(/add\s*entry\s*in\s*general/i);
 		await modalHeader.waitFor({ state: 'visible', timeout: 4000 });
 
-		expect(modalHeader).toBeVisible();
+		await expect(modalHeader).toBeVisible();
 	});
 
 	test('Check entry added', async () => {
@@ -131,13 +134,11 @@ test.describe('Workspace > Entry & group', async () => {
 
 	test('Check entry modal closed', async () => {
 		await firstWindow.getByRole('button', { name: /add entry/i }).click();
-		await firstWindow
-			.getByText(/add\s*entry\s*in\s*general/i)
-			.waitFor({ state: 'visible', timeout: 4000 });
+		const addEntryModalHeader = firstWindow.getByRole('dialog').getByText(/add\s*entry\s*in\s*general/i);
+		await addEntryModalHeader.waitFor({ state: 'visible' });
 		await firstWindow.keyboard.press('Escape');
-		await firstWindow
-			.getByText(/add\s*entry\s*in\s*general/i)
-			.waitFor({ state: 'hidden', timeout: 4000 });
+
+		await expect(addEntryModalHeader).toBeHidden();
 	});
 
 	test('Check entry removed', async () => {
@@ -169,10 +170,8 @@ test.describe('Workspace > Entry & group', async () => {
 		await addEntry(firstWindow, { config: { close: true } });
 		await addEntry(firstWindow, { config: { close: true } });
 		const entries = firstWindow.getByText(/username1/i);
-		const firstEntry = await entries.nth(0);
-		const secondEntry = await entries.nth(1);
-		await firstEntry.click();
-		await secondEntry.click({ modifiers: ['Control'] });
+		await entries.nth(0).click();
+		await entries.nth(1).click({ modifiers: ['Control'] });
 		await firstWindow.keyboard.press('Delete');
 		const removeBtn = firstWindow
 			.getByRole('dialog')
@@ -276,7 +275,7 @@ test.describe('Workspace > Entry & group', async () => {
 		await firstWindow.getByRole('dialog').waitFor({ state: 'detached' });
 		const changedNameGroup = firstWindow.getByText(/example/i);
 
-		expect(changedNameGroup).toBeVisible();
+		await expect(changedNameGroup).toBeVisible();
 	});
 
 	test('Check group deleted', async () => {
@@ -302,17 +301,14 @@ test.describe('Workspace > Entry & group', async () => {
 		await trashGroup.click();
 		const addNewButton = firstWindow.getByRole('link', { name: /add entry/i });
 		const addEntryBtn = firstWindow.getByRole('button', { name: /add entry/i });
-		let toolbarAddNewButtonDisabled =
-			await addEntryBtn.getAttribute('disabled');
 
-		await expect(addNewButton).not.toBeVisible();
-		expect(toolbarAddNewButtonDisabled).toBe('');
+		await expect(addNewButton).toBeHidden();
+		await expect(addEntryBtn).toHaveAttribute('disabled');
 
 		await emailGroup.click();
 
 		await expect(addNewButton).toBeVisible();
-		toolbarAddNewButtonDisabled = await addEntryBtn.getAttribute('disabled');
-		expect(toolbarAddNewButtonDisabled).toBeNull();
+		await expect(addEntryBtn).not.toHaveAttribute('disabled');
 	});
 
 	test('Check entry local search', async () => {
@@ -394,7 +390,8 @@ test.describe('Workspace > Entry & group', async () => {
 			.waitFor({ state: 'visible', timeout: 4000 });
 		await firstWindow.getByRole('button', { name: 'Scan' }).click();
 		const lastScanDetails = firstWindow.getByText('Last scan');
-		await lastScanDetails.waitFor({ state: 'visible' });
+
+		await expect(lastScanDetails).toBeVisible();
 	});
 
 	test('Check entry context menu displayed', async () => {
@@ -460,7 +457,7 @@ test.describe('Workspace > Entry & group', async () => {
 		await firstWindow.getByText(/descending/i).click();
 		await firstWindow.getByText(/ascending/i).click();
 
-		const firstEntry = await firstWindow
+		const firstEntry = firstWindow
 			.getByRole('main')
 			.getByRole('listitem')
 			.first();
@@ -550,6 +547,13 @@ test.describe('Workspace > Entry & group', async () => {
 		await firstWindow
 			.getByText(/edit\s*entry\s*in\s*general/i)
 			.waitFor({ state: 'visible', timeout: 4000 });
+		await firstWindow.keyboard.press('Escape');
+		await firstWindow.keyboard.press('Escape');
+
+		await firstWindow.getByRole('main').getByRole('listitem').first().click();
+
+		await expect(firstWindow.getByTestId('exposed-icon')).toBeVisible();
+		await expect(firstWindow.getByRole('complementary').nth(1)).toHaveText(/This password was detected in a data leak and may be compromised/);
 	});
 
 	test('Check maintenance scan should remove entry according to input', async () => {
@@ -659,12 +663,11 @@ test.describe('Workspace > Entry history', async () => {
 		await firstWindow.keyboard.press('Escape');
 		await firstWindow.getByRole('dialog').waitFor({ state: 'detached' });
 		await firstWindow.keyboard.press('Control+E');
-		const entryTitle = await firstWindow
+		const entryTitle = firstWindow
 			.getByRole('dialog')
 			.getByPlaceholder(/title/i)
-			.inputValue();
 
-		expect(entryTitle).toBe('Title1');
+		await expect(entryTitle).toHaveValue('Title1');
 	});
 
 	test('Check history entry removed', async () => {
@@ -742,7 +745,7 @@ test.describe('Workspace > File', async () => {
 	});
 
 	test('Save option click should save updated vault', async () => {
-		await authenticate(firstWindow);
+		// await authenticate(firstWindow);
 		await addEntry(firstWindow, { config: { close: true } });
 		await firstWindow.getByRole('menubar').getByText(/file/i).click();
 		await firstWindow
@@ -778,7 +781,6 @@ test.describe('Workspace > File', async () => {
 	});
 
 	test('Save as... option click should save same vault in new file', async () => {
-		await authenticate(firstWindow);
 		await firstWindow.getByRole('menubar').getByText(/file/i).click();
 		await firstWindow
 			.getByRole('menubar')
@@ -799,7 +801,6 @@ test.describe('Workspace > File', async () => {
 	});
 
 	test('Import option click should import KeePass entries', async () => {
-		await authenticate(firstWindow);
 		await firstWindow.getByRole('menubar').getByText(/file/i).click();
 		await firstWindow
 			.getByRole('menubar')
@@ -828,7 +829,6 @@ test.describe('Workspace > File', async () => {
 	});
 
 	test('Export option click should export entries', async () => {
-		await authenticate(firstWindow);
 		await addEntry(firstWindow, { config: { close: true } });
 		await firstWindow.getByRole('menubar').getByText(/file/i).click();
 		await firstWindow
