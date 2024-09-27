@@ -37,7 +37,7 @@ test.describe('Master password', async () => {
 		await firstWindow.getByLabel(/unlock/i).click();
 		const notification = firstWindow.getByRole('alert');
 
-		expect(await notification.innerText()).toMatch(/password is required/i);
+		await expect(notification).toHaveText(/password is required/i);
 	});
 
 	test('Check windows hello screen dispayed', async () => {

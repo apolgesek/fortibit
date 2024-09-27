@@ -1,56 +1,45 @@
 /* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
-import PATH from 'path';
 import {
 	ElectronApplication,
 	Page,
-	_electron as electron,
 } from 'playwright-core';
-import { ProcessArgument } from '../main/process-argument.enum';
-import { authenticate } from './helpers/auth';
-import { setupTestFiles } from './helpers/file';
-import { getInvoke } from './helpers/ipc';
-
-let app: ElectronApplication;
-let firstWindow: Page;
-
-test.beforeEach(async () => {
-	setupTestFiles();
-
-	app = await electron.launch({
-		args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-		colorScheme: 'no-preference',
-		env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
-	});
-	firstWindow = await app.firstWindow();
-	const invoke = await getInvoke(firstWindow);
-	await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
-	await authenticate(firstWindow);
-});
-
-test.afterEach(async () => {
-	await app.evaluate((process) => process.app.exit());
-});
+import { beforeEach } from './hooks/before-each';
+import { afterEach } from './hooks/after-each';
 
 test.describe('Keyboard navigation/menu', async () => {
+	let app: ElectronApplication;
+	let appWindow: Page;
+	
+	test.beforeEach(async () => {
+		const { appInstance, windowInstance } = await beforeEach();
+
+		app = appInstance;
+		appWindow = windowInstance;
+	});
+
+	test.afterEach(async () => {
+		await afterEach(app);
+	});
+
 	test('Check arrow down navigation', async () => {
-		await firstWindow.getByRole('menubar').getByText(/file/i).click();
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		const focusedItem = firstWindow
+		await appWindow.getByRole('menubar').getByText(/file/i).click();
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		const focusedItem = appWindow
 			.getByRole('menubar')
 			.getByText(/new file.../i);
 		await focusedItem.waitFor({ state: 'visible' });
-		await firstWindow.waitForTimeout(100);
+		await appWindow.waitForTimeout(100);
 
 		await expect(focusedItem).toBeFocused();
 	});
 
 	test('Check arrow up navigation should focus first item', async () => {
-		await firstWindow.getByRole('menubar').getByText(/file/i).click();
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowUp', { delay: 100 });
-		const focusedItem = firstWindow
+		await appWindow.getByRole('menubar').getByText(/file/i).click();
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowUp', { delay: 100 });
+		const focusedItem = appWindow
 			.getByRole('menubar')
 			.getByText(/new file.../i);
 		await focusedItem.waitFor({ state: 'visible' });
@@ -59,45 +48,45 @@ test.describe('Keyboard navigation/menu', async () => {
 	});
 
 	test('Check arrow up navigation should focus last item', async () => {
-		await firstWindow.getByRole('menubar').getByText(/file/i).click();
-		await firstWindow.keyboard.press('ArrowUp', { delay: 100 });
-		const focusedItem = firstWindow.getByRole('menubar').getByText(/exit/i);
+		await appWindow.getByRole('menubar').getByText(/file/i).click();
+		await appWindow.keyboard.press('ArrowUp', { delay: 100 });
+		const focusedItem = appWindow.getByRole('menubar').getByText(/exit/i);
 		await focusedItem.waitFor({ state: 'visible' });
 
 		await expect(focusedItem).toBeFocused();
 	});
 
 	test('Check arrow right navigation open menu to the right', async () => {
-		await firstWindow.getByRole('menubar').getByText(/file/i).click();
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowRight', { delay: 100 });
-		const focusedItem = firstWindow.getByRole('menubar').getByText(/view/i);
+		await appWindow.getByRole('menubar').getByText(/file/i).click();
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowRight', { delay: 100 });
+		const focusedItem = appWindow.getByRole('menubar').getByText(/view/i);
 		await focusedItem.waitFor({ state: 'visible' });
 
 		await expect(focusedItem).toBeFocused();
 	});
 
 	test('Check arrow right navigation open submenu to the right', async () => {
-		await firstWindow.getByRole('menubar').getByText(/file/i).click();
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowRight', { delay: 100 });
-		const focusedItem = firstWindow.getByRole('menubar').getByText(/keepass/i);
+		await appWindow.getByRole('menubar').getByText(/file/i).click();
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowRight', { delay: 100 });
+		const focusedItem = appWindow.getByRole('menubar').getByText(/keepass/i);
 		await focusedItem.waitFor({ state: 'visible' });
 
 		await expect(focusedItem).toBeFocused();
 	});
 
 	test('Check disabled menu item skipped', async () => {
-		await firstWindow.getByRole('menubar').getByText(/file/i).click();
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		const menuItem = firstWindow
+		await appWindow.getByRole('menubar').getByText(/file/i).click();
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		const menuItem = appWindow
 			.getByRole('menubar')
 			.getByText(/save/i)
 			.first();
@@ -107,44 +96,58 @@ test.describe('Keyboard navigation/menu', async () => {
 	});
 
 	test('Check arrow left close submenu', async () => {
-		await firstWindow.getByRole('menubar').getByText(/file/i).click();
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowRight', { delay: 100 });
-		const focusedItem = firstWindow.getByRole('menubar').getByText(/keepass/i);
+		await appWindow.getByRole('menubar').getByText(/file/i).click();
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowRight', { delay: 100 });
+		const focusedItem = appWindow.getByRole('menubar').getByText(/keepass/i);
 		await focusedItem.waitFor({ state: 'visible' });
-		await firstWindow.keyboard.press('ArrowLeft', { delay: 100 });
+		await appWindow.keyboard.press('ArrowLeft', { delay: 100 });
 
 		await expect(focusedItem).toBeHidden();
 	});
 });
 
 test.describe('Keyboard navigation/focusable list', async () => {
+	let app: ElectronApplication;
+	let appWindow: Page;
+
+	test.beforeEach(async () => {
+		const { appInstance, windowInstance } = await beforeEach();
+
+		app = appInstance;
+		appWindow = windowInstance;
+	});
+
+	test.afterEach(async () => {
+		await afterEach(app);
+	});
+	
 	test('Check arrow down navigation', async () => {
-		const groups = firstWindow.getByRole('complementary').getByRole('listitem');
+		const groups = appWindow.getByRole('complementary').getByRole('listitem');
 		await groups.first().click();
-		await firstWindow.keyboard.press('ArrowDown');
+		await appWindow.keyboard.press('ArrowDown');
 
 		await expect(groups.nth(1)).toHaveClass(/active/i);
 	});
 
 	test('Check arrow up navigation', async () => {
-		const groups = firstWindow.getByRole('complementary').getByRole('listitem');
+		const groups = appWindow.getByRole('complementary').getByRole('listitem');
 		await groups.nth(2).click();
-		await firstWindow.keyboard.press('ArrowUp');
+		await appWindow.keyboard.press('ArrowUp');
 
 		await expect(groups.nth(1)).toHaveClass(/active/);
 	});
 
 	test('Check arrow down custom group selection', async () => {
-		const groups = firstWindow.getByRole('complementary').getByRole('listitem');
+		const groups = appWindow.getByRole('complementary').getByRole('listitem');
 		await groups.first().click();
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
-		await firstWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
+		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
 
 		await expect(groups.nth(3)).toHaveClass(/active/);
 		await expect(groups.nth(3)).toHaveText('General');

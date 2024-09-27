@@ -17,11 +17,16 @@ import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { IsPasswordPipe } from '@app/shared/pipes/is-password.pipe';
 import { LinkPipe } from '@app/shared/pipes/link.pipe';
 import { Configuration } from '@config/configuration';
-import { Entry, EntryGroup, IpcChannel } from '@shared-renderer/index';
+import { Entry, EntryGroup, IpcChannel, PasswordEntry } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { AppConfig } from 'environments/environment';
 import { MessageBroker } from 'injection-tokens';
 import { PasswordEntryDetailsComponent } from './password-entry-details/password-entry-details.component';
+import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
+import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
+import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
+import { slideDown } from '@app/shared';
+import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 
 @Component({
 	selector: 'app-details-sidebar',
@@ -37,7 +42,12 @@ import { PasswordEntryDetailsComponent } from './password-entry-details/password
 		LinkPipe,
 		IsPasswordPipe,
 		PrettyShortcutComponent,
+		DropdownDirective,
+		DropdownMenuDirective,
+		DropdownToggleDirective,
+		MenuItemDirective
 	],
+	animations: [slideDown]
 })
 export class DetailsSidebarComponent implements OnInit {
 	private readonly detailsComponents = new Map<Entry['type'], Type<unknown>>([
@@ -174,5 +184,10 @@ export class DetailsSidebarComponent implements OnInit {
 
 	openEntryHistoryWindow() {
 		this.modalService.openEntryHistoryWindow();
+	}
+
+	async scanQrCode(entry: Entry) {
+		const secret = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ScanQrCode);
+		await this.entryManager.saveEntry({ ...entry, otpAuth: secret } as PasswordEntry);
 	}
 }

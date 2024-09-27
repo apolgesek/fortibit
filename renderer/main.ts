@@ -55,6 +55,7 @@ import {
 	Link,
 	Lock,
 	Minus,
+	MoreVertical,
 	Move,
 	Plus,
 	PlusCircle,
@@ -152,7 +153,8 @@ const icons = {
 	Shield,
 	File,
 	Lock,
-	Move
+	Move,
+	MoreVertical
 };
 
 bootstrapApplication(AppComponent, {

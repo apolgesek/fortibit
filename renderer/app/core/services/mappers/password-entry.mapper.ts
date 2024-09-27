@@ -28,6 +28,7 @@ export class PasswordEntryMapper
 			url: form.password.url,
 			notes: form.password.notes,
 			autotypeExp: form.password.autotypeExp,
+			otpAuth: form.password.otpCode,
 			groupId: form.groupId,
 			lastModificationDate: currentTime,
 		};

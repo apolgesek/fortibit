@@ -61,6 +61,7 @@ export type PasswordFormGroup = {
 	notes: FormControl<string>;
 	autotypeExp: FormControl<string>;
 	icon: FormControl<string>;
+	otpCode: FormControl<string>;
 };
 
 export type PasswordsFormGroup = {
@@ -154,6 +155,7 @@ export class EntryDialogComponent
 			notes: [''],
 			autotypeExp: [''],
 			icon: [''],
+			otpCode: ['', Validators.pattern(/^([2-7A-Z]{8})+$/)]
 		}),
 		card: this.fb.group({
 			cardholderName: [''],

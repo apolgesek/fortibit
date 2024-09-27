@@ -14,7 +14,6 @@ import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.dire
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
 import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
-import { MenuDirective } from '@app/shared/directives/menu.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { IpcChannel, UpdateState } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
@@ -34,7 +33,6 @@ type Notification = {
 	imports: [
 		CommonModule,
 		FeatherModule,
-		MenuDirective,
 		DropdownDirective,
 		DropdownToggleDirective,
 		DropdownMenuDirective,

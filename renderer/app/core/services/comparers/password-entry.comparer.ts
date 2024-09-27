@@ -46,6 +46,10 @@ export class PasswordEntryTypeComparer
 			changes.push('autotypeExp');
 		}
 
+		if (entry.otpAuth !== form.password.otpCode) {
+			changes.push('otpAuth');
+		}
+
 		return {
 			changes,
 			isEqual: changes.length === 0

@@ -1,66 +1,54 @@
 /* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
-import PATH from 'path';
-import {
-	ElectronApplication,
-	Page,
-	_electron as electron,
-} from 'playwright-core';
-import { ProcessArgument } from '../main/process-argument.enum';
+import { ElectronApplication, Page } from 'playwright-core';
 import { addEntry } from './helpers/add-entry';
-import { authenticate } from './helpers/auth';
-import { setupTestFiles } from './helpers/file';
-import { getInvoke } from './helpers/ipc';
+import { beforeEach } from './hooks/before-each';
+import { afterEach } from './hooks/after-each';
 
-const getZoomLevelFn = ({ BrowserWindow }) =>
-	BrowserWindow.getFocusedWindow().webContents.getZoomLevel();
+const getZoomFactor = ({ BrowserWindow }) =>
+	BrowserWindow.getFocusedWindow().webContents.getZoomFactor();
+
+const resetZoomFactor = (app: ElectronApplication) =>
+	app.evaluate(({ BrowserWindow }) =>
+		BrowserWindow.getFocusedWindow().webContents.setZoomFactor(1),
+	);
 
 test.describe('Hotkeys after auth', async () => {
 	let app: ElectronApplication;
-	let firstWindow: Page;
+	let appWindow: Page;
 
 	test.beforeEach(async () => {
-		setupTestFiles();
+		const { appInstance, windowInstance } = await beforeEach();
 
-		app = await electron.launch({
-			args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-			colorScheme: 'no-preference',
-			env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
-		});
-		firstWindow = await app.firstWindow();
-		const invoke = await getInvoke(firstWindow);
-		await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
-		await authenticate(firstWindow);
-		await firstWindow.getByRole('main').waitFor({ state: 'visible' });
+		app = appInstance;
+		appWindow = windowInstance;
 	});
 
 	test.afterEach(async () => {
-		await app.evaluate((process) => process.app.exit());
+		await afterEach(app);
 	});
 
 	test('Check should open new entry modal', async () => {
-		await firstWindow.keyboard.press('Control+N');
-		const addEntryModal = firstWindow.getByText(/add\s*entry\s*in\s*general/i);
+		await appWindow.keyboard.press('Control+N');
+		const addEntryModal = appWindow.getByText(/add\s*entry\s*in\s*general/i);
 
 		await expect(addEntryModal).toBeVisible();
 	});
 
 	test('Check should open edit entry modal', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
-		await firstWindow.getByRole('main').getByRole('listitem').first().click();
-		await firstWindow.keyboard.press('Control+E');
-		const editEntryModal = firstWindow.getByText(
-			/edit\s*entry\s*in\s*general/i,
-		);
+		await addEntry(appWindow, { config: { close: true } });
+		await appWindow.getByRole('main').getByRole('listitem').first().click();
+		await appWindow.keyboard.press('Control+E');
+		const editEntryModal = appWindow.getByText(/edit\s*entry\s*in\s*general/i);
 
 		await expect(editEntryModal).toBeVisible();
 	});
 
 	test('Check should open delete entry modal', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
-		await firstWindow.getByRole('main').getByRole('listitem').first().click();
-		await firstWindow.keyboard.press('Delete');
-		const deleteEntryModal = firstWindow
+		await addEntry(appWindow, { config: { close: true } });
+		await appWindow.getByRole('main').getByRole('listitem').first().click();
+		await appWindow.keyboard.press('Delete');
+		const deleteEntryModal = appWindow
 			.getByRole('dialog')
 			.getByText(/remove entry/i);
 
@@ -68,22 +56,20 @@ test.describe('Hotkeys after auth', async () => {
 	});
 
 	test('Check should open add group modal', async () => {
-		await firstWindow.keyboard.press('Control+O');
-		const addGroupModal = firstWindow
-			.getByRole('dialog')
-			.getByText(/add group/i);
+		await appWindow.keyboard.press('Control+O');
+		const addGroupModal = appWindow.getByRole('dialog').getByText(/add group/i);
 
 		await expect(addGroupModal).toBeVisible();
 	});
 
 	test('Check should open edit group modal', async () => {
-		await firstWindow
+		await appWindow
 			.getByRole('complementary')
 			.getByRole('listitem')
 			.filter({ hasText: /banking/i })
 			.click();
-		await firstWindow.keyboard.press('Control+R');
-		const addGroupModal = firstWindow
+		await appWindow.keyboard.press('Control+R');
+		const addGroupModal = appWindow
 			.getByRole('dialog')
 			.getByText(/edit group/i);
 
@@ -91,36 +77,36 @@ test.describe('Hotkeys after auth', async () => {
 	});
 
 	test('Check should lock database', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
-		await firstWindow.keyboard.press('Control+L');
-		const passwordInput = firstWindow.getByPlaceholder(/password/i);
+		await addEntry(appWindow, { config: { close: true } });
+		await appWindow.keyboard.press('Control+L');
+		const passwordInput = appWindow.getByPlaceholder(/password/i);
 
 		await expect(passwordInput).toBeVisible();
 	});
 
 	test('Check should copy username', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
-		await firstWindow.getByRole('main').getByRole('listitem').first().click();
-		await firstWindow.keyboard.press('Control+Shift+U');
-		const notification = await firstWindow.getByRole('alert').innerText();
+		await addEntry(appWindow, { config: { close: true } });
+		await appWindow.getByRole('main').getByRole('listitem').first().click();
+		await appWindow.keyboard.press('Control+Shift+U');
+		const notification = await appWindow.getByRole('alert').innerText();
 
 		expect(notification).toMatch(/username copied/i);
 	});
 
 	test('Check should copy password', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
-		await firstWindow.getByRole('main').getByRole('listitem').first().click();
-		await firstWindow.keyboard.press('Control+Shift+C');
-		const notification = await firstWindow.getByRole('alert').innerText();
+		await addEntry(appWindow, { config: { close: true } });
+		await appWindow.getByRole('main').getByRole('listitem').first().click();
+		await appWindow.keyboard.press('Control+Shift+C');
+		const notification = await appWindow.getByRole('alert').innerText();
 
 		expect(notification).toMatch(/password copied/i);
 	});
 
 	test('Check should open history modal', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
-		await firstWindow.getByRole('main').getByRole('listitem').first().click();
-		await firstWindow.keyboard.press('Control+H');
-		const entryHistoryModal = firstWindow
+		await addEntry(appWindow, { config: { close: true } });
+		await appWindow.getByRole('main').getByRole('listitem').first().click();
+		await appWindow.keyboard.press('Control+H');
+		const entryHistoryModal = appWindow
 			.getByRole('dialog')
 			.getByText(/entry history/i);
 
@@ -128,16 +114,16 @@ test.describe('Hotkeys after auth', async () => {
 	});
 
 	test('Check should select all entries', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
-		await addEntry(firstWindow, { config: { close: true } });
-		await addEntry(firstWindow, { config: { close: true } });
+		await addEntry(appWindow, { config: { close: true } });
+		await addEntry(appWindow, { config: { close: true } });
+		await addEntry(appWindow, { config: { close: true } });
 
-		await firstWindow
+		await appWindow
 			.getByText(/username1/i)
 			.first()
 			.click();
-		await firstWindow.keyboard.press('Control+A');
-		const entries = await firstWindow
+		await appWindow.keyboard.press('Control+A');
+		const entries = await appWindow
 			.getByRole('main')
 			.getByRole('listitem')
 			.all();
@@ -148,44 +134,44 @@ test.describe('Hotkeys after auth', async () => {
 	});
 
 	test('Check should move entry', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
-		await firstWindow
+		await addEntry(appWindow, { config: { close: true } });
+		await appWindow
 			.getByRole('complementary')
 			.getByRole('listitem')
 			.filter({ hasText: /general/i })
 			.click();
-		await firstWindow.getByRole('main').getByRole('listitem').first().click();
-		await firstWindow.keyboard.press('Control+M');
+		await appWindow.getByRole('main').getByRole('listitem').first().click();
+		await appWindow.keyboard.press('Control+M');
 
-		const moveEntryModal = firstWindow
+		const moveEntryModal = appWindow
 			.getByRole('dialog')
 			.getByRole('heading', { name: /move entry to:/i });
 		await expect(moveEntryModal).toBeVisible();
 	});
 
 	test('Check should save database', async () => {
-		await addEntry(firstWindow, { config: { close: true } });
-		await firstWindow.getByRole('main').getByRole('listitem').first().click();
-		await firstWindow.keyboard.press('Delete');
-		await firstWindow
+		await addEntry(appWindow, { config: { close: true } });
+		await appWindow.getByRole('main').getByRole('listitem').first().click();
+		await appWindow.keyboard.press('Delete');
+		await appWindow
 			.getByRole('dialog')
 			.getByRole('button', { name: /remove/i })
 			.click();
-		await firstWindow
+		await appWindow
 			.getByRole('complementary')
 			.getByRole('listitem')
 			.filter({ hasText: /recycle bin/i })
 			.click();
-		await firstWindow.getByRole('main').getByRole('listitem').first().click();
-		await firstWindow.keyboard.press('Delete');
-		await firstWindow
+		await appWindow.getByRole('main').getByRole('listitem').first().click();
+		await appWindow.keyboard.press('Delete');
+		await appWindow
 			.getByRole('dialog')
 			.getByRole('button', { name: /remove/i })
 			.click();
-		await firstWindow.getByRole('dialog').waitFor({ state: 'detached' });
+		await appWindow.getByRole('dialog').waitFor({ state: 'detached' });
 
-		await firstWindow.keyboard.press('Control+S');
-		const notification = firstWindow.getByRole('alert');
+		await appWindow.keyboard.press('Control+S');
+		const notification = appWindow.getByRole('alert');
 
 		await expect(notification).toBeVisible();
 	});
@@ -193,49 +179,45 @@ test.describe('Hotkeys after auth', async () => {
 
 test.describe('Hotkeys before auth', async () => {
 	let app: ElectronApplication;
-	let firstWindow: Page;
+	let appWindow: Page;
 
 	test.beforeEach(async () => {
-		setupTestFiles();
+		const { appInstance, windowInstance } = await beforeEach(false);
 
-		app = await electron.launch({
-			args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-			
-			env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
-		});
-		firstWindow = await app.firstWindow();
-		await app.waitForEvent('window');
-		await authenticate(firstWindow);
-		await firstWindow.getByRole('main').waitFor({ state: 'visible' });
+		app = appInstance;
+		appWindow = windowInstance;
 	});
 
 	test.afterEach(async () => {
-		await app.evaluate((process) => process.app.exit());
+		await afterEach(app);
 	});
 
 	test('Check should not open new entry modal', async () => {
-		await firstWindow.keyboard.press('Control+N');
-		const dialog = firstWindow.getByRole('dialog');
+		await appWindow.keyboard.press('Control+N');
+		const dialog = appWindow.getByRole('dialog');
 
 		await expect(dialog).toBeHidden();
 	});
 
 	test('Check should open settings modal', async () => {
-		await firstWindow.keyboard.press('Control+.');
-		const dialog = firstWindow.getByRole('dialog').getByText(/^Settings$/);
+		await appWindow.getByLabel(/unlock/i).waitFor({ state: 'visible' });
+		await appWindow.keyboard.press('Control+.');
+		const dialog = appWindow.getByRole('dialog').getByText(/^Settings$/);
 
 		await expect(dialog).toBeVisible();
 	});
 
 	test('Check should open password generator modal', async () => {
-		await firstWindow.keyboard.press('Control+G');
-		const dialog = firstWindow.getByRole('dialog').getByText(/^Generator$/);
+		await appWindow.getByLabel(/unlock/i).waitFor({ state: 'visible' });
+		await appWindow.keyboard.press('Control+G');
+		const dialog = appWindow.getByRole('dialog').getByText(/^Generator$/);
 
 		await expect(dialog).toBeVisible();
 	});
 
 	test('Check should toggle fullscreen', async () => {
-		await firstWindow.keyboard.press('F11');
+		await appWindow.getByLabel(/unlock/i).waitFor({ state: 'visible' });
+		await appWindow.keyboard.press('F11');
 		const isFullscreen = await app.evaluate(({ BrowserWindow }) =>
 			BrowserWindow.getFocusedWindow().isFullScreen(),
 		);
@@ -244,31 +226,41 @@ test.describe('Hotkeys before auth', async () => {
 	});
 
 	test('Check should zoom in', async () => {
-		const initialZoomLevel = await app.evaluate(getZoomLevelFn);
-		await firstWindow.keyboard.press('Control+=');
-		await firstWindow.waitForTimeout(500);
-		const changedZoomLevel = await app.evaluate(getZoomLevelFn);
+		await appWindow.getByLabel(/unlock/i).waitFor({ state: 'visible' });
+		const initialZoomLevel = await app.evaluate(getZoomFactor);
+		await appWindow.waitForTimeout(1000);
+		await appWindow.keyboard.press('Control+=');
+		const changedZoomLevel = await app.evaluate(getZoomFactor);
 
 		expect(changedZoomLevel).toBeGreaterThan(initialZoomLevel);
+		await resetZoomFactor(app);
 	});
 
 	test('Check should zoom out', async () => {
-		const initialZoomLevel = await app.evaluate(getZoomLevelFn);
-		await firstWindow.keyboard.press('Control+-');
-		await firstWindow.waitForTimeout(500);
-		const changedZoomLevel = await app.evaluate(getZoomLevelFn);
+		await appWindow.getByLabel(/unlock/i).waitFor({ state: 'visible' });
+		const initialZoomLevel = await app.evaluate(getZoomFactor);
+		await appWindow.waitForTimeout(1000);
+		await appWindow.keyboard.press('Control+-');
+		await appWindow.waitForTimeout(1000);
+		const changedZoomLevel = await app.evaluate(getZoomFactor);
 
 		expect(changedZoomLevel).toBeLessThan(initialZoomLevel);
+		await resetZoomFactor(app);
 	});
 
 	test('Check should reset zoom', async () => {
-		const initialZoomLevel = await app.evaluate(getZoomLevelFn);
-		await firstWindow.keyboard.press('Control+-');
-		await firstWindow.keyboard.press('Control+-');
-		await firstWindow.keyboard.press('Control+0');
-		await firstWindow.waitForTimeout(500);
-		const resetZoomLevel = await app.evaluate(getZoomLevelFn);
+		await appWindow.getByLabel(/unlock/i).waitFor({ state: 'visible' });
+		const initialZoomLevel = await app.evaluate(getZoomFactor);
+		await appWindow.waitForTimeout(1000);
+		await appWindow.keyboard.press('Control+-');
+		await appWindow.waitForTimeout(1000);
+		await appWindow.keyboard.press('Control+-');
+		await appWindow.waitForTimeout(1000);
+		await appWindow.keyboard.press('Control+0');
+		await appWindow.waitForTimeout(1000);
+		const resetZoomLevel = await app.evaluate(getZoomFactor);
 
 		expect(resetZoomLevel).toBe(initialZoomLevel);
+		await resetZoomFactor(app);
 	});
 });

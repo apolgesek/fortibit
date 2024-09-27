@@ -161,3 +161,32 @@
 	align-content: center;
 	width: fit-content;
 }
+
+.more-options-btn {
+	border-radius: 0.25rem;
+	background-color: var(--primary-bg);
+	padding: 0.25rem 0.5rem;
+	color: var(--link-text);
+	position: relative;
+	z-index: 9999;
+	height: 2.5rem;
+
+	&:hover {
+		background-color: var(--list-item-bg--hover);
+	}
+
+	&:focus-visible {
+		outline: 2px solid $barberry !important;
+	}
+
+	&:active {
+		outline: none !important;
+	}
+
+	i-feather {
+		margin-left: 0 !important;
+		margin-right: 0 !important;
+		height: 1.5rem !important;
+		width: 1.5rem !important;
+	}
+}

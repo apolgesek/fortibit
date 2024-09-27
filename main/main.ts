@@ -3,6 +3,7 @@ import {
 	app,
 	BrowserWindow,
 	desktopCapturer,
+	dialog,
 	globalShortcut,
 	ipcMain,
 	Menu,
@@ -12,7 +13,7 @@ import {
 } from 'electron';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { platform } from 'os';
-import { basename, join, resolve } from 'path';
+import { basename, join } from 'path';
 import { SingleInstanceServices } from './di';
 import { ProcessArgument } from './process-argument.enum';
 import { IAutotypeService } from './services/autotype';
@@ -69,7 +70,7 @@ class MainProcess {
 	}
 
 	constructor() {
-		process.env.TEST_MODE = this._isTestMode ? '1' : '0'
+		process.env.TEST_MODE = this._isTestMode ? '1' : '0';
 
 		this._services = new SingleInstanceServices();
 		this._fileArg = process.argv.find((x) =>
@@ -198,10 +199,6 @@ class MainProcess {
 			);
 			const path = JSON.parse(workspace);
 
-			if (this._isTestMode) {
-				path.workspace = resolve('./e2e/files/test.fbit');
-			}
-
 			if (path.workspace && existsSync(path.workspace)) {
 				this._databaseService.setDatabaseEntry(
 					windowRef.webContents.id,
@@ -255,28 +252,61 @@ class MainProcess {
 			shell.openExternal(url);
 		});
 
-		ipcMain.on(IpcChannel.ScanQrCode, async () => {
+		ipcMain.handle(IpcChannel.ScanQrCode, async (event) => {
 			const { width, height } = screen.getPrimaryDisplay().size;
-			const sources = await desktopCapturer.getSources({ types: ['window'], thumbnailSize: { width, height } });
+			const sources = await desktopCapturer.getSources({
+				types: ['window'],
+				thumbnailSize: { width, height },
+			});
 			const buffer = sources[0].thumbnail.toPNG();
 			const png = PNG.sync.read(buffer);
 
-			const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
-			
+			const code = jsQR(
+				Uint8ClampedArray.from(png.data),
+				png.width,
+				png.height,
+			);
+
+			const window = this._windowService.getWindowByWebContentsId(
+				event.sender.id,
+			).browserWindow;
+
 			if (!code) {
+				dialog.showMessageBox(window, {
+					title: 'QR code reader error',
+					type: 'warning',
+					message: `No otpauth QR code was found:
+						- make sure it's visible in the foreground,
+						- try zooming the code in and scan again,
+						- if none of the above works, you can manually add a secret in Advanced options of password entry.`,
+				});
+
 				return;
-				// TODO
+			}
+			
+			const secret = code.data.match(/secret=(([2-7A-Z]{8})+)/);
+
+			if (!secret) {
+				dialog.showMessageBox(window, {
+					title: 'QR code reader error',
+					type: 'warning',
+					message: `Invalid QR code data`,
+				});
+
+				return;
 			}
 
-			console.log(code.data);
-			// expose otpauth to renderer
+			return secret[1];
 		});
 
 		ipcMain.on(IpcChannel.LogError, (_, error) => {
 			const logPath = app.getPath('logs');
 			if (!existsSync(logPath)) mkdirSync(logPath, { recursive: true });
 
-			writeFileSync(join(logPath, `error_log_report_${getDateString()}`), error);
+			writeFileSync(
+				join(logPath, `error_log_report_${getDateString()}`),
+				error,
+			);
 		});
 	}
 }

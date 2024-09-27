@@ -8,7 +8,7 @@ import {
 	OnInit,
 	QueryList,
 	ViewChildren,
-	inject,
+	inject, AfterViewInit,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -45,7 +45,7 @@ import { EntryForm, PasswordFormGroup } from '../../entry-dialog.component';
 	templateUrl: './password-entry-partial-form.component.html',
 	styleUrls: ['./password-entry-partial-form.component.scss'],
 })
-export class PasswordEntryPartialFormComponent implements OnInit {
+export class PasswordEntryPartialFormComponent implements OnInit, AfterViewInit {
 	@ViewChildren('passwordInput')
 	public readonly passwordInputs: QueryList<ElementRef>;
 	@Input() public readonly isReadOnly = false;
@@ -168,6 +168,7 @@ export class PasswordEntryPartialFormComponent implements OnInit {
 			username: entry.username,
 			icon: entry.icon,
 			autotypeExp: entry.autotypeExp,
+			otpCode: entry.otpAuth,
 			notes: entry.notes,
 			url: entry.url,
 			passwords: {

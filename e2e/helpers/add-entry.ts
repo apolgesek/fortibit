@@ -4,7 +4,8 @@ type IEntryModel = {
 	title?: string;
 	username?: string;
 	url?: string;
-	config?: { close: true };
+	otpAuth?: string;
+	config?: { close: boolean };
 };
 
 export async function addEntry(page: Page, model?: IEntryModel) {
@@ -15,6 +16,11 @@ export async function addEntry(page: Page, model?: IEntryModel) {
 	if (model?.url) {
 		await page.getByPlaceholder(/website/i).fill(model.url);
 	}
+
+	if (model?.otpAuth) {
+		await page.getByPlaceholder(/base32 secret/i).fill(model?.otpAuth);
+	}
+	
 	await page.getByText(/confirm/i).click();
 
 	if (model?.config?.close) {
