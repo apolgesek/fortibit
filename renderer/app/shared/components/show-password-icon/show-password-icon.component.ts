@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FeatherModule } from 'angular-feather';
+import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 
 @Component({
 	selector: 'app-show-password-icon',
 	standalone: true,
-	imports: [CommonModule, FeatherModule],
+	imports: [CommonModule, FeatherModule, TooltipDirective],
 	templateUrl: './show-password-icon.component.html',
 	styleUrls: ['./show-password-icon.component.scss'],
 })

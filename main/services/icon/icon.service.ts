@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { AsyncQueue } from '../../core/async-queue';
 import { IAsyncQueue } from '../../core/async-queue.model';
+import { SimpleScheduler } from '../../core/schedulers/simple-scheduler';
 import { getDomain } from '../../util';
 import { IConfigService } from '../config';
 import { IFileService } from '../file';
@@ -97,7 +98,8 @@ export class IconService implements IIconService {
 			},
 		);
 
-		this.iconQueue.process();
+		const scheduler = new SimpleScheduler(this.iconQueue);
+		scheduler.initialize();
 	}
 
 	getIcons(windowId: number, entries: PasswordEntry[]) {

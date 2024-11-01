@@ -253,11 +253,22 @@ class MainProcess {
 		});
 
 		ipcMain.handle(IpcChannel.ScanQrCode, async (event) => {
+			const window = this._windowService.getWindowByWebContentsId(
+				event.sender.id,
+			).browserWindow;
+
 			const { width, height } = screen.getPrimaryDisplay().size;
 			const sources = await desktopCapturer.getSources({
 				types: ['window'],
 				thumbnailSize: { width, height },
 			});
+
+			if (!sources?.length) {
+				this.showMissingQrCodeError(window);
+
+				return;
+			}
+			
 			const buffer = sources[0].thumbnail.toPNG();
 			const png = PNG.sync.read(buffer);
 
@@ -267,19 +278,8 @@ class MainProcess {
 				png.height,
 			);
 
-			const window = this._windowService.getWindowByWebContentsId(
-				event.sender.id,
-			).browserWindow;
-
 			if (!code) {
-				dialog.showMessageBox(window, {
-					title: 'QR code reader error',
-					type: 'warning',
-					message: `No otpauth QR code was found:
-						- make sure it's visible in the foreground,
-						- try zooming the code in and scan again,
-						- if none of the above works, you can manually add a secret in Advanced options of password entry.`,
-				});
+				this.showMissingQrCodeError(window);
 
 				return;
 			}
@@ -307,6 +307,31 @@ class MainProcess {
 				join(logPath, `error_log_report_${getDateString()}`),
 				error,
 			);
+		});
+
+		ipcMain.handle(IpcChannel.ClearRecentlyOpened, () => {
+			try {
+				writeFileSync(
+					this._configService.workspacesPath,
+					'{"recentlyOpened": [], "workspace": null}',
+					{ encoding: 'utf8' },
+				);
+
+				return true;
+			} catch {
+				return false;
+			}
+		});
+	}
+
+	private showMissingQrCodeError(window: BrowserWindow) {
+		dialog.showMessageBox(window, {
+			title: 'QR code reader error',
+			type: 'warning',
+			message: `No otpauth QR code was found:
+						- make sure it's visible in the foreground,
+						- try zooming the code in and scan again,
+						- if none of the above works, you can manually add a secret in Advanced options of password entry.`,
 		});
 	}
 }

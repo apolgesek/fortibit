@@ -1,20 +1,13 @@
 import { request } from 'https';
-import { join } from 'path';
+import { IExposedPasswordsService } from './exposed-passwords-service.model';
 
-export class ExposedPasswordsService {
-	private _apiUrl: string;
-
+export class ExposedPasswordsService implements IExposedPasswordsService {
 	public async findLeaks(
 		entries: { id: number; hash: string }[],
-		basedir: string,
-	): Promise<{ id: any; occurrences: number }[]> {
+		apiUrl: string,
+	): Promise<{ id: number; occurrences: number }[]> {
 		try {
-			if (!this._apiUrl) {
-				const product = require(join(basedir, 'product.json'));
-				this._apiUrl = product.leakedPasswordsUrl;
-			}
-
-			const result = await Promise.all(entries.map((e) => this.find(e)));
+			const result = await Promise.all(entries.map((e) => this.find(e, apiUrl)));
 			return Promise.resolve(result.flat());
 		} catch (err) {
 			return Promise.reject(err);
@@ -24,15 +17,16 @@ export class ExposedPasswordsService {
 	private async find(entry: {
 		id: number;
 		hash: string;
-	}): Promise<{ id: number; occurrences: number }> {
+	}, apiUrl: string): Promise<{ id: number; occurrences: number }> {
 		const hashStart = entry.hash.slice(0, 5);
 		const hashEnd = entry.hash.slice(5);
 
 		return new Promise((resolve, reject) => {
 			let body = '';
+			// eslint-disable-next-line prefer-const
 			let timeout: NodeJS.Timeout;
 
-			const req = request(`${this._apiUrl}/${hashStart}`, (res) => {
+			const req = request(`${apiUrl}/${hashStart}`, (res) => {
 				res.on('data', async (data: Buffer) => {
 					body += data.toString();
 				});
@@ -64,7 +58,7 @@ export class ExposedPasswordsService {
 			timeout = setTimeout(() => {
 				req.destroy();
 				reject('Request timed out');
-			}, 30000);
+			}, 30_000);
 
 			req.end();
 		});

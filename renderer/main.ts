@@ -18,8 +18,9 @@ import {
 	EntryManager,
 	GroupManager,
 	ModalService,
+	SvgService,
 	WindowsHotkeyHandler,
-	WorkspaceService,
+	WorkspaceService
 } from '@app/core/services';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { IpcChannel } from '@shared-renderer/index';
@@ -79,21 +80,36 @@ import { DarwinHotkeyHandler } from './app/core/services/hotkey/darwin-hotkey-ha
 import { routes } from './app/routes';
 import { AppConfig } from './environments/environment';
 
+function preloadIcons(svgService: SvgService, paths: string[]): Promise<void>[] {
+	return paths.map(p => svgService.getFile(p));
+}
+
 function initializeApp(
 	db: DbManager,
 	messageBroker: IMessageBroker,
 	configService: ConfigService,
+	svgService: SvgService
 ): () => Promise<void> {
 	return async () => {
+		const asyncTasks: Promise<void>[] = [
+			...preloadIcons(svgService, [
+				'icons/welcome.svg',
+				'icons/windows-hello.svg',
+				'icons/history.svg'
+			])
+		];
+
 		if (isElectron()) {
-			await (window as any).api.loadChannels();
+			asyncTasks.push((window as any).api.loadChannels());
 		} else {
 			(window as any).api = {
 				loadChannels: () => {},
 			};
 		}
 
+		await Promise.all(asyncTasks);
 		await messageBroker.getPlatform();
+
 		const config = await messageBroker.ipcRenderer.invoke(
 			IpcChannel.GetAppConfig,
 		);
@@ -179,7 +195,7 @@ bootstrapApplication(AppComponent, {
 		{
 			provide: APP_INITIALIZER,
 			useFactory: initializeApp,
-			deps: [DbManager, MessageBroker, ConfigService],
+			deps: [DbManager, MessageBroker, ConfigService, SvgService],
 			multi: true,
 		},
 		{

@@ -248,6 +248,13 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 		this.messageBroker.ipcRenderer.send(IpcChannel.Close);
 	}
 
+	async clearRecentlyOpened() {
+		const result = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ClearRecentlyOpened);
+		if (result) {
+			this.recentFiles = [];
+		}
+	}
+
 	private fixMenuSize() {
 		this.topbar.nativeElement.style.height = this.getViewportHeightUnit(2);
 		this.overlay.nativeElement.style.height = this.getViewportHeightUnit(2);

@@ -1,34 +1,30 @@
-import { IAsyncQueue } from './async-queue.model';
-
-const sleep = (ms: number): Promise<void> =>
-	new Promise((resolve) => setTimeout(() => resolve(), ms));
+import { IAsyncQueue, Result } from './async-queue.interface';
 
 const attempts = Symbol('attempts');
 const toRetry = Symbol('toRetry');
 
-interface Queue {
-	[key: string]: any;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Queue = Record<string, any>;
 
 type Queueable<T> = Queue & T;
 
 export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 	private readonly queue: Queueable<T>[] = [];
 
+	public get queueSize(): number {
+		return this.queue.length;
+	}
+
 	constructor(
 		private readonly asyncFn: (item: T) => Promise<K>,
 		private readonly onFulfilled: (item: T, value: K) => void,
-		private readonly batchSize = 5,
-		private readonly intervalSeconds = 10,
+		readonly batchSize = 5,
 		private readonly maxRetries = 3,
 	) {}
 
 	async process() {
-		if (!this.queue.length) {
-			await sleep(this.intervalSeconds * 1000);
-			this.process();
-
-			return;
+		if (this.queueSize === 0) {
+			return Promise.resolve(Result.Success);
 		}
 
 		const batchArray = this.createBatches<Queueable<T>>(
@@ -36,8 +32,7 @@ export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 			this.batchSize,
 		);
 
-		for (let i = 0; i < batchArray.length; i++) {
-			const batch = batchArray[i];
+		for (const batch of batchArray) {
 			const promises = batch.map(this.asyncFn);
 
 			try {
@@ -46,7 +41,7 @@ export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 					if (result.status === 'fulfilled') {
 						this.onFulfilled(batch[j], result.value);
 					} else {
-						if (!result.reason.code) {
+						if (!result.reason.code || result.reason.code === 429) {
 							batch[j] = {
 								...batch[j],
 								[attempts]: batch[j][attempts as unknown as string] + 1,
@@ -60,14 +55,16 @@ export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 				});
 
 				this.queue.splice(0, this.batchSize);
-				await sleep(1000);
-			} catch (err) {
+
+				if (result.some(r => r.status === 'rejected' && r.reason.code === 429)) {
+					return Promise.resolve(Result.RateLimitExceeded);
+				} else {
+					return Promise.resolve(Result.Success);
+				}
+			} catch {
 				console.log('Error occured processing queue.');
 			}
 		}
-
-		await sleep(this.intervalSeconds * 1000);
-		this.process();
 	}
 
 	add(item: T): void {

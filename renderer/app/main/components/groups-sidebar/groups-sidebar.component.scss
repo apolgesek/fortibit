@@ -28,7 +28,7 @@
 				width: 1.5rem;
 				color: var(--link-text);
 				cursor: pointer;
-				transition: 50ms color;
+				transition: var(--base-animation-duration) color;
 
 				&:hover,
 				&:focus {

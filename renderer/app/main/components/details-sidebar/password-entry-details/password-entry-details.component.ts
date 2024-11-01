@@ -58,6 +58,10 @@ export class PasswordEntryDetailsComponent implements OnInit, OnChanges {
 		return Boolean(this.entry.isSecureProtocolAvailable);
 	}
 
+	get isTfaAvailable(): boolean {
+		return Boolean(this.entry.isTfaAvailable);
+	}
+
 	ngOnInit(): void {
 		this.configService.configLoadedSource$
 			.pipe(takeUntilDestroyed(this.destroyRef))

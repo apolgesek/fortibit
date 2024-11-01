@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import {
 	Component,
 	DestroyRef,
 	NgZone,
 	OnDestroy,
 	OnInit,
-	inject,
+	inject, AfterViewInit,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -21,9 +21,10 @@ import {
 } from '@app/core/services';
 import { ConfigService } from '@app/core/services/config.service';
 import { ShowPasswordIconComponent } from '@app/shared/components/show-password-icon/show-password-icon.component';
+import { SvgComponent } from '@app/shared/components/svg/svg.component';
 import { AutofocusDirective } from '@app/shared/directives/autofocus.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
-import { UiUtil } from '@app/utils';
+import { markAllAsDirty, UiUtil } from '@app/utils';
 import { tips } from '@assets/data/tips';
 import { Configuration } from '@config/configuration';
 import { IpcChannel } from '@shared-renderer/index';
@@ -31,6 +32,23 @@ import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+
+type ColorProfile = { primary: string; secondary: string };
+
+const SKELETON_ENTRY_COLOR_PROFILES = [
+	{
+		primary: '#c7e3d0',
+		secondary: '#376d48'
+	},
+	{
+		primary: '#ff9bab',
+		secondary: '#8f3d49'
+	},
+	{
+		primary: '#eae48f',
+		secondary: '#9e961d'
+	}
+];
 
 @Component({
 	selector: 'app-master-password',
@@ -44,9 +62,13 @@ import { switchMap } from 'rxjs/operators';
 		AutofocusDirective,
 		TooltipDirective,
 		ShowPasswordIconComponent,
+		SvgComponent,
+		NgOptimizedImage
 	],
 })
-export class MasterPasswordComponent implements OnInit, OnDestroy {
+export class MasterPasswordComponent implements OnInit, OnDestroy, AfterViewInit {
+	public readonly skeletonEntryColorProfiles: ColorProfile[] = SKELETON_ENTRY_COLOR_PROFILES;
+
 	public config: Configuration;
 	public passwordVisible = false;
 	public oneOfTips = '';
@@ -69,7 +91,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 	});
 
 	private onDecryptedContent: (
-		_: any,
+		_: unknown,
 		{ decrypted }: { decrypted: string },
 	) => void;
 	private _filePath: string;
@@ -178,7 +200,6 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 	}
 
 	async createNew(): Promise<void> {
-		// await this.messageBroker.ipcRenderer.invoke(IpcChannel.CreateNew);
 		this.workspaceService.createNew();
 	}
 
@@ -198,11 +219,9 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 	}
 
 	async onLoginSubmit() {
-		Object.values(this.loginForm.controls).forEach((control) => {
-			control.markAsDirty();
-		});
+		markAllAsDirty(this.loginForm);
 
-		if (this.loginForm.invalid) {
+		if (this.loginForm.controls.password.hasError('required')) {
 			const notificationModel: Toast = {
 				type: 'error',
 				message: 'Password is required',

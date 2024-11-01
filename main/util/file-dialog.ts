@@ -1,7 +1,7 @@
+import { Configuration } from '../../configuration';
 import { FileFilter, app } from 'electron';
-import { Configuration } from '../../app-config';
-import { ProcessArgument } from '../process-argument.enum';
 import { join } from 'path';
+import { ProcessArgument } from '../process-argument.enum';
 
 type FileType = 'vaultExt' | 'csv' | 'xml';
 
@@ -16,10 +16,11 @@ export function getFileFilter(
 
 	switch (fileType) {
 		case 'csv':
-			fileFilter = { name: 'Comma Separated Values File', extensions: ['csv'] };
+			fileFilter = { name: 'Comma Separated Values File (.csv)', extensions: ['csv'] };
 			break;
 		case 'xml':
-			fileFilter = { name: 'Extensible Markup Language', extensions: ['xml'] };
+			fileFilter = { name: 'Extensible Markup Language File (.xml)', extensions: ['xml'] };
+		break;
 		default:
 			break;
 	}
@@ -30,7 +31,7 @@ export function getFileFilter(
 export function getDefaultPath(config: Configuration, path: string): string {
 	const pathParts: string[] = [];
 
-	if (Boolean(app.commandLine.hasSwitch(ProcessArgument.E2E))) {
+	if (app.commandLine.hasSwitch(ProcessArgument.E2E)) {
 		pathParts.push(config.e2eFilesPath);
 	}
 	pathParts.push(path);

@@ -39,6 +39,7 @@ import { IWebApiService } from '../web-api';
 import { IWindowService } from '../window';
 import { IDatabaseService } from './database-service.model';
 import { SaveFilePayload } from './save-file-payload';
+import { IWindow } from '../window/window-model';
 
 export class DatabaseService implements IDatabaseService {
 	private readonly _isTestMode = Boolean(
@@ -245,7 +246,7 @@ export class DatabaseService implements IDatabaseService {
 						]);
 
 						return true;
-					} catch (err) {
+					} catch {
 						throw new Error('Failed to save leaked password report');
 					}
 				}
@@ -421,6 +422,8 @@ export class DatabaseService implements IDatabaseService {
 			}),
 			{ encoding: 'utf8' },
 		);
+
+		this.sendRecentlyOpenedFiles();
 	}
 
 	public getFilePath(windowId: number): string {
@@ -506,12 +509,7 @@ export class DatabaseService implements IDatabaseService {
 				this._nativeApiService.saveCredential(finalFilePath, password);
 			}
 
-			this._windowService.windows.forEach((w) =>
-				w.browserWindow.webContents.send(
-					IpcChannel.GetRecentFiles,
-					this._configService.appConfig.workspaces.recentlyOpened,
-				),
-			);
+			this.sendRecentlyOpenedFiles();
 
 			return {
 				status: true,
@@ -582,12 +580,7 @@ export class DatabaseService implements IDatabaseService {
 					detail: `The path: '${path}' does not exist.`,
 				});
 
-				this._windowService.windows.forEach((w) =>
-					w.browserWindow.webContents.send(
-						IpcChannel.GetRecentFiles,
-						this._configService.appConfig.workspaces.recentlyOpened,
-					),
-				);
+				this.sendRecentlyOpenedFiles();
 				return;
 			}
 
@@ -632,16 +625,7 @@ export class DatabaseService implements IDatabaseService {
 
 				payload.decrypted = JSON.stringify(parsedDb);
 
-				this._iconService.getIcons(
-					window.browserWindow.id,
-					parsedDb.tables.entries.filter((x) => x.type === 'password'),
-				);
-
-				this._webApiService.checkSecureProtocol(
-					window.browserWindow.id,
-					parsedDb.tables.entries.filter((x) => x.type === 'password'),
-				);
-				
+				this.startBackgroundChecks(window, parsedDb);
 				this._windowService.setIdleTimer();
 
 				window.browserWindow.webContents.send(IpcChannel.DecryptedContent, {
@@ -649,7 +633,7 @@ export class DatabaseService implements IDatabaseService {
 				});
 			} else {
 				window.browserWindow.webContents.send(IpcChannel.DecryptedContent, {
-					error: 'Password is invalid',
+					error: 'Password is incorrect',
 				});
 			}
 		} catch {
@@ -657,6 +641,23 @@ export class DatabaseService implements IDatabaseService {
 				error: 'An error occured reading the file',
 			});
 		}
+	}
+
+	private startBackgroundChecks(window: IWindow, parsedDb: VaultSchema) {
+		this.startPasswordEntriesBackgroundChecks(window, parsedDb);
+	}
+
+	private startPasswordEntriesBackgroundChecks(
+		window: IWindow,
+		parsedDb: VaultSchema,
+	) {
+		const entries = parsedDb.tables.entries.filter(
+			(x) => x.type === 'password',
+		);
+
+		this._iconService.getIcons(window.browserWindow.id, entries);
+		this._webApiService.checkSecureProtocol(window.browserWindow.id, entries);
+		this._webApiService.checkTfa(window.browserWindow.id, entries);
 	}
 
 	public async getLeaks(event: IpcMainEvent, database: string) {
@@ -743,5 +744,14 @@ export class DatabaseService implements IDatabaseService {
 		} catch {
 			return null;
 		}
+	}
+
+	private sendRecentlyOpenedFiles() {
+		this._windowService.windows.forEach((w) => {
+			w.browserWindow.webContents.send(
+				IpcChannel.GetRecentFiles,
+				this._configService.appConfig.workspaces.recentlyOpened
+			);
+		});
 	}
 }

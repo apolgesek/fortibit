@@ -1,4 +1,4 @@
-var moduleAlias = require('module-alias');
+const moduleAlias = require('module-alias');
 moduleAlias.addAliases({
 	'@root': __dirname,
 	'@shared-renderer': __dirname + '/shared',

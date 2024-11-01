@@ -11,5 +11,6 @@ export type PasswordEntry = EntryBase & {
 	history?: PasswordEntry[];
 	isExposed?: boolean;
 	isSecureProtocolAvailable?: boolean;
+	isTfaAvailable?: boolean;
 	otpAuth?: string;
 };

@@ -1,4 +1,4 @@
-import { PasswordEntry } from '../../../shared/password-entry.model';
+import { PasswordEntry } from '../../../../shared/password-entry.model';
 
 export class WeakPasswordsService {
 	private zxcvbn;

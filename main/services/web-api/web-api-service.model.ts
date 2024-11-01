@@ -6,4 +6,5 @@ export const IWebApiService =
 
 export interface IWebApiService {
 	checkSecureProtocol(windowId: number, entries: PasswordEntry[]);
+	checkTfa(windowId: number, entries: PasswordEntry[]);
 }

@@ -73,7 +73,7 @@ test.describe('Master password', async () => {
 		await firstWindow.waitForTimeout(1 * 1000); // wait to make sure this notification replaces the startup dummy one
 		const notification = firstWindow.getByRole('alert');
 
-		await expect(notification).toHaveText(/password is invalid/i);
+		await expect(notification).toHaveText(/password is incorrect/i);
 	});
 
 	test('Check settings modal open when not authenticated', async () => {

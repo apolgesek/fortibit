@@ -23,6 +23,16 @@
 								{{ i + 1 }}: {{ file | fileName }}
 							</li>
 						}
+						@if (recentFiles.length > 0) {
+							<div class="divider"><hr /></div>
+						}
+						<li
+							appMenuItem
+							[disabled]="recentFiles.length === 0"
+							(activate)="clearRecentlyOpened()"
+						>
+							Clear recently opened
+						</li>
 					</div>
 				</div>
 				<div class="divider"><hr /></div>
@@ -43,6 +53,7 @@
 						Import <i-feather name="chevron-right"></i-feather>
 					</li>
 					<div *appDropdownMenu class="dropdown-content left submenu-container">
+						<div class="submenu-label">Password managers</div>
 						<li
 							aria-hidden="true"
 							appMenuItem
@@ -73,20 +84,9 @@
 						</li>
 					</div>
 				</div>
-				<div appDropdown class="dropdown" style="width: 100%">
-					<li
-						appDropdownToggle
-						trigger="hover"
-						appMenuItem
-						[disabled]="isLocked"
-						class="submenu-open"
-					>
-						Export <i-feather name="chevron-right"></i-feather>
-					</li>
-					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<li aria-hidden="true" appMenuItem (activate)="export()">CSV</li>
-					</div>
-				</div>
+				<li appMenuItem (activate)="export()" [disabled]="isLocked">
+					Export
+				</li>
 				<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">
 					Lock <span class="secondary">{{ hotkeys['Lock'] }}</span>
 				</li>

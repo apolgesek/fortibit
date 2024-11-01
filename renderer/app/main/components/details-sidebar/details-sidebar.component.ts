@@ -27,6 +27,7 @@ import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.dire
 import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
 import { slideDown } from '@app/shared';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
+import { SvgComponent } from '@app/shared/components/svg/svg.component';
 
 @Component({
 	selector: 'app-details-sidebar',
@@ -45,7 +46,8 @@ import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 		DropdownDirective,
 		DropdownMenuDirective,
 		DropdownToggleDirective,
-		MenuItemDirective
+		MenuItemDirective,
+		SvgComponent
 	],
 	animations: [slideDown]
 })

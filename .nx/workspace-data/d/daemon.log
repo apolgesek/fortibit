@@ -1,0 +1,522 @@
+[NX Daemon Server] - 2024-10-05T15:57:16.804Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-05T15:57:16.813Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-05T15:57:16.817Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-05T15:57:16.819Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-05T15:57:16.822Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-05T15:57:16.825Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-05T15:57:16.826Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-05T15:57:16.826Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-05T15:57:16.827Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-05T15:57:16.828Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-05T15:57:16.828Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-05T19:55:14.899Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-05T19:55:14.912Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-05T19:55:14.915Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-05T19:55:14.916Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-05T19:55:14.918Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-05T19:55:14.920Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-05T19:55:14.921Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-05T19:55:14.922Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-05T19:55:14.922Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-05T19:55:14.922Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-05T19:55:14.923Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-06T14:34:26.878Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-06T14:34:26.887Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-06T14:34:26.890Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-06T14:34:26.891Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-06T14:34:26.894Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-06T14:34:26.897Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-06T14:34:26.899Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-06T14:34:26.899Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-06T14:34:26.899Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-06T14:34:26.900Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-06T14:34:26.900Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-07T19:39:22.409Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-07T19:39:22.418Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-07T19:39:22.424Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-07T19:39:22.425Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-07T19:39:22.428Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-07T19:39:22.431Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-07T19:39:22.432Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-07T19:39:22.432Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-07T19:39:22.434Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-07T19:39:22.434Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-07T19:39:22.434Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-08T22:39:39.914Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-08T22:39:39.923Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-08T22:39:39.928Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T22:39:39.929Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-08T22:39:39.931Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T22:39:39.934Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-08T22:39:39.936Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-08T22:39:39.936Z - Handled FORCE_SHUTDOWN. Handling time: 1. Response time: 2.
+[NX Daemon Server] - 2024-10-08T22:39:39.936Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-08T22:39:39.937Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-08T22:39:39.937Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-08T22:39:41.299Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-08T22:39:41.318Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-08T22:39:42.475Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX Daemon Server] - 2024-10-08T22:39:42.475Z - [REQUEST]: 
+[NX Daemon Server] - 2024-10-08T22:39:42.475Z - [REQUEST]: 
+[NX Daemon Server] - 2024-10-08T22:39:42.526Z - [SYNC]: collect registered sync generators
+[NX Daemon Server] - 2024-10-08T23:23:02.325Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T23:23:02.327Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-08T23:23:02.327Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T23:23:02.331Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-08T23:23:02.331Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-08T23:23:02.331Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 0.
+[NX Daemon Server] - 2024-10-08T23:23:02.339Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-08T23:23:02.339Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-08T23:23:02.339Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-08T23:23:02.345Z - Server stopped because: "Request to shutdown"
+[NX Daemon Server] - 2024-10-08T23:23:02.679Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-08T23:23:02.683Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-08T23:23:02.689Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T23:23:02.694Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-08T23:23:02.695Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T23:23:02.699Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-08T23:23:02.700Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-08T23:23:02.700Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-08T23:23:02.704Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-08T23:23:02.704Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-08T23:23:02.704Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-08T23:53:58.832Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-08T23:53:58.837Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-08T23:53:58.844Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T23:53:58.847Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-08T23:53:58.848Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T23:53:58.851Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-08T23:53:58.852Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-08T23:53:58.853Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 3.
+[NX Daemon Server] - 2024-10-08T23:53:58.853Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-08T23:53:58.853Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-08T23:53:58.854Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-08T23:53:59.206Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-08T23:53:59.210Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-08T23:53:59.213Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T23:53:59.215Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-08T23:53:59.218Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-08T23:53:59.221Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-08T23:53:59.223Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-08T23:53:59.223Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-08T23:53:59.223Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-08T23:53:59.224Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-08T23:53:59.224Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-09T00:06:43.781Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-09T00:06:43.788Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-09T00:06:43.794Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-09T00:06:43.796Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-09T00:06:43.796Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-09T00:06:43.798Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-09T00:06:43.799Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-09T00:06:43.799Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-09T00:06:43.800Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-09T00:06:43.800Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-09T00:06:43.800Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-09T00:06:44.142Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-09T00:06:44.146Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-09T00:06:44.158Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-09T00:06:44.160Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-09T00:06:44.160Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-09T00:06:44.162Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-09T00:06:44.163Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-09T00:06:44.164Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-09T00:06:44.164Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-09T00:06:44.164Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-09T00:06:44.164Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-09T23:31:54.033Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-09T23:31:54.043Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-09T23:31:54.047Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-09T23:31:54.048Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-09T23:31:54.051Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-09T23:31:54.054Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-09T23:31:54.054Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-09T23:31:54.055Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-09T23:31:54.056Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-09T23:31:54.057Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-09T23:31:54.057Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-10T22:58:40.803Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-10T22:58:40.818Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-10T22:58:40.822Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-10T22:58:40.823Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-10T22:58:40.825Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-10T22:58:40.828Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-10T22:58:40.830Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-10T22:58:40.831Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 3.
+[NX Daemon Server] - 2024-10-10T22:58:40.831Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-10T22:58:40.832Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-10T22:58:40.832Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-10T22:59:08.876Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-10T22:59:08.883Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-10T22:59:08.886Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-10T22:59:08.888Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-10T22:59:08.890Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-10T22:59:08.893Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-10T22:59:08.893Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-10T22:59:08.894Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-10T22:59:08.895Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-10T22:59:08.895Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-10T22:59:08.895Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-10T22:59:09.642Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-10T22:59:09.656Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-10T22:59:09.662Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-10T22:59:09.663Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-10T22:59:09.665Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-10T22:59:09.667Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-10T22:59:09.668Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-10T22:59:09.669Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-10T22:59:09.669Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-10T22:59:09.669Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-10T22:59:09.669Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-11T20:57:54.726Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-11T20:57:54.739Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-11T20:57:54.742Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-11T20:57:54.744Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-11T20:57:54.746Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-11T20:57:54.749Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-11T20:57:54.750Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-11T20:57:54.751Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-11T20:57:54.751Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-11T20:57:54.752Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-11T20:57:54.752Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-12T08:40:57.019Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-12T08:40:57.026Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-12T08:40:57.029Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T08:40:57.032Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-12T08:40:57.032Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T08:40:57.035Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-12T08:40:57.036Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-12T08:40:57.036Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-12T08:40:57.036Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-12T08:40:57.037Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-12T08:40:57.037Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-12T12:45:45.146Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-12T12:45:45.160Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-12T12:45:45.166Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T12:45:45.167Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-12T12:45:45.170Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T12:45:45.173Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-12T12:45:45.175Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-12T12:45:45.176Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 3.
+[NX Daemon Server] - 2024-10-12T12:45:45.176Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-12T12:45:45.177Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-12T12:45:45.177Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-12T14:52:54.116Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-12T14:52:54.126Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-12T14:52:54.130Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T14:52:54.132Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-12T14:52:54.135Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T14:52:54.138Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-12T14:52:54.139Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-12T14:52:54.139Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-12T14:52:54.140Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-12T14:52:54.140Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-12T14:52:54.141Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-12T14:52:54.875Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-12T14:52:54.888Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-12T14:52:54.893Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T14:52:54.894Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-12T14:52:54.896Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T14:52:54.898Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-12T14:52:54.899Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-12T14:52:54.900Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-12T14:52:54.900Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-12T14:52:54.900Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-12T14:52:54.900Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-12T15:50:57.314Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-12T15:50:57.327Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-12T15:50:57.330Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T15:50:57.331Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-12T15:50:57.333Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T15:50:57.335Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-12T15:50:57.336Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-12T15:50:57.337Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-12T15:50:57.337Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-12T15:50:57.337Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-12T15:50:57.337Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-12T15:50:57.666Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-12T15:50:57.670Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-12T15:50:57.672Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T15:50:57.672Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-12T15:50:57.674Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T15:50:57.677Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-12T15:50:57.689Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-12T15:50:57.690Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 13.
+[NX Daemon Server] - 2024-10-12T15:50:57.690Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-12T15:50:57.690Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-12T15:50:57.690Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-12T22:50:58.322Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-12T22:50:58.331Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-12T22:50:58.335Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T22:50:58.336Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-12T22:50:58.339Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T22:50:58.342Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-12T22:50:58.344Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-12T22:50:58.344Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-12T22:50:58.345Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-12T22:50:58.345Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-12T22:50:58.346Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-12T22:50:59.286Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-12T22:50:59.299Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-12T22:50:59.303Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T22:50:59.304Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-12T22:50:59.305Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-12T22:50:59.307Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-12T22:50:59.307Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-12T22:50:59.308Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-12T22:50:59.324Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-12T22:50:59.325Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-12T22:50:59.325Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-19T23:57:47.212Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-19T23:57:47.227Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-19T23:57:47.232Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-19T23:57:47.233Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-19T23:57:47.237Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-19T23:57:47.240Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-19T23:57:47.242Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-19T23:57:47.243Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 3.
+[NX Daemon Server] - 2024-10-19T23:57:47.244Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-19T23:57:47.244Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-19T23:57:47.244Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-22T01:34:54.065Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-22T01:34:54.075Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-22T01:34:54.078Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T01:34:54.079Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-22T01:34:54.081Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T01:34:54.083Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-22T01:34:54.084Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-22T01:34:54.084Z - Handled FORCE_SHUTDOWN. Handling time: 1. Response time: 1.
+[NX Daemon Server] - 2024-10-22T01:34:54.085Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-22T01:34:54.085Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-22T01:34:54.085Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-22T16:54:36.775Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-22T16:54:36.795Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-22T16:54:36.801Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T16:54:36.808Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-22T16:54:36.808Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T16:54:36.818Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-22T16:54:36.821Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-22T16:54:36.822Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 5.
+[NX Daemon Server] - 2024-10-22T16:54:36.822Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-22T16:54:36.823Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-22T16:54:36.823Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-22T20:16:59.951Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-22T20:16:59.959Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-22T20:16:59.963Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T20:16:59.964Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-22T20:16:59.966Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T20:16:59.969Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-22T20:16:59.970Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-22T20:16:59.971Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 3.
+[NX Daemon Server] - 2024-10-22T20:16:59.971Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-22T20:16:59.972Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-22T20:16:59.972Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-22T20:23:54.339Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-22T20:23:54.347Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-22T20:23:54.355Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T20:23:54.359Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-22T20:23:54.359Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T20:23:54.364Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-22T20:23:54.366Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-22T20:23:54.367Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 3.
+[NX Daemon Server] - 2024-10-22T20:23:54.368Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-22T20:23:54.368Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-22T20:23:54.368Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-22T20:23:55.017Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-22T20:23:55.021Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-22T20:23:55.023Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T20:23:55.024Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-22T20:23:55.026Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-22T20:23:55.029Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-22T20:23:55.031Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-22T20:23:55.032Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 3.
+[NX Daemon Server] - 2024-10-22T20:23:55.032Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-22T20:23:55.032Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-22T20:23:55.034Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-26T14:46:22.820Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-26T14:46:22.836Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-26T14:46:22.841Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-26T14:46:22.842Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-26T14:46:22.847Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-26T14:46:22.851Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-26T14:46:22.855Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-26T14:46:22.856Z - Handled FORCE_SHUTDOWN. Handling time: 1. Response time: 5.
+[NX Daemon Server] - 2024-10-26T14:46:22.857Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-26T14:46:22.857Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-26T14:46:22.858Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-26T14:46:46.489Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-26T14:46:46.496Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-26T14:46:46.500Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-26T14:46:46.501Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-26T14:46:46.503Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-26T14:46:46.505Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-26T14:46:46.506Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-26T14:46:46.506Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-26T14:46:46.508Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-26T14:46:46.508Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-26T14:46:46.508Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-26T14:46:47.976Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-26T14:46:48.007Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-26T14:46:49.311Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX Daemon Server] - 2024-10-26T14:46:49.311Z - [REQUEST]: 
+[NX Daemon Server] - 2024-10-26T14:46:49.311Z - [REQUEST]: 
+[NX Daemon Server] - 2024-10-26T14:46:49.366Z - [SYNC]: collect registered sync generators
+[NX Daemon Server] - 2024-10-27T00:51:10.408Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-27T00:51:10.415Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-27T00:51:10.419Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-27T00:51:10.421Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-27T00:51:10.422Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-27T00:51:10.424Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-27T00:51:10.424Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-27T00:51:10.424Z - Handled FORCE_SHUTDOWN. Handling time: 1. Response time: 0.
+[NX Daemon Server] - 2024-10-27T00:51:10.425Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-27T00:51:10.425Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-27T00:51:10.425Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-27T00:51:11.167Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-27T00:51:11.179Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-27T00:51:11.182Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-27T00:51:11.182Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-27T00:51:11.184Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-27T00:51:11.186Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-27T00:51:11.186Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-27T00:51:11.186Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-27T00:51:11.187Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-27T00:51:11.187Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-27T00:51:11.187Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-27T23:25:47.165Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-27T23:25:47.172Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-27T23:25:47.174Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-27T23:25:47.175Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-27T23:25:47.177Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-27T23:25:47.179Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-27T23:25:47.179Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-27T23:25:47.180Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-27T23:25:47.180Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-27T23:25:47.180Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-27T23:25:47.180Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-29T01:24:56.909Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-29T01:24:56.914Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-29T01:24:56.921Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-29T01:24:56.924Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-29T01:24:56.924Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-29T01:24:56.926Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-29T01:24:56.928Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-29T01:24:56.928Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-29T01:24:56.929Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-29T01:24:56.929Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-29T01:24:56.929Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-29T18:33:36.265Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-29T18:33:36.287Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-29T18:33:36.291Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-29T18:33:36.293Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-10-29T18:33:36.296Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-29T18:33:36.300Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-29T18:33:36.302Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-29T18:33:36.303Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 3.
+[NX Daemon Server] - 2024-10-29T18:33:36.303Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-29T18:33:36.304Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-29T18:33:36.305Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-29T20:38:38.046Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-29T20:38:38.052Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-29T20:38:38.055Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-29T20:38:38.058Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-29T20:38:38.058Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-29T20:38:38.060Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-29T20:38:38.061Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-29T20:38:38.061Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-29T20:38:38.062Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-29T20:38:38.062Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-29T20:38:38.062Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-29T20:38:38.803Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-29T20:38:38.816Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-29T20:38:38.819Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-29T20:38:38.821Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-29T20:38:38.821Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-29T20:38:38.823Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-29T20:38:38.824Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-29T20:38:38.825Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-10-29T20:38:38.825Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-29T20:38:38.825Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-29T20:38:38.825Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-30T18:13:19.975Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-30T18:13:19.982Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-30T18:13:19.989Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-30T18:13:19.991Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-30T18:13:19.991Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-10-30T18:13:19.993Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-10-30T18:13:19.994Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-10-30T18:13:19.994Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-10-30T18:13:19.995Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-10-30T18:13:19.995Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-10-30T18:13:19.995Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-10-30T18:13:20.809Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-10-30T18:13:20.822Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-10-30T18:13:21.641Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX Daemon Server] - 2024-10-30T18:13:21.641Z - [REQUEST]: 
+[NX Daemon Server] - 2024-10-30T18:13:21.641Z - [REQUEST]: 
+[NX Daemon Server] - 2024-10-30T18:13:21.685Z - [SYNC]: collect registered sync generators
+[NX Daemon Server] - 2024-11-01T09:47:14.663Z - [WATCHER]: Processing file changes in outputs
+[NX Daemon Server] - 2024-11-01T09:47:14.683Z - [WATCHER]: renderer/app/main/components/dialogs/settings-dialog/integration-tab/integration-tab.component.html was modified
+[NX Daemon Server] - 2024-11-01T09:47:14.897Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX Daemon Server] - 2024-11-01T09:47:14.897Z - [REQUEST]: renderer/app/main/components/dialogs/settings-dialog/integration-tab/integration-tab.component.html
+[NX Daemon Server] - 2024-11-01T09:47:14.897Z - [REQUEST]: 
+[NX Daemon Server] - 2024-11-01T09:47:14.925Z - [SYNC]: collect registered sync generators
+[NX Daemon Server] - 2024-11-01T09:47:14.925Z - [SYNC]: project graph hash is the same, not collecting task sync generators
+[NX Daemon Server] - 2024-11-01T09:47:14.925Z - [SYNC]: nx.json hash is the same, not collecting global sync generators
+[NX Daemon Server] - 2024-11-01T09:48:10.768Z - [WATCHER]: Processing file changes in outputs
+[NX Daemon Server] - 2024-11-01T09:48:10.770Z - [WATCHER]: renderer/app/main/components/dialogs/settings-dialog/integration-tab/integration-tab.component.html was modified
+[NX Daemon Server] - 2024-11-01T09:48:11.176Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX Daemon Server] - 2024-11-01T09:48:11.176Z - [REQUEST]: renderer/app/main/components/dialogs/settings-dialog/integration-tab/integration-tab.component.html
+[NX Daemon Server] - 2024-11-01T09:48:11.176Z - [REQUEST]: 
+[NX Daemon Server] - 2024-11-01T09:48:11.194Z - [SYNC]: collect registered sync generators
+[NX Daemon Server] - 2024-11-01T09:48:11.195Z - [SYNC]: project graph hash is the same, not collecting task sync generators
+[NX Daemon Server] - 2024-11-01T09:48:11.195Z - [SYNC]: nx.json hash is the same, not collecting global sync generators
+[NX Daemon Server] - 2024-11-01T09:52:23.346Z - [WATCHER]: 0 file(s) created or restored, 4 file(s) modified, 0 file(s) deleted
+[NX Daemon Server] - 2024-11-01T09:52:23.346Z - [WATCHER]: Processing file changes in outputs
+[NX Daemon Server] - 2024-11-01T09:52:24.170Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX Daemon Server] - 2024-11-01T09:52:24.170Z - [REQUEST]: renderer/app/main/components/confirm-password/confirm-password.component.scss,renderer/app/main/components/confirm-password/confirm-password.component.ts,renderer/app/main/components/confirm-password/confirm-password.component.spec.ts,renderer/app/main/components/confirm-password/confirm-password.component.html
+[NX Daemon Server] - 2024-11-01T09:52:24.170Z - [REQUEST]: 
+[NX Daemon Server] - 2024-11-01T09:52:24.186Z - [SYNC]: collect registered sync generators
+[NX Daemon Server] - 2024-11-01T09:52:24.186Z - [SYNC]: project graph hash is the same, not collecting task sync generators
+[NX Daemon Server] - 2024-11-01T09:52:24.187Z - [SYNC]: nx.json hash is the same, not collecting global sync generators
+[NX Daemon Server] - 2024-11-01T09:52:29.615Z - [WATCHER]: Processing file changes in outputs
+[NX Daemon Server] - 2024-11-01T09:52:29.617Z - [WATCHER]: renderer/app/main/components/confirm-password/confirm-password.component.spec.ts was deleted
+[NX Daemon Server] - 2024-11-01T09:52:31.221Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX Daemon Server] - 2024-11-01T09:52:31.221Z - [REQUEST]: 
+[NX Daemon Server] - 2024-11-01T09:52:31.221Z - [REQUEST]: renderer/app/main/components/confirm-password/confirm-password.component.spec.ts
+[NX Daemon Server] - 2024-11-01T09:52:31.236Z - [SYNC]: collect registered sync generators
+[NX Daemon Server] - 2024-11-01T09:52:31.236Z - [SYNC]: project graph hash is the same, not collecting task sync generators
+[NX Daemon Server] - 2024-11-01T09:52:31.236Z - [SYNC]: nx.json hash is the same, not collecting global sync generators
+[NX Daemon Server] - 2024-11-01T09:52:41.905Z - [WATCHER]: Processing file changes in outputs
+[NX Daemon Server] - 2024-11-01T09:52:41.907Z - [WATCHER]: renderer/app/main/components/dialogs/settings-dialog/integration-tab/integration-tab.component.html was modified
+[NX Daemon Server] - 2024-11-01T09:52:45.121Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX Daemon Server] - 2024-11-01T09:52:45.121Z - [REQUEST]: renderer/app/main/components/dialogs/settings-dialog/integration-tab/integration-tab.component.html
+[NX Daemon Server] - 2024-11-01T09:52:45.121Z - [REQUEST]: 
+[NX Daemon Server] - 2024-11-01T09:52:45.137Z - [SYNC]: collect registered sync generators
+[NX Daemon Server] - 2024-11-01T09:52:45.138Z - [SYNC]: project graph hash is the same, not collecting task sync generators
+[NX Daemon Server] - 2024-11-01T09:52:45.138Z - [SYNC]: nx.json hash is the same, not collecting global sync generators
+[NX Daemon Server] - 2024-11-01T09:53:37.363Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-11-01T09:53:37.365Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-11-01T09:53:37.366Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-11-01T09:53:37.366Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-11-01T09:53:37.367Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-11-01T09:53:37.369Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-11-01T09:53:37.372Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-11-01T09:53:37.373Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-11-01T09:53:37.374Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 2.
+[NX Daemon Server] - 2024-11-01T09:53:37.374Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-11-01T09:53:37.374Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-11-01T09:53:37.375Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-11-01T09:53:37.375Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)
+[NX Daemon Server] - 2024-11-01T09:53:37.386Z - Server stopped because: "Request to shutdown"
+[NX Daemon Server] - 2024-11-01T14:24:32.120Z - Started listening on: \\.\pipe\nx\C:\Users\icema\AppData\Local\Temp\0f396a8f1acec50e36fd\d.sock
+[NX Daemon Server] - 2024-11-01T14:24:32.127Z - [WATCHER]: Subscribed to changes within: c:\Users\icema\fortibit (native)
+[NX Daemon Server] - 2024-11-01T14:24:32.132Z - Established a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-11-01T14:24:32.134Z - Established a connection. Number of open connections: 2
+[NX Daemon Server] - 2024-11-01T14:24:32.137Z - Closed a connection. Number of open connections: 1
+[NX Daemon Server] - 2024-11-01T14:24:32.140Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX Daemon Server] - 2024-11-01T14:24:32.141Z - Done responding to the client Shutdown initiated
+[NX Daemon Server] - 2024-11-01T14:24:32.141Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX Daemon Server] - 2024-11-01T14:24:32.142Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (sources)
+[NX Daemon Server] - 2024-11-01T14:24:32.143Z - Closed a connection. Number of open connections: 0
+[NX Daemon Server] - 2024-11-01T14:24:32.143Z - [WATCHER]: Stopping the watcher for c:\Users\icema\fortibit (outputs)

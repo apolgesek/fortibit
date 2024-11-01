@@ -1,14 +1,10 @@
 @import 'themes/light/variables';
-
 .inputgroup {
-	background: none;
-	box-shadow: none;
 	padding: 0;
+}
 
-	input {
-		padding: 0.25rem;
-		background-color: $grey-100;
-	}
+input {
+	padding: 0.5rem;
 }
 
 .label {
@@ -26,4 +22,8 @@
 	&:hover {
 		background-color: lighten($bright-red, 5);
 	}
+}
+
+.primary-btn {
+	margin-top: 1rem;
 }

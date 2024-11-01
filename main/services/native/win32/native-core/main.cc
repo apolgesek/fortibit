@@ -172,7 +172,7 @@ namespace NativeCore
     HRESULT result = E_FAIL;
     result = DwmInvalidateIconicBitmaps(win);
 
-    args.GetReturnValue().Set(result);
+    args.GetReturnValue().Set(result == S_OK);
   }
 
   void SetThumbnailBitmap(const FunctionCallbackInfo<Value> &args)
@@ -196,7 +196,7 @@ namespace NativeCore
       DeleteObject(hbmp);
     }
 
-    args.GetReturnValue().Set(result);
+    args.GetReturnValue().Set(result == S_OK);
   }
 
   void SetLivePreviewBitmap(const FunctionCallbackInfo<Value> &args)
@@ -255,7 +255,7 @@ namespace NativeCore
       }
     }
 
-    args.GetReturnValue().Set(result);
+    args.GetReturnValue().Set(result == S_OK);
   }
 
   void VerifySignature(const FunctionCallbackInfo<Value> &args)

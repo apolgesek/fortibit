@@ -97,7 +97,7 @@
 		line-height: 1rem;
 		font-weight: bold;
 		cursor: pointer;
-		transition: color 100ms;
+		transition: color var(--base-animation-duration);
 
 		&:hover {
 			color: var(--primary-text);

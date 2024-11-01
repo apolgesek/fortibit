@@ -2,12 +2,12 @@
 	<div class="info-box">
 		<i-feather name="info"></i-feather>
 		<div>
-			Master password will be stored in Windows Credential Manager.<br /><br />
+			Master password will be stored in Windows Credential Manager.<br />
 			If you change this vault's location, biometric authentication option will
 			have to be enabled for this vault again.
 		</div>
 	</div>
-	<form [formGroup]="integrationForm">
+	<form [formGroup]="integrationForm" (ngSubmit)="onSubmit()" style="margin-top: 1rem;">
 		<div class="inputgroup checkbox">
 			<label class="label" for="windowsHello">Windows Hello:</label>
 			<label class="switch">
@@ -20,15 +20,32 @@
 			</label>
 		</div>
 		@if (isUnlocked) {
-			<div style="margin-top: 2rem">
+			<div style="margin-top: 1rem">
 				<div style="display: flex">
 					<span class="label">Credential name:</span> fbit:{{ filePath }}
 				</div>
+				<div style="margin-top: 1rem;">
+					<span>Enter master password to add credential:</span>
+					<div class="inputgroup" style="margin-left: 0; padding: 0; width: 400px; margin-top: 1rem;">
+						<input type="password" formControlName="password" placeholder="Master password" />
+					</div>
+					@if (isControlInvalid(integrationForm.controls.password)) {
+						@if (integrationForm.controls.password.hasError('required')) {
+							<div class="validation-error">
+								Password is required
+							</div>
+						}
+						@if (integrationForm.controls.password.hasError('invalidPassword')) {
+							<div class="validation-error">
+								Password is incorrect
+							</div>
+						}
+					}
+				</div>
 				<button
-					type="button"
+					type="submit"
 					class="primary-btn"
 					[ngClass]="{ danger: isBiometricsEnabledForCurrentDatabase }"
-					(click)="toggleBiometrics()"
 					[disabled]="credentialButtonDisabled"
 				>
 					@if (isBiometricsEnabledForCurrentDatabase) {

@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from '@angular/animations';
 import {
 	CdkVirtualScrollViewport,
 	ScrollingModule,
@@ -181,7 +180,7 @@ export class EntriesTableComponent implements OnInit {
 				(entry.lastModificationDate
 					? new Date(entry.lastModificationDate).getTime()
 					: 0) +
-				entry.icon ?? ''
+				entry.icon
 		);
 	}
 

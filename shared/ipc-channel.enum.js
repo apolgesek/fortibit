@@ -75,8 +75,10 @@ var IpcChannel;
     IpcChannel["ConfigChanged"] = "app:configChanged";
     IpcChannel["OpenPrompt"] = "app:openPrompt";
     IpcChannel["UpdateSecureProtocolAvailability"] = "app:updateSecureProtocolAvailability";
+    IpcChannel["UpdateTfaAvailability"] = "app:updateTfaAvailability";
     IpcChannel["ScanQrCode"] = "app:scanQrCode";
     IpcChannel["LogError"] = "app:logError";
-    IpcChannel["GetDefaultConfig"] = "app:GetDefaultConfig";
+    IpcChannel["GetDefaultConfig"] = "app:getDefaultConfig";
+    IpcChannel["ClearRecentlyOpened"] = "app:clearRecentlyOpened";
 })(IpcChannel || (exports.IpcChannel = IpcChannel = {}));
 //# sourceMappingURL=ipc-channel.enum.js.map

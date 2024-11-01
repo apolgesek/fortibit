@@ -101,13 +101,17 @@
 	--pretty-shortcut-bg: #{$grey-100};
 	--pretty-shortcut-box-shadow: #{darken($grey-100, 12)};
 
-	// WARNING BOX
-	--warning-box-bg: #{#ffcbcb};
-	--warning-box-text: #{$red-orange};
+	// DANGER BOX
+	--danger-box-bg: #{#ffcbcb};
+	--danger-box-text: #{$red-orange};
 
 	// WARNING BOX
-	--alert-box-bg: #{#ffe9cb};
-	--alert-box-text: #{$tulip-tree};
+	--warning-box-bg: #{#ffe9cb};
+	--warning-box-text: #{$tulip-tree};
+
+	// INFO BOX
+	--info-box-bg: #{#c9c6ff};
+	--info-box-text: #{darken(#c9c6ff, 35)};
 
 	// MISC
 	--link-text: #{$blue-300};

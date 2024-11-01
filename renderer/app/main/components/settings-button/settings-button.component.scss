@@ -68,9 +68,8 @@
 	.dropdown-btn {
 		border-radius: 0.25rem;
 		padding: 0;
-		transition: padding 100ms;
 		background-color: transparent;
-		transition: color 200ms;
+		transition: color var(--base-animation-duration);
 		margin-left: auto;
 
 		&.expanded {

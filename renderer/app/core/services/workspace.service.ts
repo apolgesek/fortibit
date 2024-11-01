@@ -375,14 +375,14 @@ export class WorkspaceService {
 	findEntries() {
 		this.entryManager.isGlobalSearch = false;
 		this.entryManager.selectedEntries = [];
-
+		this.entryManager.updateEntriesSource();
 		UiUtil.focusSearchbox();
 	}
 
 	findGlobalEntries() {
 		this.entryManager.isGlobalSearch = true;
 		this.entryManager.selectedEntries = [];
-
+		this.entryManager.updateEntriesSource();
 		UiUtil.focusSearchbox();
 	}
 

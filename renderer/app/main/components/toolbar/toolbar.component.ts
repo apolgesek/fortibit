@@ -17,6 +17,7 @@ import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.
 import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { FeatherModule } from 'angular-feather';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
+import { UiUtil } from '@app/utils';
 
 @Component({
 	selector: 'app-toolbar',
@@ -112,12 +113,12 @@ export class ToolbarComponent {
 	toggleSearchMode() {
 		this.isGlobalSearchMode = !this.isGlobalSearchMode;
 		this.entryManager.updateEntriesSource();
-		(this.searchInput.nativeElement as HTMLInputElement).focus();
+		UiUtil.focusSearchbox();
 	}
 
 	resetSearch() {
 		this.searchPhrase = '';
-		(this.searchInput.nativeElement as HTMLInputElement).focus();
+		UiUtil.focusSearchbox();
 	}
 
 	handleSearchboxKeydown(event: KeyboardEvent) {

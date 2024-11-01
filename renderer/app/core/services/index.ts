@@ -12,5 +12,6 @@ export * from './modal.service';
 export * from './notification.service';
 export * from './report.service';
 export * from './search.service';
+export * from './svg.service';
 export * from './update.service';
 export * from './workspace.service';

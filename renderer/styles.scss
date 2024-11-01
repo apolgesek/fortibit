@@ -34,6 +34,14 @@
 		url('~assets/fonts/roboto-black.woff') format('woff');
 }
 
+h1 {
+	font-family: 'roboto-medium';
+}
+
+h2, h3 {
+	font-family: 'roboto-regular';
+}
+
 html,
 body {
 	@include font-regular;

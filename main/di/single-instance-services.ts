@@ -46,7 +46,7 @@ export class SingleInstanceServices extends ServiceCollection {
 		this.set(INativeApiService, this.getNativeApiService());
 		this.set(ISendInputService, this.getSendInputService());
 		this.set(IConfigService, new ConfigService(this.get(INativeApiService)));
-		this.set(IEncryptionEventWrapper, new EncryptionEventWrapper());
+		this.set(IEncryptionEventWrapper, new EncryptionEventWrapper(this.get(IConfigService)));
 		this.set(
 			IEncryptionEventService,
 			new EncryptionEventService(this.get(IEncryptionEventWrapper)),

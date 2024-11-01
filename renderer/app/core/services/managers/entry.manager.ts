@@ -124,6 +124,20 @@ export class EntryManager {
 				this.markDirty();
 			});
 		});
+
+		this.messageBroker.ipcRenderer.on(IpcChannel.UpdateTfaAvailability, (_, urls: string) => {
+			console.log(urls);
+			this.zone.run(async () => {
+				for (const url of urls) {
+					await this.entryRepository.markTfaAvailable(url);
+				}
+
+				this.entries = await this.getEntries();
+				this.updateEntriesSource();
+				this.updateSelectedEntry();
+				this.markDirty();
+			});
+		});
 	}
 
 	get isGlobalSearch(): boolean {

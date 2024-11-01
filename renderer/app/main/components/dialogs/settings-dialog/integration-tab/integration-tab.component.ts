@@ -1,16 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
 	ConfigService,
 	NotificationService,
 	WorkspaceService,
 } from '@app/core/services';
+import { masterPasswordValidator } from '@app/shared/validators/master-password.validator';
+import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { Product } from '@config/product';
 import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
+import { filter, first } from 'rxjs';
 
 @Component({
 	selector: 'app-integration-tab',
@@ -20,6 +23,8 @@ import { MessageBroker } from 'injection-tokens';
 	styleUrls: ['./integration-tab.component.scss'],
 })
 export class IntegrationTabComponent implements OnInit {
+	public readonly isControlInvalid = isControlInvalid;
+
 	public isBiometricsEnabledForCurrentDatabase = false;
 	public credentialButtonDisabled = false;
 	public isUnlocked = false;
@@ -33,6 +38,11 @@ export class IntegrationTabComponent implements OnInit {
 
 	private readonly _integrationForm = this.formBuilder.group({
 		biometricsAuthenticationEnabled: [false],
+		password: this.formBuilder.control('', {
+			validators: Validators.required,
+			asyncValidators: masterPasswordValidator(this.messageBroker),
+			updateOn: 'submit',
+		}),
 	});
 
 	get integrationForm() {
@@ -47,6 +57,7 @@ export class IntegrationTabComponent implements OnInit {
 		this._integrationForm.setValue({
 			biometricsAuthenticationEnabled:
 				this.configService.config.biometricsAuthenticationEnabled,
+			password: '',
 		});
 
 		this.isUnlocked = !this.workspaceService.isLocked;
@@ -70,8 +81,37 @@ export class IntegrationTabComponent implements OnInit {
 			});
 	}
 
-	async toggleBiometrics() {
+	async onSubmit() {
+		markAllAsDirty(this._integrationForm);
+
+		if (this._integrationForm.controls.password.invalid) {
+			return;
+		}
+
+		// remove previous invalid state to allow status change emission
+		this._integrationForm.controls.password.setErrors({
+			invalidPassword: null,
+		});
+		this.integrationForm.controls.password.updateValueAndValidity();
+
 		this.credentialButtonDisabled = true;
+		this._integrationForm.controls.password.statusChanges
+			.pipe(
+				filter((status) => status !== 'PENDING'),
+				first(),
+				takeUntilDestroyed(this.destroyRef),
+			)
+			.subscribe(async (status) => {
+				if (status === 'VALID') {
+					await this.toggleBiometrics();
+					this._integrationForm.controls.password.reset();
+				}
+
+				this.credentialButtonDisabled = false;
+			});
+	}
+
+	private async toggleBiometrics() {
 		this.isBiometricsEnabledForCurrentDatabase =
 			!this.isBiometricsEnabledForCurrentDatabase;
 
@@ -107,7 +147,5 @@ export class IntegrationTabComponent implements OnInit {
 				alive: 5000,
 			});
 		}
-
-		this.credentialButtonDisabled = false;
 	}
 }

@@ -1,12 +1,12 @@
 import { createHash } from 'crypto';
 import { Entry, VaultSchema } from '../../../shared';
-import { IExposedPasswordsService } from '../exposed-passwords/exposed-passwords-service.model';
-import { ExposedPasswordsService } from '../exposed-passwords/exposed-passwords.service';
-import { WeakPasswordsService } from '../weak-passwords/weak-passwords.service';
 import { IEncryptionService } from './encryption-service.model';
 import { EncryptionService } from './encryption.service';
+import { IExposedPasswordsService } from './exposed-passwords/exposed-passwords-service.model';
+import { ExposedPasswordsService } from './exposed-passwords/exposed-passwords.service';
 import { InMemoryEncryptionService } from './in-memory-encryption.service';
 import { MessageEventType } from './message-event-type.enum';
+import { WeakPasswordsService } from './weak-passwords/weak-passwords.service';
 
 type EventPayload = {
 	type: MessageEventType;
@@ -38,7 +38,7 @@ class Main {
 	constructor() {
 		this._encryptionService = new EncryptionService();
 		this._inMemoryEncryptionService = new InMemoryEncryptionService();
-		this._exposedPasswordsService = new ExposedPasswordsService()
+		this._exposedPasswordsService = new ExposedPasswordsService();
 		this._weakPasswordsService = new WeakPasswordsService();
 
 		this._messageListener = this.execute.bind(this);
@@ -248,7 +248,7 @@ class Main {
 
 			const leaks = await this._exposedPasswordsService.findLeaks(
 				entries,
-				process.env.BASEDIR,
+				process.env.LEAKED_PASSWORDS_API_URL,
 			);
 			process.send({ data: JSON.stringify(leaks) });
 		} catch (err) {
