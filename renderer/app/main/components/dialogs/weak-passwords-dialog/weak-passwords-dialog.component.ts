@@ -10,7 +10,7 @@ import {
 } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
+import { IpcChannel, PasswordEntry, Report, WeakPasswordEntry } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { bufferTime, from } from 'rxjs';
@@ -25,13 +25,13 @@ import { bufferTime, from } from 'rxjs';
 export class WeakPasswordsDialogComponent implements IModal, OnInit {
 	ref: ComponentRef<WeakPasswordsDialogComponent>;
 	additionalData?: IAdditionalData;
-	result = [];
-	weakPasswordsFound = [];
+	result: WeakPasswordEntry[] = [];
+	weakPasswordsFound: WeakPasswordEntry[] = [];
 	scanInProgress: boolean;
 	lastReportLoaded = false;
 	showDetails = false;
 	showError = false;
-	lastReport: any;
+	lastReport: Report;
 
 	private readonly messageBroker = inject(MessageBroker);
 	private readonly modalRef = inject(ModalRef);
@@ -64,10 +64,10 @@ export class WeakPasswordsDialogComponent implements IModal, OnInit {
 						return;
 					}
 
-					const reportId = await this.reportService.addReport({
+					await this.reportService.addReport({
 						creationDate: new Date(),
 						type: ReportType.WeakPasswords,
-						payload: result.data,
+						payload: result.data as string,
 					});
 
 					await this.getLastReport();

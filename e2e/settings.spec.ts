@@ -208,6 +208,68 @@ test.describe('Settings', async () => {
 			appWindow.getByRole('dialog').getByLabel(/enable autosave/i),
 		).not.toBeChecked();
 	});
+
+	test('Check add credential should enable Windows Hello auth', async () => {
+		await appWindow.getByRole('banner').waitFor({ state: 'visible' });
+		await appWindow.keyboard.press('Control+.');
+		const integrationTab = appWindow
+			.getByRole('dialog')
+			.getByRole('button', { name: /integration/i });
+		await integrationTab.click();
+		await appWindow.getByText(/windows hello/i).click();
+		await appWindow.getByPlaceholder(/master password/i).fill('test123');
+		await appWindow.getByRole('button', { name: /add credential/i }).click();
+
+		const notification = appWindow.getByRole('alert');
+		const removeCredentialButton = appWindow.getByRole('button', { name: /remove credential/i });
+
+		await expect(notification).toHaveText(/authentication credentials saved/i);
+		await expect(removeCredentialButton).toBeVisible();
+
+		await appWindow.keyboard.press('Control+L');
+		const windowsHelloButton = appWindow.getByRole('button', { name: /windows hello/i });
+
+		await expect(windowsHelloButton).toBeVisible();
+	});
+
+	test('Check remove credential should disable Windows Hello auth', async () => {
+		await appWindow.getByRole('banner').waitFor({ state: 'visible' });
+		await appWindow.keyboard.press('Control+.');
+		const integrationTab = appWindow
+			.getByRole('dialog')
+			.getByRole('button', { name: /integration/i });
+		await integrationTab.click();
+		await appWindow.getByText(/windows hello/i).click();
+		await appWindow.getByPlaceholder(/master password/i).fill('test123');
+		await appWindow.getByRole('button', { name: /add credential/i }).click();
+
+		const removeCredentialButton = appWindow.getByRole('button', { name: /remove credential/i });
+
+		await appWindow.getByPlaceholder(/master password/i).fill('test123');
+		await removeCredentialButton.click();
+
+		await appWindow.keyboard.press('Control+L');
+		const passwordInput = appWindow.getByPlaceholder(/^password$/i);
+		await passwordInput.waitFor({ state: 'visible' });
+
+		await expect(appWindow.getByRole('button', { name: /windows hello/i })).toBeHidden();
+	});
+
+	test('Check add credential should not succeed if password is incorrect', async () => {
+		await appWindow.getByRole('banner').waitFor({ state: 'visible' });
+		await appWindow.keyboard.press('Control+.');
+		const integrationTab = appWindow
+			.getByRole('dialog')
+			.getByRole('button', { name: /integration/i });
+		await integrationTab.click();
+		await appWindow.getByText(/windows hello/i).click();
+		await appWindow.getByPlaceholder(/master password/i).fill('incorrect_password');
+		await appWindow.getByRole('button', { name: /add credential/i }).click();
+
+		const validationError = appWindow.getByText(/password is incorrect/i);
+
+		await expect(validationError).toBeVisible();
+	});
 });
 
 [

@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		"sourceMap": true,
 		"declaration": false,
+		"outDir": "./out-tsc",
 		"baseUrl": "./",
 		"moduleResolution": "node",
 		"emitDecoratorMetadata": true,
@@ -14,9 +15,9 @@
 			"@shared-renderer/*": ["shared/*"],
 			"@root/*": ["./*"]
 		},
-		"lib": ["es2021", "dom"]
+		"lib": ["es2021", "dom"],
 	},
 	"files": ["main.ts"],
 	"include": ["**/auth.service.ts"],
-	"exclude": ["node_modules", "**/*.spec.ts"]
+	"exclude": ["renderer", "node_modules", "**/*.{spec,test}.ts"]
 }

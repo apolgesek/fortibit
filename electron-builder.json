@@ -2,7 +2,8 @@
 	"asar": false,
 	"productName": "fortibit",
 	"directories": {
-		"output": "release/"
+		"output": "release/",
+		"app": "out-tsc"
 	},
 	"files": [
 		"**/*",

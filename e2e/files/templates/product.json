@@ -10,7 +10,7 @@
 	"clipboardClearTimeMs": 5000,
 	"lockOnSystemLock": false,
 	"displayIcons": true,
-	"biometricsAuthenticationEnabled": true,
+	"biometricsAuthenticationEnabled": false,
 	"autosaveEnabled": true,
 	"autoTypeEnabled": true,
 	"saveOnLock": true,
@@ -28,8 +28,7 @@
 	"signatureSubject": "Open Source Developer, Arkadiusz Półgęsek",
 	"leakedPasswordsUrl": "https://api.pwnedpasswords.com/range",
 	"biometricsProtectedFiles": [
-		"G:\\Mój dysk\\hasła.fbit",
-		"c:\\Users\\icema\\fortibit\\e2e\\files\\test.fbit"
+		"G:\\Mój dysk\\hasła.fbit"
 	],
 	"protectWindowsFromCapture": false
 }

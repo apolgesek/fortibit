@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 (function () {
 	const fse = require('fs-extra');
 

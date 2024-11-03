@@ -1,6 +1,7 @@
 export * from './card-entry.model';
 export * from './entry-group';
 export * from './entry.model';
+export * from './exposed-password-entry.model';
 export * from './history-entry.model';
 export * from './import-handler.enum';
 export * from './ipc-channel.enum';
@@ -8,3 +9,4 @@ export * from './password-entry.model';
 export * from './report.model';
 export * from './update-state.model';
 export * from './vault-schema';
+export * from './weak-password-entry.model';

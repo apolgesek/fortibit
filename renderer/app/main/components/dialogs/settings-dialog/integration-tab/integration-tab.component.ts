@@ -13,7 +13,7 @@ import { Product } from '@config/product';
 import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
-import { filter, first } from 'rxjs';
+import { first } from 'rxjs';
 
 @Component({
 	selector: 'app-integration-tab',
@@ -25,6 +25,7 @@ import { filter, first } from 'rxjs';
 export class IntegrationTabComponent implements OnInit {
 	public readonly isControlInvalid = isControlInvalid;
 
+	public lastStatus: 'VALID' | 'INVALID' = 'VALID';
 	public isBiometricsEnabledForCurrentDatabase = false;
 	public credentialButtonDisabled = false;
 	public isUnlocked = false;
@@ -67,17 +68,14 @@ export class IntegrationTabComponent implements OnInit {
 				this.filePath,
 			);
 
-		this.integrationForm.valueChanges
+		this.integrationForm.controls.biometricsAuthenticationEnabled.valueChanges
 			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe((form) => {
-				if (this.integrationForm.valid) {
-					const configPartial = {
-						biometricsAuthenticationEnabled:
-							form.biometricsAuthenticationEnabled,
-					} as Partial<Product>;
+			.subscribe((value) => {
+				const configPartial = {
+					biometricsAuthenticationEnabled: value,
+				} as Partial<Product>;
 
-					this.configService.setConfig(configPartial);
-				}
+				this.configService.setConfig(configPartial);
 			});
 	}
 
@@ -85,19 +83,12 @@ export class IntegrationTabComponent implements OnInit {
 		markAllAsDirty(this._integrationForm);
 
 		if (this._integrationForm.controls.password.invalid) {
+			this.lastStatus = 'INVALID';
 			return;
 		}
 
-		// remove previous invalid state to allow status change emission
-		this._integrationForm.controls.password.setErrors({
-			invalidPassword: null,
-		});
-		this.integrationForm.controls.password.updateValueAndValidity();
-
-		this.credentialButtonDisabled = true;
 		this._integrationForm.controls.password.statusChanges
 			.pipe(
-				filter((status) => status !== 'PENDING'),
 				first(),
 				takeUntilDestroyed(this.destroyRef),
 			)
@@ -107,7 +98,9 @@ export class IntegrationTabComponent implements OnInit {
 					this._integrationForm.controls.password.reset();
 				}
 
-				this.credentialButtonDisabled = false;
+				if (status === 'VALID' || status === 'INVALID') {
+					this.lastStatus = status;
+				}
 			});
 	}
 

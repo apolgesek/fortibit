@@ -1,4 +1,3 @@
-import { HttpClientModule } from '@angular/common/http';
 import {
 	APP_INITIALIZER,
 	enableProdMode,
@@ -103,7 +102,7 @@ function initializeApp(
 			asyncTasks.push((window as any).api.loadChannels());
 		} else {
 			(window as any).api = {
-				loadChannels: () => {},
+				loadChannels: () => Object.create(null),
 			};
 		}
 
@@ -177,7 +176,6 @@ bootstrapApplication(AppComponent, {
 	providers: [
 		importProvidersFrom(
 			BrowserAnimationsModule,
-			HttpClientModule,
 			RouterModule.forRoot(routes, { useHash: true }),
 			FeatherModule.pick(icons),
 		),

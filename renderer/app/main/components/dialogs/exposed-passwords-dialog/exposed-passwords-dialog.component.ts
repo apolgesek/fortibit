@@ -13,7 +13,7 @@ import { MessageBroker } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
 import { ReportType } from '@app/core/enums';
 import { FeatherModule } from 'angular-feather';
-import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
+import { ExposedPasswordEntry, IpcChannel, PasswordEntry, Report } from '@shared-renderer/index';
 
 @Component({
 	selector: 'app-exposed-passwords-dialog',
@@ -25,10 +25,10 @@ import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
 export class ExposedPasswordsDialogComponent implements IModal, OnInit {
 	ref: ComponentRef<ExposedPasswordsDialogComponent>;
 	additionalData?: IAdditionalData;
-	result = [];
-	exposedPasswordsFound = [];
+	result: ExposedPasswordEntry[] = [];
+	exposedPasswordsFound: ExposedPasswordEntry[] = [];
 	scanInProgress: boolean;
-	lastReport: any;
+	lastReport: Report;
 	lastReportLoaded = false;
 	showDetails = false;
 	showError = false;
@@ -65,10 +65,10 @@ export class ExposedPasswordsDialogComponent implements IModal, OnInit {
 						return;
 					}
 
-					const reportId = await this.reportService.addReport({
+					await this.reportService.addReport({
 						creationDate: new Date(),
 						type: ReportType.ExposedPasswords,
-						payload: result.data,
+						payload: result.data as string,
 					});
 
 					await this.getLastReport();

@@ -3,8 +3,7 @@
 		<i-feather name="info"></i-feather>
 		<div>
 			Master password will be stored in Windows Credential Manager.<br />
-			If you change this vault's location, biometric authentication option will
-			have to be enabled for this vault again.
+			If you change this vault's file location, you'll have to re-add the credential.
 		</div>
 	</div>
 	<form [formGroup]="integrationForm" (ngSubmit)="onSubmit()" style="margin-top: 1rem;">
@@ -25,17 +24,16 @@
 					<span class="label">Credential name:</span> fbit:{{ filePath }}
 				</div>
 				<div style="margin-top: 1rem;">
-					<span>Enter master password to add credential:</span>
+					<span>Enter your master password to add the credential:</span>
 					<div class="inputgroup" style="margin-left: 0; padding: 0; width: 400px; margin-top: 1rem;">
 						<input type="password" formControlName="password" placeholder="Master password" />
 					</div>
-					@if (isControlInvalid(integrationForm.controls.password)) {
+					@if (isControlInvalid(integrationForm.controls.password) || lastStatus === 'INVALID') {
 						@if (integrationForm.controls.password.hasError('required')) {
 							<div class="validation-error">
 								Password is required
 							</div>
-						}
-						@if (integrationForm.controls.password.hasError('invalidPassword')) {
+						} @else if (integrationForm.controls.password.hasError('invalidPassword') || lastStatus === 'INVALID') {
 							<div class="validation-error">
 								Password is incorrect
 							</div>
@@ -46,7 +44,6 @@
 					type="submit"
 					class="primary-btn"
 					[ngClass]="{ danger: isBiometricsEnabledForCurrentDatabase }"
-					[disabled]="credentialButtonDisabled"
 				>
 					@if (isBiometricsEnabledForCurrentDatabase) {
 						Remove credential

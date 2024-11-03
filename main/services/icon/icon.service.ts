@@ -1,9 +1,9 @@
-import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
 import { app, ipcMain, IpcMainEvent } from 'electron';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { join } from 'path';
+import { IpcChannel, PasswordEntry } from '../../../shared';
 import { AsyncQueue } from '../../core/async-queue';
-import { IAsyncQueue } from '../../core/async-queue.model';
+import { IAsyncQueue } from '../../core/async-queue.interface';
 import { SimpleScheduler } from '../../core/schedulers/simple-scheduler';
 import { getDomain } from '../../util';
 import { IConfigService } from '../config';

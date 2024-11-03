@@ -1,5 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { Report, IpcChannel, PasswordEntry } from '@shared-renderer/index';
+import {
+	ExposedPasswordEntry,
+	IpcChannel,
+	PasswordEntry,
+	Report,
+	WeakPasswordEntry,
+} from '@shared-renderer/index';
 import { exportDB } from 'dexie-export-import';
 import { MessageBroker } from 'injection-tokens';
 import { DbManager } from '../database';
@@ -7,6 +13,11 @@ import { ReportType } from '../enums';
 import { EntryManager } from './managers/entry.manager';
 import { GroupManager } from './managers/group.manager';
 import { ReportManager } from './managers/report.manager';
+
+type ScanResult = {
+	data: string | false;
+	error: string;
+};
 
 @Injectable({
 	providedIn: 'root',
@@ -18,10 +29,10 @@ export class ReportService {
 	private readonly entryManager = inject(EntryManager);
 	private readonly groupManager = inject(GroupManager);
 
-	async scanForLeaks(): Promise<any> {
-		return new Promise(async (resolve, reject) => {
-			const blob = await exportDB(this.db.context);
+	async scanForLeaks(): Promise<ScanResult> {
+		const blob = await exportDB(this.db.context);
 
+		return new Promise((resolve, reject) => {
 			const fr = new FileReader();
 			fr.readAsText(blob);
 			fr.onloadend = async () => {
@@ -38,7 +49,10 @@ export class ReportService {
 		});
 	}
 
-	async getExposedPasswords(): Promise<any> {
+	async getExposedPasswords(): Promise<{
+		report: Report;
+		entries: ExposedPasswordEntry[];
+	}> {
 		const report = await this.reportManager.getLastReport(
 			ReportType.ExposedPasswords,
 		);
@@ -60,16 +74,17 @@ export class ReportService {
 			groupName: groups.find((x) => x.id === e.groupId).name,
 			title: e.title,
 			username: e.username,
-			occurrences: reportPayload.find((x) => x.id === e.id).occurrences,
+			occurrences: reportPayload.find((x) => x.id === e.id)
+				.occurrences as number,
 		}));
 
 		return { report, entries: reportedEntries };
 	}
 
-	async scanForWeakPasswords(): Promise<any> {
-		return new Promise(async (resolve, reject) => {
-			const blob = await exportDB(this.db.context);
+	async scanForWeakPasswords(): Promise<ScanResult> {
+		const blob = await exportDB(this.db.context);
 
+		return new Promise((resolve, reject) => {
 			const fr = new FileReader();
 			fr.readAsText(blob);
 			fr.onloadend = async () => {
@@ -86,7 +101,10 @@ export class ReportService {
 		});
 	}
 
-	async getWeakPasswords(): Promise<any> {
+	async getWeakPasswords(): Promise<{
+		report: Report;
+		entries: WeakPasswordEntry[];
+	}> {
 		const report = await this.reportManager.getLastReport(
 			ReportType.WeakPasswords,
 		);
@@ -100,13 +118,12 @@ export class ReportService {
 		const entries = (await this.entryManager.getAllByPredicate((x) =>
 			reportIds.includes(x.id),
 		)) as PasswordEntry[];
-		const groups = await this.groupManager.getAll();
 
 		const reportedEntries = entries.map((e) => ({
 			id: e.id,
 			title: e.title,
 			username: e.username,
-			score: reportPayload.find((x) => x.id === e.id).score,
+			score: reportPayload.find((x) => x.id === e.id).score as number,
 		}));
 
 		return { report, entries: reportedEntries };

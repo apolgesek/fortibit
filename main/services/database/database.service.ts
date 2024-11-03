@@ -6,7 +6,13 @@ import {
 	getHashCode,
 } from '@root/main/util';
 import { Product } from '@root/product';
-import { ImportHandler, IpcChannel, VaultSchema } from '@shared-renderer/index';
+import {
+	ExposedPasswordEntry,
+	ImportHandler,
+	IpcChannel,
+	VaultSchema,
+	WeakPasswordEntry,
+} from '@shared-renderer/index';
 import {
 	IpcMainEvent,
 	IpcMainInvokeEvent,
@@ -37,9 +43,16 @@ import { IImportService } from '../import';
 import { INativeApiService } from '../native';
 import { IWebApiService } from '../web-api';
 import { IWindowService } from '../window';
+import { IWindow } from '../window/window-model';
 import { IDatabaseService } from './database-service.model';
 import { SaveFilePayload } from './save-file-payload';
-import { IWindow } from '../window/window-model';
+
+type SaveDatabaseResult = {
+	status: boolean;
+	file?: string;
+	notify?: boolean;
+	error?: Error;
+};
 
 export class DatabaseService implements IDatabaseService {
 	private readonly _isTestMode = Boolean(
@@ -223,7 +236,7 @@ export class DatabaseService implements IDatabaseService {
 
 		ipcMain.handle(
 			IpcChannel.SaveExposedPasswordsReport,
-			async (event: IpcMainEvent, result: any[]) => {
+			async (event: IpcMainEvent, result: ExposedPasswordEntry[]) => {
 				const date = new Date();
 				const saveReturnValue = await dialog.showSaveDialog(
 					this._windowService.getWindowByWebContentsId(event.sender.id)
@@ -257,7 +270,7 @@ export class DatabaseService implements IDatabaseService {
 
 		ipcMain.handle(
 			IpcChannel.SaveWeakPasswordsReport,
-			async (event: IpcMainEvent, result: any[]) => {
+			async (event: IpcMainEvent, result: WeakPasswordEntry[]) => {
 				const date = new Date();
 				const saveReturnValue = await dialog.showSaveDialog(
 					this._windowService.getWindowByWebContentsId(event.sender.id)
@@ -433,7 +446,7 @@ export class DatabaseService implements IDatabaseService {
 	public async saveDatabase(
 		event: IpcMainEvent,
 		saveFilePayload: SaveFilePayload,
-	): Promise<any> {
+	): Promise<SaveDatabaseResult> {
 		let savePath: Electron.SaveDialogReturnValue = {
 			filePath: this._fileMap.get(event.sender.id)?.file,
 			canceled: false,
@@ -750,7 +763,7 @@ export class DatabaseService implements IDatabaseService {
 		this._windowService.windows.forEach((w) => {
 			w.browserWindow.webContents.send(
 				IpcChannel.GetRecentFiles,
-				this._configService.appConfig.workspaces.recentlyOpened
+				this._configService.appConfig.workspaces.recentlyOpened,
 			);
 		});
 	}
