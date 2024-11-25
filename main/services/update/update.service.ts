@@ -1,5 +1,5 @@
 import { IpcChannel, UpdateState } from '@shared-renderer/index';
-import { app, ipcMain, IpcMainEvent } from 'electron';
+import { app } from 'electron';
 import {
 	emptyDirSync,
 	existsSync,
@@ -10,19 +10,13 @@ import {
 import { request } from 'https';
 import { arch, platform } from 'os';
 import { join } from 'path';
+import { UpdateInformation } from '../../types/update-information';
 import { IConfigService } from '../config/config-service.model';
 import { IFileService } from '../file/file-service.model';
 import { INativeApiService } from '../native/native-api.model';
 import { IWindowService } from '../window/window-service.model';
 import { ICommandHandler } from './command-handler.model';
 import { IUpdateService } from './update-service.model';
-
-type UpdateInformation = {
-	version: string;
-	fileName: string;
-	url: string;
-	checksum: string;
-};
 
 export class UpdateService implements IUpdateService {
 	private readonly updateDirectory: string;
@@ -45,34 +39,14 @@ export class UpdateService implements IUpdateService {
 			this._configService.appConfig.name.toLowerCase(),
 			'update',
 		);
-
-		ipcMain.on(IpcChannel.GetUpdateState, async (event: IpcMainEvent) => {
-			if (!this.updateState) {
-				return;
-			}
-
-			this._windowService
-				.getWindowByWebContentsId(event.sender.id)
-				.browserWindow.webContents.send(
-					IpcChannel.UpdateState,
-					this.updateState,
-					this._updateInformation?.version,
-				);
-		});
-
-		ipcMain.on(IpcChannel.CheckUpdate, (event: IpcMainEvent) => {
-			this.checkForUpdates().catch((err) => {
-				this.setUpdateState(UpdateState.ConnectionFailed);
-			});
-		});
-
-		ipcMain.once(IpcChannel.UpdateAndRelaunch, () => {
-			this.updateAndRelaunch();
-		});
 	}
 
-	public get updateState() {
+	public get updateState(): UpdateState {
 		return this._updateState;
+	}
+
+	public get updateInformation(): UpdateInformation {
+		return this._updateInformation;
 	}
 
 	checkForUpdates(): Promise<boolean> {
@@ -146,6 +120,17 @@ export class UpdateService implements IUpdateService {
 		});
 
 		this.spawnUpdateProcess();
+	}
+
+	public setUpdateState(state: UpdateState) {
+		this._updateState = state;
+		this._windowService.windows.forEach((window) => {
+			window.browserWindow.webContents.send(
+				IpcChannel.UpdateState,
+				this.updateState,
+				this._updateInformation?.version,
+			);
+		});
 	}
 
 	private isFileVerified(filePath: string): boolean {
@@ -248,20 +233,5 @@ export class UpdateService implements IUpdateService {
 		this._executablePath = this.getExecutablePath(
 			this._updateInformation.fileName,
 		);
-	}
-
-	private setUpdateState(state: UpdateState) {
-		this._updateState = state;
-		this._windowService.windows.forEach((window) => {
-			window.browserWindow.webContents.send(
-				IpcChannel.UpdateState,
-				this.updateState,
-				this._updateInformation?.version,
-			);
-		});
-	}
-
-	private sleep(ms: number): Promise<void> {
-		return new Promise((resolve) => setTimeout(() => resolve(), ms));
 	}
 }

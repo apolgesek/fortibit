@@ -1,3 +1,4 @@
+<!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
 <div class="password-table">
 	<div id="table-header" data-prevent-entry-deselect>
 		<div class="group-data">
@@ -47,6 +48,7 @@
 							'is-dragging': isEntryDragged(item)
 						}"
 						class="row-entry"
+						data-list-entry
 					>
 						<ng-container
 							*ngComponentOutlet="

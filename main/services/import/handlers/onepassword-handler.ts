@@ -1,46 +1,44 @@
-import { ImportHandler } from '../../../../shared';
-import { IConfigService } from '../../config';
+import { ImportHandler, PasswordEntry } from '../../../../shared';
 import { IEncryptionEventWrapper } from '../../encryption';
-import { IWindowService } from '../../window';
 import { CsvDataImporter } from './csv-data-importer';
 import { TYPE_DEF } from './type-definition';
 
 type IOnePasswordEntry = {
-	title: string;
-	url: string;
-	username: string;
-	password: string;
-	notes: string;
+	Title: string;
+	Url: string;
+	Username: string;
+	Password: string;
+	Notes: string;
+	OTPAuth: string;
 };
 
 export class OnePasswordHandler extends CsvDataImporter<IOnePasswordEntry> {
 	protected readonly handlerType = ImportHandler.OnePassword;
 	protected readonly mock: IOnePasswordEntry = {
-		title: TYPE_DEF.String,
-		notes: TYPE_DEF.String,
-		password: TYPE_DEF.String,
-		url: TYPE_DEF.String,
-		username: TYPE_DEF.String,
+		Title: TYPE_DEF.String,
+		Notes: TYPE_DEF.String,
+		Password: TYPE_DEF.String,
+		Url: TYPE_DEF.String,
+		Username: TYPE_DEF.String,
+		OTPAuth: TYPE_DEF.String,
 	};
 
 	protected readonly mapFn = (result: IOnePasswordEntry[]) => {
 		return result.map((x) => {
-			for (const key in x) {
-				if (Object.prototype.hasOwnProperty.call(x, key)) {
-					x[key.toLowerCase()] = x[key];
-					delete x[key];
-				}
-			}
-
-			return x;
-		});
+			return {
+				title: x.Title,
+				url: x.Url,
+				username: x.Username,
+				password: x.Password,
+				notes: x.Notes,
+				otpAuth: x.OTPAuth,
+			};
+		}) as Partial<PasswordEntry>[];
 	};
 
 	constructor(
-		protected readonly _windowService: IWindowService,
 		protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
-		protected readonly _configService: IConfigService,
 	) {
-		super(_windowService, _encryptionEventWrapper, _configService);
+		super(_encryptionEventWrapper);
 	}
 }

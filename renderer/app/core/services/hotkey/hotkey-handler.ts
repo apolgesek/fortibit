@@ -7,15 +7,18 @@ import { WorkspaceService } from '../workspace.service';
 import { HotkeyLabel } from './hotkey-label';
 import { authenticated } from './authenticated-decorator';
 import { noOpenModal } from './no-open-modal-decorator';
+import { inject } from '@angular/core';
+import { UiUtil } from '@app/utils';
 
 export type Action = () => void;
 export type ActionOrActions = Action | Action[];
 
 type HotkeyLabelKey = keyof typeof HotkeyLabel;
-type HotkeyLabelMap = { [key in HotkeyLabelKey]: string };
+type HotkeyLabelMap = Record<HotkeyLabelKey, string>;
 
 export type Config = {
 	labelId?: HotkeyLabelKey;
+	preventDefault?: boolean | (() => boolean);
 };
 
 export type HotkeyRegister = Record<
@@ -32,6 +35,13 @@ function capitalizeFirstLetter(text: string): string {
 
 export abstract class HotkeyHandler implements IHotkeyHandler {
 	public hotkeys: HotkeyRegister = {};
+
+	protected readonly modalService = inject(ModalService);
+	protected readonly clipboardService = inject(ClipboardService);
+	protected readonly workspaceService = inject(WorkspaceService);
+	protected readonly entryManager = inject(EntryManager);
+	protected readonly groupManager = inject(GroupManager);
+
 	protected abstract keyMap: (event: KeyboardEvent) => string[];
 
 	get hotkeysMap(): HotkeyLabelMap {
@@ -46,14 +56,6 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 	get isAnyModalOpen(): boolean {
 		return this.modalService.isAnyModalOpen;
 	}
-
-	constructor(
-		protected readonly modalService: ModalService,
-		protected readonly clipboardService: ClipboardService,
-		protected readonly workspaceService: WorkspaceService,
-		protected readonly entryManager: EntryManager,
-		protected readonly groupManager: GroupManager,
-	) {}
 
 	isMultiselectionKeyDown(event: MouseEvent): boolean {
 		return event.ctrlKey;
@@ -76,7 +78,18 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 				hotkeyDef.actionOrActions.call(this);
 			}
 
-			event.preventDefault();
+			let shouldPreventDefault = true;
+
+			if (typeof hotkeyDef.config?.preventDefault === 'function') {
+				console.log(document.activeElement);
+				shouldPreventDefault = hotkeyDef.config?.preventDefault();
+			} else if (typeof hotkeyDef.config?.preventDefault === 'boolean') {
+				shouldPreventDefault = hotkeyDef.config?.preventDefault;
+			}
+			
+			if (shouldPreventDefault) {
+				event.preventDefault();
+			}
 		}
 	}
 
@@ -198,7 +211,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 	@noOpenModal
 	@authenticated
 	public selectAllEntries() {
-		if (this.entryManager.selectedEntries.length) {
+		if (this.entryManager.selectedEntries.length && UiUtil.isEntryFocused()) {
 			this.entryManager.selectedEntries = [];
 			this.entryManager.selectedEntries.push(...this.entryManager.entries);
 		}

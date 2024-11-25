@@ -113,6 +113,10 @@
 	--info-box-bg: #{#c9c6ff};
 	--info-box-text: #{darken(#c9c6ff, 35)};
 
+	// COUNTDOWN
+	--countdown-primary: #{$blue-100};
+	--countdown-secondary: #{$blue-300};
+
 	// MISC
 	--link-text: #{$blue-300};
 	--label-text: #{#47639e};

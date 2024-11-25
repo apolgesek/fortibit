@@ -21,7 +21,7 @@ export class ImportService implements IImportService {
 	) {}
 
 	setHandler(type: ImportHandler) {
-		if (this._handlersCache.hasOwnProperty(type)) {
+		if (Object.prototype.hasOwnProperty.call(this._handlersCache, type)) {
 			this._handler = this._handlersCache[type];
 			return;
 		}
@@ -54,16 +54,8 @@ export class ImportService implements IImportService {
 	}
 
 	create<T extends IImportHandler>(
-		c: new (
-			windowService: IWindowService,
-			encryptionProcess: IEncryptionEventWrapper,
-			configService: IConfigService,
-		) => T,
+		c: new (encryptionProcess: IEncryptionEventWrapper) => T,
 	): IImportHandler {
-		return new c(
-			this._windowService,
-			this._encryptionEventWrapper,
-			this._configService,
-		);
+		return new c(this._encryptionEventWrapper);
 	}
 }

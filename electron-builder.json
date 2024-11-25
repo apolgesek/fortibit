@@ -27,7 +27,6 @@
 		"!.editorconfig",
 		"product.json",
 		"workspaces.json",
-		"tips.json",
 		"build/*.ico",
 		"build/*.node",
 		"*.scpt",

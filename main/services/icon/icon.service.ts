@@ -1,4 +1,4 @@
-import { app, ipcMain, IpcMainEvent } from 'electron';
+import { app } from 'electron';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { IpcChannel, PasswordEntry } from '../../../shared';
@@ -37,54 +37,6 @@ export class IconService implements IIconService {
 			mkdirSync(this.iconDirectory);
 		}
 
-		ipcMain.on(
-			IpcChannel.TryGetIcon,
-			async (event: IpcMainEvent, id: number, url: string) => {
-				const iconPath = await this.tryGetIcon(url);
-				const window = this._windowService.getWindowByWebContentsId(
-					event.sender.id,
-				);
-				window.browserWindow.webContents.send(
-					IpcChannel.UpdateIcon,
-					id,
-					iconPath,
-				);
-			},
-		);
-
-		ipcMain.on(
-			IpcChannel.TryReplaceIcon,
-			async (event: IpcMainEvent, id: number, path: string, newUrl: string) => {
-				const iconPath = await this.tryReplaceIcon(path, newUrl);
-				const window = this._windowService.getWindowByWebContentsId(
-					event.sender.id,
-				);
-				window.browserWindow.webContents.send(
-					IpcChannel.UpdateIcon,
-					id,
-					iconPath,
-				);
-			},
-		);
-
-		ipcMain.on(
-			IpcChannel.RemoveIcon,
-			async (event: IpcMainEvent, entry: PasswordEntry) => {
-				await this.removeIcon(entry.icon);
-				const window = this._windowService.getWindowByWebContentsId(
-					event.sender.id,
-				);
-				window.browserWindow.webContents.send(IpcChannel.UpdateIcon, entry.id);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.CheckIconExists,
-			(_: IpcMainEvent, path: string) => {
-				return existsSync(path);
-			},
-		);
-
 		this.iconQueue = new AsyncQueue<Icon, string>(
 			(item) => this.getFile(item.url),
 			(item, result) => {
@@ -104,16 +56,13 @@ export class IconService implements IIconService {
 
 	getIcons(windowId: number, entries: PasswordEntry[]) {
 		for (const entry of entries) {
-			if (
-				entry.url &&
-				(!entry.icon || entry.icon.startsWith(dataUrlPrefix))
-			) {
+			if (entry.url && (!entry.icon || entry.icon.startsWith(dataUrlPrefix))) {
 				this.iconQueue.add({ windowId, id: entry.id, url: entry.url });
 			}
 		}
 	}
 
-	async tryGetIcon(url: string): Promise<string> {
+	tryGetIcon(url: string): Promise<string> {
 		return this.getFile(url);
 	}
 
@@ -127,7 +76,7 @@ export class IconService implements IIconService {
 		}
 	}
 
-	removeIcon(path: string): Promise<boolean> {
+	removeIcon(path?: string): Promise<boolean> {
 		if (path && existsSync(path)) {
 			unlinkSync(path);
 			return Promise.resolve(true);
@@ -144,8 +93,7 @@ export class IconService implements IIconService {
 		) {
 			entry.icon = null;
 		} else if (entry.url) {
-			const filePath =
-				join(this.iconDirectory, getDomain(entry.url)) + '.png';
+			const filePath = join(this.iconDirectory, getDomain(entry.url)) + '.png';
 			if (existsSync(filePath)) {
 				entry.icon = filePath;
 			}

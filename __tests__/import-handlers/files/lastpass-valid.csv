@@ -1,0 +1,22 @@
+url,username,password,totp,extra,name,grouping,fav
+https://example.com,admin,admin123,2A4B6C8D0E2F4G6H,Default admin account,Admin Account,Admin,1
+https://test.com,test_user,test!@#456,3C5D7E9F1G3H5J7K,For testing purposes,Test User,Test,0
+https://travel.cn,旅行者,旅12345,4E6F8G0H2J4K6L8M,旅行网站登录信息,旅行账户,Travel,0
+https://example.org,empty_title,none,,,Empty Title,Empty,0
+https://devsite.com,,dev_password,,,Developer,Dev,0
+https://weird.com,user@#$%,p@$$w0rd!,5G7H9J1K3L5M7N9P,User with special characters,Special Characters,Special,0
+https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com,long_url_user,longpassword,6H8J0K2L4M6N8P0Q,Extremely long URL,Long URL,Long,0
+,,,,,Blank Fields,Blank,0
+,admin2,admin567,,,Admin,Admin,0
+https://numbers.com,123456,num123,7J9K1L3M5N7P9Q1R,User with numerical username,Numerical Username,Numbers,0
+https://россия.рф,пользователь,пароль123,8K0L2M4N6P8Q0R2S,Cyrillic characters used,Cyrillic Account,Cyrillic,0
+https://emojiland.com,😀😎,emoji🎉,9L1M3N5P7Q9R1S3T,User with emojis,Emoji User,Emoji,0
+https://dup.com,duplicate,dup123,0M2N4P6Q8R0S2T4U,First duplicate entry,Duplicate,Duplicate,0
+https://dup.com,duplicate,dup123,1N3P5Q7R9S1T3U5V,Second duplicate entry,Duplicate,Duplicate,0
+https://whitespace.com,   ,whitespace,,,Username with spaces,Whitespace,0
+https://mixedcase.com,MiXeDCaSe,MixedCase123,2P4Q6R8S0T2U4V6W,Case sensitivity test,Mixed Case,Mixed,0
+https://sub.example.com,sub_user,subPass,3Q5R7S9T1U3V5W7X,Subdomain test,Subdomain URL,Subdomain,0
+https://example.com/,slash_user,slash123,4R6S8T0U2V4W6X8Y,Trailing slash in URL,Trailing Slash,Slash,0
+https://notes.com,notes_user,notes123,5S7T9U1V3W5X7Y9Z,"This is a
+multiline note",Multiline Notes,Notes,
+https://missing.com,missing_title,missingTitle,,,Title is None,Missing,0

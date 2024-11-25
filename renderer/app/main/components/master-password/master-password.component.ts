@@ -1,11 +1,11 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
 	Component,
 	DestroyRef,
 	NgZone,
 	OnDestroy,
 	OnInit,
-	inject, AfterViewInit,
+	inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,7 +25,6 @@ import { SvgComponent } from '@app/shared/components/svg/svg.component';
 import { AutofocusDirective } from '@app/shared/directives/autofocus.directive';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { markAllAsDirty, UiUtil } from '@app/utils';
-import { tips } from '@assets/data/tips';
 import { Configuration } from '@config/configuration';
 import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
@@ -38,16 +37,16 @@ type ColorProfile = { primary: string; secondary: string };
 const SKELETON_ENTRY_COLOR_PROFILES = [
 	{
 		primary: '#c7e3d0',
-		secondary: '#376d48'
+		secondary: '#376d48',
 	},
 	{
 		primary: '#ff9bab',
-		secondary: '#8f3d49'
+		secondary: '#8f3d49',
 	},
 	{
 		primary: '#eae48f',
-		secondary: '#9e961d'
-	}
+		secondary: '#9e961d',
+	},
 ];
 
 @Component({
@@ -63,15 +62,14 @@ const SKELETON_ENTRY_COLOR_PROFILES = [
 		TooltipDirective,
 		ShowPasswordIconComponent,
 		SvgComponent,
-		NgOptimizedImage
 	],
 })
-export class MasterPasswordComponent implements OnInit, OnDestroy, AfterViewInit {
-	public readonly skeletonEntryColorProfiles: ColorProfile[] = SKELETON_ENTRY_COLOR_PROFILES;
+export class MasterPasswordComponent implements OnInit, OnDestroy {
+	public readonly skeletonEntryColorProfiles: ColorProfile[] =
+		SKELETON_ENTRY_COLOR_PROFILES;
 
 	public config: Configuration;
 	public passwordVisible = false;
-	public oneOfTips = '';
 
 	private readonly formBuilder = inject(FormBuilder);
 	private readonly messageBroker = inject(MessageBroker);
@@ -164,23 +162,12 @@ export class MasterPasswordComponent implements OnInit, OnDestroy, AfterViewInit
 			.subscribe(() => {
 				this.workspaceService.unlock();
 			});
-
-		this.oneOfTips = tips[Math.floor(Math.random() * tips.length)].content;
 	}
 
 	async selectDefaultGroup() {
 		await this.groupManager.selectGroup(this.defaultGroup);
 		await this.entryManager.setByGroup(this.defaultGroup);
 		this.entryManager.updateEntriesSource();
-	}
-
-	// make sure window preview displays master password entry page
-	ngAfterViewInit() {
-		if (this.route.snapshot.queryParams.minimize === 'true') {
-			setTimeout(() => {
-				this.messageBroker.ipcRenderer.send(IpcChannel.Minimize);
-			});
-		}
 	}
 
 	ngOnDestroy() {

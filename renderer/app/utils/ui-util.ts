@@ -24,6 +24,11 @@ export class UiUtil {
 		(document.querySelector('.search') as HTMLInputElement).focus();
 	}
 
+	public static isEntryFocused() {
+		const activeElement = document.activeElement;
+		return activeElement && activeElement.hasAttribute('data-list-entry');
+	}
+
 	private static readonly lockKeydownEvent = (event: KeyboardEvent) => {
 		event.preventDefault();
 	};

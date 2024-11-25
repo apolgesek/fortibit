@@ -1,7 +1,5 @@
-import { ImportHandler } from '../../../../shared';
-import { IConfigService } from '../../config';
+import { ImportHandler, PasswordEntry } from '../../../../shared';
 import { IEncryptionEventWrapper } from '../../encryption';
-import { IWindowService } from '../../window';
 import { CsvDataImporter } from './csv-data-importer';
 import { TYPE_DEF } from './type-definition';
 
@@ -29,7 +27,9 @@ export class LastpassHandler extends CsvDataImporter<ILastpassEntry> {
 		grouping: TYPE_DEF.String,
 	};
 
-	protected readonly mapFn = (result: ILastpassEntry[]) => {
+	protected readonly mapFn = (
+		result: ILastpassEntry[],
+	): Partial<PasswordEntry>[] => {
 		return result.map((x) => {
 			return {
 				title: x.name,
@@ -37,15 +37,14 @@ export class LastpassHandler extends CsvDataImporter<ILastpassEntry> {
 				password: x.password,
 				url: x.url,
 				notes: x.extra,
+				otpAuth: x.totp,
 			};
 		});
 	};
 
 	constructor(
-		protected readonly _windowService: IWindowService,
 		protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
-		protected readonly _configService: IConfigService,
 	) {
-		super(_windowService, _encryptionEventWrapper, _configService);
+		super(_encryptionEventWrapper);
 	}
 }

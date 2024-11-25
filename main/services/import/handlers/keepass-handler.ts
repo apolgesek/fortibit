@@ -1,12 +1,10 @@
 import { ImportHandler, PasswordEntry } from '../../../../shared';
-import { IConfigService } from '../../config';
 import { IEncryptionEventWrapper } from '../../encryption';
-import { IWindowService } from '../../window';
 import { XmlDataImporter } from './xml-data-importer';
 
-export class KeePassHandler extends XmlDataImporter {
+export class KeePassHandler extends XmlDataImporter<any> {
 	protected handlerType = ImportHandler.KeePass;
-	protected mapFn = (data: any) => {
+	protected mapFn = (data) => {
 		const groups = data.KeePassFile.Root.Group;
 		return Array.isArray(groups)
 			? groups.map((x) => this.mapEntries(x)).flat()
@@ -14,11 +12,9 @@ export class KeePassHandler extends XmlDataImporter {
 	};
 
 	constructor(
-		protected readonly _windowService: IWindowService,
 		protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
-		protected readonly _configService: IConfigService,
 	) {
-		super(_windowService, _encryptionEventWrapper, _configService);
+		super(_encryptionEventWrapper);
 	}
 
 	private mapEntries(entries: any[]): Partial<PasswordEntry>[] {

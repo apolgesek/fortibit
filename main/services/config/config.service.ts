@@ -1,15 +1,13 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { Configuration } from '@root/configuration';
 import { Product } from '@root/product';
-import { IpcChannel } from '@shared-renderer/index';
 import deepmerge from 'deepmerge';
-import { IpcMainEvent, app, ipcMain } from 'electron';
+import { app } from 'electron';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { writeFileSync } from 'fs-extra';
 import * as os from 'os';
 import { join } from 'path';
-import { INativeApiService } from '../native';
 import { IConfigService, getDefaultConfig } from './index';
-import { ProcessArgument } from '@root/main/process-argument.enum';
 
 export class ConfigService implements IConfigService {
 	public get appConfig(): Configuration {
@@ -26,14 +24,9 @@ export class ConfigService implements IConfigService {
 
 	private readonly _productPath: string;
 	private readonly _workspacesPath: string;
-	private readonly _isTestMode = Boolean(
-		app.commandLine.hasSwitch(ProcessArgument.E2E),
-	);
 	private _appConfig: Configuration;
 
-	constructor(
-		@INativeApiService private readonly _nativeApiService: INativeApiService,
-	) {
+	constructor() {
 		const dir = join(app.getPath('appData'), app.getName(), 'config'); // app.getName returns "Electron" in test mode
 		const productPath = join(dir, 'product.json');
 		const workspacePath = join(dir, 'workspaces.json');
@@ -65,7 +58,7 @@ export class ConfigService implements IConfigService {
 			JSON.parse(productFileContent),
 			require(this._productPath),
 		);
-		const workspacesInformation: any = require(this._workspacesPath);
+		const workspacesInformation = require(this._workspacesPath);
 
 		this._appConfig = deepmerge(getDefaultConfig(), {
 			version: app.getVersion(),
@@ -111,27 +104,8 @@ export class ConfigService implements IConfigService {
 			biometricsProtectedFiles: [],
 			protectWindowsFromCapture: productInformation.protectWindowsFromCapture,
 			autosaveEnabled: productInformation.autosaveEnabled,
-			organizationName: null
+			organizationName: null,
 		} as Configuration);
-
-		ipcMain.handle(IpcChannel.GetAppConfig, async () => {
-			const paths = await this._nativeApiService.listCredentials();
-			this.appConfig.biometricsProtectedFiles = paths;
-			this.appConfig.organizationName = this._nativeApiService.readRegistryKey('SOFTWARE\\Fortibit', 'org');
-
-			return this.appConfig;
-		});
-
-		ipcMain.handle(IpcChannel.GetDefaultConfig, async () => {
-			return getDefaultConfig();
-		});
-
-		ipcMain.on(
-			IpcChannel.ConfigChanged,
-			(_: IpcMainEvent, config: Partial<Configuration>) => {
-				this.set(config);
-			},
-		);
 	}
 
 	set(settings: Partial<Configuration>) {
@@ -147,7 +121,7 @@ export class ConfigService implements IConfigService {
 			'temporaryFileExtension',
 			'workspaces',
 			'e2eFilesPath',
-			'organizationName'
+			'organizationName',
 		];
 		writeFileSync(
 			this._productPath,

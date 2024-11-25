@@ -35,6 +35,26 @@ import {
 import { IWebApiService, WebApiService } from '../services/web-api';
 import { IWindowService, WindowService } from '../services/window';
 import { ServiceCollection } from './index';
+import {
+	AutotypeIpcEventHandler,
+	ClipboardIpcEventHandler,
+	ConfigIpcEventHandler,
+	DatabaseIpcEventHandler,
+	ExportIpcEventHandler,
+	IAutotypeIpcEventHandler,
+	IClipboardIpcEventHandler,
+	IConfigIpcEventHandler,
+	IDatabaseIpcEventHandler,
+	IExportIpcEventHandler,
+	IIconIpcEventHandler,
+	IImportIpcEventHandler,
+	IUpdateIpcEventHandler,
+	IWindowIpcEventHandler,
+	IconIpcEventHandler,
+	ImportIpcEventHandler,
+	UpdateIpcEventHandler,
+	WindowIpcEventHandler,
+} from '../ipc';
 
 export class SingleInstanceServices extends ServiceCollection {
 	constructor() {
@@ -45,8 +65,11 @@ export class SingleInstanceServices extends ServiceCollection {
 	configureServices() {
 		this.set(INativeApiService, this.getNativeApiService());
 		this.set(ISendInputService, this.getSendInputService());
-		this.set(IConfigService, new ConfigService(this.get(INativeApiService)));
-		this.set(IEncryptionEventWrapper, new EncryptionEventWrapper(this.get(IConfigService)));
+		this.set(IConfigService, new ConfigService());
+		this.set(
+			IEncryptionEventWrapper,
+			new EncryptionEventWrapper(this.get(IConfigService)),
+		);
 		this.set(
 			IEncryptionEventService,
 			new EncryptionEventService(this.get(IEncryptionEventWrapper)),
@@ -113,8 +136,6 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(IWindowService),
 				this.get(IIconService),
 				this.get(IWebApiService),
-				this.get(IImportService),
-				this.get(IExportService),
 				this.get(INativeApiService),
 				this.get(IEncryptionEventService),
 			),
@@ -131,29 +152,108 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(INativeApiService),
 			),
 		);
+
+		this.set(
+			IDatabaseIpcEventHandler,
+			new DatabaseIpcEventHandler(
+				this.get(IDatabaseService),
+				this.get(IWindowService),
+				this.get(INativeApiService),
+				this.get(IConfigService),
+			),
+		);
+
+		this.set(
+			IWindowIpcEventHandler,
+			new WindowIpcEventHandler(
+				this.get(IWindowService),
+				this.get(IConfigService),
+				this.get(INativeApiService),
+			),
+		);
+
+		this.set(
+			IIconIpcEventHandler,
+			new IconIpcEventHandler(this.get(IIconService), this.get(IWindowService)),
+		);
+
+		this.set(
+			IConfigIpcEventHandler,
+			new ConfigIpcEventHandler(
+				this.get(IConfigService),
+				this.get(INativeApiService),
+			),
+		);
+
+		this.set(
+			IAutotypeIpcEventHandler,
+			new AutotypeIpcEventHandler(
+				this.get(IWindowService),
+				this.get(IAutotypeService),
+			),
+		);
+
+		this.set(
+			IImportIpcEventHandler,
+			new ImportIpcEventHandler(
+				this.get(IImportService),
+				this.get(IConfigService),
+				this.get(IWindowService),
+			),
+		);
+
+		this.set(
+			IExportIpcEventHandler,
+			new ExportIpcEventHandler(
+				this.get(IExportService),
+				this.get(IWindowService),
+			),
+		);
+
+		this.set(
+			IUpdateIpcEventHandler,
+			new UpdateIpcEventHandler(
+				this.get(IUpdateService),
+				this.get(IWindowService),
+			),
+		);
+
+		this.set(
+			IClipboardIpcEventHandler,
+			new ClipboardIpcEventHandler(this.get(IClipboardService)),
+		);
 	}
 
 	getNativeApiService(): INativeApiService {
-		if (process.platform === 'win32') {
-			return new Win32ApiService();
-		} else if (process.platform === 'darwin') {
-			return new DarwinApiService();
+		switch (process.platform) {
+			case 'win32':
+				return new Win32ApiService();
+			case 'darwin':
+				return new DarwinApiService();
+			default:
+				throw new Error(`Unsupported platform: ${process.platform}`);
 		}
 	}
 
 	getSendInputService(): ISendInputService {
-		if (process.platform === 'win32') {
-			return new Win32SendInputService(this.get(INativeApiService));
-		} else if (process.platform === 'darwin') {
-			return new DarwinSendInputService(this.get(INativeApiService));
+		switch (process.platform) {
+			case 'win32':
+				return new Win32SendInputService(this.get(INativeApiService));
+			case 'darwin':
+				return new DarwinSendInputService(this.get(INativeApiService));
+			default:
+				throw new Error(`Unsupported platform: ${process.platform}`);
 		}
 	}
 
 	getCommandHandler(): ICommandHandler {
-		if (process.platform === 'win32') {
-			return new Win32CommandHandler();
-		} else if (process.platform === 'darwin') {
-			return new DarwinCommandHandler();
+		switch (process.platform) {
+			case 'win32':
+				return new Win32CommandHandler();
+			case 'darwin':
+				return new DarwinCommandHandler();
+			default:
+				throw new Error(`Unsupported platform: ${process.platform}`);
 		}
 	}
 }

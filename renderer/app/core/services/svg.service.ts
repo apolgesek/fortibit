@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root',
 })
 export class SvgService {
-  files: Map<string, string> = new Map<string, string>();
+	files: Map<string, string> = new Map<string, string>();
 
-  async getFile(path: string) {
-    path = 'assets/' + path;
-    
-    const svgResponse = await fetch(path);
-    const inlineData = await svgResponse.text();
+	async getFile(path: string) {
+		path = 'assets/' + path;
 
-    this.files.set(path, inlineData);
-  }
+		const svgResponse = await fetch(path);
+		const inlineData = await svgResponse.text();
+
+		this.files.set(path, inlineData);
+	}
 }

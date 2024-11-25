@@ -12,10 +12,8 @@ import {
 import { ConfigService } from '@app/core/services/config.service';
 import { PrettyShortcutComponent } from '@app/shared/components/pretty-shortcut/pretty-shortcut.component';
 import { SidebarHandleComponent } from '@app/shared/components/sidebar-handle/sidebar-handle.component';
-import { TooltipComponent } from '@app/shared/components/tooltip/tooltip.component';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { IsPasswordPipe } from '@app/shared/pipes/is-password.pipe';
-import { LinkPipe } from '@app/shared/pipes/link.pipe';
 import { Configuration } from '@config/configuration';
 import { Entry, EntryGroup, IpcChannel, PasswordEntry } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
@@ -39,8 +37,6 @@ import { SvgComponent } from '@app/shared/components/svg/svg.component';
 		FeatherModule,
 		SidebarHandleComponent,
 		TooltipDirective,
-		TooltipComponent,
-		LinkPipe,
 		IsPasswordPipe,
 		PrettyShortcutComponent,
 		DropdownDirective,

@@ -8,7 +8,6 @@ import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.
 import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
 import { MenuDirective } from '@app/shared/directives/menu.directive';
-import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { FeatherModule } from 'angular-feather';
 
 type SortOption = {
@@ -31,8 +30,7 @@ type SortDirectionOption = {
 		DropdownDirective,
 		DropdownToggleDirective,
 		DropdownMenuDirective,
-		MenuItemDirective,
-		TooltipDirective,
+		MenuItemDirective
 	],
 	templateUrl: './table-filters.component.html',
 	styleUrls: ['./table-filters.component.scss'],
@@ -70,9 +68,7 @@ export class TableFiltersComponent {
 		);
 	}
 
-	public get filtersCount(): number {
-		return 0;
-	}
+	readonly filtersCount = 0;
 
 	setSort(option: SortOption) {
 		this.selectedSortOption = option;

@@ -1,0 +1,22 @@
+folder,favorite,type,name,notes,fields,reprompt,login_uri,login_username,login_password,login_totp
+Admin,1,login,Admin Account,Default admin account,,0,https://example.com,admin,admin123,2A4B6C8D0E2F4G6H
+Test,0,login,Test User,For testing purposes,,0,https://test.com,test_user,test!@#456,3C5D7E9F1G3H5J7K
+Travel,0,login,旅行账户,旅行网站登录信息,,0,https://travel.cn,旅行者,旅12345,4E6F8G0H2J4K6L8M
+Empty,0,login,Empty Title,Missing title,,0,https://example.org,empty_title,none,
+Dev,0,login,Developer,Username missing,,0,https://devsite.com,,dev_password,
+Special,0,login,Special Characters,,User with special characters,0,https://weird.com,user@#$%,p@$$w0rd!,5G7H9J1K3L5M7N9P
+Long,0,login,Long URL,Extremely long URL,,0,https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com,long_url_user,longpassword,6H8J0K2L4M6N8P0Q
+Blank,0,login,Blank Fields,,,0,,,,
+Admin,0,login,Admin,Missing URL,,0,,admin2,admin567,
+Numbers,0,login,Numerical Username,User with numerical username,,0,https://numbers.com,123456,num123,7J9K1L3M5N7P9Q1R
+Cyrillic,0,login,Cyrillic Account,Cyrillic characters used,,0,https://россия.рф,пользователь,пароль123,8K0L2M4N6P8Q0R2S
+Emoji,0,login,Emoji User,User with emojis,,0,https://emojiland.com,😀😎,emoji🎉,9L1M3N5P7Q9R1S3T
+Duplicate,0,login,Duplicate,First duplicate entry,,0,https://dup.com,duplicate,dup123,0M2N4P6Q8R0S2T4U
+Duplicate,0,login,Duplicate,Second duplicate entry,,0,https://dup.com,duplicate,dup123,1N3P5Q7R9S1T3U5V
+Whitespace,0,login,Whitespace,Username with spaces,,0,https://whitespace.com,   ,whitespace,
+Mixed,0,login,Mixed Case,Case sensitivity test,,0,https://mixedcase.com,MiXeDCaSe,MixedCase123,2P4Q6R8S0T2U4V6W
+Subdomain,0,login,Subdomain URL,Subdomain test,,0,https://sub.example.com,sub_user,subPass,3Q5R7S9T1U3V5W7X
+Slash,0,login,Trailing Slash,Trailing slash in URL,,0,https://example.com/,slash_user,slash123,4R6S8T0U2V4W6X8Y
+Notes,0,login,Multiline Notes,"This is a
+multiline note",,0,https://notes.com,notes_user,notes123,5S7T9U1V3W5X7Y9Z
+Missing,0,login,,Title is None,,0,https://missing.com,missing_title,missingTitle,

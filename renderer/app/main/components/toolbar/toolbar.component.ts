@@ -10,11 +10,6 @@ import {
 import { SettingsButtonComponent } from '../settings-button/settings-button.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
-import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
-import { MenuDirective } from '@app/shared/directives/menu.directive';
-import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
-import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
 import { FeatherModule } from 'angular-feather';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { UiUtil } from '@app/utils';
@@ -28,11 +23,6 @@ import { UiUtil } from '@app/utils';
 		CommonModule,
 		FormsModule,
 		FeatherModule,
-		MenuDirective,
-		DropdownDirective,
-		DropdownToggleDirective,
-		DropdownMenuDirective,
-		MenuItemDirective,
 		SettingsButtonComponent,
 		TooltipDirective,
 	],

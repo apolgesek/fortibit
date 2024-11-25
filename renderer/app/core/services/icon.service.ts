@@ -21,7 +21,7 @@ export class IconService {
 	replaceIconPath<T extends IconEntry>(
 		editedEntry: T,
 		newEntry: Partial<T>,
-		key: keyof T
+		key: keyof T,
 	): void {
 		this.messageBroker.ipcRenderer.send(
 			IpcChannel.TryReplaceIcon,

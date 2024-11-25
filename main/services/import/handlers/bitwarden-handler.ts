@@ -1,7 +1,5 @@
-import { ImportHandler } from '../../../../shared';
-import { IConfigService } from '../../config';
+import { ImportHandler, PasswordEntry } from '../../../../shared';
 import { IEncryptionEventWrapper } from '../../encryption';
-import { IWindowService } from '../../window';
 import { CsvDataImporter } from './csv-data-importer';
 import { TYPE_DEF } from './type-definition';
 
@@ -35,7 +33,9 @@ export class BitwardenHandler extends CsvDataImporter<IBitwardenEntry> {
 		fields: TYPE_DEF.String,
 	};
 
-	protected readonly mapFn = (result: IBitwardenEntry[]) => {
+	protected readonly mapFn = (
+		result: IBitwardenEntry[],
+	): Partial<PasswordEntry>[] => {
 		return result
 			.filter((x) => x.type === 'login')
 			.map((x) => {
@@ -45,15 +45,14 @@ export class BitwardenHandler extends CsvDataImporter<IBitwardenEntry> {
 					password: x.login_password,
 					url: x.login_uri,
 					notes: x.notes,
+					otpAuth: x.login_totp,
 				};
 			});
 	};
 
 	constructor(
-		protected readonly _windowService: IWindowService,
 		protected readonly _encryptionEventWrapper: IEncryptionEventWrapper,
-		protected readonly _configService: IConfigService,
 	) {
-		super(_windowService, _encryptionEventWrapper, _configService);
+		super(_encryptionEventWrapper);
 	}
 }

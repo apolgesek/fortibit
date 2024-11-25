@@ -29,6 +29,18 @@ import { IWindowService } from './services/window';
 import jsQR from 'jsqr';
 import { PNG } from 'pngjs';
 import { getDateString } from './util';
+import { IDatabaseIpcEventHandler } from './ipc/database-ipc-event-handler';
+import { IWindowIpcEventHandler } from './ipc/window-ipc-event-handler';
+import {
+	IAutotypeIpcEventHandler,
+	IClipboardIpcEventHandler,
+	IConfigIpcEventHandler,
+	IExportIpcEventHandler,
+	IIconIpcEventHandler,
+	IImportIpcEventHandler,
+	IIpcEventHandler,
+	IUpdateIpcEventHandler,
+} from './ipc';
 
 class MainProcess {
 	private readonly _services: SingleInstanceServices;
@@ -67,6 +79,42 @@ class MainProcess {
 
 	private get _clipboardService(): IClipboardService {
 		return this._services.get(IClipboardService);
+	}
+
+	private get _databaseIpcEventHandler() {
+		return this._services.get(IDatabaseIpcEventHandler);
+	}
+
+	private get _windowIpcEventHandler() {
+		return this._services.get(IWindowIpcEventHandler);
+	}
+
+	private get _iconIpcEventHandler() {
+		return this._services.get(IIconIpcEventHandler);
+	}
+
+	private get _configIpcEventHandler() {
+		return this._services.get(IConfigIpcEventHandler);
+	}
+
+	private get _autotypeIpcEventHandler() {
+		return this._services.get(IAutotypeIpcEventHandler);
+	}
+
+	private get _importIpcEventHandler() {
+		return this._services.get(IImportIpcEventHandler);
+	}
+
+	private get _exportIpcEventHandler() {
+		return this._services.get(IExportIpcEventHandler);
+	}
+
+	private get _updateIpcEventHandler() {
+		return this._services.get(IUpdateIpcEventHandler);
+	}
+
+	private get _clipboardIpcEventHandler() {
+		return this._services.get(IClipboardIpcEventHandler);
 	}
 
 	constructor() {
@@ -210,6 +258,20 @@ class MainProcess {
 	}
 
 	private registerIpcEventListeners() {
+		const ipcEventHandlers: IIpcEventHandler[] = [
+			this._configIpcEventHandler,
+			this._databaseIpcEventHandler,
+			this._windowIpcEventHandler,
+			this._iconIpcEventHandler,
+			this._autotypeIpcEventHandler,
+			this._importIpcEventHandler,
+			this._exportIpcEventHandler,
+			this._updateIpcEventHandler,
+			this._clipboardIpcEventHandler,
+		];
+
+		ipcEventHandlers.forEach((handler) => handler.initialize());
+
 		ipcMain.handle(IpcChannel.GetWhitelistedChannels, () => {
 			return Object.values(IpcChannel);
 		});
@@ -268,7 +330,7 @@ class MainProcess {
 
 				return;
 			}
-			
+
 			const buffer = sources[0].thumbnail.toPNG();
 			const png = PNG.sync.read(buffer);
 
@@ -283,7 +345,7 @@ class MainProcess {
 
 				return;
 			}
-			
+
 			const secret = code.data.match(/secret=(([2-7A-Z]{8})+)/);
 
 			if (!secret) {

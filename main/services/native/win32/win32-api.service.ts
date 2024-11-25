@@ -6,8 +6,6 @@ import { MessageEventType } from './message-event-type.enum';
 class NativeCore {
 	private static _instance: any;
 
-	private constructor() {}
-
 	static getInstance() {
 		if (!NativeCore._instance) {
 			this._instance = require('bindings')('NativeCore');

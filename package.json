@@ -24,11 +24,11 @@
 		"ng:serve": "ng serve -c local",
 		"electron": "electron",
 		"electron:serve-tsc": "tsc -p tsconfig.serve.json",
-		"electron:serve": "npm run copyfiles-serve && wait-on tcp:4200 && npm run electron:serve-tsc && electron ./out-tsc --serve",
+		"electron:serve": "npm run copyfiles-serve && wait-on tcp:4200 && npm run electron:serve-tsc && electron ./out-tsc --serve --inspect=9229",
 		"electron:local": "npm run build:prod && electron .",
 		"electron:windows": "node release-scripts/clean.js && npm run build:prod && electron-builder build --dir && node release-scripts/package.js && makensis release-scripts/nsis/Fortibit.nsi && makensis release-scripts/nsis/Fortibit-update.nsi",
 		"electron:mac": "npm run build:prod && electron-builder build --mac",
-		"test": "jest",
+		"test": "jest __tests__",
 		"test-renderer": "ng test --watch=false",
 		"test-renderer:watch": "ng test",
 		"e2e": "npm run build:e2e && playwright test -c e2e/playwright.config.ts e2e/",
@@ -44,7 +44,7 @@
 		"deepmerge": "4.3.1",
 		"dexie": "4.0.8",
 		"dexie-export-import": "4.1.2",
-		"fast-xml-parser": "4.2.4",
+		"fast-xml-parser": "4.5.0",
 		"focus-trap": "6.7.3",
 		"fs-extra": "10.0.0",
 		"generate-password": "1.7.0",
@@ -93,7 +93,7 @@
 		"@types/zxcvbn": "4.4.1",
 		"angular-eslint": "18.4.0",
 		"copyfiles": "2.4.1",
-		"electron": "33.0.2",
+		"electron": "33.2.0",
 		"electron-builder": "25.1.8",
 		"electron-reloader": "1.2.3",
 		"eslint": "9.8.0",
@@ -104,7 +104,7 @@
 		"npm-run-all": "4.1.5",
 		"playwright": "1.47.0",
 		"prettier": "3.3.3",
-		"ts-jest": "29.1.1",
+		"ts-jest": "29.2.5",
 		"ts-node": "10.9.2",
 		"typescript": "5.4.5",
 		"typescript-eslint": "8.12.2",
@@ -112,9 +112,9 @@
 		"webdriver-manager": "12.1.8"
 	},
 	"engines": {
-		"node": ">=16.14.0"
+		"node": ">=20.18.0"
 	},
 	"browserslist": [
-		"chrome 114"
+		"chrome 130"
 	]
 }

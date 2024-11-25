@@ -35,6 +35,7 @@ export class FileService implements IFileService {
 						message: 'Failed to download a file.',
 						code: response.statusCode,
 					});
+
 					return;
 				}
 
@@ -49,12 +50,13 @@ export class FileService implements IFileService {
 							downloadCallback,
 						),
 					);
+
 					return;
 				}
 
 				const file = createWriteStream(path);
 
-				response.on('error', (err) => {
+				response.on('error', () => {
 					clearInterval(interval);
 					file.close();
 					unlink(path, (err) => {
@@ -81,15 +83,22 @@ export class FileService implements IFileService {
 
 				response.on('end', () => {
 					clearInterval(interval);
+
 					file.end(() => {
-						finishCallback && finishCallback();
+						if (finishCallback) {
+							finishCallback();
+						}
+
 						resolve(path);
 					});
 				});
 			});
 
 			req.on('error', () => {
-				errorCallback && errorCallback();
+				if (errorCallback) {
+					errorCallback();
+				}
+
 				reject({
 					message: 'Error occured while downloading file.',
 					code: null,

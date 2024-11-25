@@ -19,7 +19,7 @@ import {
 	ModalService,
 	SvgService,
 	WindowsHotkeyHandler,
-	WorkspaceService
+	WorkspaceService,
 } from '@app/core/services';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { IpcChannel } from '@shared-renderer/index';
@@ -79,29 +79,39 @@ import { DarwinHotkeyHandler } from './app/core/services/hotkey/darwin-hotkey-ha
 import { routes } from './app/routes';
 import { AppConfig } from './environments/environment';
 
-function preloadIcons(svgService: SvgService, paths: string[]): Promise<void>[] {
-	return paths.map(p => svgService.getFile(p));
+type RendererWindow = Window &
+	typeof globalThis & {
+		api: { loadChannels: () => Promise<true | undefined> };
+	};
+
+function preloadIcons(
+	svgService: SvgService,
+	paths: string[],
+): Promise<void>[] {
+	return paths.map((p) => svgService.getFile(p));
 }
 
 function initializeApp(
 	db: DbManager,
 	messageBroker: IMessageBroker,
 	configService: ConfigService,
-	svgService: SvgService
+	svgService: SvgService,
 ): () => Promise<void> {
 	return async () => {
-		const asyncTasks: Promise<void>[] = [
+		const asyncTasks: Promise<unknown>[] = [
 			...preloadIcons(svgService, [
 				'icons/welcome.svg',
 				'icons/windows-hello.svg',
-				'icons/history.svg'
-			])
+				'icons/history.svg',
+			]),
 		];
 
+		const rendererWindow = window as RendererWindow;
+
 		if (isElectron()) {
-			asyncTasks.push((window as any).api.loadChannels());
+			asyncTasks.push(rendererWindow.api.loadChannels());
 		} else {
-			(window as any).api = {
+			rendererWindow.api = {
 				loadChannels: () => Object.create(null),
 			};
 		}
@@ -169,7 +179,7 @@ const icons = {
 	File,
 	Lock,
 	Move,
-	MoreVertical
+	MoreVertical,
 };
 
 bootstrapApplication(AppComponent, {
@@ -198,32 +208,13 @@ bootstrapApplication(AppComponent, {
 		},
 		{
 			provide: HotkeyHandler,
-			useFactory: (
-				messageBroker: IMessageBroker,
-				workspaceService: WorkspaceService,
-				entriesManager: EntryManager,
-				groupsManager: GroupManager,
-				modalService: ModalService,
-				clipboardService: ClipboardService,
-			) => {
+			useFactory: (messageBroker: IMessageBroker) => {
 				switch (messageBroker.platform) {
 					case 'win32':
 					case 'web':
-						return new WindowsHotkeyHandler(
-							modalService,
-							clipboardService,
-							workspaceService,
-							entriesManager,
-							groupsManager,
-						);
+						return new WindowsHotkeyHandler();
 					case 'darwin':
-						return new DarwinHotkeyHandler(
-							modalService,
-							clipboardService,
-							workspaceService,
-							entriesManager,
-							groupsManager,
-						);
+						return new DarwinHotkeyHandler();
 					default:
 						throw new Error('HotkeyHandler: Unsupported platform');
 				}
@@ -238,7 +229,8 @@ bootstrapApplication(AppComponent, {
 			],
 		},
 		{
-			provide: ErrorHandler, useClass: DefaultErrorHandler
-		}
+			provide: ErrorHandler,
+			useClass: DefaultErrorHandler,
+		},
 	],
 }).catch((err) => console.error(err));

@@ -1,16 +1,13 @@
-import { IpcChannel } from '@shared-renderer/index';
-import { clipboard, ipcMain } from 'electron';
+import { clipboard } from 'electron';
 import { IConfigService } from '../config';
 import { IClipboardService } from './clipboard-service.model';
 
 export class ClipboardService implements IClipboardService {
 	private _clearClipboardTimeout: NodeJS.Timeout;
 
-	constructor(@IConfigService private readonly _configService: IConfigService) {
-		ipcMain.handle(IpcChannel.CopyCliboard, async (_, value: string) => {
-			return this.write(value);
-		});
-	}
+	constructor(
+		@IConfigService private readonly _configService: IConfigService,
+	) {}
 
 	clear() {
 		clipboard.clear();

@@ -19,7 +19,6 @@ import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { SidebarHandleComponent } from '@app/shared/components/sidebar-handle/sidebar-handle.component';
 import { EntryGroup } from '../../../../../shared/index';
 import { FeatherModule } from 'angular-feather';
-import { ToolbarComponent } from '../toolbar/toolbar.component';
 import { HotkeyHandler } from 'injection-tokens';
 
 @Component({
@@ -36,8 +35,7 @@ import { HotkeyHandler } from 'injection-tokens';
 		DroppableDirective,
 		FocusableListDirective,
 		FocusableListItemDirective,
-		TooltipDirective,
-		ToolbarComponent,
+		TooltipDirective
 	],
 })
 export class GroupsSidebarComponent implements OnInit {
@@ -96,7 +94,7 @@ export class GroupsSidebarComponent implements OnInit {
 			.getResult();
 	}
 
-	groupTrackFn(group: any): number {
+	groupTrackFn(_: number, group: EntryGroup) {
 		return group.id;
 	}
 

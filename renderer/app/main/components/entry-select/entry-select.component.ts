@@ -2,7 +2,6 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import { Component, NgZone, OnInit, inject } from '@angular/core';
 import { SecondaryMenuBarComponent } from '@app/main/components/secondary-menu-bar/secondary-menu-bar.component';
-import { EntryIconDirective } from '@app/main/directives/entry-icon.directive';
 import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
 import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
@@ -19,7 +18,6 @@ import { MessageBroker } from 'injection-tokens';
 		CommonModule,
 		ScrollingModule,
 		FeatherModule,
-		EntryIconDirective,
 		FocusableListDirective,
 		FocusableListItemDirective,
 		SecondaryMenuBarComponent,

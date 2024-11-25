@@ -2,8 +2,7 @@ import { Configuration } from '../../configuration';
 import { FileFilter, app } from 'electron';
 import { join } from 'path';
 import { ProcessArgument } from '../process-argument.enum';
-
-type FileType = 'vaultExt' | 'csv' | 'xml';
+import { FileType } from '../types/file-type';
 
 export function getFileFilter(
 	config: Configuration,
@@ -16,11 +15,17 @@ export function getFileFilter(
 
 	switch (fileType) {
 		case 'csv':
-			fileFilter = { name: 'Comma Separated Values File (.csv)', extensions: ['csv'] };
+			fileFilter = {
+				name: 'Comma Separated Values File (.csv)',
+				extensions: ['csv'],
+			};
 			break;
 		case 'xml':
-			fileFilter = { name: 'Extensible Markup Language File (.xml)', extensions: ['xml'] };
-		break;
+			fileFilter = {
+				name: 'Extensible Markup Language File (.xml)',
+				extensions: ['xml'],
+			};
+			break;
 		default:
 			break;
 	}

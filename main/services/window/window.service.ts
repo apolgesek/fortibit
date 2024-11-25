@@ -1,14 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Configuration } from '@root/configuration';
 import { IpcChannel } from '@shared-renderer/index';
 import { randomBytes } from 'crypto';
 import {
 	app,
 	BrowserWindow,
-	dialog,
-	ipcMain,
-	IpcMainEvent,
-	MessageBoxOptions,
 	nativeImage,
 	nativeTheme,
 	powerMonitor,
@@ -24,15 +19,13 @@ import { INativeApiService } from '../native';
 import { IPerformanceService } from '../performance/performance-service.model';
 import { IWindowService } from './';
 import { IWindow } from './window-model';
+import { Configuration } from '@root/configuration';
 
 const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
 const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
 
 const formatURL = (urlObject: UrlObject) =>
 	String(Object.assign(new URL('http://localhost'), urlObject));
-const zoomLevels = [
-	0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3,
-];
 
 export class WindowService implements IWindowService {
 	private readonly _isDevMode = Boolean(
@@ -59,160 +52,7 @@ export class WindowService implements IWindowService {
 		@IPerformanceService
 		private readonly _performanceService: IPerformanceService,
 		@INativeApiService private readonly _nativeApiService: INativeApiService,
-	) {
-		ipcMain.on(IpcChannel.TryClose, (ipcEvent: IpcMainEvent) => {
-			const win = this._windows.find(
-				(x) => x.browserWindow.webContents.id === ipcEvent.sender.id,
-			);
-			win.browserWindow.focus();
-		});
-
-		ipcMain.on(IpcChannel.Exit, (event: IpcMainEvent) => {
-			const win = this._windows.find(
-				(x) => x.browserWindow.webContents.id === event.sender.id,
-			);
-			win.browserWindow.close();
-		});
-
-		ipcMain.on(IpcChannel.Unlock, (event: IpcMainEvent) => {
-			this.onUnlock(event.sender.id);
-		});
-
-		ipcMain.on(IpcChannel.Minimize, (event: IpcMainEvent) => {
-			const win = this._windows.find(
-				(x) => x.browserWindow.webContents.id === event.sender.id,
-			);
-			win.browserWindow.minimize();
-		});
-
-		ipcMain.on(IpcChannel.Maximize, (event: IpcMainEvent) => {
-			const win = this._windows.find(
-				(x) => x.browserWindow.webContents.id === event.sender.id,
-			);
-
-			if (win.browserWindow.isMaximized()) {
-				win.browserWindow.unmaximize()
-			} else {
-				win.browserWindow.maximize();
-			}
-		});
-
-		ipcMain.on(IpcChannel.Close, (event: IpcMainEvent) => {
-			const win = this._windows.find(
-				(x) => x.browserWindow.webContents.id === event.sender.id,
-			);
-
-			if (win.browserWindow.webContents.isDevToolsOpened()) {
-				win.browserWindow.webContents.closeDevTools();
-			}
-
-			win.browserWindow.close();
-		});
-
-		ipcMain.handle(IpcChannel.ZoomIn, (event: IpcMainEvent) => {
-			const currentFactor = parseFloat(event.sender.getZoomFactor().toFixed(2));
-			if (currentFactor === zoomLevels[zoomLevels.length - 1])
-				return zoomLevels[zoomLevels.length - 1];
-
-			const idx = zoomLevels.findIndex((x) => x === currentFactor);
-			event.sender.setZoomFactor(zoomLevels[idx + 1]);
-
-			return zoomLevels[idx + 1];
-		});
-
-		ipcMain.handle(IpcChannel.ZoomOut, (event: IpcMainEvent) => {
-			const currentFactor = parseFloat(event.sender.getZoomFactor().toFixed(2));
-			if (currentFactor === zoomLevels[0]) return zoomLevels[0];
-
-			const idx = zoomLevels.findIndex((x) => x === currentFactor);
-			event.sender.setZoomFactor(zoomLevels[idx - 1]);
-
-			return zoomLevels[idx - 1];
-		});
-
-		ipcMain.handle(IpcChannel.ResetZoom, (event: IpcMainEvent) => {
-			event.sender.setZoomFactor(1);
-			return 1;
-		});
-
-		ipcMain.handle(IpcChannel.ToggleFullscreen, (event: IpcMainEvent) => {
-			const browserWindow = this.getWindowByWebContentsId(
-				event.sender.id,
-			).browserWindow;
-			const fullscreenMode = !browserWindow.isFullScreen();
-			browserWindow.setFullScreen(fullscreenMode);
-
-			return fullscreenMode;
-		});
-
-		ipcMain.handle(
-			IpcChannel.ChangeWindowsCaptureProtection,
-			(event: IpcMainEvent, config: Partial<Configuration>) => {
-				const win = this._windows.find(
-					(x) => x.browserWindow.webContents.id === event.sender.id,
-				);
-
-				if (
-					config.protectWindowsFromCapture !==
-					this._configService.appConfig.protectWindowsFromCapture
-				) {
-					this._nativeApiService.setWindowAffinity(
-						win.browserWindow.getNativeWindowHandle(),
-						config.protectWindowsFromCapture,
-					);
-				}
-			},
-		);
-
-		ipcMain.handle(IpcChannel.ToggleTheme, (_, config: Configuration) => {
-			if (this._configService.appConfig.theme === config.theme)
-				return;
-			
-			if (config.theme === 'dark') {
-				nativeTheme.themeSource = 'dark';
-
-				this.windows.forEach((w) =>
-					w.browserWindow.setTitleBarOverlay({
-						color: '#191d1e',
-						symbolColor: '#dadada',
-					}),
-				);
-			} else {
-				nativeTheme.themeSource = 'light';
-
-				this.windows.forEach((w) =>
-					w.browserWindow.setTitleBarOverlay({
-						color: '#fcfcfc',
-						symbolColor: '#364f63',
-					}),
-				);
-			}
-
-			this.windows.forEach((w) => {
-				if (w.key == null) {
-					this._nativeApiService.setThumbnailBitmap(
-						w.browserWindow.getNativeWindowHandle(),
-						this.getThumbnailIconPath(),
-						this._configService.appConfig.theme,
-					);
-				}
-			});
-		});
-
-		ipcMain.handle(IpcChannel.RegenerateKey, (event: IpcMainEvent) => {
-			this.getWindowByWebContentsId(event.sender.id).key = this.getSecureKey();
-		});
-
-		ipcMain.handle(
-			IpcChannel.OpenPrompt,
-			async (event: IpcMainEvent, options: MessageBoxOptions) => {
-				return await dialog.showMessageBox(
-					this.getWindowByWebContentsId(event.sender.id).browserWindow,
-					options,
-				);
-			},
-		);
-	}
+	) {}
 
 	getWindow(index: number): BrowserWindow {
 		return this._windows[index].browserWindow;
@@ -248,14 +88,6 @@ export class WindowService implements IWindowService {
 			if (this.windows.length === 1) {
 				this.getWindow(0).close();
 			}
-		});
-
-		window.on('maximize', () => {
-			window.webContents.send(IpcChannel.MaximizedRestored, true);
-		});
-
-		window.on('unmaximize', () => {
-			window.webContents.send(IpcChannel.MaximizedRestored, false);
 		});
 
 		this._windows.push({ browserWindow: window, key: null });
@@ -357,7 +189,7 @@ export class WindowService implements IWindowService {
 			: key;
 	}
 
-	private getThumbnailIconPath(): string {
+	getThumbnailIconPath(): string {
 		return join(
 			app.getAppPath(),
 			'assets',
@@ -384,7 +216,7 @@ export class WindowService implements IWindowService {
 		}
 	}
 
-	private onUnlock(windowId: number) {
+	onUnlock(windowId: number): void {
 		const win = this.getWindowByWebContentsId(windowId);
 
 		if (process.platform === 'win32') {
@@ -442,6 +274,40 @@ export class WindowService implements IWindowService {
 				);
 			},
 		);
+	}
+
+	toggleTheme(config: Configuration): void {
+		if (this._configService.appConfig.theme === config.theme) return;
+
+		if (config.theme === 'dark') {
+			nativeTheme.themeSource = 'dark';
+
+			this.windows.forEach((w) =>
+				w.browserWindow.setTitleBarOverlay({
+					color: '#191d1e',
+					symbolColor: '#dadada',
+				}),
+			);
+		} else {
+			nativeTheme.themeSource = 'light';
+
+			this.windows.forEach((w) =>
+				w.browserWindow.setTitleBarOverlay({
+					color: '#fcfcfc',
+					symbolColor: '#364f63',
+				}),
+			);
+		}
+
+		this.windows.forEach((w) => {
+			if (w.key == null) {
+				this._nativeApiService.setThumbnailBitmap(
+					w.browserWindow.getNativeWindowHandle(),
+					this.getThumbnailIconPath(),
+					this._configService.appConfig.theme,
+				);
+			}
+		});
 	}
 
 	private createFromTemplate(

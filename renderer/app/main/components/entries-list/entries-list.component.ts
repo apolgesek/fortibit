@@ -26,18 +26,10 @@ import { ClipboardService } from '@app/core/services/clipboard.service';
 import { ContextMenuBuilderService } from '@app/core/services/context-menu-builder.service';
 import { ModalService } from '@app/core/services/modal.service';
 import { SearchService } from '@app/core/services/search.service';
-import { EntryIconDirective } from '@app/main/directives/entry-icon.directive';
-import { TextEmphasizeDirective } from '@app/main/directives/text-emphasize.directive';
 import { MenuItem, slideDown } from '@app/shared';
 import { ContextMenuItemDirective } from '@app/shared/directives/context-menu-item.directive';
-import { DropdownMenuDirective } from '@app/shared/directives/dropdown-menu.directive';
-import { DropdownToggleDirective } from '@app/shared/directives/dropdown-toggle.directive';
-import { DropdownDirective } from '@app/shared/directives/dropdown.directive';
 import { FocusableListItemDirective } from '@app/shared/directives/focusable-list-item.directive';
 import { FocusableListDirective } from '@app/shared/directives/focusable-list.directive';
-import { MenuItemDirective } from '@app/shared/directives/menu-item.directive';
-import { MenuDirective } from '@app/shared/directives/menu.directive';
-import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { UiUtil } from '@app/utils';
 import { Entry, PasswordEntry } from '@shared-renderer/index';
 import { HotkeyHandler } from 'injection-tokens';
@@ -45,7 +37,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { PasswordEntryComponent } from './password-entry/password-entry.component';
 import { TableFiltersComponent } from '../table-filters/table-filters.component';
-import { ToolbarComponent } from '../toolbar/toolbar.component';
 
 @Component({
 	selector: 'app-entries-list',
@@ -57,19 +48,10 @@ import { ToolbarComponent } from '../toolbar/toolbar.component';
 	standalone: true,
 	imports: [
 		CommonModule,
-		MenuDirective,
-		DropdownDirective,
-		DropdownToggleDirective,
-		DropdownMenuDirective,
-		MenuItemDirective,
 		ScrollingModule,
-		TextEmphasizeDirective,
-		EntryIconDirective,
 		FocusableListDirective,
 		FocusableListItemDirective,
 		ContextMenuItemDirective,
-		TooltipDirective,
-		ToolbarComponent,
 		TableFiltersComponent,
 	],
 })
@@ -84,7 +66,7 @@ export class EntriesTableComponent implements OnInit {
 
 	public passwordList$: Observable<Entry[]>;
 	public searchPhrase$: Observable<string>;
-	public entryMenuItems: Map<Entry['type'], MenuItem[]> = new Map();
+	public entryMenuItems = new Map<Entry['type'], MenuItem[]>();
 	public multiEntryMenuItems: MenuItem[] = [];
 	public iconsEnabled: boolean;
 
@@ -250,7 +232,7 @@ export class EntriesTableComponent implements OnInit {
 		}
 	}
 
-	getComponentType(item: Entry): Type<any> {
+	getComponentType(item: Entry): Type<unknown> {
 		switch (item.type) {
 			case 'password':
 				return PasswordEntryComponent;

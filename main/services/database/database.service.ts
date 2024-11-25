@@ -1,58 +1,34 @@
-import {
-	CsvWriter,
-	getDateString,
-	getDefaultPath,
-	getFileFilter,
-	getHashCode,
-} from '@root/main/util';
+import { getDefaultPath, getFileFilter, getHashCode } from '@root/main/util';
 import { Product } from '@root/product';
+import { IpcChannel, VaultSchema } from '@shared-renderer/index';
 import {
-	ExposedPasswordEntry,
-	ImportHandler,
-	IpcChannel,
-	VaultSchema,
-	WeakPasswordEntry,
-} from '@shared-renderer/index';
-import {
-	IpcMainEvent,
-	IpcMainInvokeEvent,
 	app,
 	dialog,
-	ipcMain,
 	powerMonitor,
 	safeStorage,
 	session,
+	IpcMainInvokeEvent,
 } from 'electron';
 import {
 	copyFileSync,
 	existsSync,
 	mkdirSync,
-	readdirSync,
 	renameSync,
 	unlinkSync,
 } from 'fs';
 import { emptyDirSync, readFileSync, writeFileSync } from 'fs-extra';
-import { generate } from 'generate-password';
 import { basename, join } from 'path';
 import { ProcessArgument } from '../../process-argument.enum';
 import { IConfigService } from '../config';
 import { IEncryptionEventService } from '../encryption/encryption-event-service.model';
-import { IExportService } from '../export';
 import { IIconService } from '../icon';
-import { IImportService } from '../import';
 import { INativeApiService } from '../native';
 import { IWebApiService } from '../web-api';
 import { IWindowService } from '../window';
 import { IWindow } from '../window/window-model';
 import { IDatabaseService } from './database-service.model';
 import { SaveFilePayload } from './save-file-payload';
-
-type SaveDatabaseResult = {
-	status: boolean;
-	file?: string;
-	notify?: boolean;
-	error?: Error;
-};
+import { SaveDatabaseResult } from '../../types/save-database-result';
 
 export class DatabaseService implements IDatabaseService {
 	private readonly _isTestMode = Boolean(
@@ -74,7 +50,7 @@ export class DatabaseService implements IDatabaseService {
 		return this._fileMap;
 	}
 
-	setPassword(value: string, windowId: number) {
+	public setPassword(value: string, windowId: number) {
 		if (windowId === this._windowService.getWindow(1).id) {
 			return;
 		}
@@ -90,7 +66,7 @@ export class DatabaseService implements IDatabaseService {
 		}
 	}
 
-	getPassword(windowId: number): string {
+	public getPassword(windowId: number): string {
 		const password = this._fileMap.get(windowId)?.password;
 
 		if (!password) {
@@ -107,8 +83,6 @@ export class DatabaseService implements IDatabaseService {
 		@IWindowService private readonly _windowService: IWindowService,
 		@IWindowService private readonly _iconService: IIconService,
 		@IWebApiService private readonly _webApiService: IWebApiService,
-		@IImportService private readonly _importService: IImportService,
-		@IExportService private readonly _exportService: IExportService,
 		@INativeApiService private readonly _nativeApiService: INativeApiService,
 		@IEncryptionEventService
 		private readonly _encryptionEventService: IEncryptionEventService,
@@ -122,257 +96,12 @@ export class DatabaseService implements IDatabaseService {
 			mkdirSync(this._tmpDirectoryPath);
 		}
 
-		ipcMain.on(IpcChannel.Lock, (event: IpcMainEvent) => {
-			this._windowService.onLock(event.sender.id);
-
-			this.removeBrowserSession();
-			this.removeRecoveryFile(event.sender.id);
-			this.setPassword(null, event.sender.id);
-		});
-
-		ipcMain.on(IpcChannel.Exit, (event: IpcMainEvent) => {
-			this.removeRecoveryFile(event.sender.id);
-		});
-
-		ipcMain.handle(
-			IpcChannel.DecryptDatabase,
-			async (event: IpcMainEvent, password: string) => {
-				return await this.decryptDatabase(event, password);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.DecryptBiometrics,
-			async (event: IpcMainEvent) => {
-				return await this.biometricsDecrypt(event);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.ValidatePassword,
-			(event: IpcMainEvent, password: string): boolean => {
-				if (!password?.length) {
-					return false;
-				}
-
-				return password === this.getPassword(event.sender.id);
-			},
-		);
-
-		ipcMain.handle(IpcChannel.CheckOpenMode, (event: IpcMainInvokeEvent) => {
-			return this.getFilePath(event.sender.id);
-		});
-
-		ipcMain.handle(
-			IpcChannel.SaveFile,
-			async (event: IpcMainEvent, payload: SaveFilePayload) => {
-				return await this.saveDatabase(event, payload);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.OpenFile,
-			async (event: IpcMainEvent, path: string) => {
-				return await this.openDatabase(event, path);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.DropFile,
-			(event: IpcMainEvent, filePath: string) => {
-				this.setDatabaseEntry(event.sender.id, filePath);
-				this._windowService.setTitle(event.sender.id, basename(filePath));
-
-				return this.getFilePath(event.sender.id);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.ToggleBiometricsUnlock,
-			async (event: IpcMainEvent, isEnabled) => {
-				const path = this.getFilePath(event.sender.id);
-				if (isEnabled) {
-					this._nativeApiService.saveCredential(
-						path,
-						this.getPassword(event.sender.id),
-					);
-				} else {
-					this._nativeApiService.removeCredential(path);
-				}
-
-				return true;
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.GetImportedDatabaseMetadata,
-			async (_: IpcMainEvent, type: ImportHandler) => {
-				this._importService.setHandler(type);
-				return await this._importService.getHandler().getMetadata();
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.Import,
-			async (event: IpcMainEvent, filePath: string, type: ImportHandler) => {
-				this._importService.setHandler(type);
-				return await this._importService.getHandler().import(event, filePath);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.ScanLeaks,
-			async (event: IpcMainEvent, database: string) => {
-				return await this.getLeaks(event, database);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.GetWeakPasswords,
-			async (event: IpcMainEvent, database: string) => {
-				return await this.getWeakPasswords(event, database);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.SaveExposedPasswordsReport,
-			async (event: IpcMainEvent, result: ExposedPasswordEntry[]) => {
-				const date = new Date();
-				const saveReturnValue = await dialog.showSaveDialog(
-					this._windowService.getWindowByWebContentsId(event.sender.id)
-						.browserWindow,
-					{
-						defaultPath: getDefaultPath(
-							this._configService.appConfig,
-							`exposed_passwords_report_${getDateString(date)}`,
-						),
-						filters: [getFileFilter(this._configService.appConfig, 'csv')],
-					},
-				);
-
-				if (saveReturnValue.filePath && !saveReturnValue.canceled) {
-					try {
-						CsvWriter.writeFile(saveReturnValue.filePath, result, [
-							'title',
-							'username',
-							'occurrences',
-						]);
-
-						return true;
-					} catch {
-						throw new Error('Failed to save leaked password report');
-					}
-				}
-
-				return false;
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.SaveWeakPasswordsReport,
-			async (event: IpcMainEvent, result: WeakPasswordEntry[]) => {
-				const date = new Date();
-				const saveReturnValue = await dialog.showSaveDialog(
-					this._windowService.getWindowByWebContentsId(event.sender.id)
-						.browserWindow,
-					{
-						defaultPath: getDefaultPath(
-							this._configService.appConfig,
-							`weak_passwords_report_${getDateString(date)}`,
-						),
-						filters: [getFileFilter(this._configService.appConfig, 'csv')],
-					},
-				);
-
-				if (saveReturnValue.filePath && !saveReturnValue.canceled) {
-					try {
-						CsvWriter.writeFile(saveReturnValue.filePath, result, [
-							'title',
-							'username',
-							'score',
-						]);
-
-						return true;
-					} catch {
-						throw new Error('Failed to save weak passwords report');
-					}
-				}
-
-				return false;
-			},
-		);
-
-		ipcMain.handle(IpcChannel.CreateNew, async (event: IpcMainEvent) => {
-			this._fileMap.delete(event.sender.id);
-			return true;
-		});
-
-		ipcMain.handle(
-			IpcChannel.ChangeScreenLockSettings,
-			(_: IpcMainEvent, form: Partial<Product>) => {
-				this.changeEncryptionSettings(form);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.Export,
-			async (event: IpcMainEvent, database: string) => {
-				return await this._exportService.export(
-					this._windowService.getWindowByWebContentsId(event.sender.id),
-					database,
-				);
-			},
-		);
-
-		ipcMain.handle(
-			IpcChannel.GeneratePassword,
-			async (event: IpcMainEvent, options) => {
-				return generate(options);
-			},
-		);
-
-		ipcMain.handle(IpcChannel.RecoverFile, (event: IpcMainEvent) => {
-			return this.recoverFile(event.sender.id);
-		});
-
-		ipcMain.handle(IpcChannel.CheckRecoveryFile, (event: IpcMainEvent) => {
-			return this.checkRecoveryFile(event.sender.id);
-		});
-
-		ipcMain.handle(IpcChannel.RemoveRecoveryFile, (event: IpcMainEvent) => {
-			return this.removeRecoveryFile(event.sender.id);
-		});
-
-		ipcMain.handle(
-			IpcChannel.DatabaseChanged,
-			async (event: IpcMainEvent, payload: SaveFilePayload) => {
-				return await this.saveDatabaseSnapshot(event, payload);
-			},
-		);
-
 		if (this._configService.appConfig.lockOnSystemLock) {
 			powerMonitor.addListener('lock-screen', this._screenLockHandler);
 		}
-
-		if (this._isTestMode) {
-			ipcMain.handle(IpcChannel.TestCleanup, () => {
-				try {
-					const files = readdirSync(this._configService.appConfig.e2eFilesPath);
-					files
-						.filter((f) => /test_\d+\.(fbit|csv)/.test(f))
-						.forEach((f) =>
-							unlinkSync(join(this._configService.appConfig.e2eFilesPath, f)),
-						);
-
-					return true;
-				} catch {
-					return false;
-				}
-			});
-		}
 	}
 
-	public async biometricsDecrypt(event: IpcMainEvent): Promise<void> {
+	public async biometricsDecrypt(event: IpcMainInvokeEvent): Promise<void> {
 		let password: string;
 
 		if (this._isTestMode) {
@@ -444,7 +173,7 @@ export class DatabaseService implements IDatabaseService {
 	}
 
 	public async saveDatabase(
-		event: IpcMainEvent,
+		event: IpcMainInvokeEvent,
 		saveFilePayload: SaveFilePayload,
 	): Promise<SaveDatabaseResult> {
 		let savePath: Electron.SaveDialogReturnValue = {
@@ -535,7 +264,7 @@ export class DatabaseService implements IDatabaseService {
 	}
 
 	public async saveDatabaseSnapshot(
-		event: IpcMainEvent,
+		event: IpcMainInvokeEvent,
 		{ database },
 	): Promise<void> {
 		const window = this._windowService.getWindowByWebContentsId(
@@ -557,7 +286,7 @@ export class DatabaseService implements IDatabaseService {
 	}
 
 	public async openDatabase(
-		event: IpcMainEvent,
+		event: IpcMainInvokeEvent,
 		path: string,
 	): Promise<string> {
 		let openDialogReturnValue;
@@ -607,7 +336,7 @@ export class DatabaseService implements IDatabaseService {
 	}
 
 	public async decryptDatabase(
-		event: { sender: { id: number } },
+		event: IpcMainInvokeEvent,
 		password: string,
 	): Promise<void> {
 		const window = this._windowService.getWindowByWebContentsId(
@@ -656,6 +385,71 @@ export class DatabaseService implements IDatabaseService {
 		}
 	}
 
+	public async getLeaks(event: IpcMainInvokeEvent, database: string) {
+		const key = this._windowService.getWindowByWebContentsId(
+			event.sender.id,
+		).key;
+		return await this._encryptionEventService.getLeaks(database, key);
+	}
+
+	public async getWeakPasswords(event: IpcMainInvokeEvent, database: string) {
+		const key = this._windowService.getWindowByWebContentsId(
+			event.sender.id,
+		).key;
+		return await this._encryptionEventService.getWeakPasswords(database, key);
+	}
+
+	public changeEncryptionSettings(settings: Partial<Product>) {
+		if (
+			settings.lockOnSystemLock !==
+			this._configService.appConfig.lockOnSystemLock
+		) {
+			if (settings.lockOnSystemLock) {
+				powerMonitor.addListener('lock-screen', this._screenLockHandler);
+			} else {
+				powerMonitor.removeListener('lock-screen', this._screenLockHandler);
+			}
+		}
+	}
+
+	public checkRecoveryFile(windowId): string {
+		const path = this.getRecoveryFilePath(windowId);
+
+		if (existsSync(path)) {
+			return path;
+		}
+	}
+
+	public removeRecoveryFile(windowId) {
+		const path = this.getRecoveryFilePath(windowId);
+		if (path && existsSync(path)) {
+			unlinkSync(path);
+		}
+	}
+
+	public removeBrowserSession(): Promise<void> {
+		return session.defaultSession.clearStorageData();
+	}
+
+	public async recoverFile(windowId: number) {
+		const key = this._windowService.getWindowByWebContentsId(windowId).key;
+
+		try {
+			const fileData = readFileSync(this.getRecoveryFilePath(windowId), {
+				encoding: 'base64',
+			});
+			const payload = await this._encryptionEventService.decryptDatabase(
+				fileData,
+				this.getPassword(windowId),
+				key,
+			);
+
+			return payload.decrypted;
+		} catch {
+			return null;
+		}
+	}
+
 	private startBackgroundChecks(window: IWindow, parsedDb: VaultSchema) {
 		this.startPasswordEntriesBackgroundChecks(window, parsedDb);
 	}
@@ -673,39 +467,8 @@ export class DatabaseService implements IDatabaseService {
 		this._webApiService.checkTfa(window.browserWindow.id, entries);
 	}
 
-	public async getLeaks(event: IpcMainEvent, database: string) {
-		const key = this._windowService.getWindowByWebContentsId(
-			event.sender.id,
-		).key;
-		return await this._encryptionEventService.getLeaks(database, key);
-	}
-
-	public async getWeakPasswords(event: IpcMainEvent, database: string) {
-		const key = this._windowService.getWindowByWebContentsId(
-			event.sender.id,
-		).key;
-		return await this._encryptionEventService.getWeakPasswords(database, key);
-	}
-
 	private appendExtension(name: string): string {
 		return `${name}.${this._configService.appConfig.fileExtension}`;
-	}
-
-	private changeEncryptionSettings(settings: Partial<Product>) {
-		if (
-			settings.lockOnSystemLock !==
-			this._configService.appConfig.lockOnSystemLock
-		) {
-			if (settings.lockOnSystemLock) {
-				powerMonitor.addListener('lock-screen', this._screenLockHandler);
-			} else {
-				powerMonitor.removeListener('lock-screen', this._screenLockHandler);
-			}
-		}
-	}
-
-	private removeBrowserSession(): Promise<void> {
-		return session.defaultSession.clearStorageData();
 	}
 
 	private createTemporaryPathFrom(path: string) {
@@ -713,21 +476,6 @@ export class DatabaseService implements IDatabaseService {
 		temp.pop();
 
 		return temp.join('') + '~';
-	}
-
-	private checkRecoveryFile(windowId): string {
-		const path = this.getRecoveryFilePath(windowId);
-
-		if (existsSync(path)) {
-			return path;
-		}
-	}
-
-	private removeRecoveryFile(windowId) {
-		const path = this.getRecoveryFilePath(windowId);
-		if (path && existsSync(path)) {
-			unlinkSync(path);
-		}
 	}
 
 	private getRecoveryFilePath(windowId: number): string {
@@ -738,25 +486,6 @@ export class DatabaseService implements IDatabaseService {
 
 		const tmpFileName = getHashCode(this.getFilePath(windowId));
 		return join(this._tmpDirectoryPath, `~${tmpFileName}.tmp`);
-	}
-
-	private async recoverFile(windowId: number) {
-		const key = this._windowService.getWindowByWebContentsId(windowId).key;
-
-		try {
-			const fileData = readFileSync(this.getRecoveryFilePath(windowId), {
-				encoding: 'base64',
-			});
-			const payload = await this._encryptionEventService.decryptDatabase(
-				fileData,
-				this.getPassword(windowId),
-				key,
-			);
-
-			return payload.decrypted;
-		} catch {
-			return null;
-		}
 	}
 
 	private sendRecentlyOpenedFiles() {

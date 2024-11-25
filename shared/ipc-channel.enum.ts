@@ -12,9 +12,6 @@ export enum IpcChannel {
 	GetAutotypeFoundEntry = 'app:getAutotypeFoundEntry',
 	AutotypeEntrySelected = 'app:autotypeEntrySelected',
 	SaveFile = 'app:saveFile',
-	Minimize = 'app:minimize',
-	Maximize = 'app:maximize',
-	MaximizedRestored = 'app:windowMaximized',
 	Lock = 'app:lock',
 	Unlock = 'app:unlock',
 	Close = 'app:close',
@@ -75,5 +72,5 @@ export enum IpcChannel {
 	ScanQrCode = 'app:scanQrCode',
 	LogError = 'app:logError',
 	GetDefaultConfig = 'app:getDefaultConfig',
-	ClearRecentlyOpened = 'app:clearRecentlyOpened'
+	ClearRecentlyOpened = 'app:clearRecentlyOpened',
 }
