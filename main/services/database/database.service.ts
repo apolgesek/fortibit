@@ -1,13 +1,19 @@
+import { IConfigService } from '@root/main/services/config';
+import { IEncryptionEventService } from '@root/main/services/encryption';
+import { IIconService } from '@root/main/services/icon';
+import { INativeApiService } from '@root/main/services/native';
+import { IWebApiService } from '@root/main/services/web-api';
+import { IWindow, IWindowService } from '@root/main/services/window';
 import { getDefaultPath, getFileFilter, getHashCode } from '@root/main/util';
 import { Product } from '@root/product';
 import { IpcChannel, VaultSchema } from '@shared-renderer/index';
 import {
 	app,
 	dialog,
+	IpcMainInvokeEvent,
 	powerMonitor,
 	safeStorage,
 	session,
-	IpcMainInvokeEvent,
 } from 'electron';
 import {
 	copyFileSync,
@@ -19,16 +25,9 @@ import {
 import { emptyDirSync, readFileSync, writeFileSync } from 'fs-extra';
 import { basename, join } from 'path';
 import { ProcessArgument } from '../../process-argument.enum';
-import { IConfigService } from '../config';
-import { IEncryptionEventService } from '../encryption/encryption-event-service.model';
-import { IIconService } from '../icon';
-import { INativeApiService } from '../native';
-import { IWebApiService } from '../web-api';
-import { IWindowService } from '../window';
-import { IWindow } from '../window/window-model';
-import { IDatabaseService } from './database-service.model';
-import { SaveFilePayload } from './save-file-payload';
 import { SaveDatabaseResult } from '../../types/save-database-result';
+import { IDatabaseService } from './';
+import { SaveFilePayload } from './save-file-payload';
 
 export class DatabaseService implements IDatabaseService {
 	private readonly _isTestMode = Boolean(

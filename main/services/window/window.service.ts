@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { Configuration } from '@root/configuration';
+import { IConfigService } from '@root/main/services/config';
+import { INativeApiService } from '@root/main/services/native';
+import { IPerformanceService } from '@root/main/services/performance';
 import { IpcChannel } from '@shared-renderer/index';
 import { randomBytes } from 'crypto';
 import {
@@ -14,12 +18,7 @@ import { join } from 'path';
 import { nextTick } from 'process';
 import { UrlObject } from 'url';
 import { ProcessArgument } from '../../process-argument.enum';
-import { IConfigService } from '../config';
-import { INativeApiService } from '../native';
-import { IPerformanceService } from '../performance/performance-service.model';
-import { IWindowService } from './';
-import { IWindow } from './window-model';
-import { Configuration } from '@root/configuration';
+import { IWindow, IWindowService } from './';
 
 const WM_SENDICONICTHUMBNAILBITMAP = 0x0323;
 const WM_DWMSENDICONICLIVEPREVIEWBITMAP = 0x0326;
@@ -173,7 +172,7 @@ export class WindowService implements IWindowService {
 					window.browserWindow.webContents.send(IpcChannel.Lock);
 				});
 			}
-		}, 1000);
+		}, 1_000);
 	}
 
 	setTitle(windowId: number, title: string): void {

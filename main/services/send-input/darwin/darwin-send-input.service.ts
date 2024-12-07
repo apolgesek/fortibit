@@ -1,5 +1,5 @@
-import { INativeApiService } from '../../native';
-import { ISendInputService } from '../send-input.model';
+import { INativeApiService } from '@root/main/services/native';
+import { ISendInputService } from '@root/main/services/send-input';
 
 export class DarwinSendInputService implements ISendInputService {
 	constructor(

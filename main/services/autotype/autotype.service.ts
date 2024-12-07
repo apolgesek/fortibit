@@ -1,14 +1,16 @@
+import { IAutotypeService } from '@root/main/services/autotype';
+import { IConfigService } from '@root/main/services/config';
+import { IDatabaseService } from '@root/main/services/database';
+import {
+	IEncryptionEventWrapper,
+	MessageEventType,
+} from '@root/main/services/encryption';
+import { INativeApiService } from '@root/main/services/native';
+import { ISendInputService, KeyCode } from '@root/main/services/send-input';
+import { IWindow, IWindowService } from '@root/main/services/window';
 import { Product } from '@root/product';
 import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
 import { IpcMainEvent, globalShortcut } from 'electron';
-import { IConfigService } from '../config';
-import { IDatabaseService } from '../database';
-import { IEncryptionEventWrapper, MessageEventType } from '../encryption';
-import { INativeApiService } from '../native';
-import { ISendInputService, KeyCode } from '../send-input';
-import { IWindowService } from '../window';
-import { IWindow } from '../window/window-model';
-import { IAutotypeService } from './autotype-service.model';
 
 type AutotypeResult = {
 	entries: PasswordEntry[];
@@ -26,10 +28,6 @@ export class AutotypeService implements IAutotypeService {
 	private _autocompleteMode = AutocompleteMode.Full;
 	private _processRunning = false;
 
-	private get _windows(): IWindow[] {
-		return this._windowService.windows;
-	}
-
 	constructor(
 		@IWindowService private readonly _windowService: IWindowService,
 		@IDatabaseService private readonly _databaseService: IDatabaseService,
@@ -39,6 +37,28 @@ export class AutotypeService implements IAutotypeService {
 		@IConfigService private readonly _configService: IConfigService,
 		@INativeApiService private readonly _nativeApiService: INativeApiService,
 	) {}
+
+	changeEncryptionSettings(settings: Partial<Product>) {
+		if (
+			settings.autoTypeEnabled ??
+			this._configService.appConfig.autoTypeEnabled
+		) {
+			this.registerAutocompleteShortcut(
+				settings.autocompleteShortcut ??
+					this._configService.appConfig.autocompleteShortcut,
+				settings.autocompleteUsernameOnlyShortcut ??
+					this._configService.appConfig.autocompleteUsernameOnlyShortcut,
+				settings.autocompletePasswordOnlyShortcut ??
+					this._configService.appConfig.autocompletePasswordOnlyShortcut,
+			);
+		} else {
+			this.unregisterAutocompleteShortcut(
+				this._configService.appConfig.autocompleteShortcut,
+				this._configService.appConfig.autocompleteUsernameOnlyShortcut,
+				this._configService.appConfig.autocompletePasswordOnlyShortcut,
+			);
+		}
+	}
 
 	registerAutocompleteShortcut(
 		shortcut: string,
@@ -76,7 +96,7 @@ export class AutotypeService implements IAutotypeService {
 
 		this._result = [];
 		// stop running listeners
-		this._windows.forEach((win) => {
+		this._windowService.vaultWindows.forEach((win) => {
 			if (win.autocompleteListener)
 				win.browserWindow.webContents.off(
 					'ipc-message',
@@ -89,12 +109,12 @@ export class AutotypeService implements IAutotypeService {
 			this.addWindowHandler(win);
 		});
 
-		// stop active autotype if entry select window is close
+		// stop active autotype if entry select window is closed
 		this._windowService.getWindow(1).on('hide', () => {
 			this._processRunning = false;
 		});
 
-		this._windows.forEach((win) => {
+		this._windowService.vaultWindows.forEach((win) => {
 			win.browserWindow.webContents.send(
 				IpcChannel.GetAutotypeFoundEntry,
 				activeWindowTitle,
@@ -144,28 +164,6 @@ export class AutotypeService implements IAutotypeService {
 		this._result = [];
 	}
 
-	changeEncryptionSettings(settings: Partial<Product>) {
-		if (
-			settings.autoTypeEnabled ??
-			this._configService.appConfig.autoTypeEnabled
-		) {
-			this.registerAutocompleteShortcut(
-				settings.autocompleteShortcut ??
-					this._configService.appConfig.autocompleteShortcut,
-				settings.autocompleteUsernameOnlyShortcut ??
-					this._configService.appConfig.autocompleteUsernameOnlyShortcut,
-				settings.autocompletePasswordOnlyShortcut ??
-					this._configService.appConfig.autocompletePasswordOnlyShortcut,
-			);
-		} else {
-			this.unregisterAutocompleteShortcut(
-				this._configService.appConfig.autocompleteShortcut,
-				this._configService.appConfig.autocompleteUsernameOnlyShortcut,
-				this._configService.appConfig.autocompletePasswordOnlyShortcut,
-			);
-		}
-	}
-
 	private addWindowHandler(win: IWindow) {
 		const listener = (
 			event: Electron.Event,
@@ -180,7 +178,7 @@ export class AutotypeService implements IAutotypeService {
 					windowId: (event as IpcMainEvent).sender.id,
 				});
 
-				if (this._windows.length - 1 === this._result.length) {
+				if (this._windowService.vaultWindows.length === this._result.length) {
 					const foundEntries: PasswordEntry[] = this._result.reduce(
 						(arr, current) => [...arr, ...current.entries],
 						[],
@@ -225,18 +223,14 @@ export class AutotypeService implements IAutotypeService {
 	}
 
 	private handleNoEntriesFound() {
-		const dbContextWindows = this._windows.filter(
-			(x) => x.browserWindow.id !== this._windowService.getWindow(1).id,
-		);
-
 		// if there are no unlocked databases restore all windows
 		if (
-			dbContextWindows.length === 0 ||
-			dbContextWindows.every(
+			this._windowService.vaultWindows.length === 0 ||
+			this._windowService.vaultWindows.every(
 				(x) => this._databaseService.getPassword(x.browserWindow.id) === null,
 			)
 		) {
-			dbContextWindows.forEach((window) => {
+			this._windowService.vaultWindows.forEach((window) => {
 				if (window.browserWindow.isMinimized()) {
 					window.browserWindow.restore();
 				}

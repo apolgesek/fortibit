@@ -3,8 +3,8 @@ import { IAsyncScheduler } from './async-scheduler.interface';
 
 export abstract class BaseAsyncQueueScheduler implements IAsyncScheduler {
 	protected readonly items: IAsyncQueue<unknown>[];
-	protected readonly rateLimitExceededMs = 60 * 1_000;
-	protected readonly successMs = 15 * 1_000;
+	protected readonly rateLimitExceededMs: number;
+	protected readonly successMs: number;
 
 	private readonly _timeMarginMs = 5 * 1_000;
 
@@ -13,8 +13,8 @@ export abstract class BaseAsyncQueueScheduler implements IAsyncScheduler {
 
 	constructor(
 		items: IAsyncQueue<unknown>[],
-		rateLimitExceededMs?: number,
-		successMs?: number,
+		rateLimitExceededMs: number = 60 * 1_000,
+		successMs: number = 15 * 1_000,
 	) {
 		this.items = items;
 		this.rateLimitExceededMs = rateLimitExceededMs;

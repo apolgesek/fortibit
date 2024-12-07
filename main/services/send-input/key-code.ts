@@ -7,7 +7,7 @@ export class KeyCode {
 	public static TAB = KeyCode.getKeyCode(Key.Tab);
 	public static ENTER = KeyCode.getKeyCode(Key.Enter);
 
-	private static _keyMap: { [key: number]: number };
+	private static _keyMap: Record<number, number>;
 
 	private static getKeyCode(key: Key): number {
 		if (!KeyCode._keyMap) {

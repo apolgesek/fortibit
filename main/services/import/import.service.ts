@@ -1,7 +1,5 @@
 import { ImportHandler } from '../../../shared';
-import { IConfigService } from '../config';
 import { IEncryptionEventWrapper } from '../encryption';
-import { IWindowService } from '../window';
 import { BitwardenHandler } from './handlers/bitwarden-handler';
 import { KeePassHandler } from './handlers/keepass-handler';
 import { LastpassHandler } from './handlers/lastpass-handler';
@@ -14,10 +12,8 @@ export class ImportService implements IImportService {
 	private _handler: IImportHandler;
 
 	constructor(
-		@IWindowService private readonly _windowService: IWindowService,
 		@IEncryptionEventWrapper
 		private readonly _encryptionEventWrapper: IEncryptionEventWrapper,
-		@IConfigService private readonly _configService: IConfigService,
 	) {}
 
 	setHandler(type: ImportHandler) {

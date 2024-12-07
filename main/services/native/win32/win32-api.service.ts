@@ -1,6 +1,6 @@
+import { INativeApiService } from '@root/main/services/native';
 import { ChildProcess, fork } from 'child_process';
 import { join } from 'path';
-import { INativeApiService } from '../native-api.model';
 import { MessageEventType } from './message-event-type.enum';
 
 class NativeCore {

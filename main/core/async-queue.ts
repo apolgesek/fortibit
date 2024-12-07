@@ -22,7 +22,7 @@ export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 		private readonly maxRetries = 3,
 	) {}
 
-	async process() {
+	async process(): Promise<Result> {
 		if (this.queueSize === 0) {
 			return Promise.resolve(Result.Success);
 		}
@@ -46,7 +46,7 @@ export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 								...batch[j],
 								[attempts]: batch[j][attempts as unknown as string] + 1,
 							};
-							
+
 							if (batch[j][attempts as unknown as string] < this.maxRetries) {
 								this.add({ ...batch[j], [toRetry]: true });
 							}
@@ -54,9 +54,11 @@ export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 					}
 				});
 
-				this.queue.splice(0, this.batchSize);
+				this.queue.splice(0, Math.min(this.batchSize, batch.length));
 
-				if (result.some(r => r.status === 'rejected' && r.reason.code === 429)) {
+				if (
+					result.some((r) => r.status === 'rejected' && r.reason.code === 429)
+				) {
 					return Promise.resolve(Result.RateLimitExceeded);
 				} else {
 					return Promise.resolve(Result.Success);

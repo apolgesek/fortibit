@@ -12,4 +12,5 @@ module.exports = {
 		}),
 	},
 	modulePathIgnorePatterns: ['out-tsc', 'release'],
+	testMatch: ['<rootDir>/__tests__/**/*.test.ts'],
 };

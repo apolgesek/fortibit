@@ -5,7 +5,10 @@ import { XmlDataImporter } from './xml-data-importer';
 export class KeePassHandler extends XmlDataImporter<any> {
 	protected handlerType = ImportHandler.KeePass;
 	protected mapFn = (data) => {
-		const groups = data.KeePassFile.Root.Group;
+		const groups = data?.KeePassFile?.Root?.Group;
+
+		if (!groups) throw new Error('Invalid KeePass file');
+
 		return Array.isArray(groups)
 			? groups.map((x) => this.mapEntries(x)).flat()
 			: this.mapEntries(groups.Entry);

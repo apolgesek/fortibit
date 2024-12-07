@@ -1,8 +1,8 @@
 import { ProcessArgument } from '@root/main/process-argument.enum';
-import { IpcMainEvent, app, ipcMain } from 'electron';
-import { INativeApiService } from '../../native';
-import { ISendInputService } from './../send-input.model';
+import { INativeApiService } from '@root/main/services/native';
+import { ISendInputService } from '@root/main/services/send-input';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
+import { IpcMainEvent, app, ipcMain } from 'electron';
 
 export class Win32SendInputService implements ISendInputService {
 	private readonly _keypressDelayMs = 0;

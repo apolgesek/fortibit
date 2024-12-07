@@ -114,19 +114,12 @@ export class SingleInstanceServices extends ServiceCollection {
 
 		this.set(
 			IImportService,
-			new ImportService(
-				this.get(IWindowService),
-				this.get(IEncryptionEventWrapper),
-				this.get(IConfigService),
-			),
+			new ImportService(this.get(IEncryptionEventWrapper)),
 		);
 
 		this.set(
 			IExportService,
-			new ExportService(
-				this.get(IEncryptionEventWrapper),
-				this.get(IConfigService),
-			),
+			new ExportService(this.get(IEncryptionEventWrapper)),
 		);
 
 		this.set(
@@ -207,6 +200,7 @@ export class SingleInstanceServices extends ServiceCollection {
 			new ExportIpcEventHandler(
 				this.get(IExportService),
 				this.get(IWindowService),
+				this.get(IConfigService),
 			),
 		);
 

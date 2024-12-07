@@ -58,15 +58,15 @@ export class WebApiService implements IWebApiService {
 			},
 		);
 
-		this._scheduler = new RoundRobinScheduler([
-			this._secureUrlQueue,
-			this._tfaQueue,
-		], 10);
+		this._scheduler = new RoundRobinScheduler(
+			[this._secureUrlQueue, this._tfaQueue],
+			10,
+		);
 		this._scheduler.initialize();
 	}
 
 	checkSecureProtocol(windowId: number, entries: PasswordEntry[]) {
-		// entries = Array.from(Array(500).keys()).map(() => ({ ...entries[0], url: 'http://wykop.pl', isSecureProtocolAvailable: false }));
+		// entries = Array.from(Array(500).keys()).map(() => ({ ...entries[0], url: 'http://google.pl', isSecureProtocolAvailable: false }));
 		const batches = this.createBatches(entries, 100);
 
 		batches.forEach((batch) => {
@@ -85,7 +85,7 @@ export class WebApiService implements IWebApiService {
 	}
 
 	checkTfa(windowId: number, entries: PasswordEntry[]) {
-		// entries = Array.from(Array(600).keys()).map(() => ({ ...entries[0], url: 'http://wykop.pl', isTfaAvailable: false }));
+		// entries = Array.from(Array(600).keys()).map(() => ({ ...entries[0], url: 'http://google.pl', isTfaAvailable: false }));
 		const batches = this.createBatches(entries, 100);
 
 		batches.forEach((batch) => {

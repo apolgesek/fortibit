@@ -1,31 +1,15 @@
-import { CsvWriter, getDefaultPath, getFileFilter } from '@root/main/util';
-import { dialog } from 'electron';
+import { CsvWriter } from '@root/main/util';
 import { PasswordEntry } from '../../../shared';
-import { IConfigService } from '../config';
 import { IEncryptionEventWrapper, MessageEventType } from '../encryption';
-import { IWindow } from '../window/window-model';
 import { IExportService } from './export-service.model';
 
 export class ExportService implements IExportService {
 	constructor(
 		@IEncryptionEventWrapper
 		private readonly _encryptionEventWrapper: IEncryptionEventWrapper,
-		@IConfigService private readonly _configService: IConfigService,
 	) {}
 
-	async export(window: IWindow, database: string): Promise<boolean> {
-		const saveDialogReturnValue = await dialog.showSaveDialog(
-			window.browserWindow,
-			{
-				defaultPath: getDefaultPath(this._configService.appConfig, ''),
-				filters: [getFileFilter(this._configService.appConfig, 'csv')],
-			},
-		);
-
-		if (saveDialogReturnValue.canceled) {
-			return false;
-		}
-
+	async export(key: string, path: string, database: string): Promise<boolean> {
 		const parsedDb = JSON.parse(database);
 		const stores = parsedDb.data.data;
 		const entriesStore = stores.find((x) => x.tableName === 'entries');
@@ -37,9 +21,10 @@ export class ExportService implements IExportService {
 
 		const payload = (await this._encryptionEventWrapper.processEventAsync(
 			encryptionEvent,
-			window.key,
+			key,
 		)) as { error: string; decrypted: PasswordEntry[] };
-		CsvWriter.writeFile(saveDialogReturnValue.filePath, payload.decrypted, [
+
+		CsvWriter.writeFile(path, payload.decrypted, [
 			'title',
 			'username',
 			'password',

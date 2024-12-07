@@ -5,16 +5,17 @@ import {
 } from '@root/main/services/encryption';
 import { IImportHandler } from '@root/main/services/import';
 import { BitwardenHandler } from '@root/main/services/import/handlers/bitwarden-handler';
+import { KeePassHandler } from '@root/main/services/import/handlers/keepass-handler';
 import { LastpassHandler } from '@root/main/services/import/handlers/lastpass-handler';
 import { OnePasswordHandler } from '@root/main/services/import/handlers/onepassword-handler';
+import { PasswordEntry } from '@shared-renderer/password-entry.model';
 import { normalize } from 'path';
+import { mockIpcHandlers } from '../mocks/ipc-handlers';
+import { mockServices } from '../mocks/services';
 
-jest.mock('@root/main/services/autotype', () => jest.fn());
-jest.mock('@root/main/services/window', () => jest.fn());
-jest.mock('@root/main/services/icon', () => jest.fn());
-jest.mock('@root/main/services/web-api', () => jest.fn());
-jest.mock('@root/main/services/database', () => jest.fn());
-jest.mock('@root/main/services/clipboard', () => jest.fn());
+mockServices();
+mockIpcHandlers();
+
 jest.mock('@root/main/services/config', () => {
 	return {
 		ConfigService: jest.fn(),
@@ -32,22 +33,44 @@ jest.mock('@root/main/services/encryption', () => {
 	};
 });
 
-describe('Import service - get metadata', () => {
-	const cases: [
-		name: string,
-		path: string,
-		handler: new (
-			encryptionEventWrapper: IEncryptionEventWrapper,
-		) => IImportHandler,
-	][] = [
-		['OnePassword', 'onepassword-valid.csv', OnePasswordHandler],
-		['Bitwarden', 'bitwarden-valid.csv', BitwardenHandler],
-		['LastPass', 'lastpass-valid.csv', LastpassHandler],
-	];
+const cases: [
+	name: string,
+	path: string,
+	handler: new (
+		encryptionEventWrapper: IEncryptionEventWrapper,
+	) => IImportHandler,
+	props: (keyof PasswordEntry)[],
+][] = [
+	[
+		'OnePassword',
+		'onepassword-valid.csv',
+		OnePasswordHandler,
+		['title', 'username', 'password', 'url', 'notes', 'otpAuth'],
+	],
+	[
+		'Bitwarden',
+		'bitwarden-valid.csv',
+		BitwardenHandler,
+		['title', 'username', 'password', 'url', 'notes', 'otpAuth'],
+	],
+	[
+		'LastPass',
+		'lastpass-valid.csv',
+		LastpassHandler,
+		['title', 'username', 'password', 'url', 'notes', 'otpAuth'],
+	],
+	[
+		'KeePass',
+		'keepass-valid.xml',
+		KeePassHandler,
+		['title', 'username', 'password', 'url', 'notes'],
+	],
+];
 
+describe('Import service - get metadata', () => {
 	test.each(cases)(
 		'Valid %p file metadata should be fetched successfully',
-		async (name, path, handler) => {
+		async (_, path, handler) => {
 			const metadata = await new handler(null).getMetadata({
 				filePaths: [normalize(__dirname + `/files/${path}`)],
 				canceled: false,
@@ -59,10 +82,14 @@ describe('Import service - get metadata', () => {
 
 	test.each(cases)(
 		'Invalid %p file metadata should fail processing',
-		async (name, path, handler) => {
+		async (_, __, handler) => {
+			const instance = new handler(null);
+
 			const action = () =>
-				new handler(null).getMetadata({
-					filePaths: [normalize(__dirname + '/files/invalid.csv')],
+				instance.getMetadata({
+					filePaths: [
+						normalize(__dirname + `/files/invalid.${instance.fileExtension}`),
+					],
 					canceled: false,
 				});
 
@@ -72,21 +99,9 @@ describe('Import service - get metadata', () => {
 });
 
 describe('Import service - import', () => {
-	const cases: [
-		name: string,
-		path: string,
-		handler: new (
-			encryptionEventWrapper: IEncryptionEventWrapper,
-		) => IImportHandler,
-	][] = [
-		['OnePassword', 'onepassword-valid.csv', OnePasswordHandler],
-		['Bitwarden', 'bitwarden-valid.csv', BitwardenHandler],
-		['LastPass', 'lastpass-valid.csv', LastpassHandler],
-	];
-
 	test.each(cases)(
 		'Valid %p file should be imported successfully',
-		async (name, path, handler) => {
+		async (_, path, handler, props) => {
 			const result = await new handler(
 				new EncryptionEventWrapper(new ConfigService()),
 			).import('test', normalize(__dirname + `/files/${path}`));
@@ -95,12 +110,9 @@ describe('Import service - import', () => {
 			expect(parsedResult.length).toBe(20);
 
 			parsedResult.forEach((element) => {
-				expect(element).toHaveProperty('title');
-				expect(element).toHaveProperty('username');
-				expect(element).toHaveProperty('password');
-				expect(element).toHaveProperty('url');
-				expect(element).toHaveProperty('notes');
-				expect(element).toHaveProperty('otpAuth');
+				props.forEach((prop) => {
+					expect(element).toHaveProperty(prop);
+				});
 			});
 		},
 	);

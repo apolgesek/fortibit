@@ -28,7 +28,7 @@
 		"electron:local": "npm run build:prod && electron .",
 		"electron:windows": "node release-scripts/clean.js && npm run build:prod && electron-builder build --dir && node release-scripts/package.js && makensis release-scripts/nsis/Fortibit.nsi && makensis release-scripts/nsis/Fortibit-update.nsi",
 		"electron:mac": "npm run build:prod && electron-builder build --mac",
-		"test": "jest __tests__",
+		"test": "jest",
 		"test-renderer": "ng test --watch=false",
 		"test-renderer:watch": "ng test",
 		"e2e": "npm run build:e2e && playwright test -c e2e/playwright.config.ts e2e/",

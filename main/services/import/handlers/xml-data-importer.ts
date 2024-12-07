@@ -17,27 +17,38 @@ export abstract class XmlDataImporter<T> implements IImportHandler {
 	async getMetadata(
 		fileData: Electron.OpenDialogReturnValue,
 	): Promise<ImportMetadata> {
-		return new Promise((resolve) => {
+		return new Promise((resolve, reject) => {
 			const xmlFile = readFileSync(fileData.filePaths[0]).toString();
 			const parser = new XMLParser();
-			const data = parser.parse(xmlFile);
-			const output = this.mapFn(data);
 
-			const payload = {
-				filePath: fileData.filePaths[0],
-				size: output.length,
-				type: this.handlerType,
-			};
+			try {
+				const data = parser.parse(xmlFile);
+				const output = this.mapFn(data);
 
-			resolve(payload);
+				const payload = {
+					filePath: fileData.filePaths[0],
+					size: output.length,
+					type: this.handlerType,
+				};
+
+				resolve(payload);
+			} catch {
+				reject('There was an error importing file');
+			}
 		});
 	}
 
 	async import(key: string, path: string): Promise<string> {
 		const xmlFile = readFileSync(path).toString();
 		const parser = new XMLParser();
-		const data = parser.parse(xmlFile);
-		const output = this.mapFn(data);
+
+		let output: Partial<PasswordEntry>[] = [];
+		try {
+			const data = parser.parse(xmlFile);
+			output = this.mapFn(data);
+		} catch {
+			return Promise.reject('There was an error importing file');
+		}
 
 		let encryptedOutput;
 
@@ -62,7 +73,7 @@ export abstract class XmlDataImporter<T> implements IImportHandler {
 				}),
 			);
 		} catch {
-			Promise.reject('Encryption error occured');
+			return Promise.reject('Encryption error occured');
 		}
 
 		const serialized = JSON.stringify(encryptedOutput);
