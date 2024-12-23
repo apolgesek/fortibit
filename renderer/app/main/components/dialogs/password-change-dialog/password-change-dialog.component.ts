@@ -15,14 +15,20 @@ import { valueMatchValidator } from '@app/shared/validators/value-match.validato
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { Observable, delay, from, map, switchMap, tap, timer } from 'rxjs';
+import { Observable, from, map, switchMap, tap, timer } from 'rxjs';
+import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 
 @Component({
 	selector: 'app-password-change-dialog',
 	templateUrl: './password-change-dialog.component.html',
 	styleUrls: ['./password-change-dialog.component.scss'],
 	standalone: true,
-	imports: [ReactiveFormsModule, ModalComponent, ShowPasswordIconComponent],
+	imports: [
+		ReactiveFormsModule,
+		ModalComponent,
+		ShowPasswordIconComponent,
+		ValidationErrorComponent,
+	],
 })
 export class PasswordChangeDialogComponent implements IModal {
 	public readonly isControlInvalid = isControlInvalid;

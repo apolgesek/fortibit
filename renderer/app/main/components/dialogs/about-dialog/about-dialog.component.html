@@ -44,6 +44,9 @@
 				@case (updateState.ConnectionFailed) {
 					Error occured when checking for update
 				}
+				@case (updateState.FileCorrupted) {
+					Update file is corrupted
+				}
 				@case (updateState.Available) {
 					<div
 						style="

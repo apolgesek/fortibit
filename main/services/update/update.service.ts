@@ -1,15 +1,18 @@
 import { IpcChannel, UpdateState } from '@shared-renderer/index';
+import { createHash } from 'crypto';
 import { app } from 'electron';
 import {
+	createReadStream,
 	emptyDirSync,
 	existsSync,
 	mkdirSync,
 	readdirSync,
 	renameSync,
 } from 'fs-extra';
-import { request } from 'https';
+import { zipObject } from 'lodash';
 import { arch, platform } from 'os';
 import { join } from 'path';
+import { pipeline } from 'stream/promises';
 import { UpdateInformation } from '../../types/update-information';
 import { IConfigService } from '../config/config-service.model';
 import { IFileService } from '../file/file-service.model';
@@ -17,6 +20,21 @@ import { INativeApiService } from '../native/native-api.model';
 import { IWindowService } from '../window/window-service.model';
 import { ICommandHandler } from './command-handler.model';
 import { IUpdateService } from './update-service.model';
+
+async function computeHash(filePath: string) {
+	const input = createReadStream(filePath);
+	const hash = createHash('sha256');
+
+	await pipeline(input, hash);
+
+	return hash.digest('hex');
+}
+
+type UpdateMetadata = {
+	version: string;
+	checksum: string;
+	download_url: Record<'win32' | 'darwin', string>;
+};
 
 export class UpdateService implements IUpdateService {
 	private readonly updateDirectory: string;
@@ -49,69 +67,50 @@ export class UpdateService implements IUpdateService {
 		return this._updateInformation;
 	}
 
-	checkForUpdates(): Promise<boolean> {
+	async checkForUpdates(): Promise<boolean> {
 		if (!existsSync(this.updateDirectory)) {
 			mkdirSync(this.updateDirectory, { recursive: true });
 		}
 
-		return new Promise((resolve, reject) => {
-			if (
-				this.updateState === UpdateState.Available ||
-				this.updateState === UpdateState.Downloaded
-			) {
-				// reannounce update status
-				this.setUpdateState(this.updateState);
-				resolve(true);
-				return;
-			}
+		if (
+			this.updateState === UpdateState.Available ||
+			this.updateState === UpdateState.Downloaded
+		) {
+			// reannounce update status
+			this.setUpdateState(this.updateState);
+			return true;
+		}
 
-			const req = request(this._configService.appConfig.updateUrl, (res) => {
-				let body = '';
-
-				res.on('data', async (data: Buffer) => {
-					body += data.toString();
-				});
-
-				res.on('error', (err) => {
-					reject(err);
-				});
-
-				res.on('end', () => {
-					const idx = process.platform === 'win32' ? 0 : 1;
-					const updateMetadataArray = body.trim().split('\n')[idx].split(',');
-					const updateMetadata = {
-						productName: updateMetadataArray[0],
-						version: updateMetadataArray[1],
-						checksum: updateMetadataArray[2],
-						commit: updateMetadataArray[3],
-					};
-
-					const isUpdateAvailable =
-						updateMetadata.version.localeCompare(app.getVersion()) === 1;
-
-					if (isUpdateAvailable) {
-						this.resolveUpdateInformation(updateMetadata);
-						this.setUpdateState(UpdateState.Available);
-
-						if (!this.isAnyValidUpdateFile()) {
-							this.getUpdate();
-						}
-					} else {
-						this.setUpdateState(UpdateState.NotAvailable);
-					}
-
-					resolve(isUpdateAvailable);
-				});
-			}).on('error', (err) => {
-				reject(err);
-			});
-
-			req.end();
+		const response = await fetch(this._configService.appConfig.updateUrl, {
+			method: 'GET',
+			cache: 'no-store',
 		});
+
+		if (response.status >= 300)
+			throw new Error(`Failed to fetch update metadata: ${response.status}`);
+
+		const updateMetadata: UpdateMetadata = await response.json();
+
+		const isUpdateAvailable =
+			updateMetadata.version.localeCompare(app.getVersion()) === 1;
+
+		if (isUpdateAvailable) {
+			this.resolveUpdateInformation(updateMetadata);
+			this.setUpdateState(UpdateState.Available);
+
+			const isAnyValidUpdateFile = await this.isAnyValidUpdateFile();
+			if (!isAnyValidUpdateFile) {
+				this.getUpdate();
+			}
+		} else {
+			this.setUpdateState(UpdateState.NotAvailable);
+		}
+
+		return isUpdateAvailable;
 	}
 
 	public isNewUpdateAvailable(): boolean {
-		return !!this._updateInformation;
+		return Boolean(this._updateInformation);
 	}
 
 	async updateAndRelaunch(): Promise<void> {
@@ -133,21 +132,34 @@ export class UpdateService implements IUpdateService {
 		});
 	}
 
-	private isFileVerified(filePath: string): boolean {
-		return this._nativeApiService.verifySignature(
-			filePath,
-			this._configService.appConfig.signatureSubject,
+	private async isFileVerified(filePath: string): Promise<boolean> {
+		const computedHash = await computeHash(filePath);
+		const isMatchingChecksum =
+			this._updateInformation.checksum.toUpperCase() ===
+			computedHash.toUpperCase();
+
+		return (
+			isMatchingChecksum &&
+			this._nativeApiService.verifySignature(
+				filePath,
+				this._configService.appConfig.signatureSubject,
+			)
 		);
 	}
 
-	private isAnyValidUpdateFile(): boolean {
-		const updateFilePaths = readdirSync(this.updateDirectory);
+	private async isAnyValidUpdateFile(): Promise<boolean> {
+		const updateFileNames = readdirSync(this.updateDirectory);
+		const verifyResults = await Promise.all(
+			updateFileNames.map((filePath) =>
+				this.isFileVerified(join(this.updateDirectory, filePath)),
+			),
+		);
+
+		const zipped = zipObject(updateFileNames, verifyResults);
 
 		if (
-			updateFilePaths.some(
-				(fileName) =>
-					fileName === this._executablePath &&
-					this.isFileVerified(join(this.updateDirectory, fileName)),
+			updateFileNames.some(
+				(fileName) => fileName === this._executablePath && zipped[fileName],
 			)
 		) {
 			this.setUpdateState(UpdateState.Downloaded);
@@ -173,8 +185,12 @@ export class UpdateService implements IUpdateService {
 				this._updateDestinationPath,
 				this.getExecutablePath(this._updateDestinationPath),
 			);
-			setTimeout(() => {
-				this.isAnyValidUpdateFile();
+
+			setTimeout(async () => {
+				const isAnyValidUpdateFile = await this.isAnyValidUpdateFile();
+				if (!isAnyValidUpdateFile) {
+					this.setUpdateState(UpdateState.FileCorrupted);
+				}
 			});
 		};
 
@@ -205,7 +221,7 @@ export class UpdateService implements IUpdateService {
 		return pathParts.join('.');
 	}
 
-	private resolveUpdateInformation(updateMetadata) {
+	private resolveUpdateInformation(updateMetadata: UpdateMetadata) {
 		this._updateInformation = {
 			version: null,
 			fileName: null,
@@ -219,12 +235,7 @@ export class UpdateService implements IUpdateService {
 		}_${platform()}_${arch()}_update.${
 			this._configService.appConfig.temporaryFileExtension
 		}`;
-		this._updateInformation.url = `${
-			this._configService.appConfig.webUrl
-		}/update/${this._updateInformation.fileName.replace(
-			`.${this._configService.appConfig.temporaryFileExtension}`,
-			`.${this.fileExt}`,
-		)}`;
+		this._updateInformation.url = updateMetadata.download_url[platform()];
 		this._updateInformation.checksum = updateMetadata.checksum;
 		this._updateDestinationPath = join(
 			this.updateDirectory,

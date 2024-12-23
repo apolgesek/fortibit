@@ -22,6 +22,7 @@ import { IAdditionalData, IModal } from '@app/shared';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { FeatherModule } from 'angular-feather';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { ValidationErrorComponent } from '../../../../shared/components/validation-error/validation-error.component';
 
 export type GroupDialogDataPayload = {
 	mode: 'new' | 'edit';
@@ -32,7 +33,12 @@ export type GroupDialogDataPayload = {
 	templateUrl: './group-dialog.component.html',
 	styleUrls: ['./group-dialog.component.scss'],
 	standalone: true,
-	imports: [ReactiveFormsModule, FeatherModule, ModalComponent],
+	imports: [
+		ReactiveFormsModule,
+		FeatherModule,
+		ModalComponent,
+		ValidationErrorComponent,
+	],
 })
 export class GroupDialogComponent implements IModal, OnInit {
 	public readonly ref!: ComponentRef<GroupDialogComponent>;

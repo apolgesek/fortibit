@@ -6,6 +6,7 @@ import { ShowPasswordIconComponent } from '@app/shared/components/show-password-
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { FeatherModule } from 'angular-feather';
+import { ValidationErrorComponent } from '../../../shared/components/validation-error/validation-error.component';
 
 @Component({
 	selector: 'app-master-password-setup',
@@ -17,6 +18,7 @@ import { FeatherModule } from 'angular-feather';
 		FeatherModule,
 		ShowPasswordIconComponent,
 		RouterLink,
+		ValidationErrorComponent,
 	],
 })
 export class MasterPasswordSetupComponent {

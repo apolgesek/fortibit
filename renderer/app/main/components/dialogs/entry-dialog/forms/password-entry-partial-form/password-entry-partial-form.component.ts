@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+	AfterViewInit,
 	ChangeDetectorRef,
 	Component,
 	DestroyRef,
@@ -8,7 +9,7 @@ import {
 	OnInit,
 	QueryList,
 	ViewChildren,
-	inject, AfterViewInit,
+	inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -24,6 +25,7 @@ import {
 } from '@app/core/services';
 import { EntryDialogDataPayload, IAdditionalData } from '@app/shared';
 import { PasswordStrengthMeterComponent } from '@app/shared/components/password-strength-meter/password-strength-meter.component';
+import { ValidationErrorComponent } from '@app/shared/components/validation-error/validation-error.component';
 import { isControlInvalid } from '@app/utils';
 import { Configuration } from '@config/configuration';
 import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
@@ -41,11 +43,14 @@ import { EntryForm, PasswordFormGroup } from '../../entry-dialog.component';
 		FeatherModule,
 		ReactiveFormsModule,
 		PasswordStrengthMeterComponent,
+		ValidationErrorComponent,
 	],
 	templateUrl: './password-entry-partial-form.component.html',
 	styleUrls: ['./password-entry-partial-form.component.scss'],
 })
-export class PasswordEntryPartialFormComponent implements OnInit, AfterViewInit {
+export class PasswordEntryPartialFormComponent
+	implements OnInit, AfterViewInit
+{
 	@ViewChildren('passwordInput')
 	public readonly passwordInputs: QueryList<ElementRef>;
 	@Input() public readonly isReadOnly = false;

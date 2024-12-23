@@ -75,7 +75,7 @@ export class ConfigService implements IConfigService {
 			updateUrl: productInformation.updateUrl,
 			webUrl: productInformation.webUrl,
 			webApiUrl: productInformation.webApiUrl,
-			iconServiceUrl: productInformation.iconServiceUrl,
+			cdnUrl: productInformation.cdnUrl,
 			signatureSubject: productInformation.signatureSubject,
 			leakedPasswordsUrl: productInformation.leakedPasswordsUrl,
 			compressionEnabled: productInformation.compressionEnabled,

@@ -38,9 +38,12 @@
 				placeholder="Title"
 			/>
 		</div>
-		@if (isControlInvalid(title)) {
-			<div id="title-invalid" class="validation-error">Title is required</div>
-		}
+		<app-validation-error
+			id="title-invalid"
+			controlName="title"
+			errors="Title is required"
+		>
+		</app-validation-error>
 		<ng-container
 			*ngComponentOutlet="
 				formPartialComponent;

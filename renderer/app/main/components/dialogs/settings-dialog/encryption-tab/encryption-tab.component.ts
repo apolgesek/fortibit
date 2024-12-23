@@ -1,34 +1,36 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfigService } from '@app/core/services';
 import { isControlInvalid } from '@app/utils';
 import { Product } from '@config/product';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { ValidationErrorComponent } from '../../../../../shared/components/validation-error/validation-error.component';
 
 @Component({
 	selector: 'app-encryption-tab',
 	templateUrl: './encryption-tab.component.html',
 	styleUrls: ['./encryption-tab.component.scss'],
 	standalone: true,
-	imports: [ReactiveFormsModule],
+	imports: [ReactiveFormsModule, ValidationErrorComponent],
 })
-export class EncryptionTabComponent implements OnInit, OnDestroy {
+export class EncryptionTabComponent implements OnInit {
 	public readonly isControlInvalid = isControlInvalid;
-	private readonly destroyed: Subject<void> = new Subject();
 	private readonly debounceTimeMs = 500;
 
 	private readonly configService = inject(ConfigService);
 	private readonly formBuilder = inject(FormBuilder);
+	private readonly destroyRef = inject(DestroyRef);
 
 	private readonly _encryptionForm = this.formBuilder.group({
 		passwordLength: [
 			0,
 			{
-				validators: Validators.compose([
+				validators: [
 					Validators.required,
 					Validators.min(6),
 					Validators.max(32),
-				]),
+				],
 			},
 		],
 		lowercase: [false],
@@ -54,7 +56,7 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
 			.pipe(
 				debounceTime(this.debounceTimeMs),
 				distinctUntilChanged(),
-				takeUntil(this.destroyed),
+				takeUntilDestroyed(this.destroyRef),
 			)
 			.subscribe((form) => {
 				if (this.encryptionForm.invalid) {
@@ -73,13 +75,6 @@ export class EncryptionTabComponent implements OnInit, OnDestroy {
 
 				this.configService.setConfig(configPartial);
 			});
-	}
-
-	ngOnDestroy() {
-		setTimeout(() => {
-			this.destroyed.next();
-			this.destroyed.complete();
-		}, this.debounceTimeMs);
 	}
 
 	onNumberChange(event: Event, path: string, maxLength: number) {

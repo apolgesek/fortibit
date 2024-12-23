@@ -1,6 +1,5 @@
-/* eslint-disable @angular-eslint/no-output-native */
-/* eslint-disable @angular-eslint/no-output-rename */
 /* eslint-disable @angular-eslint/no-output-on-prefix */
+/* eslint-disable @angular-eslint/no-output-rename */
 import {
 	AfterViewInit,
 	ContentChildren,
@@ -35,21 +34,22 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class DropdownDirective implements AfterViewInit {
 	@Input() public select = false;
 
-	@Output('open') public onOpen: EventEmitter<DropdownDirective> =
-		new EventEmitter();
-	@Output('close') public onClose: EventEmitter<DropdownDirective> =
-		new EventEmitter();
+	@Output('open') public onOpen = new EventEmitter<DropdownDirective>();
+	@Output('close') public onClose = new EventEmitter<DropdownDirective>();
 
 	@ContentChildren(MenuItemDirective, { descendants: true })
 	public menuItems: QueryList<MenuItemDirective>;
 
-	private dropdownClosed: Subject<void> = new Subject();
+	private dropdownClosed = new Subject<void>();
 	private _index: number;
 
 	private readonly destroyRef = inject(DestroyRef);
 	private readonly element = inject(ElementRef);
 	private readonly dropdownState = inject(DropdownStateService);
-	private readonly parentDropdownState = inject(DropdownStateService, { optional: true, skipSelf: true });
+	private readonly parentDropdownState = inject(DropdownStateService, {
+		optional: true,
+		skipSelf: true,
+	});
 	private readonly menuService = inject(MenuService, { optional: true });
 
 	@HostBinding('class.open')

@@ -119,7 +119,6 @@ class MainProcess {
 
 	constructor() {
 		process.env.TEST_MODE = this._isTestMode ? '1' : '0';
-
 		this._services = new SingleInstanceServices();
 		this._fileArg = process.argv.find((x) =>
 			x.endsWith(this._services.get(IConfigService).appConfig.fileExtension),
@@ -186,9 +185,15 @@ class MainProcess {
 	}
 
 	private async onReady() {
-		const mainWindow = this._windowService.createMainWindow();
-		const entrySelectWindow = this._windowService.createEntrySelectWindow();
 		this.registerIpcEventListeners();
+
+		const mainWindow = this._windowService.createMainWindow();
+		this.setFile(mainWindow, this._fileArg);
+
+		this._windowService.loadWindow(mainWindow, null).then(() => {
+			const entrySelectWindow = this._windowService.createEntrySelectWindow();
+			this._windowService.loadWindow(entrySelectWindow, 'entry-select');
+		});
 
 		if (this._configService.appConfig.theme === 'dark') {
 			nativeTheme.themeSource = 'dark';
@@ -204,24 +209,10 @@ class MainProcess {
 			);
 		}
 
-		this.setFile(mainWindow, this._fileArg);
-		await this._windowService.loadWindow(mainWindow, null);
-
 		try {
 			this._performanceService.mark('firstWindowLoaded');
 		} catch (err) {
 			console.log(err);
-		}
-
-		this.openDevTools(mainWindow);
-
-		await this._windowService.loadWindow(entrySelectWindow, 'entry-select');
-		this.openDevTools(entrySelectWindow);
-	}
-
-	private openDevTools(window: BrowserWindow) {
-		if (this._isDevMode) {
-			window.webContents.openDevTools({ mode: 'detach' });
 		}
 	}
 

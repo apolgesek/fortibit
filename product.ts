@@ -12,7 +12,7 @@ export type Product = {
 	commit: string;
 	webUrl: string;
 	webApiUrl: string;
-	iconServiceUrl: string;
+	cdnUrl: string;
 	updateUrl: string;
 	signatureSubject: string;
 	leakedPasswordsUrl: string;

@@ -11,9 +11,11 @@
 				(input)="onNumberChange($event, 'passwordLength', 2)"
 			/>
 		</div>
-		@if (isControlInvalid(encryptionForm.get('passwordLength'))) {
-			<div class="validation-error">Length must be between 6 and 32.</div>
-		}
+		<app-validation-error
+			controlName="passwordLength"
+			errors="Length must be between 6 and 32"
+		>
+		</app-validation-error>
 		<div class="inputgroup checkbox">
 			<label class="label" for="uppercase">Uppercase letters:</label>
 			<label class="switch">

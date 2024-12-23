@@ -104,7 +104,7 @@ export class IconService implements IIconService {
 		const formattedHostname = getDomain(url);
 
 		const fileUrl =
-			this._configService.appConfig.iconServiceUrl +
+			this._configService.appConfig.cdnUrl +
 			'/icon/' +
 			formattedHostname +
 			'.png';

@@ -31,9 +31,12 @@
 						formControlName="enabled"
 					/>
 					<label class="label" for="deleteHistory"></label>
-					<label style="display: flex; flex-direction: column" class="complex-label" for="deleteHistory">
-						<span
-							>Delete history entries older than (days):</span>
+					<label
+						style="display: flex; flex-direction: column"
+						class="complex-label"
+						for="deleteHistory"
+					>
+						<span>Delete history entries older than (days):</span>
 						<span style="color: #63797d">Range: 0-999</span>
 					</label>
 					<input
@@ -51,12 +54,11 @@
 						(input)="onNumberChange($event, 'historyDays', 3)"
 					/>
 				</div>
-				@if (isControlInvalid(maintenanceForm.get('historyDays'))) {
-					<div class="validation-error" id="history-days-invalid">
-						Invalid value
-					</div>
-				}
-
+				<app-validation-error
+					id="history-days-invalid"
+					controlName="historyDays.value"
+					errors="Invalid value"
+				></app-validation-error>
 				<div
 					class="inputgroup"
 					style="margin-top: 2rem"

@@ -24,11 +24,9 @@
 	"updateUrl": "https://fortibit.com/update/version.txt",
 	"webUrl": "https://fortibit.com",
 	"webApiUrl": "https://w6wulr0ohj.execute-api.eu-central-1.amazonaws.com/prd",
-	"iconServiceUrl": "https://d368f7is8rwkbe.cloudfront.net",
+	"cdnUrl": "https://d368f7is8rwkbe.cloudfront.net",
 	"signatureSubject": "Open Source Developer, Arkadiusz Półgęsek",
 	"leakedPasswordsUrl": "https://api.pwnedpasswords.com/range",
-	"biometricsProtectedFiles": [
-		"G:\\Mój dysk\\hasła.fbit"
-	],
+	"biometricsProtectedFiles": ["G:\\Mój dysk\\hasła.fbit"],
 	"protectWindowsFromCapture": false
 }

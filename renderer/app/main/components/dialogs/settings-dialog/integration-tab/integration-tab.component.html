@@ -3,10 +3,15 @@
 		<i-feather name="info"></i-feather>
 		<div>
 			Master password will be stored in Windows Credential Manager.<br />
-			If you change this vault's file location, you'll have to re-add the credential.
+			If you change this vault's file location, you'll have to re-add the
+			credential.
 		</div>
 	</div>
-	<form [formGroup]="integrationForm" (ngSubmit)="onSubmit()" style="margin-top: 1rem;">
+	<form
+		[formGroup]="integrationForm"
+		(ngSubmit)="onSubmit()"
+		style="margin-top: 1rem"
+	>
 		<div class="inputgroup checkbox">
 			<label class="label" for="windowsHello">Windows Hello:</label>
 			<label class="switch">
@@ -23,20 +28,29 @@
 				<div style="display: flex">
 					<span class="label">Credential name:</span> fbit:{{ filePath }}
 				</div>
-				<div style="margin-top: 1rem;">
+				<div style="margin-top: 1rem">
 					<span>Enter your master password to add the credential:</span>
-					<div class="inputgroup" style="margin-left: 0; padding: 0; width: 400px; margin-top: 1rem;">
-						<input type="password" formControlName="password" placeholder="Master password" />
+					<div
+						class="inputgroup"
+						style="margin-left: 0; padding: 0; width: 400px; margin-top: 1rem"
+					>
+						<input
+							type="password"
+							formControlName="password"
+							placeholder="Master password"
+						/>
 					</div>
-					@if (isControlInvalid(integrationForm.controls.password) || lastStatus === 'INVALID') {
+					@if (
+						isControlInvalid(integrationForm.controls.password) ||
+						lastStatus === 'INVALID'
+					) {
 						@if (integrationForm.controls.password.hasError('required')) {
-							<div class="validation-error">
-								Password is required
-							</div>
-						} @else if (integrationForm.controls.password.hasError('invalidPassword') || lastStatus === 'INVALID') {
-							<div class="validation-error">
-								Password is incorrect
-							</div>
+							<div class="validation-error">Password is required</div>
+						} @else if (
+							integrationForm.controls.password.hasError('invalidPassword') ||
+							lastStatus === 'INVALID'
+						) {
+							<div class="validation-error">Password is incorrect</div>
 						}
 					}
 				</div>

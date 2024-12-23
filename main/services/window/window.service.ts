@@ -91,12 +91,13 @@ export class WindowService implements IWindowService {
 
 		this._windows.push({ browserWindow: window, key: null });
 
-		// log performance only for the first window when the app initializes
-		if (window.id === 1) {
-			window.webContents.on('dom-ready', () => {
-				this._performanceService.mark('domReady');
-			});
-		}
+		window.webContents.once('dom-ready', () => {
+			if (this._isDevMode) {
+				window.webContents.openDevTools({ mode: 'detach' });
+			}
+
+			this._performanceService.mark('domReady');
+		});
 
 		window.webContents.setFrameRate(60);
 
@@ -126,6 +127,12 @@ export class WindowService implements IWindowService {
 		window.once('closed', () => {
 			this.removeWindow(window);
 		});
+
+		if (this._isDevMode) {
+			window.webContents.once('dom-ready', () => {
+				window.webContents.openDevTools({ mode: 'detach' });
+			});
+		}
 
 		this._windows.push({ browserWindow: window, key: null });
 		return window;

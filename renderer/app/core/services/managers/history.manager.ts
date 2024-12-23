@@ -6,7 +6,7 @@ import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class HistoryManager {
-	public readonly markDirtySource: Subject<void> = new Subject();
+	public readonly markDirtySource = new Subject<void>();
 	private readonly historyRepository: HistoryRepository = new HistoryRepository(
 		inject(DbManager),
 	);

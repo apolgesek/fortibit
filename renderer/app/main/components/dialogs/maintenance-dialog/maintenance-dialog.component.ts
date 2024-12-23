@@ -6,6 +6,7 @@ import {
 	FormControl,
 	FormGroup,
 	ReactiveFormsModule,
+	Validators,
 } from '@angular/forms';
 import { GroupId } from '@app/core/enums';
 import {
@@ -17,20 +18,12 @@ import {
 import { HistoryManager } from '@app/core/services/managers/history.manager';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { ValidationErrorComponent } from '@app/shared/components/validation-error/validation-error.component';
 import { isControlInvalid } from '@app/utils';
 import { FeatherModule } from 'angular-feather';
-import {
-	Observable,
-	combineLatest,
-	forkJoin,
-	from,
-	switchMap,
-	take,
-	tap,
-	timer,
-} from 'rxjs';
+import { Observable, forkJoin, from, switchMap, tap, timer } from 'rxjs';
 
-type ToggleableControls<K> = { [key in keyof K]: AbstractControl<any> } & {
+type ToggleableControls<K> = { [key in keyof K]: AbstractControl<unknown> } & {
 	enabled: FormControl<boolean>;
 };
 type ToggleableGroup<T extends ToggleableControls<T>> = FormGroup<T>;
@@ -40,7 +33,13 @@ type ToggleableGroup<T extends ToggleableControls<T>> = FormGroup<T>;
 	standalone: true,
 	templateUrl: './maintenance-dialog.component.html',
 	styleUrls: ['./maintenance-dialog.component.scss'],
-	imports: [ModalComponent, CommonModule, ReactiveFormsModule, FeatherModule],
+	imports: [
+		ModalComponent,
+		CommonModule,
+		ReactiveFormsModule,
+		FeatherModule,
+		ValidationErrorComponent,
+	],
 })
 export class MaintenanceDialogComponent implements IModal {
 	public readonly isControlInvalid = isControlInvalid;
@@ -59,11 +58,11 @@ export class MaintenanceDialogComponent implements IModal {
 
 	private readonly _maintenanceForm = this.formBuilder.group({
 		historyDays: this.formBuilder.group({
-			enabled: true,
-			value: 30,
+			enabled: [true],
+			value: [30, Validators.required],
 		}),
 		emptyRecycleBin: this.formBuilder.group({
-			enabled: true,
+			enabled: [true],
 		}),
 	});
 
@@ -82,7 +81,7 @@ export class MaintenanceDialogComponent implements IModal {
 
 		this.cleaningInProgress = true;
 
-		const observables: Observable<any>[] = [];
+		const observables: Observable<unknown>[] = [];
 
 		if (this.isEnabled(this.maintenanceForm.controls.historyDays)) {
 			observables.push(

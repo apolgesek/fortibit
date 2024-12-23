@@ -6,7 +6,6 @@ import {
 	NotificationService,
 	WorkspaceService,
 } from '@app/core/services';
-import { MasterPasswordSetupComponent } from '@app/main/components/master-password-setup/master-password-setup.component';
 import { HotkeyBinderDirective } from '@app/main/directives/hotkey-binder.directive';
 import { isControlInvalid } from '@app/utils';
 import { Configuration } from '@config/configuration';
@@ -14,6 +13,7 @@ import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { ValidationErrorComponent } from '../../../../../shared/components/validation-error/validation-error.component';
 
 @Component({
 	selector: 'app-general-tab',
@@ -23,8 +23,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 	imports: [
 		ReactiveFormsModule,
 		FeatherModule,
-		MasterPasswordSetupComponent,
 		HotkeyBinderDirective,
+		ValidationErrorComponent,
 	],
 })
 export class GeneralTabComponent implements OnInit {

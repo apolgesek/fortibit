@@ -26,16 +26,14 @@
 					placeholder="Name"
 				/>
 			</div>
-			@if (isControlInvalid(name)) {
-				<div class="validation-error" id="name-invalid">
-					@if (name.hasError('required')) {
-						Group name is required.
-					}
-					@if (name.hasError('maxlength')) {
-						Group name must not exceed 40 characters.
-					}
-				</div>
-			}
+			<app-validation-error
+				id="name-invalid"
+				controlName="name"
+				[errors]="{
+					required: 'Group name is required',
+					maxlength: 'Group name must not exceed 40 characters',
+				}"
+			></app-validation-error>
 		</div>
 	</div>
 	<div class="footer-container">

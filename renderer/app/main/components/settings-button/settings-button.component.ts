@@ -47,11 +47,7 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
 	public settingsLabel: string;
 
 	private readonly notificationsSource = new Subject<Notification>();
-	private updateListener: (
-		event: any,
-		state: UpdateState,
-		version: string,
-	) => void;
+	private updateListener: (_, state: UpdateState, version: string) => void;
 
 	private readonly messageBroker = inject(MessageBroker);
 	private readonly hotkeyHandler = inject(HotkeyHandler);
@@ -78,7 +74,7 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
 			takeUntilDestroyed(this.destroyRef),
 		);
 
-		this.updateListener = (_: any, state: UpdateState, version: string) => {
+		this.updateListener = (_, state: UpdateState, version: string) => {
 			this.zone.run(() => {
 				if (state !== UpdateState.Downloaded) {
 					return;

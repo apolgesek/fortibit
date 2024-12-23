@@ -27,16 +27,17 @@ import {
 	ModalRef,
 	NotificationService,
 } from '@app/core/services';
-import { CompareResult, IEntryTypeComparer } from '@app/core/services/comparers/entry-type-comparer';
+import {
+	CompareResult,
+	IEntryTypeComparer,
+} from '@app/core/services/comparers/entry-type-comparer';
 import { PasswordEntryTypeComparer } from '@app/core/services/comparers/password-entry.comparer';
 import { IEntryTypeMapper } from '@app/core/services/mappers/entry-type-mapper';
 import { PasswordEntryMapper } from '@app/core/services/mappers/password-entry.mapper';
 import { PasswordEntryPartialFormComponent } from '@app/main/components/dialogs/entry-dialog/forms/password-entry-partial-form/password-entry-partial-form.component';
 import { EntryDialogDataPayload, IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { PasswordStrengthMeterComponent } from '@app/shared/components/password-strength-meter/password-strength-meter.component';
-import { DateMaskDirective } from '@app/shared/directives/date-mask.directive';
-import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
+import { ValidationErrorComponent } from '@app/shared/components/validation-error/validation-error.component';
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { Configuration } from '@config/configuration';
@@ -89,11 +90,8 @@ export type EntryForm = FormGroup<{
 		ReactiveFormsModule,
 		FeatherModule,
 		ModalComponent,
-		DateMaskDirective,
-		TooltipDirective,
-		PasswordStrengthMeterComponent,
 		NgComponentOutlet,
-		PasswordEntryPartialFormComponent,
+		ValidationErrorComponent,
 	],
 })
 export class EntryDialogComponent
@@ -155,7 +153,7 @@ export class EntryDialogComponent
 			notes: [''],
 			autotypeExp: [''],
 			icon: [''],
-			otpCode: ['', Validators.pattern(/^([2-7A-Z]{8})+$/)]
+			otpCode: ['', Validators.pattern(/^([2-7A-Z]{8})+$/)],
 		}),
 		card: this.fb.group({
 			cardholderName: [''],
@@ -315,10 +313,10 @@ export class EntryDialogComponent
 				this.newEntryForm.value,
 				this.additionalData.payload,
 			);
-	
+
 			if (compareResult.isEqual) {
 				this.close();
-	
+
 				return;
 			}
 		}
