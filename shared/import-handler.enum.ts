@@ -3,4 +3,7 @@ export enum ImportHandler {
 	OnePassword,
 	Bitwarden,
 	Lastpass,
+	Chrome,
+	Firefox,
+	Edge,
 }

@@ -82,11 +82,31 @@
 						>
 							Lastpass &bull; CSV
 						</li>
+						<div class="submenu-label">Browsers</div>
+						<li
+							aria-hidden="true"
+							appMenuItem
+							(activate)="import(importHandler.Chrome)"
+						>
+							Chrome &bull; CSV
+						</li>
+						<li
+							aria-hidden="true"
+							appMenuItem
+							(activate)="import(importHandler.Firefox)"
+						>
+							Firefox &bull; CSV
+						</li>
+						<li
+							aria-hidden="true"
+							appMenuItem
+							(activate)="import(importHandler.Edge)"
+						>
+							Edge &bull; CSV
+						</li>
 					</div>
 				</div>
-				<li appMenuItem (activate)="export()" [disabled]="isLocked">
-					Export
-				</li>
+				<li appMenuItem (activate)="export()" [disabled]="isLocked">Export</li>
 				<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">
 					Lock <span class="secondary">{{ hotkeys['Lock'] }}</span>
 				</li>

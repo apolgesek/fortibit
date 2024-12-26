@@ -1,6 +1,9 @@
 import { ImportHandler } from '../../../shared';
 import { IEncryptionEventWrapper } from '../encryption';
 import { BitwardenHandler } from './handlers/bitwarden-handler';
+import { ChromeHandler } from './handlers/chrome-handler';
+import { EdgeHandler } from './handlers/edge-handler';
+import { FirefoxHandler } from './handlers/firefox-handler';
 import { KeePassHandler } from './handlers/keepass-handler';
 import { LastpassHandler } from './handlers/lastpass-handler';
 import { OnePasswordHandler } from './handlers/onepassword-handler';
@@ -36,6 +39,15 @@ export class ImportService implements IImportService {
 				break;
 			case ImportHandler.Lastpass:
 				handler = this.create(LastpassHandler);
+				break;
+			case ImportHandler.Chrome:
+				handler = this.create(ChromeHandler);
+				break;
+			case ImportHandler.Firefox:
+				handler = this.create(FirefoxHandler);
+				break;
+			case ImportHandler.Edge:
+				handler = this.create(EdgeHandler);
 				break;
 			default:
 				throw new Error('Unsupported import handler type.');

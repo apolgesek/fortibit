@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class GroupManager {
-	public readonly markDirtySource: Subject<void> = new Subject();
+	public readonly markDirtySource = new Subject<void>();
 	public groups: EntryGroup[] = [];
 	public builtInGroups: EntryGroup[] = [];
 	public selectedGroup?: number;

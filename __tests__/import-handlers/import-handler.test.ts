@@ -5,6 +5,8 @@ import {
 } from '@root/main/services/encryption';
 import { IImportHandler } from '@root/main/services/import';
 import { BitwardenHandler } from '@root/main/services/import/handlers/bitwarden-handler';
+import { ChromeHandler } from '@root/main/services/import/handlers/chrome-handler';
+import { FirefoxHandler } from '@root/main/services/import/handlers/firefox-handler';
 import { KeePassHandler } from '@root/main/services/import/handlers/keepass-handler';
 import { LastpassHandler } from '@root/main/services/import/handlers/lastpass-handler';
 import { OnePasswordHandler } from '@root/main/services/import/handlers/onepassword-handler';
@@ -58,6 +60,18 @@ const cases: [
 		'lastpass-valid.csv',
 		LastpassHandler,
 		['title', 'username', 'password', 'url', 'notes', 'otpAuth'],
+	],
+	[
+		'Chrome',
+		'chrome-valid.csv',
+		ChromeHandler,
+		['title', 'username', 'password', 'url', 'notes'],
+	],
+	[
+		'Firefox',
+		'firefox-valid.csv',
+		FirefoxHandler,
+		['username', 'password', 'url'],
 	],
 	[
 		'KeePass',

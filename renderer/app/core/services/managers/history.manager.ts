@@ -16,37 +16,44 @@ export class HistoryManager {
 	}
 
 	async add(item: HistoryEntry): Promise<number> {
+		const result = this.historyRepository.add(item);
 		this.markDirty();
-		return this.historyRepository.add(item);
-	}
 
-	async bulkAdd(items: HistoryEntry[]): Promise<number> {
-		return this.historyRepository.bulkAdd(items);
+		return result;
 	}
 
 	async delete(id: number): Promise<void> {
+		const result = this.historyRepository.delete(id);
 		this.markDirty();
-		return this.historyRepository.delete(id);
+
+		return result;
 	}
 
 	async bulkDelete(ids: number[]): Promise<number> {
+		const result = this.historyRepository.bulkDelete(ids);
 		this.markDirty();
-		return this.historyRepository.bulkDelete(ids);
+
+		return result;
 	}
 
 	async deleteOlderThanDays(value: number): Promise<number> {
 		let pastDate = new Date().getTime();
 		pastDate -= value * 24 * 60 * 60 * 1000;
 
-		this.markDirty();
-		return this.historyRepository.deleteByPredicate(
+		const result = this.historyRepository.deleteByPredicate(
 			(x) => x.entry.lastModificationDate < new Date(pastDate),
 		);
+
+		this.markDirty();
+
+		return result;
 	}
 
 	async deleteExcessiveRows(): Promise<number> {
+		const result = this.historyRepository.deleteExcessiveRows(20);
 		this.markDirty();
-		return this.historyRepository.deleteExcessiveRows(20);
+
+		return result;
 	}
 
 	private markDirty() {

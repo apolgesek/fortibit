@@ -49,7 +49,7 @@ export abstract class CsvDataImporter<T> implements IImportHandler {
 	import(key: string, path: string): Promise<string> {
 		return new Promise((resolve, reject) => {
 			const results: T[] = [];
-			let output: Partial<PasswordEntry>[] = [];
+			let entries: Partial<PasswordEntry>[] = [];
 
 			createReadStream(path)
 				.pipe(csv())
@@ -63,12 +63,13 @@ export abstract class CsvDataImporter<T> implements IImportHandler {
 						return;
 					}
 
-					output = this.mapFn(results);
+					entries = this.mapFn(results);
+					entries = entries.map((x) => ({ ...x, type: x.type ?? 'password' }));
 					let encryptedOutput;
 
 					try {
 						encryptedOutput = await Promise.all(
-							output.map(async (e) => {
+							entries.map(async (e) => {
 								const encryptionEvent = {
 									plain: e.password,
 									type: MessageEventType.EncryptString,
