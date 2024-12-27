@@ -6,12 +6,12 @@ export class DarwinApiService implements INativeApiService {
 	readRegistryKey(key: string, value: string): string {
 		return '';
 	}
-	
+
 	setWindowAffinity(handle: Buffer, enabled: boolean): void {}
 
 	async getPassword(windowHandleHex: Buffer, dbPath: string): Promise<string> {
 		try {
-			await systemPreferences.promptTouchID('asd');
+			await systemPreferences.promptTouchID('test');
 			return 'test';
 		} catch (err) {
 			console.log('Could not verify identity with Touch ID.');
@@ -27,7 +27,7 @@ export class DarwinApiService implements INativeApiService {
 	}
 
 	listCredentials(): Promise<string[]> {
-		throw new Error('Method not implemented.');
+		return Promise.resolve([]);
 	}
 
 	pressPhraseKey(char: string): void {

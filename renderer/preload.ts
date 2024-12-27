@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 
 (function () {
 	let validatedChannels: string[] = [];
@@ -58,6 +58,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 	contextBridge.exposeInMainWorld('api', {
 		isTestMode: process.env.TEST_MODE === '1',
+		webUtils,
 		loadChannels: async () => {
 			if (validatedChannels.length > 0) {
 				return;

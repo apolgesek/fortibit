@@ -63,6 +63,12 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 	private readonly db = inject(DbManager);
 	private readonly notificationService = inject(NotificationService);
 
+	private _isWin32 = false;
+
+	get isWin32(): boolean {
+		return this._isWin32;
+	}
+
 	get isDatabasePristine(): boolean {
 		return !!this.workspaceService.isSynced;
 	}
@@ -80,6 +86,7 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 	}
 
 	ngOnInit() {
+		this._isWin32 = this.messageBroker.platform === 'win32';
 		this.hotkeys = this.hotkeyHandler.hotkeysMap;
 		this.configService.configLoadedSource$
 			.pipe(takeUntilDestroyed(this.destroyRef))
@@ -98,6 +105,8 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 	}
 
 	ngAfterViewInit() {
+		if (!this.isWin32) return;
+
 		this.fixMenuSize();
 		this.zone.runOutsideAngular(() => {
 			const windowMove$ = new Observable<void>((subscriber) => {
@@ -249,7 +258,9 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 	}
 
 	async clearRecentlyOpened() {
-		const result = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ClearRecentlyOpened);
+		const result = await this.messageBroker.ipcRenderer.invoke(
+			IpcChannel.ClearRecentlyOpened,
+		);
 		if (result) {
 			this.recentFiles = [];
 		}

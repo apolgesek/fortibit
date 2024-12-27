@@ -22,13 +22,12 @@ import {
 	UpdateService,
 	WorkspaceService,
 } from './core/services';
-import { MenuBarComponent } from './main/components/menu-bar/menu-bar.component';
 
 @Component({
 	selector: 'app-root',
 	templateUrl: './app.component.html',
 	standalone: true,
-	imports: [RouterModule, MenuBarComponent],
+	imports: [RouterModule],
 })
 export class AppComponent implements OnInit, AfterViewInit {
 	public fontsLoaded = false;
@@ -66,7 +65,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 		try {
 			await this.preloadFonts();
 			this.fontsLoaded = true;
-		} catch (err) {
+		} catch {
 			console.log('Failed to fetch fonts');
 		}
 
@@ -168,9 +167,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 			const dataTransfer = (event as DragEvent).dataTransfer as DataTransfer;
 
 			if (dataTransfer.files.length) {
-				const file = dataTransfer.files[0] as any;
+				const file = dataTransfer.files[0];
+				const filePath =
+					this.messageBroker.ipcRenderer.webUtils.getPathForFile(file);
 
-				if (!file.path.endsWith(this.config.fileExtension)) {
+				if (!filePath.endsWith(this.config.fileExtension)) {
 					return;
 				}
 
@@ -178,7 +179,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 				if (success) {
 					const result = await this.messageBroker.ipcRenderer.invoke(
 						IpcChannel.DropFile,
-						file.path,
+						filePath,
 					);
 					await this.workspaceService.handleDatabaseLock(result);
 				}

@@ -8,9 +8,51 @@ import { InMemoryEncryptionService } from './in-memory-encryption.service';
 import { MessageEventType } from './message-event-type.enum';
 import { WeakPasswordsService } from './weak-passwords/weak-passwords.service';
 
-type EventPayload = {
-	type: MessageEventType;
-	[key: string]: any;
+type EventPayload =
+	| DecryptDatabaseEventPayload
+	| EncryptDatabaseEventPayload
+	| EncryptStringEventPayload
+	| DecryptStringEventPayload
+	| BulkDecryptStringEventPayload
+	| GetLeaksEventPayload
+	| GetWeakPasswordsEventPayload;
+
+type DecryptDatabaseEventPayload = {
+	type: MessageEventType.DecryptDatabase;
+	data: string;
+	password: string;
+};
+
+type EncryptDatabaseEventPayload = {
+	type: MessageEventType.EncryptDatabase;
+	schemaVersion: number;
+	database: string;
+	password: string;
+};
+
+type EncryptStringEventPayload = {
+	type: MessageEventType.EncryptString;
+	plain: string;
+};
+
+type DecryptStringEventPayload = {
+	type: MessageEventType.DecryptString;
+	encrypted: string;
+};
+
+type BulkDecryptStringEventPayload = {
+	type: MessageEventType.BulkDecryptString;
+	rows: string;
+};
+
+type GetLeaksEventPayload = {
+	type: MessageEventType.GetLeaks;
+	database: string;
+};
+
+type GetWeakPasswordsEventPayload = {
+	type: MessageEventType.GetWeakPasswords;
+	database: string;
 };
 
 // include only intended props excluding database engine generated and private ones
@@ -26,6 +68,12 @@ function normalizeEntity<T extends object>(e: T): Partial<T> {
 	}
 
 	return entity;
+}
+
+function sendAsync<T>(arg: T): Promise<void> {
+	return new Promise((resolve) => {
+		process.send(arg, resolve);
+	});
 }
 
 class Main {
@@ -49,44 +97,28 @@ class Main {
 	}
 
 	public async execute(event: EventPayload): Promise<void> {
-		switch (event.type) {
-			case MessageEventType.DecryptDatabase:
-				this.decryptDatabase(event);
-				break;
+		const eventMap = {
+			[MessageEventType.DecryptDatabase]: this.decryptDatabase,
+			[MessageEventType.EncryptDatabase]: this.encryptDatabase,
+			[MessageEventType.EncryptString]: this.encryptString,
+			[MessageEventType.DecryptString]: this.decryptString,
+			[MessageEventType.BulkDecryptString]: this.bulkDecryptString,
+			[MessageEventType.GetLeaks]: this.getLeaks,
+			[MessageEventType.GetWeakPasswords]: this.getWeakPasswords,
+		};
 
-			case MessageEventType.EncryptDatabase:
-				this.encryptDatabase(event);
-				break;
-
-			case MessageEventType.EncryptString:
-				this.encryptString(event);
-				break;
-
-			case MessageEventType.DecryptString:
-				this.decryptString(event);
-				break;
-
-			case MessageEventType.BulkDecryptString:
-				this.bulkDecryptString(event);
-				break;
-
-			case MessageEventType.GetLeaks:
-				await this.getLeaks(event);
-				break;
-
-			case MessageEventType.GetWeakPasswords:
-				await this.getWeakPasswords(event);
-				break;
-
-			default:
-				break;
+		const fn = eventMap[event.type];
+		if (!fn) {
+			throw new Error(`Unknown event type: ${event.type}`);
 		}
+
+		await fn.bind(this)(event);
 
 		// explicitly exit the process just in case
 		process.exit();
 	}
 
-	public encryptDatabase(event: EventPayload) {
+	public async encryptDatabase(event: EncryptDatabaseEventPayload) {
 		const { schemaVersion, database, password } = event;
 		const parsedDb = JSON.parse(database);
 		const stores = parsedDb.data.data;
@@ -134,12 +166,12 @@ class Main {
 		};
 
 		const databaseJSON = JSON.stringify(vault);
-		process.send({
+		await sendAsync({
 			encrypted: this._encryptionService.encryptString(databaseJSON, password),
 		});
 	}
 
-	public decryptDatabase(event: EventPayload) {
+	public async decryptDatabase(event: DecryptDatabaseEventPayload) {
 		const { data, password } = event;
 
 		try {
@@ -176,32 +208,34 @@ class Main {
 				}
 			}
 
-			process.send({ decrypted: JSON.stringify(decryptedDb) });
+			await sendAsync({ decrypted: JSON.stringify(decryptedDb) });
 		} catch (err) {
 			console.log(err);
-			process.send({ error: err });
+			await sendAsync({ error: err });
 		}
 	}
 
-	public encryptString(event: EventPayload) {
+	public async encryptString(event: EncryptStringEventPayload) {
 		const { plain } = event;
 		const encryptedPassword = this._inMemoryEncryptionService.encryptString(
 			plain,
 			process.env.ENCRYPTION_KEY,
 		);
-		process.send({ encrypted: encryptedPassword });
+
+		await sendAsync({ encrypted: encryptedPassword });
 	}
 
-	public decryptString(event: EventPayload) {
+	public async decryptString(event: DecryptStringEventPayload) {
 		const { encrypted } = event;
 		const decryptedPassword = this._inMemoryEncryptionService.decryptString(
 			encrypted,
 			process.env.ENCRYPTION_KEY,
 		);
-		process.send({ decrypted: decryptedPassword });
+
+		await sendAsync({ decrypted: decryptedPassword });
 	}
 
-	public bulkDecryptString(event: EventPayload) {
+	public async bulkDecryptString(event: BulkDecryptStringEventPayload) {
 		const { rows } = event;
 		const decrypted: Entry[] = JSON.parse(rows);
 
@@ -218,10 +252,10 @@ class Main {
 			}
 		}
 
-		process.send({ decrypted });
+		await sendAsync({ decrypted });
 	}
 
-	public async getLeaks(event: EventPayload) {
+	public async getLeaks(event: GetLeaksEventPayload) {
 		const { database } = event;
 
 		try {
@@ -250,13 +284,14 @@ class Main {
 				entries,
 				process.env.LEAKED_PASSWORDS_API_URL,
 			);
-			process.send({ data: JSON.stringify(leaks) });
+
+			await sendAsync({ data: JSON.stringify(leaks) });
 		} catch (err) {
-			process.send({ error: err });
+			await sendAsync({ error: err });
 		}
 	}
 
-	public async getWeakPasswords(event: EventPayload) {
+	public async getWeakPasswords(event: GetWeakPasswordsEventPayload) {
 		const { database } = event;
 
 		try {
@@ -276,9 +311,9 @@ class Main {
 				});
 
 			const weakPasswords = await this._weakPasswordsService.getAll(entries);
-			process.send({ data: JSON.stringify(weakPasswords) });
+			await sendAsync({ data: JSON.stringify(weakPasswords) });
 		} catch (err) {
-			process.send({ error: err });
+			await sendAsync({ error: err });
 		}
 	}
 }

@@ -1,228 +1,241 @@
 <div data-prevent-entry-deselect #topbar class="topbar">
-	<ul appMenu class="menu">
-		<div class="brand-logo"></div>
-		<ul appDropdown class="dropdown">
-			<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
-				File
-			</li>
-			<div *appDropdownMenu class="dropdown-content left">
-				<li appMenuItem (activate)="newFile()">New file...</li>
-				<li appMenuItem (activate)="openFile()">Open file...</li>
-				<div appDropdown class="dropdown" style="width: 100%">
-					<li
-						appDropdownToggle
-						trigger="hover"
-						appMenuItem
-						class="submenu-open"
-					>
-						Open recent <i-feather name="chevron-right"></i-feather>
-					</li>
-					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						@for (file of recentFiles; track file; let i = $index) {
-							<li aria-hidden="true" appMenuItem (activate)="openFile(file)">
-								{{ i + 1 }}: {{ file | fileName }}
+	@if (isWin32) {
+		<ul appMenu class="menu">
+			<div class="brand-logo"></div>
+			<ul appDropdown class="dropdown">
+				<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
+					File
+				</li>
+				<div *appDropdownMenu class="dropdown-content left">
+					<li appMenuItem (activate)="newFile()">New file...</li>
+					<li appMenuItem (activate)="openFile()">Open file...</li>
+					<div appDropdown class="dropdown" style="width: 100%">
+						<li
+							appDropdownToggle
+							trigger="hover"
+							appMenuItem
+							class="submenu-open"
+						>
+							Open recent <i-feather name="chevron-right"></i-feather>
+						</li>
+						<div
+							*appDropdownMenu
+							class="dropdown-content left submenu-container"
+						>
+							@for (file of recentFiles; track file; let i = $index) {
+								<li aria-hidden="true" appMenuItem (activate)="openFile(file)">
+									{{ i + 1 }}: {{ file | fileName }}
+								</li>
+							}
+							@if (recentFiles.length > 0) {
+								<div class="divider"><hr /></div>
+							}
+							<li
+								appMenuItem
+								[disabled]="recentFiles.length === 0"
+								(activate)="clearRecentlyOpened()"
+							>
+								Clear recently opened
 							</li>
-						}
-						@if (recentFiles.length > 0) {
-							<div class="divider"><hr /></div>
-						}
-						<li
-							appMenuItem
-							[disabled]="recentFiles.length === 0"
-							(activate)="clearRecentlyOpened()"
-						>
-							Clear recently opened
-						</li>
+						</div>
 					</div>
-				</div>
-				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="save()" [disabled]="isDatabasePristine">
-					Save <span class="secondary">{{ hotkeys['SaveDatabase'] }}</span>
-				</li>
-				<li appMenuItem [disabled]="isLocked" (activate)="saveAs()">
-					Save as...
-				</li>
-				<div appDropdown class="dropdown" style="width: 100%">
-					<li
-						appDropdownToggle
-						trigger="hover"
-						appMenuItem
-						[disabled]="isLocked"
-						class="submenu-open"
-					>
-						Import <i-feather name="chevron-right"></i-feather>
+					<div class="divider"><hr /></div>
+					<li appMenuItem (activate)="save()" [disabled]="isDatabasePristine">
+						Save <span class="secondary">{{ hotkeys['SaveDatabase'] }}</span>
 					</li>
-					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<div class="submenu-label">Password managers</div>
+					<li appMenuItem [disabled]="isLocked" (activate)="saveAs()">
+						Save as...
+					</li>
+					<div appDropdown class="dropdown" style="width: 100%">
 						<li
-							aria-hidden="true"
+							appDropdownToggle
+							trigger="hover"
 							appMenuItem
-							(activate)="import(importHandler.KeePass)"
+							[disabled]="isLocked"
+							class="submenu-open"
 						>
-							KeePass &bull; XML
+							Import <i-feather name="chevron-right"></i-feather>
 						</li>
-						<li
-							aria-hidden="true"
-							appMenuItem
-							(activate)="import(importHandler.OnePassword)"
+						<div
+							*appDropdownMenu
+							class="dropdown-content left submenu-container"
 						>
-							1Password &bull; CSV
-						</li>
-						<li
-							aria-hidden="true"
-							appMenuItem
-							(activate)="import(importHandler.Bitwarden)"
-						>
-							Bitwarden &bull; CSV
-						</li>
-						<li
-							aria-hidden="true"
-							appMenuItem
-							(activate)="import(importHandler.Lastpass)"
-						>
-							Lastpass &bull; CSV
-						</li>
-						<div class="submenu-label">Browsers</div>
-						<li
-							aria-hidden="true"
-							appMenuItem
-							(activate)="import(importHandler.Chrome)"
-						>
-							Chrome &bull; CSV
-						</li>
-						<li
-							aria-hidden="true"
-							appMenuItem
-							(activate)="import(importHandler.Firefox)"
-						>
-							Firefox &bull; CSV
-						</li>
-						<li
-							aria-hidden="true"
-							appMenuItem
-							(activate)="import(importHandler.Edge)"
-						>
-							Edge &bull; CSV
-						</li>
+							<div class="submenu-label">Password managers</div>
+							<li
+								aria-hidden="true"
+								appMenuItem
+								(activate)="import(importHandler.KeePass)"
+							>
+								KeePass &bull; XML
+							</li>
+							<li
+								aria-hidden="true"
+								appMenuItem
+								(activate)="import(importHandler.OnePassword)"
+							>
+								1Password &bull; CSV
+							</li>
+							<li
+								aria-hidden="true"
+								appMenuItem
+								(activate)="import(importHandler.Bitwarden)"
+							>
+								Bitwarden &bull; CSV
+							</li>
+							<li
+								aria-hidden="true"
+								appMenuItem
+								(activate)="import(importHandler.Lastpass)"
+							>
+								Lastpass &bull; CSV
+							</li>
+							<div class="submenu-label">Browsers</div>
+							<li
+								aria-hidden="true"
+								appMenuItem
+								(activate)="import(importHandler.Chrome)"
+							>
+								Chrome &bull; CSV
+							</li>
+							<li
+								aria-hidden="true"
+								appMenuItem
+								(activate)="import(importHandler.Firefox)"
+							>
+								Firefox &bull; CSV
+							</li>
+							<li
+								aria-hidden="true"
+								appMenuItem
+								(activate)="import(importHandler.Edge)"
+							>
+								Edge &bull; CSV
+							</li>
+						</div>
 					</div>
-				</div>
-				<li appMenuItem (activate)="export()" [disabled]="isLocked">Export</li>
-				<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">
-					Lock <span class="secondary">{{ hotkeys['Lock'] }}</span>
-				</li>
-				<div class="divider"><hr /></div>
-				<li
-					appMenuItem
-					(activate)="openChangePasswordWindow()"
-					[disabled]="isLocked"
-				>
-					Change password
-				</li>
-				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="exit()">Exit</li>
-			</div>
-		</ul>
-		<ul appDropdown class="dropdown">
-			<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
-				View
-			</li>
-			<div *appDropdownMenu class="dropdown-content left">
-				<li appMenuItem (activate)="searchGroup()" [disabled]="isLocked">
-					Search group
-					<span class="secondary">{{ hotkeys['FindInGroup'] }}</span>
-				</li>
-				<li appMenuItem (activate)="searchVault()" [disabled]="isLocked">
-					Search vault
-					<span class="secondary">{{ hotkeys['FindInVault'] }}</span>
-				</li>
-				<ul
-					class="zoom-level"
-					style="
-						list-style-type: none;
-						display: flex;
-						align-items: center;
-						padding: 0 0.5rem;
-					"
-				>
-					<span style="margin-right: auto">Zoom</span>
-					<li appMenuItem (activate)="zoomOut()" [closeOnSelect]="false">
-						<i-feather name="minus"></i-feather>
+					<li appMenuItem (activate)="export()" [disabled]="isLocked">
+						Export
 					</li>
-					<span style="margin: 0 0.5rem">{{ zoomFactor }}%</span>
-					<li appMenuItem (activate)="zoomIn()" [closeOnSelect]="false">
-						<i-feather name="plus"></i-feather>
+					<li appMenuItem (activate)="lock()" [disabled]="!isLockingEnabled">
+						Lock <span class="secondary">{{ hotkeys['Lock'] }}</span>
 					</li>
-				</ul>
-				<li appMenuItem (activate)="resetZoom()">
-					Reset zoom <span class="secondary">{{ hotkeys['ResetZoom'] }}</span>
-				</li>
-				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="fullscreen()">
-					Toggle fullscreen
-					<span class="secondary">{{ hotkeys['ToggleFullscreen'] }}</span>
-				</li>
-			</div>
-		</ul>
-		<ul appDropdown class="dropdown">
-			<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
-				Tools
-			</li>
-			<div *appDropdownMenu class="dropdown-content left">
-				<li appMenuItem (activate)="openGeneratorWindow()">
-					Generator <span class="secondary">{{ hotkeys['Generator'] }}</span>
-				</li>
-				<div class="divider"><hr /></div>
-				<div appDropdown class="dropdown" style="width: 100%">
+					<div class="divider"><hr /></div>
 					<li
-						appDropdownToggle
-						trigger="hover"
 						appMenuItem
-						class="submenu-open"
+						(activate)="openChangePasswordWindow()"
 						[disabled]="isLocked"
 					>
-						Report <i-feather name="chevron-right"></i-feather>
+						Change password
 					</li>
-					<div *appDropdownMenu class="dropdown-content left submenu-container">
-						<li
-							aria-hidden="true"
-							appMenuItem
-							(activate)="openExposedPasswordsWindow()"
-						>
-							Leaked passwords
-						</li>
-						<li
-							aria-hidden="true"
-							appMenuItem
-							(activate)="openWeakPasswordsWindow()"
-						>
-							Weak passwords
-						</li>
-					</div>
+					<div class="divider"><hr /></div>
+					<li appMenuItem (activate)="exit()">Exit</li>
 				</div>
-				<li
-					appMenuItem
-					(activate)="openMaintenanceWindow()"
-					[disabled]="isLocked"
-				>
-					Maintenance
+			</ul>
+			<ul appDropdown class="dropdown">
+				<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
+					View
 				</li>
-			</div>
-		</ul>
-		<ul appDropdown class="dropdown">
-			<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
-				Help
-			</li>
-			<div *appDropdownMenu class="dropdown-content left">
-				<li appMenuItem (activate)="openKeyboardShortcuts()">
-					Keyboard shortcuts
+				<div *appDropdownMenu class="dropdown-content left">
+					<li appMenuItem (activate)="searchGroup()" [disabled]="isLocked">
+						Search group
+						<span class="secondary">{{ hotkeys['FindInGroup'] }}</span>
+					</li>
+					<li appMenuItem (activate)="searchVault()" [disabled]="isLocked">
+						Search vault
+						<span class="secondary">{{ hotkeys['FindInVault'] }}</span>
+					</li>
+					<ul
+						class="zoom-level"
+						style="
+							list-style-type: none;
+							display: flex;
+							align-items: center;
+							padding: 0 0.5rem;
+						"
+					>
+						<span style="margin-right: auto">Zoom</span>
+						<li appMenuItem (activate)="zoomOut()" [closeOnSelect]="false">
+							<i-feather name="minus"></i-feather>
+						</li>
+						<span style="margin: 0 0.5rem">{{ zoomFactor }}%</span>
+						<li appMenuItem (activate)="zoomIn()" [closeOnSelect]="false">
+							<i-feather name="plus"></i-feather>
+						</li>
+					</ul>
+					<li appMenuItem (activate)="resetZoom()">
+						Reset zoom <span class="secondary">{{ hotkeys['ResetZoom'] }}</span>
+					</li>
+					<div class="divider"><hr /></div>
+					<li appMenuItem (activate)="fullscreen()">
+						Toggle fullscreen
+						<span class="secondary">{{ hotkeys['ToggleFullscreen'] }}</span>
+					</li>
+				</div>
+			</ul>
+			<ul appDropdown class="dropdown">
+				<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
+					Tools
 				</li>
-				<div class="divider"><hr /></div>
-				<li appMenuItem (activate)="openReleaseNotes()">Release notes</li>
-				<li appMenuItem (activate)="openReportIssue()">Report issue</li>
-				<li appMenuItem (activate)="openAboutWindow()">About</li>
-			</div>
+				<div *appDropdownMenu class="dropdown-content left">
+					<li appMenuItem (activate)="openGeneratorWindow()">
+						Generator <span class="secondary">{{ hotkeys['Generator'] }}</span>
+					</li>
+					<div class="divider"><hr /></div>
+					<div appDropdown class="dropdown" style="width: 100%">
+						<li
+							appDropdownToggle
+							trigger="hover"
+							appMenuItem
+							class="submenu-open"
+							[disabled]="isLocked"
+						>
+							Report <i-feather name="chevron-right"></i-feather>
+						</li>
+						<div
+							*appDropdownMenu
+							class="dropdown-content left submenu-container"
+						>
+							<li
+								aria-hidden="true"
+								appMenuItem
+								(activate)="openExposedPasswordsWindow()"
+							>
+								Leaked passwords
+							</li>
+							<li
+								aria-hidden="true"
+								appMenuItem
+								(activate)="openWeakPasswordsWindow()"
+							>
+								Weak passwords
+							</li>
+						</div>
+					</div>
+					<li
+						appMenuItem
+						(activate)="openMaintenanceWindow()"
+						[disabled]="isLocked"
+					>
+						Maintenance
+					</li>
+				</div>
+			</ul>
+			<ul appDropdown class="dropdown">
+				<li appDropdownToggle trigger="click" appMenuItem class="menu-bar-item">
+					Help
+				</li>
+				<div *appDropdownMenu class="dropdown-content left">
+					<li appMenuItem (activate)="openKeyboardShortcuts()">
+						Keyboard shortcuts
+					</li>
+					<div class="divider"><hr /></div>
+					<li appMenuItem (activate)="openReleaseNotes()">Release notes</li>
+					<li appMenuItem (activate)="openReportIssue()">Report issue</li>
+					<li appMenuItem (activate)="openAboutWindow()">About</li>
+				</div>
+			</ul>
 		</ul>
-	</ul>
+	}
 </div>
 
 <div #overlay class="overlay"></div>

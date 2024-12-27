@@ -5,9 +5,14 @@ import deepmerge from 'deepmerge';
 import { app } from 'electron';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { writeFileSync } from 'fs-extra';
+import { pickBy } from 'lodash';
 import * as os from 'os';
 import { join } from 'path';
 import { IConfigService, getDefaultConfig } from './index';
+
+function removeUndefined<T extends object>(obj: T): Partial<T> {
+	return pickBy<T>(obj, (value) => value !== undefined);
+}
 
 export class ConfigService implements IConfigService {
 	public get appConfig(): Configuration {
@@ -60,52 +65,55 @@ export class ConfigService implements IConfigService {
 		);
 		const workspacesInformation = require(this._workspacesPath);
 
-		this._appConfig = deepmerge(getDefaultConfig(), {
-			version: app.getVersion(),
-			electronVersion: process.versions.electron,
-			nodeVersion: process.versions.node,
-			chromiumVersion: process.versions.chrome,
-			os: `${os.type()} ${os.release()}`,
-			fileExtension: 'fbit',
-			temporaryFileExtension: 'tmp',
-			e2eFilesPath: process.env.E2E_FILES_PATH,
-			workspaces: workspacesInformation,
-			name: productInformation.name,
-			commit: productInformation.commit,
-			updateUrl: productInformation.updateUrl,
-			webUrl: productInformation.webUrl,
-			webApiUrl: productInformation.webApiUrl,
-			cdnUrl: productInformation.cdnUrl,
-			signatureSubject: productInformation.signatureSubject,
-			leakedPasswordsUrl: productInformation.leakedPasswordsUrl,
-			compressionEnabled: productInformation.compressionEnabled,
-			autocompleteShortcut: productInformation.autocompleteShortcut,
-			autocompleteUsernameOnlyShortcut:
-				productInformation.autocompleteUsernameOnlyShortcut,
-			autocompletePasswordOnlyShortcut:
-				productInformation.autocompletePasswordOnlyShortcut,
-			clipboardClearTimeMs: productInformation.clipboardClearTimeMs,
-			biometricsAuthenticationEnabled:
-				productInformation.biometricsAuthenticationEnabled,
-			encryption: {
-				lowercase: productInformation.encryption.lowercase,
-				numbers: productInformation.encryption.numbers,
-				uppercase: productInformation.encryption.uppercase,
-				specialChars: productInformation.encryption.specialChars,
-				passwordLength: productInformation.encryption.passwordLength,
-			},
-			idleSeconds: productInformation.idleSeconds,
-			lockOnSystemLock: productInformation.lockOnSystemLock,
-			saveOnLock: productInformation.saveOnLock,
-			displayIcons: productInformation.displayIcons,
-			autoTypeEnabled: productInformation.autoTypeEnabled,
-			theme: productInformation.theme,
-			showInsecureUrlPrompt: productInformation.showInsecureUrlPrompt,
-			biometricsProtectedFiles: [],
-			protectWindowsFromCapture: productInformation.protectWindowsFromCapture,
-			autosaveEnabled: productInformation.autosaveEnabled,
-			organizationName: null,
-		} as Configuration);
+		this._appConfig = deepmerge(
+			getDefaultConfig(),
+			removeUndefined({
+				version: app.getVersion(),
+				electronVersion: process.versions.electron,
+				nodeVersion: process.versions.node,
+				chromiumVersion: process.versions.chrome,
+				os: `${os.type()} ${os.release()}`,
+				fileExtension: 'fbit',
+				temporaryFileExtension: 'tmp',
+				e2eFilesPath: process.env.E2E_FILES_PATH,
+				workspaces: workspacesInformation,
+				name: productInformation.name,
+				commit: productInformation.commit,
+				updateUrl: productInformation.updateUrl,
+				webUrl: productInformation.webUrl,
+				webApiUrl: productInformation.webApiUrl,
+				cdnUrl: productInformation.cdnUrl,
+				signatureSubject: productInformation.signatureSubject,
+				leakedPasswordsUrl: productInformation.leakedPasswordsUrl,
+				compressionEnabled: productInformation.compressionEnabled,
+				autocompleteShortcut: productInformation.autocompleteShortcut,
+				autocompleteUsernameOnlyShortcut:
+					productInformation.autocompleteUsernameOnlyShortcut,
+				autocompletePasswordOnlyShortcut:
+					productInformation.autocompletePasswordOnlyShortcut,
+				clipboardClearTimeMs: productInformation.clipboardClearTimeMs,
+				biometricsAuthenticationEnabled:
+					productInformation.biometricsAuthenticationEnabled,
+				encryption: {
+					lowercase: productInformation.encryption.lowercase,
+					numbers: productInformation.encryption.numbers,
+					uppercase: productInformation.encryption.uppercase,
+					specialChars: productInformation.encryption.specialChars,
+					passwordLength: productInformation.encryption.passwordLength,
+				},
+				idleSeconds: productInformation.idleSeconds,
+				lockOnSystemLock: productInformation.lockOnSystemLock,
+				saveOnLock: productInformation.saveOnLock,
+				displayIcons: productInformation.displayIcons,
+				autoTypeEnabled: productInformation.autoTypeEnabled,
+				theme: productInformation.theme,
+				showInsecureUrlPrompt: productInformation.showInsecureUrlPrompt,
+				biometricsProtectedFiles: [],
+				protectWindowsFromCapture: productInformation.protectWindowsFromCapture,
+				autosaveEnabled: productInformation.autosaveEnabled,
+				organizationName: null,
+			}) as Configuration,
+		);
 	}
 
 	set(settings: Partial<Configuration>) {
