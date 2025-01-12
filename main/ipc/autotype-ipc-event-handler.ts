@@ -1,7 +1,7 @@
 import { Configuration } from '@root/configuration';
 import { PasswordEntry } from '@shared-renderer/index';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
-import { ipcMain, IpcMainEvent } from 'electron';
+import { ipcMain, IpcMainEvent, Menu } from 'electron';
 import { createServiceDecorator } from '../di';
 import { IAutotypeService } from '../services/autotype';
 import { IWindowService } from '../services/window';
@@ -25,6 +25,10 @@ export class AutotypeIpcEventHandler implements IIpcEventHandler {
 				).browserWindow;
 				browserWindow.blur();
 				browserWindow.hide();
+
+				if (process.platform === 'darwin') {
+					Menu.sendActionToFirstResponder('hide:');
+				}
 				this._autotypeService.typeLoginDetails(entry);
 			},
 		);

@@ -222,6 +222,12 @@ export class AutotypeService implements IAutotypeService {
 			foundEntries,
 		);
 
+		if (process.platform === 'darwin') {
+			entrySelectWindow.setVisibleOnAllWorkspaces(true, {
+				visibleOnFullScreen: true,
+			});
+			entrySelectWindow.setAlwaysOnTop(true, 'screen-saver', 1);
+		}
 		entrySelectWindow.show();
 		entrySelectWindow.focus();
 	}
