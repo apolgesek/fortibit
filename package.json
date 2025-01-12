@@ -21,7 +21,7 @@
 		"build:e2e": "npm run build -- -c e2e",
 		"ng:serve": "ng serve -c local",
 		"electron": "electron",
-		"copyfiles-serve": "copyfiles {package.json,product.json,workspaces.json} out-tsc && copyfiles build/** out-tsc && copyfiles renderer/preload.js out-tsc",
+		"copyfiles-serve": "copyfiles {**/*.scpt,package.json,product.json,workspaces.json} out-tsc && copyfiles build/** out-tsc && copyfiles renderer/preload.js out-tsc",
 		"electron:serve-tsc": "tsc -p tsconfig.serve.json && npm exec tsc -- renderer/preload.ts --types node && npm run copyfiles-serve",
 		"electron:serve": "wait-on tcp:4200 && npm run electron:serve-tsc && electron ./out-tsc --serve --inspect=9229",
 		"electron:local": "npm run build:prod && electron .",

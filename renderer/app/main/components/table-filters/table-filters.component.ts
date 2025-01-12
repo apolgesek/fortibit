@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, QueryList, ViewChildren, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	QueryList,
+	ViewChildren,
+	inject,
+} from '@angular/core';
 import { Sort } from '@app/core/enums';
 import { SearchService } from '@app/core/services';
 import { slideDown } from '@app/shared';
@@ -30,12 +36,12 @@ type SortDirectionOption = {
 		DropdownDirective,
 		DropdownToggleDirective,
 		DropdownMenuDirective,
-		MenuItemDirective
+		MenuItemDirective,
 	],
 	templateUrl: './table-filters.component.html',
 	styleUrls: ['./table-filters.component.scss'],
 	animations: [slideDown],
-	changeDetection: ChangeDetectionStrategy.OnPush
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableFiltersComponent {
 	@ViewChildren('sort')

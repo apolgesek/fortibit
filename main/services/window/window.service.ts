@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Configuration } from '@root/configuration';
+import { IMessageBroker } from '@root/main/ipc/message-broker';
 import { IConfigService } from '@root/main/services/config';
 import { INativeApiService } from '@root/main/services/native';
 import { IPerformanceService } from '@root/main/services/performance';
@@ -34,7 +35,7 @@ export class WindowService implements IWindowService {
 		app.commandLine.hasSwitch(ProcessArgument.E2E),
 	);
 	private readonly _windows: IWindow[] = [];
-	private _idleTimer: NodeJS.Timeout;
+	private _idleTimer: NodeJS.Timeout | null;
 
 	get windows(): IWindow[] {
 		return this._windows;
@@ -42,23 +43,30 @@ export class WindowService implements IWindowService {
 
 	get vaultWindows(): IWindow[] {
 		return this.windows.filter(
-			(x) => x.browserWindow.id !== this.getWindow(1).id,
+			(x) => x.browserWindow.id !== this.getWindow(1)?.id,
 		);
 	}
 
 	constructor(
+		@IMessageBroker private readonly _messageBroker: IMessageBroker,
 		@IConfigService private readonly _configService: IConfigService,
 		@IPerformanceService
 		private readonly _performanceService: IPerformanceService,
 		@INativeApiService private readonly _nativeApiService: INativeApiService,
 	) {}
 
-	getWindow(index: number): BrowserWindow {
-		return this._windows[index].browserWindow;
+	getWindow(index: number): BrowserWindow | undefined {
+		return this._windows[index]?.browserWindow;
 	}
 
 	getWindowByWebContentsId(id: number): IWindow {
-		return this._windows.find((x) => x.browserWindow.webContents.id === id);
+		const window = this._windows.find(
+			(x) => x.browserWindow.webContents.id === id,
+		);
+
+		if (!window) throw new Error(`Window not found by webContents id ${id}`);
+
+		return window;
 	}
 
 	removeWindow(window: BrowserWindow) {
@@ -66,10 +74,35 @@ export class WindowService implements IWindowService {
 		this._windows.splice(index, 1);
 	}
 
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	sendMessage(window: BrowserWindow, channel: IpcChannel, ...args: any[]): void;
+	sendMessage(windowId: number, channel: IpcChannel, ...args: any[]): void;
+	sendMessage(
+		windowOrWindowId: BrowserWindow | number,
+		channel: IpcChannel,
+		...args: any[]
+	): void {
+		let window: BrowserWindow | undefined;
+		if (typeof windowOrWindowId === 'number') {
+			window = this.getWindowByWebContentsId(windowOrWindowId)?.browserWindow;
+		} else {
+			window = windowOrWindowId;
+		}
+
+		this._messageBroker.send(window, channel, ...args);
+	}
+
+	sendMessageToAll(channel: IpcChannel, ...args: any[]): void {
+		this.vaultWindows.forEach((w) =>
+			this._messageBroker.send(w.browserWindow, channel, ...args),
+		);
+	}
+	/* eslint-enable @typescript-eslint/no-explicit-any */
+
 	createMainWindow(): BrowserWindow {
 		screen.on('display-metrics-changed', () => {
 			this.windows.forEach((w) =>
-				w.browserWindow.webContents.send(IpcChannel.RecalculateViewport),
+				this.sendMessage(w.browserWindow, IpcChannel.RecalculateViewport),
 			);
 		});
 
@@ -85,7 +118,7 @@ export class WindowService implements IWindowService {
 		window.once('closed', () => {
 			this.removeWindow(window);
 			if (this.windows.length === 1) {
-				this.getWindow(0).close();
+				this.getWindow(0)?.close();
 			}
 		});
 
@@ -176,7 +209,7 @@ export class WindowService implements IWindowService {
 				this._configService.appConfig.idleSeconds
 			) {
 				this.vaultWindows.forEach((window) => {
-					window.browserWindow.webContents.send(IpcChannel.Lock);
+					this.sendMessage(window.browserWindow, IpcChannel.Lock);
 				});
 			}
 		}, 1_000);
@@ -185,7 +218,7 @@ export class WindowService implements IWindowService {
 	setTitle(windowId: number, title: string): void {
 		this.windows
 			.find((x) => x.browserWindow.id === windowId)
-			.browserWindow.setTitle(`${title} - Fortibit`);
+			?.browserWindow.setTitle(`${title} - Fortibit`);
 	}
 
 	getSecureKey(): string {
@@ -206,8 +239,8 @@ export class WindowService implements IWindowService {
 	onLock(windowId: number): void {
 		const win = this.getWindowByWebContentsId(windowId);
 
-		if (this.getWindow(1).isVisible()) {
-			this.getWindow(1).hide();
+		if (this.getWindow(1)?.isVisible()) {
+			this.getWindow(1)?.hide();
 		}
 
 		win.key = null;
@@ -359,12 +392,12 @@ export class WindowService implements IWindowService {
 		const window = new BrowserWindow({ ...options, ...template });
 
 		window.on('move', () => {
-			window.webContents.send(IpcChannel.RecalculateViewport);
+			this.sendMessage(window, IpcChannel.RecalculateViewport);
 		});
 
 		window.on('restore', () => {
 			nextTick(() => {
-				window.webContents.send(IpcChannel.RecalculateViewport);
+				this.sendMessage(window, IpcChannel.RecalculateViewport);
 			});
 		});
 

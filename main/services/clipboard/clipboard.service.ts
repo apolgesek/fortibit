@@ -3,7 +3,7 @@ import { IConfigService } from '../config';
 import { IClipboardService } from './clipboard-service.model';
 
 export class ClipboardService implements IClipboardService {
-	private _clearClipboardTimeout: NodeJS.Timeout;
+	private _clearClipboardTimeout: NodeJS.Timeout | null;
 
 	constructor(
 		@IConfigService private readonly _configService: IConfigService,
@@ -15,7 +15,10 @@ export class ClipboardService implements IClipboardService {
 	}
 
 	async write(content: string): Promise<boolean> {
-		clearTimeout(this._clearClipboardTimeout);
+		if (this._clearClipboardTimeout) {
+			clearTimeout(this._clearClipboardTimeout);
+		}
+
 		clipboard.writeText(content);
 
 		this._clearClipboardTimeout = setTimeout(() => {

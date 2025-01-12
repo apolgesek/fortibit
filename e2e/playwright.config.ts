@@ -11,7 +11,7 @@ const config: PlaywrightTestConfig = {
 		launchOptions: {
 			slowMo: 1000,
 		},
-		trace: 'off'
+		trace: 'off',
 	},
 	expect: {
 		toMatchSnapshot: { threshold: 0.2 },

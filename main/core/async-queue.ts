@@ -56,17 +56,26 @@ export class AsyncQueue<T, K> implements IAsyncQueue<T> {
 
 				this.queue.splice(0, Math.min(this.batchSize, batch.length));
 
-				if (
-					result.some((r) => r.status === 'rejected' && r.reason.code === 429)
-				) {
+				const hasRateLimitExceeded = result.some(
+					(r) => r.status === 'rejected' && r.reason.code === 429,
+				);
+				const hasRejection = result.some((r) => r.status === 'rejected');
+
+				if (hasRateLimitExceeded) {
 					return Promise.resolve(Result.RateLimitExceeded);
-				} else {
-					return Promise.resolve(Result.Success);
 				}
+
+				if (hasRejection) {
+					return Promise.resolve(Result.Failed);
+				}
+
+				return Promise.resolve(Result.Success);
 			} catch {
 				console.log('Error occured processing queue.');
 			}
 		}
+
+		return Promise.resolve(Result.Failed);
 	}
 
 	add(item: T): void {

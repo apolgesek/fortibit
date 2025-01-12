@@ -12,6 +12,7 @@
 		"emitDecoratorMetadata": false,
 		"allowSyntheticDefaultImports": true,
 		"forceConsistentCasingInFileNames": true,
+		"strictNullChecks": true,
 		"allowJs": true,
 		"target": "ES2022",
 		"typeRoots": ["node_modules/@types"],

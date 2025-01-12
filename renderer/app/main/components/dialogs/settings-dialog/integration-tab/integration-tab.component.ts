@@ -88,10 +88,7 @@ export class IntegrationTabComponent implements OnInit {
 		}
 
 		this._integrationForm.controls.password.statusChanges
-			.pipe(
-				first(),
-				takeUntilDestroyed(this.destroyRef),
-			)
+			.pipe(first(), takeUntilDestroyed(this.destroyRef))
 			.subscribe(async (status) => {
 				if (status === 'VALID') {
 					await this.toggleBiometrics();

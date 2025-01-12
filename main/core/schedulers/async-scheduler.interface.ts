@@ -1,3 +1,3 @@
 export interface IAsyncScheduler {
-  initialize(): void;
+	initialize(): void;
 }

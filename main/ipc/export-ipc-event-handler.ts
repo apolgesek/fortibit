@@ -38,7 +38,7 @@ export class ExportIpcEventHandler implements IIpcEventHandler {
 				}
 
 				return this._exportService.export(
-					window.key,
+					window.key as string,
 					saveDialogReturnValue.filePath,
 					database,
 				);

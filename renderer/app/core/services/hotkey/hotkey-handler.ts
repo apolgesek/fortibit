@@ -86,7 +86,7 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 			} else if (typeof hotkeyDef.config?.preventDefault === 'boolean') {
 				shouldPreventDefault = hotkeyDef.config?.preventDefault;
 			}
-			
+
 			if (shouldPreventDefault) {
 				event.preventDefault();
 			}

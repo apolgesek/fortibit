@@ -1,1 +1,1 @@
-export type FileType = 'vaultExt' | 'csv' | 'xml';
+export type FileType = '$vault' | 'csv' | 'xml';

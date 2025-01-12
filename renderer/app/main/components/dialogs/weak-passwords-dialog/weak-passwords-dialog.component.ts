@@ -10,7 +10,12 @@ import {
 } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { IpcChannel, PasswordEntry, Report, WeakPasswordEntry } from '@shared-renderer/index';
+import {
+	IpcChannel,
+	PasswordEntry,
+	Report,
+	WeakPasswordEntry,
+} from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
 import { bufferTime, from } from 'rxjs';

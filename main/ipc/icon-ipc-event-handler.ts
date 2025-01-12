@@ -21,10 +21,8 @@ export class IconIpcEventHandler implements IIpcEventHandler {
 			IpcChannel.TryGetIcon,
 			async (event: IpcMainEvent, id: number, url: string) => {
 				const iconPath = await this._iconService.tryGetIcon(url);
-				const window = this._windowService.getWindowByWebContentsId(
+				this._windowService.sendMessage(
 					event.sender.id,
-				);
-				window.browserWindow.webContents.send(
 					IpcChannel.UpdateIcon,
 					id,
 					iconPath,
@@ -36,10 +34,8 @@ export class IconIpcEventHandler implements IIpcEventHandler {
 			IpcChannel.TryReplaceIcon,
 			async (event: IpcMainEvent, id: number, path: string, newUrl: string) => {
 				const iconPath = await this._iconService.tryReplaceIcon(path, newUrl);
-				const window = this._windowService.getWindowByWebContentsId(
+				this._windowService.sendMessage(
 					event.sender.id,
-				);
-				window.browserWindow.webContents.send(
 					IpcChannel.UpdateIcon,
 					id,
 					iconPath,
@@ -51,10 +47,11 @@ export class IconIpcEventHandler implements IIpcEventHandler {
 			IpcChannel.RemoveIcon,
 			async (event: IpcMainEvent, entry: PasswordEntry) => {
 				await this._iconService.removeIcon(entry.icon);
-				const window = this._windowService.getWindowByWebContentsId(
+				this._windowService.sendMessage(
 					event.sender.id,
+					IpcChannel.UpdateIcon,
+					entry.id,
 				);
-				window.browserWindow.webContents.send(IpcChannel.UpdateIcon, entry.id);
 			},
 		);
 

@@ -1,8 +1,35 @@
+import {
+	AutotypeIpcEventHandler,
+	ClipboardIpcEventHandler,
+	ConfigIpcEventHandler,
+	DatabaseIpcEventHandler,
+	EncryptionIpcEventHandler,
+	ExportIpcEventHandler,
+	IAutotypeIpcEventHandler,
+	IClipboardIpcEventHandler,
+	IConfigIpcEventHandler,
+	IconIpcEventHandler,
+	IDatabaseIpcEventHandler,
+	IEncryptionIpcEventHandler,
+	IExportIpcEventHandler,
+	IIconIpcEventHandler,
+	IImportIpcEventHandler,
+	ImportIpcEventHandler,
+	ITotpIpcEventHandler,
+	IUpdateIpcEventHandler,
+	IWindowIpcEventHandler,
+	TotpIpcEventHandler,
+	UpdateIpcEventHandler,
+	WindowIpcEventHandler,
+} from '../ipc';
+import { IMessageBroker, MessageBroker } from '../ipc/message-broker';
 import { AutotypeService, IAutotypeService } from '../services/autotype';
 import { ClipboardService, IClipboardService } from '../services/clipboard';
 import { IConfigService } from '../services/config';
 import { ConfigService } from '../services/config/config.service';
 import { DatabaseService, IDatabaseService } from '../services/database';
+import { DialogService, IDialogService } from '../services/dialog';
+import { DownloadService, IDownloadService } from '../services/download';
 import {
 	EncryptionEventService,
 	EncryptionEventWrapper,
@@ -25,6 +52,7 @@ import {
 	ISendInputService,
 	Win32SendInputService,
 } from '../services/send-input';
+import { ITotpService, TotpService } from '../services/totp';
 import {
 	DarwinCommandHandler,
 	ICommandHandler,
@@ -35,26 +63,6 @@ import {
 import { IWebApiService, WebApiService } from '../services/web-api';
 import { IWindowService, WindowService } from '../services/window';
 import { ServiceCollection } from './index';
-import {
-	AutotypeIpcEventHandler,
-	ClipboardIpcEventHandler,
-	ConfigIpcEventHandler,
-	DatabaseIpcEventHandler,
-	ExportIpcEventHandler,
-	IAutotypeIpcEventHandler,
-	IClipboardIpcEventHandler,
-	IConfigIpcEventHandler,
-	IDatabaseIpcEventHandler,
-	IExportIpcEventHandler,
-	IIconIpcEventHandler,
-	IImportIpcEventHandler,
-	IUpdateIpcEventHandler,
-	IWindowIpcEventHandler,
-	IconIpcEventHandler,
-	ImportIpcEventHandler,
-	UpdateIpcEventHandler,
-	WindowIpcEventHandler,
-} from '../ipc';
 
 export class SingleInstanceServices extends ServiceCollection {
 	constructor() {
@@ -63,6 +71,7 @@ export class SingleInstanceServices extends ServiceCollection {
 	}
 
 	configureServices() {
+		this.set(IMessageBroker, new MessageBroker());
 		this.set(INativeApiService, this.getNativeApiService());
 		this.set(ISendInputService, this.getSendInputService());
 		this.set(IConfigService, new ConfigService());
@@ -76,52 +85,49 @@ export class SingleInstanceServices extends ServiceCollection {
 		);
 		this.set(IPerformanceService, new PerformanceService());
 		this.set(IFileService, new FileService());
+		this.set(IDialogService, new DialogService(this.get(IConfigService)));
+		this.set(IDownloadService, new DownloadService());
 		this.set(IClipboardService, new ClipboardService(this.get(IConfigService)));
-
 		this.set(
 			IWindowService,
 			new WindowService(
+				this.get(IMessageBroker),
 				this.get(IConfigService),
 				this.get(IPerformanceService),
 				this.get(INativeApiService),
 			),
 		);
-
+		this.set(ITotpService, new TotpService(this.get(IWindowService)));
 		this.set(
 			IWebApiService,
 			new WebApiService(this.get(IConfigService), this.get(IWindowService)),
 		);
-
 		this.set(
 			IUpdateService,
 			new UpdateService(
 				this.get(IConfigService),
 				this.get(IWindowService),
-				this.get(IFileService),
+				this.get(IDownloadService),
 				this.getCommandHandler(),
 				this.get(INativeApiService),
 			),
 		);
-
 		this.set(
 			IIconService,
 			new IconService(
 				this.get(IConfigService),
-				this.get(IFileService),
+				this.get(IDownloadService),
 				this.get(IWindowService),
 			),
 		);
-
 		this.set(
 			IImportService,
 			new ImportService(this.get(IEncryptionEventWrapper)),
 		);
-
 		this.set(
 			IExportService,
 			new ExportService(this.get(IEncryptionEventWrapper)),
 		);
-
 		this.set(
 			IDatabaseService,
 			new DatabaseService(
@@ -131,9 +137,10 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(IWebApiService),
 				this.get(INativeApiService),
 				this.get(IEncryptionEventService),
+				this.get(IFileService),
+				this.get(IDialogService),
 			),
 		);
-
 		this.set(
 			IAutotypeService,
 			new AutotypeService(
@@ -155,7 +162,6 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(IConfigService),
 			),
 		);
-
 		this.set(
 			IWindowIpcEventHandler,
 			new WindowIpcEventHandler(
@@ -164,12 +170,10 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(INativeApiService),
 			),
 		);
-
 		this.set(
 			IIconIpcEventHandler,
 			new IconIpcEventHandler(this.get(IIconService), this.get(IWindowService)),
 		);
-
 		this.set(
 			IConfigIpcEventHandler,
 			new ConfigIpcEventHandler(
@@ -177,7 +181,6 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(INativeApiService),
 			),
 		);
-
 		this.set(
 			IAutotypeIpcEventHandler,
 			new AutotypeIpcEventHandler(
@@ -185,7 +188,6 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(IAutotypeService),
 			),
 		);
-
 		this.set(
 			IImportIpcEventHandler,
 			new ImportIpcEventHandler(
@@ -194,7 +196,6 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(IWindowService),
 			),
 		);
-
 		this.set(
 			IExportIpcEventHandler,
 			new ExportIpcEventHandler(
@@ -203,7 +204,6 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(IConfigService),
 			),
 		);
-
 		this.set(
 			IUpdateIpcEventHandler,
 			new UpdateIpcEventHandler(
@@ -211,10 +211,20 @@ export class SingleInstanceServices extends ServiceCollection {
 				this.get(IWindowService),
 			),
 		);
-
 		this.set(
 			IClipboardIpcEventHandler,
 			new ClipboardIpcEventHandler(this.get(IClipboardService)),
+		);
+		this.set(
+			IEncryptionIpcEventHandler,
+			new EncryptionIpcEventHandler(
+				this.get(IWindowService),
+				this.get(IEncryptionEventWrapper),
+			),
+		);
+		this.set(
+			ITotpIpcEventHandler,
+			new TotpIpcEventHandler(this.get(ITotpService)),
 		);
 	}
 

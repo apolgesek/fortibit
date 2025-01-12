@@ -1,8 +1,6 @@
 import { ProcessArgument } from '@root/main/process-argument.enum';
 import { join } from 'path';
-import {
-	_electron as electron,
-} from 'playwright-core';
+import { _electron as electron } from 'playwright-core';
 import { authenticate } from '../helpers/auth';
 import { setupTestFiles } from '../helpers/file';
 
@@ -16,7 +14,7 @@ export async function beforeEach(auth = true) {
 	});
 
 	const firstWindow = await app.firstWindow();
-	
+
 	if (auth) {
 		await authenticate(firstWindow);
 		await firstWindow.getByRole('main').waitFor({ state: 'visible' });

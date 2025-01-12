@@ -18,7 +18,10 @@
 						[appFocusableListItem]="item"
 						role="menuitem"
 						tabindex="0"
-						[ngClass]="{ separator: item.separator, disabled: item['_disabled'] }"
+						[ngClass]="{
+							separator: item.separator,
+							disabled: item['_disabled'],
+						}"
 						(click)="
 							!item['_disabled'] &&
 								item.command &&

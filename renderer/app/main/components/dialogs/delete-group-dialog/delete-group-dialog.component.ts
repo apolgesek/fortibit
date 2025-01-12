@@ -39,7 +39,11 @@ export class DeleteGroupDialogComponent implements IModal {
 
 		this.close();
 
-		this.notificationService.add({ type: 'success', alive: 5000, message: 'Group removed' });
+		this.notificationService.add({
+			type: 'success',
+			alive: 5000,
+			message: 'Group removed',
+		});
 	}
 
 	close() {

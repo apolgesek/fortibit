@@ -45,9 +45,7 @@ export class WindowIpcEventHandler implements IIpcEventHandler {
 		});
 
 		ipcMain.on(IpcChannel.Close, (event: IpcMainEvent) => {
-			const win = this._windowService.windows.find(
-				(x) => x.browserWindow.webContents.id === event.sender.id,
-			);
+			const win = this._windowService.getWindowByWebContentsId(event.sender.id);
 
 			if (win.browserWindow.webContents.isDevToolsOpened()) {
 				win.browserWindow.webContents.closeDevTools();

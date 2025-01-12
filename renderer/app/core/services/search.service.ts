@@ -35,7 +35,8 @@ interface ISearchService {
 	providedIn: 'root',
 })
 export class SearchService implements ISearchService {
-	public searchInputSource: BehaviorSubject<string> = new BehaviorSubject<string>('');
+	public searchInputSource: BehaviorSubject<string> =
+		new BehaviorSubject<string>('');
 	public searchPhrase$: Observable<string>;
 	public sortProp: SortableEntryProp = 'creationDate';
 	public sortOrder: Sort = Sort.Desc;

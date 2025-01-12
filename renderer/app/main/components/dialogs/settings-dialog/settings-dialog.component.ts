@@ -14,7 +14,7 @@ import { ViewTabComponent } from './view-tab/view-tab.component';
 
 enum Tab {
 	Integration = 'Integration',
-	Organization = 'Organization'
+	Organization = 'Organization',
 }
 
 @Component({
@@ -30,7 +30,7 @@ enum Tab {
 		ViewTabComponent,
 		IntegrationTabComponent,
 		GeneralTabComponent,
-		OrganizationTabComponent
+		OrganizationTabComponent,
 	],
 })
 export class SettingsDialogComponent implements IModal {
@@ -49,7 +49,7 @@ export class SettingsDialogComponent implements IModal {
 	shouldIncludeTab(tab: Tab): boolean {
 		switch (this.messageBroker.platform) {
 			case 'darwin':
-				const disabledTabs = [ Tab.Integration, Tab.Organization ];
+				const disabledTabs = [Tab.Integration, Tab.Organization];
 				if (disabledTabs.includes(tab)) {
 					return false;
 				}

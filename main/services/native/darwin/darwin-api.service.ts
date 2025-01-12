@@ -1,8 +1,13 @@
 import { execSync } from 'child_process';
 import { INativeApiService } from '../native-api.model';
-import { systemPreferences } from 'electron';
+import { app, systemPreferences } from 'electron';
+import { ProcessArgument } from '@root/main/process-argument.enum';
 
 export class DarwinApiService implements INativeApiService {
+	private readonly _isTestMode = Boolean(
+		app.commandLine.hasSwitch(ProcessArgument.E2E),
+	);
+
 	readRegistryKey(key: string, value: string): string {
 		return '';
 	}
@@ -11,10 +16,12 @@ export class DarwinApiService implements INativeApiService {
 
 	async getPassword(windowHandleHex: Buffer, dbPath: string): Promise<string> {
 		try {
+			if (this._isTestMode) return Promise.resolve('test123');
+
 			await systemPreferences.promptTouchID('test');
 			return 'test';
-		} catch (err) {
-			console.log('Could not verify identity with Touch ID.');
+		} catch {
+			throw new Error('Could not verify identity with Touch ID.');
 		}
 	}
 
@@ -49,15 +56,11 @@ export class DarwinApiService implements INativeApiService {
 	}
 
 	getActiveWindowTitle(): string {
-		try {
-			const title = execSync('osascript GetActiveWindowTitle.scpt', {
-				cwd: __dirname,
-			});
+		const title = execSync('osascript GetActiveWindowTitle.scpt', {
+			cwd: __dirname,
+		});
 
-			return title.toString('utf-8');
-		} catch (error) {
-			console.log(error);
-		}
+		return title.toString('utf-8');
 	}
 
 	setLivePreviewBitmap(handle: Buffer, path: string): number {

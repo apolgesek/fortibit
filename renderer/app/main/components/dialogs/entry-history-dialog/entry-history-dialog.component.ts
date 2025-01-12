@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, DestroyRef, OnInit, inject } from '@angular/core';
+import {
+	Component,
+	ComponentRef,
+	DestroyRef,
+	OnInit,
+	inject,
+} from '@angular/core';
 import { EntryManager, ModalRef, ModalService } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';

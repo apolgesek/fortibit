@@ -11,11 +11,11 @@ import {
 } from 'fs-extra';
 import { zipObject } from 'lodash';
 import { arch, platform } from 'os';
-import { join } from 'path';
+import { join, parse } from 'path';
 import { pipeline } from 'stream/promises';
 import { UpdateInformation } from '../../types/update-information';
 import { IConfigService } from '../config/config-service.model';
-import { IFileService } from '../file/file-service.model';
+import { IDownloadService } from '../download/download-service.model';
 import { INativeApiService } from '../native/native-api.model';
 import { IWindowService } from '../window/window-service.model';
 import { ICommandHandler } from './command-handler.model';
@@ -48,7 +48,7 @@ export class UpdateService implements IUpdateService {
 	constructor(
 		@IConfigService private readonly _configService: IConfigService,
 		@IWindowService private readonly _windowService: IWindowService,
-		@IFileService private readonly _fileService: IFileService,
+		@IDownloadService private readonly _downloadService: IDownloadService,
 		@ICommandHandler private readonly _commandHandler: ICommandHandler,
 		@INativeApiService private readonly _nativeApiService: INativeApiService,
 	) {
@@ -123,13 +123,11 @@ export class UpdateService implements IUpdateService {
 
 	public setUpdateState(state: UpdateState) {
 		this._updateState = state;
-		this._windowService.windows.forEach((window) => {
-			window.browserWindow.webContents.send(
-				IpcChannel.UpdateState,
-				this.updateState,
-				this._updateInformation?.version,
-			);
-		});
+		this._windowService.sendMessageToAll(
+			IpcChannel.UpdateState,
+			this.updateState,
+			this.updateInformation?.version,
+		);
 	}
 
 	private async isFileVerified(filePath: string): Promise<boolean> {
@@ -195,12 +193,10 @@ export class UpdateService implements IUpdateService {
 		};
 
 		const onDownload = (progress: string) => {
-			this._windowService.windows.forEach((w) =>
-				w.browserWindow.webContents.send(IpcChannel.UpdateProgress, progress),
-			);
+			this._windowService.sendMessageToAll(IpcChannel.UpdateProgress, progress);
 		};
 
-		return this._fileService.download(
+		return this._downloadService.download(
 			this._updateInformation.url,
 			this._updateDestinationPath,
 			onError,
@@ -214,27 +210,17 @@ export class UpdateService implements IUpdateService {
 	}
 
 	private getExecutablePath(path: string) {
-		const pathParts = path.split('.');
-		pathParts.pop();
-		pathParts.push(this.fileExt);
-
-		return pathParts.join('.');
+		const { dir, name } = parse(path);
+		return join(dir, name) + '.' + this.fileExt;
 	}
 
 	private resolveUpdateInformation(updateMetadata: UpdateMetadata) {
-		this._updateInformation = {
-			version: null,
-			fileName: null,
-			url: null,
-			checksum: null,
-		};
+		this._updateInformation = Object.assign({});
 
 		this._updateInformation.version = updateMetadata.version;
 		this._updateInformation.fileName = `${this._configService.appConfig.name.toLowerCase()}_${
 			updateMetadata.version
-		}_${platform()}_${arch()}_update.${
-			this._configService.appConfig.temporaryFileExtension
-		}`;
+		}_${platform()}_${arch()}_update.${this._configService.appConfig.temporaryFileExtension}`;
 		this._updateInformation.url = updateMetadata.download_url[platform()];
 		this._updateInformation.checksum = updateMetadata.checksum;
 		this._updateDestinationPath = join(

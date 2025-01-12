@@ -72,27 +72,34 @@ export class EntryRepository implements IEntryRepository {
 
 	markSecureProtocolAvailable(url: string) {
 		return this.db.context.transaction('rw', this.db.entries, () => {
-			this.db.entries.filter(x => x.type === 'password' && new RegExp(url).test(x.url)).modify((e: PasswordEntry) => {
-				e.isSecureProtocolAvailable = true;
-			});
-		});		
+			this.db.entries
+				.filter((x) => x.type === 'password' && new RegExp(url).test(x.url))
+				.modify((e: PasswordEntry) => {
+					e.isSecureProtocolAvailable = true;
+				});
+		});
 	}
 
 	markTfaAvailable(url: string) {
 		return this.db.context.transaction('rw', this.db.entries, () => {
-			this.db.entries.filter(x => x.type === 'password' && new RegExp(url).test(x.url)).modify((e: PasswordEntry) => {
-				e.isTfaAvailable = true;
-			});
-		});		
+			this.db.entries
+				.filter((x) => x.type === 'password' && new RegExp(url).test(x.url))
+				.modify((e: PasswordEntry) => {
+					e.isTfaAvailable = true;
+				});
+		});
 	}
 
 	markExposed(ids: number[]): Promise<number | number[]> {
 		return this.db.context.transaction('rw', this.db.entries, () =>
 			Promise.all(
-				ids.map((id) => this.db.entries.update(id, (e: PasswordEntry) => {
-					e.isExposed = true;
-				})),
-			));
+				ids.map((id) =>
+					this.db.entries.update(id, (e: PasswordEntry) => {
+						e.isExposed = true;
+					}),
+				),
+			),
+		);
 	}
 
 	delete(id: number): Promise<void> {

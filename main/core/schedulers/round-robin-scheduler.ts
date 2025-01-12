@@ -12,17 +12,22 @@ export class RoundRobinScheduler extends BaseAsyncQueueScheduler {
 		super(items, 60 * 1_000, 60 * 1_000);
 		this._maxConcurrentItems = maxConcurrentItems;
 
-		const chunkSize = Math.floor(this._maxConcurrentItems / Math.max(...this.items.map(x => x.batchSize)));
+		const chunkSize = Math.floor(
+			this._maxConcurrentItems /
+				Math.max(...this.items.map((x) => x.batchSize)),
+		);
 		this._chunkedItems = chunk(this.items, chunkSize);
 	}
 
 	protected async fn(): Promise<Result> {
-		const result = await Promise.all(this._chunkedItems[this._processedQueueItemIndex].map(i => i.process()));
-		if (result.some(r => r === Result.RateLimitExceeded)) {
+		const result = await Promise.all(
+			this._chunkedItems[this._processedQueueItemIndex].map((i) => i.process()),
+		);
+		if (result.some((r) => r === Result.RateLimitExceeded)) {
 			return Result.RateLimitExceeded;
 		} else {
 			return Result.Success;
-		}		
+		}
 	}
 
 	protected onExecuted(): void {

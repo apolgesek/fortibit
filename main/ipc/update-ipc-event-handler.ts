@@ -21,13 +21,12 @@ export class UpdateIpcEventHandler implements IIpcEventHandler {
 				return;
 			}
 
-			this._windowService
-				.getWindowByWebContentsId(event.sender.id)
-				.browserWindow.webContents.send(
-					IpcChannel.UpdateState,
-					this._updateService.updateState,
-					this._updateService.updateInformation?.version,
-				);
+			this._windowService.sendMessage(
+				event.sender.id,
+				IpcChannel.UpdateState,
+				this._updateService.updateState,
+				this._updateService.updateInformation?.version,
+			);
 		});
 
 		ipcMain.on(IpcChannel.CheckUpdate, () => {

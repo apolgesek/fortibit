@@ -1,16 +1,13 @@
 /* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
-import {
-	ElectronApplication,
-	Page,
-} from 'playwright-core';
+import { ElectronApplication, Page } from 'playwright-core';
 import { beforeEach } from './hooks/before-each';
 import { afterEach } from './hooks/after-each';
 
 test.describe('Keyboard navigation/menu', async () => {
 	let app: ElectronApplication;
 	let appWindow: Page;
-	
+
 	test.beforeEach(async () => {
 		const { appInstance, windowInstance } = await beforeEach();
 
@@ -86,10 +83,7 @@ test.describe('Keyboard navigation/menu', async () => {
 		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
 		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
 		await appWindow.keyboard.press('ArrowDown', { delay: 100 });
-		const menuItem = appWindow
-			.getByRole('menubar')
-			.getByText(/save/i)
-			.first();
+		const menuItem = appWindow.getByRole('menubar').getByText(/save/i).first();
 		await menuItem.waitFor({ state: 'visible' });
 
 		await expect(menuItem).toBeDisabled();
@@ -125,7 +119,7 @@ test.describe('Keyboard navigation/focusable list', async () => {
 	test.afterEach(async () => {
 		await afterEach(app);
 	});
-	
+
 	test('Check arrow down navigation', async () => {
 		const groups = appWindow.getByRole('complementary').getByRole('listitem');
 		await groups.first().click();

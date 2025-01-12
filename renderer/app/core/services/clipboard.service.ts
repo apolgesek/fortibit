@@ -21,9 +21,11 @@ export class ClipboardService {
 	private readonly messageBroker = inject(MessageBroker);
 	private readonly notificationService = inject(NotificationService);
 	private readonly configService = inject(ConfigService);
-	
+
 	constructor() {
-		this.configService.configLoadedSource$.subscribe((config) => this.config = config);
+		this.configService.configLoadedSource$.subscribe(
+			(config) => (this.config = config),
+		);
 	}
 
 	async copyText(model: CopyText) {

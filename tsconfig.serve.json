@@ -8,6 +8,7 @@
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"esModuleInterop": true,
+		"strictNullChecks": true,
 		"module": "commonjs",
 		"target": "es5",
 		"types": ["node"],
@@ -15,7 +16,7 @@
 			"@shared-renderer/*": ["shared/*"],
 			"@root/*": ["./*"]
 		},
-		"lib": ["es2021", "dom"],
+		"lib": ["es2021", "dom"]
 	},
 	"files": ["main.ts"],
 	"include": ["**/auth.service.ts"],

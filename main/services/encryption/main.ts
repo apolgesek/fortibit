@@ -2,58 +2,21 @@ import { createHash } from 'crypto';
 import { Entry, VaultSchema } from '../../../shared';
 import { IEncryptionService } from './encryption-service.model';
 import { EncryptionService } from './encryption.service';
+import {
+	BulkDecryptStringEventPayload,
+	DecryptDatabaseEventPayload,
+	DecryptStringEventPayload,
+	EncryptDatabaseEventPayload,
+	EncryptStringEventPayload,
+	EventPayload,
+	GetLeaksEventPayload,
+	GetWeakPasswordsEventPayload,
+} from './events/event-payload.type';
 import { IExposedPasswordsService } from './exposed-passwords/exposed-passwords-service.model';
 import { ExposedPasswordsService } from './exposed-passwords/exposed-passwords.service';
 import { InMemoryEncryptionService } from './in-memory-encryption.service';
 import { MessageEventType } from './message-event-type.enum';
 import { WeakPasswordsService } from './weak-passwords/weak-passwords.service';
-
-type EventPayload =
-	| DecryptDatabaseEventPayload
-	| EncryptDatabaseEventPayload
-	| EncryptStringEventPayload
-	| DecryptStringEventPayload
-	| BulkDecryptStringEventPayload
-	| GetLeaksEventPayload
-	| GetWeakPasswordsEventPayload;
-
-type DecryptDatabaseEventPayload = {
-	type: MessageEventType.DecryptDatabase;
-	data: string;
-	password: string;
-};
-
-type EncryptDatabaseEventPayload = {
-	type: MessageEventType.EncryptDatabase;
-	schemaVersion: number;
-	database: string;
-	password: string;
-};
-
-type EncryptStringEventPayload = {
-	type: MessageEventType.EncryptString;
-	plain: string;
-};
-
-type DecryptStringEventPayload = {
-	type: MessageEventType.DecryptString;
-	encrypted: string;
-};
-
-type BulkDecryptStringEventPayload = {
-	type: MessageEventType.BulkDecryptString;
-	rows: string;
-};
-
-type GetLeaksEventPayload = {
-	type: MessageEventType.GetLeaks;
-	database: string;
-};
-
-type GetWeakPasswordsEventPayload = {
-	type: MessageEventType.GetWeakPasswords;
-	database: string;
-};
 
 // include only intended props excluding database engine generated and private ones
 function normalizeEntity<T extends object>(e: T): Partial<T> {
@@ -72,7 +35,7 @@ function normalizeEntity<T extends object>(e: T): Partial<T> {
 
 function sendAsync<T>(arg: T): Promise<void> {
 	return new Promise((resolve) => {
-		process.send(arg, resolve);
+		process.send!(arg, resolve);
 	});
 }
 
@@ -133,7 +96,7 @@ class Main {
 				case 'password':
 					entry.password = this._inMemoryEncryptionService.decryptString(
 						entry.password,
-						process.env.ENCRYPTION_KEY,
+						process.env.ENCRYPTION_KEY as string,
 					);
 					break;
 				default:
@@ -147,7 +110,7 @@ class Main {
 					historyEntry.entry.password =
 						this._inMemoryEncryptionService.decryptString(
 							historyEntry.entry.password,
-							process.env.ENCRYPTION_KEY,
+							process.env.ENCRYPTION_KEY as string,
 						);
 					break;
 				default:
@@ -186,7 +149,7 @@ class Main {
 					case 'password':
 						entry.password = this._inMemoryEncryptionService.encryptString(
 							entry.password,
-							process.env.ENCRYPTION_KEY,
+							process.env.ENCRYPTION_KEY as string,
 						);
 						break;
 					default:
@@ -200,7 +163,7 @@ class Main {
 						historyEntry.entry.password =
 							this._inMemoryEncryptionService.encryptString(
 								historyEntry.entry.password,
-								process.env.ENCRYPTION_KEY,
+								process.env.ENCRYPTION_KEY as string,
 							);
 						break;
 					default:
@@ -219,7 +182,7 @@ class Main {
 		const { plain } = event;
 		const encryptedPassword = this._inMemoryEncryptionService.encryptString(
 			plain,
-			process.env.ENCRYPTION_KEY,
+			process.env.ENCRYPTION_KEY as string,
 		);
 
 		await sendAsync({ encrypted: encryptedPassword });
@@ -229,7 +192,7 @@ class Main {
 		const { encrypted } = event;
 		const decryptedPassword = this._inMemoryEncryptionService.decryptString(
 			encrypted,
-			process.env.ENCRYPTION_KEY,
+			process.env.ENCRYPTION_KEY as string,
 		);
 
 		await sendAsync({ decrypted: decryptedPassword });
@@ -244,7 +207,7 @@ class Main {
 				case 'password':
 					entry.password = this._inMemoryEncryptionService.decryptString(
 						entry.password,
-						process.env.ENCRYPTION_KEY,
+						process.env.ENCRYPTION_KEY as string,
 					);
 					break;
 				default:
@@ -269,7 +232,7 @@ class Main {
 					shasum.update(
 						this._inMemoryEncryptionService.decryptString(
 							entry.password,
-							process.env.ENCRYPTION_KEY,
+							process.env.ENCRYPTION_KEY as string,
 						),
 					);
 					const hash = shasum.digest('hex');
@@ -282,7 +245,7 @@ class Main {
 
 			const leaks = await this._exposedPasswordsService.findLeaks(
 				entries,
-				process.env.LEAKED_PASSWORDS_API_URL,
+				process.env.LEAKED_PASSWORDS_API_URL as string,
 			);
 
 			await sendAsync({ data: JSON.stringify(leaks) });
@@ -305,7 +268,7 @@ class Main {
 						id: entry.id,
 						password: this._inMemoryEncryptionService.decryptString(
 							entry.password,
-							process.env.ENCRYPTION_KEY,
+							process.env.ENCRYPTION_KEY as string,
 						),
 					};
 				});

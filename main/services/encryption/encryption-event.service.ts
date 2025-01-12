@@ -20,7 +20,10 @@ export class EncryptionEventService implements IEncryptionEventService {
 		return (await this._encryptionEventWrapper.processEventAsync(
 			encryptionEvent,
 			key,
-		)) as { error: string; data: string };
+		)) as {
+			error: string;
+			data: string;
+		};
 	}
 
 	public async getWeakPasswords(
@@ -34,10 +37,13 @@ export class EncryptionEventService implements IEncryptionEventService {
 		return (await this._encryptionEventWrapper.processEventAsync(
 			encryptionEvent,
 			key,
-		)) as { error: string; data: string };
+		)) as {
+			error: string;
+			data: string;
+		};
 	}
 
-	public async saveDatabase(
+	public async encryptVaultData(
 		schemaVersion: number,
 		database: string,
 		password: string,
@@ -52,10 +58,12 @@ export class EncryptionEventService implements IEncryptionEventService {
 		return (await this._encryptionEventWrapper.processEventAsync(
 			encryptionEvent,
 			key,
-		)) as { encrypted: string };
+		)) as {
+			encrypted: string;
+		};
 	}
 
-	public async decryptDatabase(
+	public async decryptVaultData(
 		data: string,
 		password: string,
 		key: string,
@@ -68,6 +76,9 @@ export class EncryptionEventService implements IEncryptionEventService {
 		return (await this._encryptionEventWrapper.processEventAsync(
 			encryptionEvent,
 			key,
-		)) as { error: string; decrypted: string };
+		)) as {
+			error: string;
+			decrypted: string;
+		};
 	}
 }

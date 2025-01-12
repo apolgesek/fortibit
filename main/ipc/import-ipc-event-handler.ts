@@ -44,12 +44,11 @@ export class ImportIpcEventHandler implements IIpcEventHandler {
 			IpcChannel.Import,
 			(event: IpcMainInvokeEvent, filePath: string, type: ImportHandler) => {
 				this._importService.setHandler(type);
-
 				const key = this._windowService.getWindowByWebContentsId(
 					event.sender.id,
 				).key;
 
-				return this._importService.getHandler().import(key, filePath);
+				return this._importService.getHandler().import(key as string, filePath);
 			},
 		);
 	}

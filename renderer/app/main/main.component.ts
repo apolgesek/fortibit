@@ -1,9 +1,4 @@
-import {
-	Component,
-	OnInit,
-	ViewContainerRef,
-	inject,
-} from '@angular/core';
+import { Component, OnInit, ViewContainerRef, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MessageBroker } from 'injection-tokens';
 import { IpcChannel } from '../../../shared/ipc-channel.enum';

@@ -31,7 +31,7 @@ export class NotificationComponent implements OnInit, AfterViewInit, OnDestroy {
 	private timer: any;
 
 	private readonly element = inject(ElementRef);
-	private readonly notificationService = inject(NotificationService); 
+	private readonly notificationService = inject(NotificationService);
 
 	@HostBinding('style')
 	get style(): string {

@@ -1,8 +1,6 @@
 import { ConfigService } from '@root/main/services/config';
-import {
-	EncryptionEventWrapper,
-	IEncryptionEventWrapper,
-} from '@root/main/services/encryption';
+import { EncryptionEventWrapper } from '@root/main/services/encryption';
+import type { IEncryptionEventWrapper } from '@root/main/services/encryption/encryption-event-wrapper.model';
 import { IImportHandler } from '@root/main/services/import';
 import { BitwardenHandler } from '@root/main/services/import/handlers/bitwarden-handler';
 import { ChromeHandler } from '@root/main/services/import/handlers/chrome-handler';
@@ -85,7 +83,9 @@ describe('Import service - get metadata', () => {
 	test.each(cases)(
 		'Valid %p file metadata should be fetched successfully',
 		async (_, path, handler) => {
-			const metadata = await new handler(null).getMetadata({
+			const metadata = await new handler(
+				new EncryptionEventWrapper(new ConfigService()),
+			).getMetadata({
 				filePaths: [normalize(__dirname + `/files/${path}`)],
 				canceled: false,
 			});
@@ -97,7 +97,9 @@ describe('Import service - get metadata', () => {
 	test.each(cases)(
 		'Invalid %p file metadata should fail processing',
 		async (_, __, handler) => {
-			const instance = new handler(null);
+			const instance = new handler(
+				new EncryptionEventWrapper(new ConfigService()),
+			);
 
 			const action = () =>
 				instance.getMetadata({

@@ -2,13 +2,10 @@ import { IpcChannel } from '@shared-renderer/index';
 import {
 	app,
 	BrowserWindow,
-	desktopCapturer,
-	dialog,
 	globalShortcut,
 	ipcMain,
 	Menu,
 	nativeTheme,
-	screen,
 	shell,
 } from 'electron';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
@@ -20,14 +17,8 @@ import { IAutotypeService } from './services/autotype';
 import { IClipboardService } from './services/clipboard';
 import { IConfigService } from './services/config';
 import { IDatabaseService } from './services/database';
-import {
-	IEncryptionEventWrapper,
-	MessageEventType,
-} from './services/encryption';
 import { IPerformanceService } from './services/performance/performance-service.model';
 import { IWindowService } from './services/window';
-import jsQR from 'jsqr';
-import { PNG } from 'pngjs';
 import { getDateString } from './util';
 import { IDatabaseIpcEventHandler } from './ipc/database-ipc-event-handler';
 import { IWindowIpcEventHandler } from './ipc/window-ipc-event-handler';
@@ -35,23 +26,22 @@ import {
 	IAutotypeIpcEventHandler,
 	IClipboardIpcEventHandler,
 	IConfigIpcEventHandler,
+	IEncryptionIpcEventHandler,
 	IExportIpcEventHandler,
 	IIconIpcEventHandler,
 	IImportIpcEventHandler,
 	IIpcEventHandler,
+	ITotpIpcEventHandler,
 	IUpdateIpcEventHandler,
 } from './ipc';
 
 class MainProcess {
 	private readonly _services: SingleInstanceServices;
-	private readonly _isDevMode = Boolean(
-		app.commandLine.hasSwitch(ProcessArgument.Serve),
-	);
 	private readonly _isTestMode = Boolean(
 		app.commandLine.hasSwitch(ProcessArgument.E2E),
 	);
 
-	private _fileArg: string;
+	private _fileArg: string | undefined;
 
 	private get _databaseService(): IDatabaseService {
 		return this._services.get(IDatabaseService);
@@ -59,10 +49,6 @@ class MainProcess {
 
 	private get _windowService(): IWindowService {
 		return this._services.get(IWindowService);
-	}
-
-	private get _encryptionEventWrapper(): IEncryptionEventWrapper {
-		return this._services.get(IEncryptionEventWrapper);
 	}
 
 	private get _performanceService(): IPerformanceService {
@@ -117,6 +103,14 @@ class MainProcess {
 		return this._services.get(IClipboardIpcEventHandler);
 	}
 
+	private get _encryptionIpcEventHandler() {
+		return this._services.get(IEncryptionIpcEventHandler);
+	}
+
+	private get _totpIpcEventHandler() {
+		return this._services.get(ITotpIpcEventHandler);
+	}
+
 	constructor() {
 		process.env.TEST_MODE = this._isTestMode ? '1' : '0';
 		this._services = new SingleInstanceServices();
@@ -145,7 +139,7 @@ class MainProcess {
 			const windowRef = this._windowService.createMainWindow();
 			this.setFile(windowRef, filePath);
 
-			this._windowService.loadWindow(windowRef, null);
+			this._windowService.loadWindow(windowRef);
 		});
 
 		// disable creation of new windows for better security
@@ -190,7 +184,7 @@ class MainProcess {
 		const mainWindow = this._windowService.createMainWindow();
 		this.setFile(mainWindow, this._fileArg);
 
-		this._windowService.loadWindow(mainWindow, null).then(() => {
+		this._windowService.loadWindow(mainWindow).then(() => {
 			const entrySelectWindow = this._windowService.createEntrySelectWindow();
 			this._windowService.loadWindow(entrySelectWindow, 'entry-select');
 		});
@@ -216,7 +210,7 @@ class MainProcess {
 		}
 	}
 
-	private setFile(windowRef: BrowserWindow, filePath: string) {
+	private setFile(windowRef: BrowserWindow, filePath?: string) {
 		if (filePath) {
 			this._databaseService.setDatabaseEntry(
 				windowRef.webContents.id,
@@ -259,6 +253,8 @@ class MainProcess {
 			this._exportIpcEventHandler,
 			this._updateIpcEventHandler,
 			this._clipboardIpcEventHandler,
+			this._encryptionIpcEventHandler,
+			this._totpIpcEventHandler,
 		];
 
 		ipcEventHandlers.forEach((handler) => handler.initialize());
@@ -271,85 +267,12 @@ class MainProcess {
 			return platform();
 		});
 
-		ipcMain.handle(IpcChannel.EncryptPassword, async (event, password) => {
-			const encryptionEvent = {
-				type: MessageEventType.EncryptString,
-				plain: password,
-			};
-			const response = (await this._encryptionEventWrapper.processEventAsync(
-				encryptionEvent,
-				this._windowService.getWindowByWebContentsId(event.sender.id).key,
-			)) as { encrypted: string };
-
-			return response.encrypted;
-		});
-
-		ipcMain.handle(IpcChannel.DecryptPassword, async (event, password) => {
-			const encryptionEvent = {
-				type: MessageEventType.DecryptString,
-				encrypted: password,
-			};
-			const response = (await this._encryptionEventWrapper.processEventAsync(
-				encryptionEvent,
-				this._windowService.getWindowByWebContentsId(event.sender.id).key,
-			)) as { decrypted: string };
-
-			return response.decrypted;
-		});
-
 		ipcMain.on(IpcChannel.OpenUrl, async (_, url: string) => {
 			if (!/^https?/.test(url)) {
 				url = 'http://' + url;
 			}
 
 			shell.openExternal(url);
-		});
-
-		ipcMain.handle(IpcChannel.ScanQrCode, async (event) => {
-			const window = this._windowService.getWindowByWebContentsId(
-				event.sender.id,
-			).browserWindow;
-
-			const { width, height } = screen.getPrimaryDisplay().size;
-			const sources = await desktopCapturer.getSources({
-				types: ['window'],
-				thumbnailSize: { width, height },
-			});
-
-			if (!sources?.length) {
-				this.showMissingQrCodeError(window);
-
-				return;
-			}
-
-			const buffer = sources[0].thumbnail.toPNG();
-			const png = PNG.sync.read(buffer);
-
-			const code = jsQR(
-				Uint8ClampedArray.from(png.data),
-				png.width,
-				png.height,
-			);
-
-			if (!code) {
-				this.showMissingQrCodeError(window);
-
-				return;
-			}
-
-			const secret = code.data.match(/secret=(([2-7A-Z]{8})+)/);
-
-			if (!secret) {
-				dialog.showMessageBox(window, {
-					title: 'QR code reader error',
-					type: 'warning',
-					message: `Invalid QR code data`,
-				});
-
-				return;
-			}
-
-			return secret[1];
 		});
 
 		ipcMain.on(IpcChannel.LogError, (_, error) => {
@@ -360,31 +283,6 @@ class MainProcess {
 				join(logPath, `error_log_report_${getDateString()}`),
 				error,
 			);
-		});
-
-		ipcMain.handle(IpcChannel.ClearRecentlyOpened, () => {
-			try {
-				writeFileSync(
-					this._configService.workspacesPath,
-					'{"recentlyOpened": [], "workspace": null}',
-					{ encoding: 'utf8' },
-				);
-
-				return true;
-			} catch {
-				return false;
-			}
-		});
-	}
-
-	private showMissingQrCodeError(window: BrowserWindow) {
-		dialog.showMessageBox(window, {
-			title: 'QR code reader error',
-			type: 'warning',
-			message: `No otpauth QR code was found:
-						- make sure it's visible in the foreground,
-						- try zooming the code in and scan again,
-						- if none of the above works, you can manually add a secret in Advanced options of password entry.`,
 		});
 	}
 }

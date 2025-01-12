@@ -1,6 +1,8 @@
 import { AutotypeService } from '@root/main/services/autotype';
 import { ConfigService } from '@root/main/services/config';
 import { DatabaseService } from '@root/main/services/database';
+import { DialogService } from '@root/main/services/dialog';
+import { DownloadService } from '@root/main/services/download';
 import {
 	EncryptionEventService,
 	EncryptionEventWrapper,
@@ -12,6 +14,7 @@ import { PerformanceService } from '@root/main/services/performance';
 import { Win32SendInputService } from '@root/main/services/send-input';
 import { WebApiService } from '@root/main/services/web-api';
 import { IWindow, WindowService } from '@root/main/services/window';
+import { MessageBroker } from '@root/out-tsc/main/ipc/message-broker/message-broker';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { PasswordEntry } from '@shared-renderer/password-entry.model';
 
@@ -128,7 +131,7 @@ jest.mock('@root/main/services/window', () => {
 		IWindowService: jest.fn(),
 		IWindow: jest.fn(),
 		WindowService: jest.fn().mockImplementation(() => {
-			const a = (function () {
+			const instance = (function () {
 				return {
 					getWindow: jest.fn().mockImplementation(() => {
 						return {
@@ -141,34 +144,38 @@ jest.mock('@root/main/services/window', () => {
 						};
 					}),
 					getWindowByWebContentsId: () => ({ key: 'key' }),
+					sendMessage: jest.fn(),
+					sendMessageToAll: jest.fn(),
 				};
 			})();
 
-			Object.defineProperty(a, 'vaultWindows', {
+			Object.defineProperty(instance, 'vaultWindows', {
 				get: jest.fn(),
 				configurable: true,
 			});
 
-			return a;
+			return instance;
 		}),
 	};
 });
 
 function setup() {
+	const messageBroker = new MessageBroker();
 	const configService = new ConfigService();
 	const nativeApiService = new Win32ApiService();
 	const performanceService = new PerformanceService();
+	const downloadService = new DownloadService();
 	const fileService = new FileService();
-
+	const dialogService = new DialogService(configService);
 	const windowService = new WindowService(
+		messageBroker,
 		configService,
 		performanceService,
 		nativeApiService,
 	);
-
 	const iconService = new IconService(
 		configService,
-		fileService,
+		downloadService,
 		windowService,
 	);
 	const webApiService = new WebApiService(configService, windowService);
@@ -176,9 +183,7 @@ function setup() {
 	const encryptionEventService = new EncryptionEventService(
 		encryptionEventWrapper,
 	);
-
 	const sendInputService = new Win32SendInputService(nativeApiService);
-
 	const databaseService = new DatabaseService(
 		configService,
 		windowService,
@@ -186,6 +191,8 @@ function setup() {
 		webApiService,
 		nativeApiService,
 		encryptionEventService,
+		fileService,
+		dialogService,
 	);
 
 	return {
@@ -399,39 +406,38 @@ describe('Autotype service', () => {
 		);
 
 		const getWindowSpy = jest.spyOn(windowService, 'getWindow');
+		const sendMessageSpy = jest.spyOn(windowService, 'sendMessage');
 
 		// Act
 		autotypeService.autotypeEntry();
 
 		// wait for async operations to finish
 		await new Promise((resolve) => setTimeout(resolve));
-
-		const sendSpy = jest.spyOn(
-			getWindowSpy.mock.results[1].value.webContents,
-			'send',
-		);
 		const showSpy = jest.spyOn(getWindowSpy.mock.results[1].value, 'show');
 		const focusSpy = jest.spyOn(getWindowSpy.mock.results[1].value, 'focus');
 
 		// Assert
 		expect(
 			vaultWindowsSpy.mock.results
-				.at(-1)
+				.at(-1)!
 				.value.filter((x) => Boolean(x.autocompleteListener)).length,
 		).toBe(resultCount);
-		expect(getWindowSpy).toHaveBeenCalledWith(1);
-		expect(sendSpy).toHaveBeenCalledWith(IpcChannel.SendMatchingEntries, [
-			{
-				title: 'test.com logowanie',
-				username: 'username',
-				password: 'password',
-			},
-			{
-				title: 'test.com',
-				username: 'username',
-				password: 'password',
-			},
-		]);
+		expect(sendMessageSpy).toHaveBeenCalledWith(
+			expect.anything(),
+			IpcChannel.SendMatchingEntries,
+			[
+				{
+					title: 'test.com logowanie',
+					username: 'username',
+					password: 'password',
+				},
+				{
+					title: 'test.com',
+					username: 'username',
+					password: 'password',
+				},
+			],
+		);
 		expect(showSpy).toHaveBeenCalled();
 		expect(focusSpy).toHaveBeenCalled();
 	});

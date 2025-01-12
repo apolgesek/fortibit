@@ -48,11 +48,11 @@ export class ContextMenuBuilderService {
 	buildEmptyRecycleBinContextMenuItem(): this {
 		this.contextMenuItems.push({
 			label: 'Empty recycle bin',
-			disabled: () => { return this.entryManager.entries.length === 0 },
+			disabled: () => {
+				return this.entryManager.entries.length === 0;
+			},
 			command: () => {
-				this.entryManager.selectedEntries = [
-					...this.entryManager.entries,
-				];
+				this.entryManager.selectedEntries = [...this.entryManager.entries];
 				this.modalService.openDeleteEntryWindow();
 			},
 		});

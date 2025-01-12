@@ -42,9 +42,7 @@ import { TableFiltersComponent } from '../table-filters/table-filters.component'
 	selector: 'app-entries-list',
 	templateUrl: './entries-list.component.html',
 	styleUrls: ['./entries-list.component.scss'],
-	animations: [
-		slideDown,
-	],
+	animations: [slideDown],
 	standalone: true,
 	imports: [
 		CommonModule,
@@ -77,7 +75,9 @@ export class EntriesTableComponent implements OnInit {
 	private readonly searchService = inject(SearchService);
 	private readonly configService = inject(ConfigService);
 	private readonly clipboardService = inject(ClipboardService);
-	private readonly contextMenuBuilderService = inject(ContextMenuBuilderService);
+	private readonly contextMenuBuilderService = inject(
+		ContextMenuBuilderService,
+	);
 	private readonly modalService = inject(ModalService);
 	private readonly hotkeyHandler = inject(HotkeyHandler);
 
@@ -130,6 +130,10 @@ export class EntriesTableComponent implements OnInit {
 		return this.groupManager.isAddAllowed;
 	}
 
+	get isRecycleBin(): boolean {
+		return this.groupManager.selectedGroup === GroupId.RecycleBin;
+	}
+
 	ngOnInit() {
 		this.handleEntriesReload();
 
@@ -156,13 +160,13 @@ export class EntriesTableComponent implements OnInit {
 	trackingTag(_: number, entry: PasswordEntry): string {
 		return (
 			entry.id +
-				entry.title +
-				entry.username +
-				entry.password +
-				(entry.lastModificationDate
-					? new Date(entry.lastModificationDate).getTime()
-					: 0) +
-				entry.icon
+			entry.title +
+			entry.username +
+			entry.password +
+			(entry.lastModificationDate
+				? new Date(entry.lastModificationDate).getTime()
+				: 0) +
+			entry.icon
 		);
 	}
 

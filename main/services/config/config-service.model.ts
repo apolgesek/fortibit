@@ -7,6 +7,9 @@ export const IConfigService =
 export interface IConfigService {
 	get productPath(): string;
 	get workspacesPath(): string;
+	get tmpDir(): string;
 	get appConfig(): Configuration;
 	set(settings: Partial<Configuration>);
 }
+
+export type ConfigServiceConstructor = new () => IConfigService;

@@ -46,7 +46,7 @@
 						class="action-btn star"
 						[ngClass]="{
 							active: entry?.isStarred,
-							'is-animating': isAnimating
+							'is-animating': isAnimating,
 						}"
 						(click)="toggleStarred(entry)"
 					>
@@ -82,7 +82,8 @@
 					(click)="openEntryHistoryWindow(); (false)"
 					class="show-history"
 				>
-				<app-svg src="assets/icons/history.svg" />&nbsp;Show history</a>
+					<app-svg src="assets/icons/history.svg" />&nbsp;Show history</a
+				>
 			}
 
 			<div class="small">

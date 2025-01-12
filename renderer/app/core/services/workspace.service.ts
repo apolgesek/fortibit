@@ -4,7 +4,12 @@ import { DbManager } from '@app/core/database';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { UiUtil } from '@app/utils';
 import { Configuration } from '@config/configuration';
-import { PasswordEntry, IpcChannel, VaultSchema, Entry } from '@shared-renderer/index';
+import {
+	PasswordEntry,
+	IpcChannel,
+	VaultSchema,
+	Entry,
+} from '@shared-renderer/index';
 import { exportDB, importInto } from 'dexie-export-import';
 import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
 import { MessageBroker } from 'injection-tokens';
@@ -43,9 +48,10 @@ export class WorkspaceService {
 	}
 
 	private readonly loadedDatabaseSource = new Subject<boolean>();
-	private readonly processors: Partial<Record<Entry['type'], IProcessor<any>>> = {
-		password: inject(PasswordProcessor)
-	}
+	private readonly processors: Partial<Record<Entry['type'], IProcessor<any>>> =
+		{
+			password: inject(PasswordProcessor),
+		};
 	private readonly messageBroker = inject(MessageBroker);
 	private readonly configService = inject(ConfigService);
 	private readonly entryManager = inject(EntryManager);

@@ -12,13 +12,13 @@ export interface IEncryptionEventService {
 		database: string,
 		key: string,
 	): Promise<{ data: string | false; error: string }>;
-	saveDatabase(
+	encryptVaultData(
 		schemaVersion: number,
 		database: string,
 		password: string,
 		key: string,
 	): Promise<{ encrypted: string }>;
-	decryptDatabase(
+	decryptVaultData(
 		data: string,
 		password: string,
 		key: string,

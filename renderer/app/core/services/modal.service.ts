@@ -104,7 +104,9 @@ export class ModalService {
 	openGroupWindow(mode: 'new' | 'edit' = 'new'): ModalRef {
 		return this.modalManager.open<GroupDialogDataPayload>(
 			GroupDialogComponent,
-			{ payload: { mode } },
+			{
+				payload: { mode },
+			},
 		);
 	}
 
@@ -142,7 +144,9 @@ export class ModalService {
 		this.entryManager.editedEntry = selectedEntry;
 		return this.modalManager.open<EntryHistoryDialogDataPayload>(
 			EntryHistoryDialogComponent,
-			{ payload: { id: this.entryManager.editedEntry.id } },
+			{
+				payload: { id: this.entryManager.editedEntry.id },
+			},
 		);
 	}
 
@@ -153,7 +157,9 @@ export class ModalService {
 	openRecoveryWindow(path: string): ModalRef {
 		return this.modalManager.open<FileRecoveryDialogDataPayload>(
 			FileRecoveryDialogComponent,
-			{ payload: { path } },
+			{
+				payload: { path },
+			},
 		);
 	}
 
@@ -185,7 +191,9 @@ export class ModalService {
 
 		return this.modalManager.open<EntryDialogDataPayload>(
 			EntryDialogComponent,
-			{ payload: { decryptedPassword } },
+			{
+				payload: { decryptedPassword },
+			},
 		);
 	}
 }

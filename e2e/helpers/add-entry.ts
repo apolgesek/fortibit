@@ -20,7 +20,7 @@ export async function addEntry(page: Page, model?: IEntryModel) {
 	if (model?.otpAuth) {
 		await page.getByPlaceholder(/base32 secret/i).fill(model?.otpAuth);
 	}
-	
+
 	await page.getByText(/confirm/i).click();
 
 	if (model?.config?.close) {

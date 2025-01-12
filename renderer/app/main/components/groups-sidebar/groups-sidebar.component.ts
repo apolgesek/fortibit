@@ -35,7 +35,7 @@ import { HotkeyHandler } from 'injection-tokens';
 		DroppableDirective,
 		FocusableListDirective,
 		FocusableListItemDirective,
-		TooltipDirective
+		TooltipDirective,
 	],
 })
 export class GroupsSidebarComponent implements OnInit {
@@ -63,7 +63,9 @@ export class GroupsSidebarComponent implements OnInit {
 	private readonly entryManager = inject(EntryManager);
 	private readonly groupManager = inject(GroupManager);
 	private readonly searchService = inject(SearchService);
-	private readonly contextMenuBuilderService = inject(ContextMenuBuilderService);
+	private readonly contextMenuBuilderService = inject(
+		ContextMenuBuilderService,
+	);
 	private readonly modalService = inject(ModalService);
 	private readonly hotkeyHandler = inject(HotkeyHandler);
 

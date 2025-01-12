@@ -7,8 +7,8 @@ export abstract class BaseAsyncQueueScheduler implements IAsyncScheduler {
 	protected readonly successMs: number;
 
 	private readonly _timeMarginMs = 5 * 1_000;
+	private readonly results: Result[] = [];
 
-	protected lastResult: Result;
 	protected condition: (() => boolean) | boolean = true;
 
 	constructor(
@@ -31,25 +31,50 @@ export abstract class BaseAsyncQueueScheduler implements IAsyncScheduler {
 		return;
 	}
 
-	private getTimeout(result: Result): number {
-		switch (result) {
-			case Result.RateLimitExceeded:
-				return this.rateLimitExceededMs + this._timeMarginMs;
-			case Result.Success:
-				return this.successMs;
-			default:
-				return this.successMs;
-		}
-	}
-
 	private async run(): Promise<void> {
 		if (
 			typeof this.condition === 'function' ? !this.condition() : !this.condition
 		)
 			return;
 
-		this.lastResult = await this.fn();
+		const result = await this.fn();
+		this.results.unshift(result);
+
+		if (this.results.length > 10) {
+			this.results.pop();
+		}
+
 		this.onExecuted();
-		setTimeout(this.run.bind(this), this.getTimeout(this.lastResult));
+		setTimeout(this.run.bind(this), this.getTimeout());
+	}
+
+	private getTimeout(): number {
+		const lastResult = this.results[0];
+
+		switch (lastResult) {
+			case Result.RateLimitExceeded:
+				return this.getExponentialBackoffTimeout();
+			case Result.Success:
+				return this.successMs;
+			case Result.Failed:
+				return this.successMs;
+			default:
+				throw new Error(`Unknown result ${lastResult}`);
+		}
+	}
+
+	private getExponentialBackoffTimeout(): number {
+		let lastRateLimitExceededIndex =
+			this.results.findIndex((x) => x === Result.Success) - 1;
+
+		if (lastRateLimitExceededIndex < 0) {
+			lastRateLimitExceededIndex = this.results.length - 1;
+		}
+
+		const timeout =
+			Math.pow(2, Math.min(lastRateLimitExceededIndex, 3)) *
+			this.rateLimitExceededMs;
+
+		return timeout + this._timeMarginMs;
 	}
 }

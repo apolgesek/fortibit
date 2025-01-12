@@ -599,7 +599,9 @@ test.describe('Workspace > Entry & group', async () => {
 
 		await expect(
 			appWindow.getByText('https protocol is available'),
-		).toBeVisible({ timeout: 10_000 });
+		).toBeVisible({
+			timeout: 10_000,
+		});
 	});
 
 	test('Check TOTP is generating when valid secret is saved manually', async () => {

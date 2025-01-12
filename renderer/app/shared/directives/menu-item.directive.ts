@@ -24,7 +24,7 @@ export class MenuItemDirective {
 	@Input() closeMode: 'tree' | 'subtree' = 'tree';
 	@Output() activate = new EventEmitter();
 	private _isDisabled = false;
-	
+
 	private readonly dropdownState = inject(DropdownStateService);
 	private readonly el = inject(ElementRef);
 

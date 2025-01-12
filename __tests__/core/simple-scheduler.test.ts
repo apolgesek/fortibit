@@ -8,16 +8,45 @@ describe('SimpleScheduler', () => {
 
 	const cases = [
 		{
-			description: 'successful result (default timeouts)',
+			description: 'successful result',
 			results: [Result.Success, Result.Success, Result.Success, Result.Success],
 			timeToAdvance: 59_900,
 			expectedCalls: 4,
 		},
 		{
-			description: 'rate limit exceeded result (default timeouts)',
+			description: 'rate limit exceeded result',
 			results: [Result.Success, Result.RateLimitExceeded, Result.Success],
 			timeToAdvance: 80_000,
 			expectedCalls: 3,
+		},
+		{
+			description: 'consecutive rate limit exceeded result',
+			results: [
+				Result.Success, // 15s
+				Result.RateLimitExceeded, // 65s
+				Result.RateLimitExceeded, // 125s
+			],
+			timeToAdvance: 204_000,
+			expectedCalls: 3,
+		},
+		{
+			description:
+				'consecutive rate limit exceeded result after successful result',
+			results: [
+				Result.RateLimitExceeded, // 65s
+				Result.Success, // 15s
+				Result.RateLimitExceeded, // 65s
+				Result.RateLimitExceeded, // 125s
+				Result.RateLimitExceeded, // 245s
+			],
+			timeToAdvance: 514_000,
+			expectedCalls: 5,
+		},
+		{
+			description: 'failed result',
+			results: [Result.Failed, Result.Failed, Result.Failed, Result.Failed],
+			timeToAdvance: 59_900,
+			expectedCalls: 4,
 		},
 	];
 

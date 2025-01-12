@@ -4,6 +4,7 @@ import { Configuration } from '../../../configuration';
 
 export const getDefaultConfig = (): Partial<Configuration> => {
 	const os = platform();
+
 	return {
 		schemaVersion: 1,
 		encryption: {
@@ -22,12 +23,10 @@ export const getDefaultConfig = (): Partial<Configuration> => {
 		autoTypeEnabled: true,
 		saveOnLock: false,
 		compressionEnabled: false,
-		autocompleteUsernameOnlyShortcut:
-			os === 'win32' ? 'Alt+[' : 'Option+[',
-		autocompletePasswordOnlyShortcut:
-			os === 'win32' ? 'Alt+]' : 'Option+]',
+		autocompleteUsernameOnlyShortcut: os === 'win32' ? 'Alt+[' : 'Option+[',
+		autocompletePasswordOnlyShortcut: os === 'win32' ? 'Alt+]' : 'Option+]',
 		autocompleteShortcut: platform() === 'win32' ? 'Alt+\\' : 'Option+\\',
 		showInsecureUrlPrompt: true,
-		theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
+		theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
 	};
 };

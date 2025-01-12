@@ -33,12 +33,11 @@ export class WebApiService implements IWebApiService {
 					return;
 				}
 
-				this._windowService
-					.getWindowByWebContentsId(item.windowId)
-					.browserWindow.webContents.send(
-						IpcChannel.UpdateSecureProtocolAvailability,
-						result,
-					);
+				this._windowService.sendMessage(
+					item.windowId,
+					IpcChannel.UpdateSecureProtocolAvailability,
+					result,
+				);
 			},
 		);
 
@@ -49,12 +48,11 @@ export class WebApiService implements IWebApiService {
 					return;
 				}
 
-				this._windowService
-					.getWindowByWebContentsId(item.windowId)
-					.browserWindow.webContents.send(
-						IpcChannel.UpdateTfaAvailability,
-						result,
-					);
+				this._windowService.sendMessage(
+					item.windowId,
+					IpcChannel.UpdateTfaAvailability,
+					result,
+				);
 			},
 		);
 
@@ -76,10 +74,10 @@ export class WebApiService implements IWebApiService {
 					.filter(
 						(e) =>
 							Boolean(e.url) &&
-							!e.url.startsWith('https') &&
+							!e.url!.startsWith('https') &&
 							!e.isSecureProtocolAvailable,
 					)
-					.map((e) => e.url),
+					.map((e) => e.url) as string[],
 			});
 		});
 	}
@@ -93,7 +91,7 @@ export class WebApiService implements IWebApiService {
 				windowId: windowId,
 				urls: batch
 					.filter((e) => Boolean(e.url) && !e.isTfaAvailable)
-					.map((e) => e.url),
+					.map((e) => e.url) as string[],
 			});
 		});
 	}

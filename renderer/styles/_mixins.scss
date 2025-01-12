@@ -19,7 +19,8 @@ h1 {
 	font-weight: 400;
 }
 
-h2, h3 {
+h2,
+h3 {
 	font-family: 'roboto-regular';
 	font-weight: 400;
 }
@@ -105,7 +106,9 @@ h2, h3 {
 	color: var(--primary-text);
 	border-radius: 0.25rem;
 	cursor: pointer;
-	transition: color var(--base-animation-duration), background-color var(--base-animation-duration);
+	transition:
+		color var(--base-animation-duration),
+		background-color var(--base-animation-duration);
 	text-transform: uppercase;
 	justify-content: center;
 

@@ -5,33 +5,41 @@ import { IconService } from '../icon.service';
 
 @Injectable({ providedIn: 'root' })
 export class PasswordProcessor implements IProcessor<PasswordEntry> {
-  private readonly iconService = inject(IconService);
+	private readonly iconService = inject(IconService);
 
-  beforeAdd() {}
+	beforeAdd() {}
 
-  afterAdd(entry: PasswordEntry) {
-    this.iconService.getIconPath(entry, 'url');
-  }
+	afterAdd(entry: PasswordEntry) {
+		this.iconService.getIconPath(entry, 'url');
+	}
 
-  beforeUpdate(entry: PasswordEntry, oldEntry: PasswordEntry, changes: (keyof PasswordEntry)[]): void {
-    if (changes?.includes('password')) {
-      entry.isExposed = false;
-    }
-  }
+	beforeUpdate(
+		entry: PasswordEntry,
+		oldEntry: PasswordEntry,
+		changes: (keyof PasswordEntry)[],
+	): void {
+		if (changes?.includes('password')) {
+			entry.isExposed = false;
+		}
+	}
 
-  afterDelete(entry: PasswordEntry) {
-    this.iconService.removeIconPath(entry);
-  }
+	afterDelete(entry: PasswordEntry) {
+		this.iconService.removeIconPath(entry);
+	}
 
-  afterUpdate(entry: PasswordEntry, oldEntry: PasswordEntry, changes: (keyof PasswordEntry)[]): void {
-    if (
-      oldEntry &&
-      oldEntry.icon &&
-      !oldEntry.icon.startsWith('data:image/png')
-    ) {
-      this.iconService.replaceIconPath(oldEntry, entry, 'url');
-    } else {
-      this.iconService.getIconPath(entry, 'url');
-    }
-  } 
+	afterUpdate(
+		entry: PasswordEntry,
+		oldEntry: PasswordEntry,
+		changes: (keyof PasswordEntry)[],
+	): void {
+		if (
+			oldEntry &&
+			oldEntry.icon &&
+			!oldEntry.icon.startsWith('data:image/png')
+		) {
+			this.iconService.replaceIconPath(oldEntry, entry, 'url');
+		} else {
+			this.iconService.getIconPath(entry, 'url');
+		}
+	}
 }

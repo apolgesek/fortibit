@@ -1,4 +1,10 @@
-import { Directive, Input, ElementRef, inject, ChangeDetectorRef } from '@angular/core';
+import {
+	Directive,
+	Input,
+	ElementRef,
+	inject,
+	ChangeDetectorRef,
+} from '@angular/core';
 @Directive({
 	selector: '[appTextEmphasize]',
 	standalone: true,
@@ -17,44 +23,41 @@ export class TextEmphasizeDirective {
 	}
 
 	private applyChanges() {
-			const elementTextContent = this.element.nativeElement as HTMLElement;
+		const elementTextContent = this.element.nativeElement as HTMLElement;
 
-			elementTextContent.innerHTML = elementTextContent.innerHTML
-				.replaceAll(new RegExp(this.openingTag, 'g'), '')
-				.replaceAll(new RegExp(this.closingTag, 'g'), '');
+		elementTextContent.innerHTML = elementTextContent.innerHTML
+			.replaceAll(new RegExp(this.openingTag, 'g'), '')
+			.replaceAll(new RegExp(this.closingTag, 'g'), '');
 
-			if (this.isSubstringNotFound(elementTextContent)) {
-				return;
-			}
+		if (this.isSubstringNotFound(elementTextContent)) {
+			return;
+		}
 
-			const matchedSubstrings = Array.from(
-				(elementTextContent.textContent ?? '').matchAll(
-					new RegExp(this.searchPhraseValue, 'gi'),
-				),
-			).map((x) => x[0]);
+		const matchedSubstrings = Array.from(
+			(elementTextContent.textContent ?? '').matchAll(
+				new RegExp(this.searchPhraseValue, 'gi'),
+			),
+		).map((x) => x[0]);
 
-			for (const match of matchedSubstrings) {
-				const lastFoundIndex = elementTextContent.innerHTML.lastIndexOf(
-					this.closingTag,
+		for (const match of matchedSubstrings) {
+			const lastFoundIndex = elementTextContent.innerHTML.lastIndexOf(
+				this.closingTag,
+			);
+			let textToReplace = elementTextContent.innerHTML;
+
+			if (lastFoundIndex >= 0) {
+				textToReplace = elementTextContent.innerHTML.substring(
+					lastFoundIndex + this.closingTag.length,
 				);
-				let textToReplace = elementTextContent.innerHTML;
-
-				if (lastFoundIndex >= 0) {
-					textToReplace = elementTextContent.innerHTML.substring(
-						lastFoundIndex + this.closingTag.length,
-					);
-				}
-
-				elementTextContent.innerHTML =
-					elementTextContent.innerHTML.substring(
-						0,
-						lastFoundIndex >= 0 ? lastFoundIndex + this.closingTag.length : 0,
-					) +
-					textToReplace.replace(
-						match,
-						this.openingTag + match + this.closingTag,
-					);
 			}
+
+			elementTextContent.innerHTML =
+				elementTextContent.innerHTML.substring(
+					0,
+					lastFoundIndex >= 0 ? lastFoundIndex + this.closingTag.length : 0,
+				) +
+				textToReplace.replace(match, this.openingTag + match + this.closingTag);
+		}
 	}
 
 	private isSubstringNotFound(elementTextContent: HTMLElement) {

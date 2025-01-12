@@ -3,8 +3,9 @@
 	<div id="table-header" data-prevent-entry-deselect>
 		<div class="group-data">
 			@if (
-				searchPhraseSnapshot?.length && (!isSearching || wasSearched) && entriesFound$
-					| async;
+				searchPhraseSnapshot?.length &&
+					(!isSearching || wasSearched) &&
+					entriesFound$ | async;
 				as entriesCount
 			) {
 				{{ entriesCount }} found
@@ -45,7 +46,7 @@
 						(dragend)="endDrag()"
 						[ngClass]="{
 							selected: isEntrySelected(item),
-							'is-dragging': isEntryDragged(item)
+							'is-dragging': isEntryDragged(item),
 						}"
 						class="row-entry"
 						data-list-entry
@@ -56,7 +57,7 @@
 								inputs: {
 									searchPhrase: searchPhrase$ | async,
 									item,
-									iconsEnabled
+									iconsEnabled,
 								}
 							"
 						/>
@@ -68,7 +69,11 @@
 				@if ((searchPhrase$ | async)?.length || activeFilters?.length) {
 					No matching entries found
 				} @else {
-					There are no entries in this group
+					@if (isRecycleBin) {
+						Recycle bin is empty
+					} @else {
+						No entries in this group
+					}
 					@if (isAddPossible) {
 						<a
 							href="#"

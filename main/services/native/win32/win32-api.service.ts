@@ -2,6 +2,8 @@ import { INativeApiService } from '@root/main/services/native';
 import { ChildProcess, fork } from 'child_process';
 import { join } from 'path';
 import { MessageEventType } from './message-event-type.enum';
+import { ProcessArgument } from '@root/main/process-argument.enum';
+import { app } from 'electron';
 
 class NativeCore {
 	private static _instance: any;
@@ -30,6 +32,10 @@ class NativeAuthProcess {
 }
 
 export class Win32ApiService implements INativeApiService {
+	private readonly _isTestMode = Boolean(
+		app.commandLine.hasSwitch(ProcessArgument.E2E),
+	);
+
 	readRegistryKey(key: string, value: string): string | null {
 		return NativeCore.getInstance().readRegistryKey(key, value);
 	}
@@ -84,6 +90,8 @@ export class Win32ApiService implements INativeApiService {
 
 	async getPassword(windowHandleHex: Buffer, dbPath: string): Promise<string> {
 		return new Promise((resolve) => {
+			if (this._isTestMode) return resolve('test123');
+
 			const nativeAuth = NativeAuthProcess.getInstance();
 			nativeAuth.once('message', (result) => {
 				resolve(result.toString());

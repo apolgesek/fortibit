@@ -6,14 +6,16 @@ import { IConfigService } from '../config';
 import { IEncryptionEventWrapper } from './encryption-event-wrapper.model';
 
 export class EncryptionEventWrapper implements IEncryptionEventWrapper {
-	constructor(@IConfigService private readonly _configService: IConfigService) {}
+	constructor(
+		@IConfigService private readonly _configService: IConfigService,
+	) {}
 
 	private readonly _isDevMode = Boolean(
 		app.commandLine.hasSwitch(ProcessArgument.Serve),
 	);
 
 	public async processEventAsync(
-		event: any,
+		event,
 		encryptedKey: string,
 	): Promise<Serializable> {
 		const process = await this.createEncryptionProcess(encryptedKey);
@@ -41,7 +43,8 @@ export class EncryptionEventWrapper implements IEncryptionEventWrapper {
 			env: {
 				ELECTRON_RUN_AS_NODE: '1',
 				ENCRYPTION_KEY: this.decryptKey(encryptedKey),
-				LEAKED_PASSWORDS_API_URL: this._configService.appConfig.leakedPasswordsUrl,
+				LEAKED_PASSWORDS_API_URL:
+					this._configService.appConfig.leakedPasswordsUrl,
 			},
 		});
 	}

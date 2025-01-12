@@ -10,5 +10,9 @@ export interface IEntryTypeComparer<
 	FormType,
 	PayloadType,
 > {
-	compare(entry: EntryType, form: FormType, payload: PayloadType): CompareResult;
+	compare(
+		entry: EntryType,
+		form: FormType,
+		payload: PayloadType,
+	): CompareResult;
 }

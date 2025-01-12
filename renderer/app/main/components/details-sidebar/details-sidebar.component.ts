@@ -15,7 +15,12 @@ import { SidebarHandleComponent } from '@app/shared/components/sidebar-handle/si
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
 import { IsPasswordPipe } from '@app/shared/pipes/is-password.pipe';
 import { Configuration } from '@config/configuration';
-import { Entry, EntryGroup, IpcChannel, PasswordEntry } from '@shared-renderer/index';
+import {
+	Entry,
+	EntryGroup,
+	IpcChannel,
+	PasswordEntry,
+} from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { AppConfig } from 'environments/environment';
 import { MessageBroker } from 'injection-tokens';
@@ -43,9 +48,9 @@ import { SvgComponent } from '@app/shared/components/svg/svg.component';
 		DropdownMenuDirective,
 		DropdownToggleDirective,
 		MenuItemDirective,
-		SvgComponent
+		SvgComponent,
 	],
-	animations: [slideDown]
+	animations: [slideDown],
 })
 export class DetailsSidebarComponent implements OnInit {
 	private readonly detailsComponents = new Map<Entry['type'], Type<unknown>>([
@@ -185,7 +190,12 @@ export class DetailsSidebarComponent implements OnInit {
 	}
 
 	async scanQrCode(entry: Entry) {
-		const secret = await this.messageBroker.ipcRenderer.invoke(IpcChannel.ScanQrCode);
-		await this.entryManager.saveEntry({ ...entry, otpAuth: secret } as PasswordEntry);
+		const secret = await this.messageBroker.ipcRenderer.invoke(
+			IpcChannel.ScanQrCode,
+		);
+		await this.entryManager.saveEntry({
+			...entry,
+			otpAuth: secret,
+		} as PasswordEntry);
 	}
 }

@@ -26,7 +26,9 @@ export class DarwinHotkeyHandler extends HotkeyHandler {
 		this.registerHotkey('F11', this.toggleFullscreen, {
 			labelId: 'ToggleFullscreen',
 		});
-		this.registerHotkey('⌘+A', this.selectAllEntries, { preventDefault: UiUtil.isEntryFocused });
+		this.registerHotkey('⌘+A', this.selectAllEntries, {
+			preventDefault: UiUtil.isEntryFocused,
+		});
 		this.registerHotkey('⌘+E', this.editEntry, { labelId: 'Edit' });
 		this.registerHotkey('⌘+F', this.findEntries, { labelId: 'FindInGroup' });
 		this.registerHotkey('⌘+G', this.openGenerator, { labelId: 'Generator' });

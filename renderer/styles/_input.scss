@@ -71,7 +71,7 @@ input[type='number'] {
 		height: 0;
 	}
 
-		/* The slider */
+	/* The slider */
 	.slider {
 		position: absolute;
 		cursor: pointer;
@@ -134,72 +134,72 @@ input[type='number'] {
 
 input[type='checkbox'] {
 	position: absolute;
-  opacity: 0;
+	opacity: 0;
 
 	& + label {
-    position: relative;
-    cursor: pointer;
-    padding: 0;
+		position: relative;
+		cursor: pointer;
+		padding: 0;
 		margin-left: 2px;
-  }
+	}
 
-  // Box.
-  & + label:before {
-    content: '';
-    margin-right: 10px;
-    display: inline-block;
-    vertical-align: text-top;
-    width: 20px;
-    height: 20px;
-    background: var(--input-modal-bg);
+	// Box.
+	& + label:before {
+		content: '';
+		margin-right: 10px;
+		display: inline-block;
+		vertical-align: text-top;
+		width: 20px;
+		height: 20px;
+		background: var(--input-modal-bg);
 		border-radius: 0.25rem;
-  }
+	}
 
-  // Box hover
-  &:hover + label:before {
-    background: var(--input-modal-bg);
-  }
+	// Box hover
+	&:hover + label:before {
+		background: var(--input-modal-bg);
+	}
 
 	// Box focus
 	&:focus-visible + label:before {
 		outline: 2px solid $barberry;
 	}
 
-  // Box checked
-  &:checked + label:before {
-    background: var(--input-modal-bg);
-  }
-  
-  // Disabled state label.
-  &:disabled + label {
-    color: #b8b8b8;
-    cursor: auto;
-  }
+	// Box checked
+	&:checked + label:before {
+		background: var(--input-modal-bg);
+	}
 
-  // Disabled box.
-  &:disabled + label:before {
-    box-shadow: none;
-    background: #ddd;
-  }
+	// Disabled state label.
+	&:disabled + label {
+		color: #b8b8b8;
+		cursor: auto;
+	}
 
-  // Checkmark. Could be replaced with an image
-  &:checked + label:after {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 9px;
-    background: var(--primary-text);
-    width: 2px;
-    height: 2px;
-    box-shadow: 
-      2px 0 0 var(--primary-text),
-      4px 0 0 var(--primary-text),
-      4px -2px 0 var(--primary-text),
-      4px -4px 0 var(--primary-text),
-      4px -6px 0 var(--primary-text),
-      4px -8px 0 var(--primary-text);
-    transform: rotate(45deg);
-  }
+	// Disabled box.
+	&:disabled + label:before {
+		box-shadow: none;
+		background: #ddd;
+	}
+
+	// Checkmark. Could be replaced with an image
+	&:checked + label:after {
+		content: '';
+		position: absolute;
+		left: 5px;
+		top: 9px;
+		background: var(--primary-text);
+		width: 2px;
+		height: 2px;
+		box-shadow:
+			2px 0 0 var(--primary-text),
+			4px 0 0 var(--primary-text),
+			4px -2px 0 var(--primary-text),
+			4px -4px 0 var(--primary-text),
+			4px -6px 0 var(--primary-text),
+			4px -8px 0 var(--primary-text);
+		transform: rotate(45deg);
+	}
 }
 
 .complex-label * {

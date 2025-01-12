@@ -5,7 +5,9 @@ import { IEncryptionEventWrapper, MessageEventType } from '../../encryption';
 import { IImportHandler } from '../import-handler.model';
 import { ImportMetadata } from './import-metadata.model';
 
-export abstract class CsvDataImporter<T> implements IImportHandler {
+export abstract class CsvDataImporter<T extends object>
+	implements IImportHandler
+{
 	public readonly fileExtension = 'csv';
 	protected abstract readonly handlerType: ImportHandler;
 	protected abstract readonly mock: T;

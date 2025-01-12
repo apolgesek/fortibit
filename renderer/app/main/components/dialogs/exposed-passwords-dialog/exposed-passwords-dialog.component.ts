@@ -13,7 +13,12 @@ import { MessageBroker } from 'injection-tokens';
 import { CommonModule } from '@angular/common';
 import { ReportType } from '@app/core/enums';
 import { FeatherModule } from 'angular-feather';
-import { ExposedPasswordEntry, IpcChannel, PasswordEntry, Report } from '@shared-renderer/index';
+import {
+	ExposedPasswordEntry,
+	IpcChannel,
+	PasswordEntry,
+	Report,
+} from '@shared-renderer/index';
 
 @Component({
 	selector: 'app-exposed-passwords-dialog',
@@ -72,7 +77,9 @@ export class ExposedPasswordsDialogComponent implements IModal, OnInit {
 					});
 
 					await this.getLastReport();
-					await this.entryManager.bulkMarkExposed(this.exposedPasswordsFound.map(x => x.id));
+					await this.entryManager.bulkMarkExposed(
+						this.exposedPasswordsFound.map((x) => x.id),
+					);
 
 					this.scanInProgress = false;
 

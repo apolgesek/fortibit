@@ -7,7 +7,7 @@ export type PasswordEntry = EntryBase & {
 	url?: string;
 	notes?: string;
 	autotypeExp?: string;
-	icon?: string;
+	icon?: string | null;
 	history?: PasswordEntry[];
 	isExposed?: boolean;
 	isSecureProtocolAvailable?: boolean;

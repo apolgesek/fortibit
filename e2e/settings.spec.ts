@@ -44,8 +44,7 @@ test.describe('Settings', async () => {
 		await appWindow.keyboard.press('Escape');
 		await addEntry(appWindow, { config: { close: true } });
 		await appWindow.getByText(/•{6}/i).dblclick();
-		const notificationSeconds = appWindow
-			.getByRole('alert');
+		const notificationSeconds = appWindow.getByRole('alert');
 
 		await expect(notificationSeconds).toHaveText('5');
 	});
@@ -221,13 +220,17 @@ test.describe('Settings', async () => {
 		await appWindow.getByRole('button', { name: /add credential/i }).click();
 
 		const notification = appWindow.getByRole('alert');
-		const removeCredentialButton = appWindow.getByRole('button', { name: /remove credential/i });
+		const removeCredentialButton = appWindow.getByRole('button', {
+			name: /remove credential/i,
+		});
 
 		await expect(notification).toHaveText(/authentication credentials saved/i);
 		await expect(removeCredentialButton).toBeVisible();
 
 		await appWindow.keyboard.press('Control+L');
-		const windowsHelloButton = appWindow.getByRole('button', { name: /windows hello/i });
+		const windowsHelloButton = appWindow.getByRole('button', {
+			name: /windows hello/i,
+		});
 
 		await expect(windowsHelloButton).toBeVisible();
 	});
@@ -243,7 +246,9 @@ test.describe('Settings', async () => {
 		await appWindow.getByPlaceholder(/master password/i).fill('test123');
 		await appWindow.getByRole('button', { name: /add credential/i }).click();
 
-		const removeCredentialButton = appWindow.getByRole('button', { name: /remove credential/i });
+		const removeCredentialButton = appWindow.getByRole('button', {
+			name: /remove credential/i,
+		});
 
 		await appWindow.getByPlaceholder(/master password/i).fill('test123');
 		await removeCredentialButton.click();
@@ -252,7 +257,9 @@ test.describe('Settings', async () => {
 		const passwordInput = appWindow.getByPlaceholder(/^password$/i);
 		await passwordInput.waitFor({ state: 'visible' });
 
-		await expect(appWindow.getByRole('button', { name: /windows hello/i })).toBeHidden();
+		await expect(
+			appWindow.getByRole('button', { name: /windows hello/i }),
+		).toBeHidden();
 	});
 
 	test('Check add credential should not succeed if password is incorrect', async () => {
@@ -263,7 +270,9 @@ test.describe('Settings', async () => {
 			.getByRole('button', { name: /integration/i });
 		await integrationTab.click();
 		await appWindow.getByText(/windows hello/i).click();
-		await appWindow.getByPlaceholder(/master password/i).fill('incorrect_password');
+		await appWindow
+			.getByPlaceholder(/master password/i)
+			.fill('incorrect_password');
 		await appWindow.getByRole('button', { name: /add credential/i }).click();
 
 		const validationError = appWindow.getByText(/password is incorrect/i);

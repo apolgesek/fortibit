@@ -1,4 +1,4 @@
-export enum  Result {
+export enum Result {
 	Failed,
 	RateLimitExceeded,
 	Success,

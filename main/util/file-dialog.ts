@@ -8,29 +8,25 @@ export function getFileFilter(
 	config: Configuration,
 	fileType: FileType,
 ): FileFilter {
-	let fileFilter = {
-		name: 'Fortibit database file',
-		extensions: [config.fileExtension],
-	};
-
 	switch (fileType) {
 		case 'csv':
-			fileFilter = {
+			return {
 				name: 'Comma Separated Values File (.csv)',
 				extensions: ['csv'],
 			};
-			break;
 		case 'xml':
-			fileFilter = {
+			return {
 				name: 'Extensible Markup Language File (.xml)',
 				extensions: ['xml'],
 			};
-			break;
+		case '$vault':
+			return {
+				name: 'Fortibit database file',
+				extensions: [config.fileExtension],
+			};
 		default:
-			break;
+			throw new Error('Unknown file type');
 	}
-
-	return fileFilter;
 }
 
 export function getDefaultPath(config: Configuration, path: string): string {

@@ -52,7 +52,7 @@ export class PasswordEntryTypeComparer
 
 		return {
 			changes,
-			isEqual: changes.length === 0
+			isEqual: changes.length === 0,
 		};
 	}
 }

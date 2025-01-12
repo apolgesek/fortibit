@@ -7,7 +7,7 @@ import { IAsyncQueue } from '../../core/async-queue.interface';
 import { SimpleScheduler } from '../../core/schedulers/simple-scheduler';
 import { getDomain } from '../../util';
 import { IConfigService } from '../config';
-import { IFileService } from '../file';
+import { IDownloadService } from '../download';
 import { IWindowService } from '../window';
 import { IIconService } from './icon-service.model';
 
@@ -25,7 +25,7 @@ export class IconService implements IIconService {
 
 	constructor(
 		@IConfigService private readonly _configService: IConfigService,
-		@IFileService private readonly _fileService: IFileService,
+		@IDownloadService private readonly _downloadService: IDownloadService,
 		@IWindowService private readonly _windowService: IWindowService,
 	) {
 		this.iconDirectory = join(
@@ -40,13 +40,12 @@ export class IconService implements IIconService {
 		this.iconQueue = new AsyncQueue<Icon, string>(
 			(item) => this.getFile(item.url),
 			(item, result) => {
-				this._windowService
-					.getWindowByWebContentsId(item.windowId)
-					.browserWindow.webContents.send(
-						IpcChannel.UpdateIcon,
-						item.id,
-						result,
-					);
+				this._windowService.sendMessage(
+					item.windowId,
+					IpcChannel.UpdateIcon,
+					item.id,
+					result,
+				);
 			},
 		);
 
@@ -66,7 +65,7 @@ export class IconService implements IIconService {
 		return this.getFile(url);
 	}
 
-	async tryReplaceIcon(path: string, newUrl: string): Promise<string> {
+	async tryReplaceIcon(path: string, newUrl: string): Promise<string | null> {
 		await this.removeIcon(path);
 
 		if (newUrl) {
@@ -114,6 +113,6 @@ export class IconService implements IIconService {
 			return Promise.resolve(filePath);
 		}
 
-		return this._fileService.download(fileUrl, filePath);
+		return this._downloadService.download(fileUrl, filePath);
 	}
 }

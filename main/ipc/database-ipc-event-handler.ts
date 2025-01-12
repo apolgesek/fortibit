@@ -5,14 +5,13 @@ import {
 	dialog,
 	ipcMain,
 } from 'electron';
-
 import { Product } from '@root/product';
 import {
 	ExposedPasswordEntry,
 	IpcChannel,
 	WeakPasswordEntry,
 } from '@shared-renderer/index';
-import { readdirSync, unlinkSync } from 'fs';
+import { readdirSync, unlinkSync, writeFileSync } from 'fs';
 import { generate } from 'generate-password';
 import { basename, join } from 'path';
 import { createServiceDecorator } from '../di';
@@ -50,7 +49,7 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 
 			this._databaseService.removeBrowserSession();
 			this._databaseService.removeRecoveryFile(event.sender.id);
-			this._databaseService.setPassword(null, event.sender.id);
+			this._databaseService.setVaultPassword(event.sender.id, null);
 		});
 
 		ipcMain.on(IpcChannel.Exit, (event: IpcMainEvent) => {
@@ -59,15 +58,46 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 
 		ipcMain.handle(
 			IpcChannel.DecryptDatabase,
-			(event: IpcMainInvokeEvent, password: string) => {
-				return this._databaseService.decryptDatabase(event, password);
+			async (event: IpcMainInvokeEvent, password: string) => {
+				try {
+					const result = await this._databaseService.decryptDatabase(
+						event.sender.id,
+						password,
+					);
+
+					if (result.decrypted) {
+						event.sender.send(IpcChannel.DecryptedContent, {
+							decrypted: result.decrypted,
+						});
+					} else {
+						event.sender.send(IpcChannel.DecryptedContent, {
+							error: result.error,
+						});
+					}
+				} catch {
+					event.sender.send(IpcChannel.DecryptedContent, {
+						error: 'An error occured reading the file',
+					});
+				}
 			},
 		);
 
 		ipcMain.handle(
 			IpcChannel.DecryptBiometrics,
-			(event: IpcMainInvokeEvent) => {
-				return this._databaseService.biometricsDecrypt(event);
+			async (event: IpcMainInvokeEvent) => {
+				const result = await this._databaseService.decryptWithBiometrics(
+					event.sender.id,
+				);
+
+				if (result?.decrypted) {
+					event.sender.send(IpcChannel.DecryptedContent, {
+						decrypted: result.decrypted,
+					});
+				} else {
+					event.sender.send(IpcChannel.DecryptedContent, {
+						error: 'There was an error retrieving the password',
+					});
+				}
 			},
 		);
 
@@ -78,7 +108,9 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 					return false;
 				}
 
-				return password === this._databaseService.getPassword(event.sender.id);
+				return (
+					password === this._databaseService.getVaultPassword(event.sender.id)
+				);
 			},
 		);
 
@@ -89,14 +121,14 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 		ipcMain.handle(
 			IpcChannel.SaveFile,
 			(event: IpcMainInvokeEvent, payload: SaveFilePayload) => {
-				return this._databaseService.saveDatabase(event, payload);
+				return this._databaseService.saveDatabase(event.sender.id, payload);
 			},
 		);
 
 		ipcMain.handle(
 			IpcChannel.OpenFile,
 			(event: IpcMainInvokeEvent, path: string) => {
-				return this._databaseService.openDatabase(event, path);
+				return this._databaseService.openDatabase(event.sender.id, path);
 			},
 		);
 
@@ -117,7 +149,7 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 				if (isEnabled) {
 					this._nativeApiService.saveCredential(
 						path,
-						this._databaseService.getPassword(event.sender.id),
+						this._databaseService.getVaultPassword(event.sender.id) as string,
 					);
 				} else {
 					this._nativeApiService.removeCredential(path);
@@ -130,14 +162,17 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 		ipcMain.handle(
 			IpcChannel.ScanLeaks,
 			(event: IpcMainInvokeEvent, database: string) => {
-				return this._databaseService.getLeaks(event, database);
+				return this._databaseService.getLeaks(event.sender.id, database);
 			},
 		);
 
 		ipcMain.handle(
 			IpcChannel.GetWeakPasswords,
 			(event: IpcMainInvokeEvent, database: string) => {
-				return this._databaseService.getWeakPasswords(event, database);
+				return this._databaseService.getWeakPasswords(
+					event.sender.id,
+					database,
+				);
 			},
 		);
 
@@ -216,26 +251,30 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 
 		ipcMain.handle(
 			IpcChannel.ChangeScreenLockSettings,
-			(_: IpcMainInvokeEvent, form: Partial<Product>) => {
-				this._databaseService.changeEncryptionSettings(form);
+			(_: IpcMainInvokeEvent, settings: Partial<Product>) => {
+				this._databaseService.changeEncryptionSettings(settings);
 			},
 		);
 
 		ipcMain.handle(
 			IpcChannel.GeneratePassword,
-			(event: IpcMainInvokeEvent, options) => {
+			(_: IpcMainInvokeEvent, options) => {
 				return generate(options);
 			},
 		);
 
 		ipcMain.handle(IpcChannel.RecoverFile, (event: IpcMainInvokeEvent) => {
-			return this._databaseService.recoverFile(event.sender.id);
+			try {
+				return this._databaseService.recoverFile(event.sender.id);
+			} catch {
+				return null;
+			}
 		});
 
 		ipcMain.handle(
 			IpcChannel.CheckRecoveryFile,
 			(event: IpcMainInvokeEvent) => {
-				return this._databaseService.checkRecoveryFile(event.sender.id);
+				return this._databaseService.checkRecoveryFileExists(event.sender.id);
 			},
 		);
 
@@ -249,7 +288,10 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 		ipcMain.handle(
 			IpcChannel.DatabaseChanged,
 			(event: IpcMainInvokeEvent, payload: SaveFilePayload) => {
-				return this._databaseService.saveDatabaseSnapshot(event, payload);
+				return this._databaseService.saveDatabaseSnapshot(
+					event.sender.id,
+					payload,
+				);
 			},
 		);
 
@@ -269,5 +311,19 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 				}
 			});
 		}
+
+		ipcMain.handle(IpcChannel.ClearRecentlyOpened, () => {
+			try {
+				writeFileSync(
+					this._configService.workspacesPath,
+					'{"recentlyOpened": [], "workspace": null}',
+					{ encoding: 'utf8' },
+				);
+
+				return true;
+			} catch {
+				return false;
+			}
+		});
 	}
 }

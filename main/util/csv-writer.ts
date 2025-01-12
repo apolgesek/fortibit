@@ -2,7 +2,11 @@ import { stringify } from 'csv-stringify/sync';
 import { writeFileSync } from 'fs';
 
 export class CsvWriter {
-	public static writeFile<T>(path: string, arr: T[], props?: (keyof T)[]) {
+	public static writeFile<T extends object>(
+		path: string,
+		arr: T[],
+		props?: (keyof T)[],
+	) {
 		if (!props) {
 			props = Object.keys(arr[0]) as (keyof T)[];
 		}

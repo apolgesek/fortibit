@@ -1,4 +1,10 @@
-import { Directive, ElementRef, HostListener, Renderer2, inject } from '@angular/core';
+import {
+	Directive,
+	ElementRef,
+	HostListener,
+	Renderer2,
+	inject,
+} from '@angular/core';
 import { EntryManager, GroupManager } from '@app/core/services';
 import { UiUtil } from '@app/utils';
 

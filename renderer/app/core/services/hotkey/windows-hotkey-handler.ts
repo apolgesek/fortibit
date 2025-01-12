@@ -26,7 +26,9 @@ export class WindowsHotkeyHandler extends HotkeyHandler {
 		this.registerHotkey('F11', this.toggleFullscreen, {
 			labelId: 'ToggleFullscreen',
 		});
-		this.registerHotkey('Ctrl+A', this.selectAllEntries, { preventDefault: UiUtil.isEntryFocused });
+		this.registerHotkey('Ctrl+A', this.selectAllEntries, {
+			preventDefault: UiUtil.isEntryFocused,
+		});
 		this.registerHotkey('Ctrl+E', this.editEntry, { labelId: 'Edit' });
 		this.registerHotkey('Ctrl+F', this.findEntries, { labelId: 'FindInGroup' });
 		this.registerHotkey('Ctrl+G', this.openGenerator, { labelId: 'Generator' });

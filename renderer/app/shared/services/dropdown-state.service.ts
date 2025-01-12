@@ -15,7 +15,9 @@ export class DropdownStateService {
 	public readonly focusFirstItem$: Observable<void>;
 
 	private readonly _stateChangesSource: BehaviorSubject<MenuStateChange> =
-		new BehaviorSubject({ isOpen: false });
+		new BehaviorSubject({
+			isOpen: false,
+		});
 	private readonly _focusFirstSource: Subject<void> = new Subject();
 
 	constructor() {

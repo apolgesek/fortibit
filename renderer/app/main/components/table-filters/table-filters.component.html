@@ -44,7 +44,7 @@
 						@for (option of sortOptions; track option) {
 							<li
 								[ngClass]="{
-									selected: selectedSortOption.prop === option.prop
+									selected: selectedSortOption.prop === option.prop,
 								}"
 								appMenuItem
 								closeMode="subtree"
@@ -83,7 +83,7 @@
 						@for (option of sortDirectionOptions; track option) {
 							<li
 								[ngClass]="{
-									selected: selectedSortDirection.state === option.state
+									selected: selectedSortDirection.state === option.state,
 								}"
 								appMenuItem
 								closeMode="subtree"

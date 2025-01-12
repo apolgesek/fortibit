@@ -75,14 +75,14 @@ export class PasswordEntryDetailsComponent implements OnInit, OnChanges {
 			clearInterval(this.otpInterval);
 			this.otpInterval = null;
 		}
-		
+
 		if (this.entry.otpAuth) {
 			this.otp = new OTPAuth.TOTP({
 				secret: this.entry.otpAuth,
 				digits: 6,
 				period: 30,
 				algorithm: 'SHA1',
-				issuer: this.entry.title
+				issuer: this.entry.title,
 			});
 
 			this.generateNewOtp();

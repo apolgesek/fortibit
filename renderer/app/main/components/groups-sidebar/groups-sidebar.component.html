@@ -13,7 +13,7 @@
 			@for (
 				group of builtInGroups;
 				let i = $index;
-				track groupTrackFn(i, group);
+				track groupTrackFn(i, group)
 			) {
 				<li
 					[appFocusableListItem]="group.id"

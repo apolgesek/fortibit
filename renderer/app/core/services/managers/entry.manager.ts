@@ -51,8 +51,9 @@ export class EntryManager {
 
 	private readonly scrollTopEntriesSource = new Subject<void>();
 	private readonly firstEntrySelectedSource = new Subject<void>();
-	private readonly entrySelectedSource =
-		new BehaviorSubject<Entry>(this.selectedEntries[0]);
+	private readonly entrySelectedSource = new BehaviorSubject<Entry>(
+		this.selectedEntries[0],
+	);
 	private readonly entryListSource: BehaviorSubject<Entry[]> =
 		new BehaviorSubject<Entry[]>([]);
 
@@ -62,9 +63,10 @@ export class EntryManager {
 	private readonly notificationService = inject(NotificationService);
 	private readonly historyManager = inject(HistoryManager);
 	private readonly groupManager = inject(GroupManager);
-	private readonly processors: Partial<Record<Entry['type'], IProcessor<any>>> = {
-		password: inject(PasswordProcessor)
-	}
+	private readonly processors: Partial<Record<Entry['type'], IProcessor<any>>> =
+		{
+			password: inject(PasswordProcessor),
+		};
 
 	constructor() {
 		this.markDirtySource = new Subject();
@@ -96,9 +98,7 @@ export class EntryManager {
 			IpcChannel.UpdateIcon,
 			(_, id: number, iconPath: string) => {
 				this.zone.run(async () => {
-					const entry = this.entries.find(
-						(x) => x.id === id,
-					) as PasswordEntry;
+					const entry = this.entries.find((x) => x.id === id) as PasswordEntry;
 					if (!entry) {
 						return;
 					}
@@ -112,32 +112,38 @@ export class EntryManager {
 			},
 		);
 
-		this.messageBroker.ipcRenderer.on(IpcChannel.UpdateSecureProtocolAvailability, (_, urls: string) => {
-			this.zone.run(async () => {
-				for (const url of urls) {
-					await this.entryRepository.markSecureProtocolAvailable(url);
-				}
+		this.messageBroker.ipcRenderer.on(
+			IpcChannel.UpdateSecureProtocolAvailability,
+			(_, urls: string) => {
+				this.zone.run(async () => {
+					for (const url of urls) {
+						await this.entryRepository.markSecureProtocolAvailable(url);
+					}
 
-				this.entries = await this.getEntries();
-				this.updateEntriesSource();
-				this.updateSelectedEntry();
-				this.markDirty();
-			});
-		});
+					this.entries = await this.getEntries();
+					this.updateEntriesSource();
+					this.updateSelectedEntry();
+					this.markDirty();
+				});
+			},
+		);
 
-		this.messageBroker.ipcRenderer.on(IpcChannel.UpdateTfaAvailability, (_, urls: string) => {
-			console.log(urls);
-			this.zone.run(async () => {
-				for (const url of urls) {
-					await this.entryRepository.markTfaAvailable(url);
-				}
+		this.messageBroker.ipcRenderer.on(
+			IpcChannel.UpdateTfaAvailability,
+			(_, urls: string) => {
+				console.log(urls);
+				this.zone.run(async () => {
+					for (const url of urls) {
+						await this.entryRepository.markTfaAvailable(url);
+					}
 
-				this.entries = await this.getEntries();
-				this.updateEntriesSource();
-				this.updateSelectedEntry();
-				this.markDirty();
-			});
-		});
+					this.entries = await this.getEntries();
+					this.updateEntriesSource();
+					this.updateSelectedEntry();
+					this.markDirty();
+				});
+			},
+		);
 	}
 
 	get isGlobalSearch(): boolean {
@@ -154,7 +160,7 @@ export class EntryManager {
 
 		if (entry.id) {
 			const editedEntry = { ...this.editedEntry };
-			
+
 			entryProcessor.beforeUpdate(entry, this.editedEntry, changes);
 
 			id = await this.entryRepository.update(entry);
@@ -182,7 +188,7 @@ export class EntryManager {
 			const newEntry = { ...entry, id };
 
 			entryProcessor.afterAdd(newEntry);
-			
+
 			this.entries = await this.getEntries();
 			this.searchService.reset();
 		}
@@ -219,7 +225,7 @@ export class EntryManager {
 
 			this.entries = await this.getEntries();
 
-			this.selectedEntries.forEach(entry => {
+			this.selectedEntries.forEach((entry) => {
 				this.processors[entry.type].afterDelete(entry);
 			});
 		} else {
@@ -403,7 +409,9 @@ export class EntryManager {
 
 	private updateSelectedEntry() {
 		if (this.selectedEntries.length === 1) {
-			const entry = this.entries.find(x => x.id === this.selectedEntries[0].id);
+			const entry = this.entries.find(
+				(x) => x.id === this.selectedEntries[0].id,
+			);
 			this.selectEntry(entry);
 		}
 	}

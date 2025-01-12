@@ -2,6 +2,6 @@ import { BrowserWindow } from 'electron';
 
 export interface IWindow {
 	browserWindow: BrowserWindow;
-	key: string;
-	autocompleteListener?: (...args) => void;
+	key: string | null;
+	autocompleteListener?: ((...args) => void) | null;
 }

@@ -10,7 +10,7 @@ import { ISendInputService, KeyCode } from '@root/main/services/send-input';
 import { IWindow, IWindowService } from '@root/main/services/window';
 import { Product } from '@root/product';
 import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
-import { IpcMainEvent, globalShortcut } from 'electron';
+import { BrowserWindow, IpcMainEvent, globalShortcut } from 'electron';
 
 type AutotypeResult = {
 	entries: PasswordEntry[];
@@ -110,22 +110,25 @@ export class AutotypeService implements IAutotypeService {
 		});
 
 		// stop active autotype if entry select window is closed
-		this._windowService.getWindow(1).on('hide', () => {
+		this._windowService.getWindow(1)?.on('hide', () => {
 			this._processRunning = false;
 		});
 
-		this._windowService.vaultWindows.forEach((win) => {
-			win.browserWindow.webContents.send(
-				IpcChannel.GetAutotypeFoundEntry,
-				activeWindowTitle,
-			);
-		});
+		this._windowService.sendMessageToAll(
+			IpcChannel.GetAutotypeFoundEntry,
+			activeWindowTitle,
+		);
 	}
 
 	async typeLoginDetails(entry: PasswordEntry): Promise<void> {
 		const windowId = this._result.find((x) =>
 			x.entries.find((e) => e.id === entry.id),
-		).windowId;
+		)?.windowId;
+
+		if (!windowId) {
+			throw new Error('Window not found');
+		}
+
 		const window = this._windowService.getWindowByWebContentsId(windowId);
 
 		const encryptionEvent = {
@@ -135,7 +138,7 @@ export class AutotypeService implements IAutotypeService {
 
 		const payload = (await this._encryptionEventWrapper.processEventAsync(
 			encryptionEvent,
-			window.key,
+			window.key as string,
 		)) as { decrypted: string };
 		await this._sendInputService.sleep(200);
 
@@ -211,9 +214,10 @@ export class AutotypeService implements IAutotypeService {
 	}
 
 	private handleMultipleEntriesFound(foundEntries: PasswordEntry[]) {
-		const entrySelectWindow = this._windowService.getWindow(1);
+		const entrySelectWindow = this._windowService.getWindow(1) as BrowserWindow;
 
-		entrySelectWindow.webContents.send(
+		this._windowService.sendMessage(
+			entrySelectWindow,
 			IpcChannel.SendMatchingEntries,
 			foundEntries,
 		);
@@ -227,7 +231,8 @@ export class AutotypeService implements IAutotypeService {
 		if (
 			this._windowService.vaultWindows.length === 0 ||
 			this._windowService.vaultWindows.every(
-				(x) => this._databaseService.getPassword(x.browserWindow.id) === null,
+				(x) =>
+					this._databaseService.getVaultPassword(x.browserWindow.id) === null,
 			)
 		) {
 			this._windowService.vaultWindows.forEach((window) => {

@@ -43,7 +43,7 @@ var argv = require('minimist')(process.argv.slice(2));
 
 		process.on('exit', () => {
 			if (errorOutput) {
-				console.error('\x1b[31m', errorOutput ,'\x1b[0m');
+				console.error('\x1b[31m', errorOutput, '\x1b[0m');
 			}
 
 			console.log(infoOutput);

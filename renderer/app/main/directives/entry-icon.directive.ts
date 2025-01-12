@@ -31,7 +31,7 @@ export class EntryIconDirective implements AfterViewInit {
 	}
 
 	@HostBinding('data-testid')
-	readonly elementClass = 'entry-icon'; 
+	readonly elementClass = 'entry-icon';
 
 	async ngAfterViewInit(): Promise<void> {
 		// icon check can't be async to avoid load delay
