@@ -12,8 +12,6 @@ export class DarwinApiService implements INativeApiService {
 		return '';
 	}
 
-	setWindowAffinity(handle: Buffer, enabled: boolean): void {}
-
 	async getPassword(windowHandleHex: Buffer, dbPath: string): Promise<string> {
 		try {
 			if (this._isTestMode) return Promise.resolve('test123');

@@ -105,8 +105,7 @@ export class WindowIpcEventHandler implements IIpcEventHandler {
 					config.protectWindowsFromCapture !==
 					this._configService.appConfig.protectWindowsFromCapture
 				) {
-					this._nativeApiService.setWindowAffinity(
-						win!.browserWindow.getNativeWindowHandle(),
+					win?.browserWindow.setContentProtection(
 						config?.protectWindowsFromCapture ?? false,
 					);
 				}

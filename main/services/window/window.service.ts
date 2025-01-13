@@ -406,10 +406,7 @@ export class WindowService implements IWindowService {
 		});
 
 		if (this._configService.appConfig.protectWindowsFromCapture) {
-			this._nativeApiService.setWindowAffinity(
-				window.getNativeWindowHandle(),
-				true,
-			);
+			window.setContentProtection(true);
 		}
 
 		return window;

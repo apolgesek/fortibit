@@ -31,6 +31,7 @@
 namespace NativeCore
 {
   using v8::ArrayBuffer;
+  using v8::Boolean;
   using v8::Context;
   using v8::FunctionCallbackInfo;
   using v8::Isolate;
@@ -40,7 +41,6 @@ namespace NativeCore
   using v8::Object;
   using v8::String;
   using v8::Value;
-  using v8::Boolean;
 
   INPUT SetupInput()
   {
@@ -98,17 +98,6 @@ namespace NativeCore
     SendInput(1, &ip, sizeof(INPUT));
 
     args.GetReturnValue().Set(true);
-  }
-
-  void SetWindowAffinity(const FunctionCallbackInfo<Value> &args)
-  {
-    char *buffer = node::Buffer::Data(args[0]);
-    bool value = args[1].As<Boolean>()->Value();
-    HWND win = static_cast<HWND>(*reinterpret_cast<void **>(buffer));
-
-    bool success = SetWindowDisplayAffinity(win, value ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
-    
-    args.GetReturnValue().Set(success);
   }
 
   void GetActiveWindowTitle(const FunctionCallbackInfo<Value> &args)
@@ -398,14 +387,14 @@ namespace NativeCore
 
     LPCWSTR szFileName = stringToWString(filePath).c_str();
 
-	  WIN_CERTIFICATE certHeader;
-	  DWORD dwCertCount = 0;
+    WIN_CERTIFICATE certHeader;
+    DWORD dwCertCount = 0;
     WIN_CERTIFICATE *pCert = NULL;
-	  char  *pCertBuf = NULL;
+    char *pCertBuf = NULL;
     PCCERT_CONTEXT pCertContext = NULL;
     TCHAR *pSubjectName = NULL;
 
-	  HANDLE hFile = INVALID_HANDLE_VALUE;
+    HANDLE hFile = INVALID_HANDLE_VALUE;
     hFile = CreateFile(szFileName, FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
     if (!ImageEnumerateCertificates(hFile, CERT_SECTION_TYPE_ANY, &dwCertCount, NULL, 0))
     {
@@ -436,7 +425,7 @@ namespace NativeCore
     }
 
     DWORD dwDecodeSize = 0;
-    CRYPT_VERIFY_MESSAGE_PARA para = { 0 };
+    CRYPT_VERIFY_MESSAGE_PARA para = {0};
     para.cbSize = sizeof(para);
     para.dwMsgAndCertEncodingType = X509_ASN_ENCODING | PKCS_7_ASN_ENCODING;
     if (!CryptVerifyMessageSignature(&para, 0, pCert->bCertificate, pCert->dwLength, NULL, &dwDecodeSize, &pCertContext))
@@ -455,7 +444,7 @@ namespace NativeCore
     }
 
     pSubjectName = new TCHAR[dwSubjectSize];
-	  CertGetNameStringW(pCertContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0, NULL, pSubjectName, dwSubjectSize);
+    CertGetNameStringW(pCertContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0, NULL, pSubjectName, dwSubjectSize);
 
     args.GetReturnValue().Set(String::NewFromTwoByte(isolate, (const uint16_t *)pSubjectName).ToLocalChecked());
   }
@@ -488,7 +477,7 @@ namespace NativeCore
 
     BYTE valueData[8192];
     DWORD dataSize = sizeof(valueData);
-    
+
     if (RegQueryValueEx(hKey, nameCStr, NULL, NULL, valueData, &dataSize) != ERROR_SUCCESS)
     {
       args.GetReturnValue().SetNull();
@@ -505,7 +494,6 @@ namespace NativeCore
   {
     NODE_SET_METHOD(exports, "pressPhraseKey", PressPhraseKey);
     NODE_SET_METHOD(exports, "pressKey", PressKey);
-    NODE_SET_METHOD(exports, "setWindowAffinity", SetWindowAffinity);
     NODE_SET_METHOD(exports, "getActiveWindowTitle", GetActiveWindowTitle);
     NODE_SET_METHOD(exports, "setIconicBitmap", SetIconicBitmap);
     NODE_SET_METHOD(exports, "unsetIconicBitmap", UnsetIconicBitmap);

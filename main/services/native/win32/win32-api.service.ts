@@ -48,11 +48,6 @@ export class Win32ApiService implements INativeApiService {
 		NativeCore.getInstance().pressKey(key);
 	}
 
-	// side effect of this being set is no animation on window restore from minimized state
-	setWindowAffinity(handle: Buffer, enabled: boolean): void {
-		NativeCore.getInstance().setWindowAffinity(handle, enabled);
-	}
-
 	getActiveWindowTitle(): string {
 		return NativeCore.getInstance().getActiveWindowTitle();
 	}
