@@ -49,7 +49,7 @@ export class SettingsDialogComponent implements IModal {
 	shouldIncludeTab(tab: Tab): boolean {
 		switch (this.messageBroker.platform) {
 			case 'darwin':
-				const disabledTabs = [Tab.Integration, Tab.Organization];
+				const disabledTabs = [Tab.Organization];
 				if (disabledTabs.includes(tab)) {
 					return false;
 				}
