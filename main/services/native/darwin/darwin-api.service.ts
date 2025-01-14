@@ -1,12 +1,15 @@
-import { execSync } from 'child_process';
-import { INativeApiService } from '../native-api.model';
-import { app, systemPreferences } from 'electron';
 import { ProcessArgument } from '@root/main/process-argument.enum';
-
-const utf8ToHex = (str) => Buffer.from(str, 'utf8').toString('hex');
-const hexToUtf8 = (hex) => Buffer.from(hex, 'hex').toString('utf8');
+import { IConfigService } from '@root/main/services/config';
+import { execSync } from 'child_process';
+import { app, systemPreferences } from 'electron';
+import { INativeApiService } from '../native-api.model';
+import { hexToUtf8, utf8ToHex } from '../utils';
 
 export class DarwinApiService implements INativeApiService {
+	constructor(
+		@IConfigService private readonly _configService: IConfigService,
+	) {}
+
 	private readonly _isTestMode = Boolean(
 		app.commandLine.hasSwitch(ProcessArgument.E2E),
 	);
@@ -20,25 +23,37 @@ export class DarwinApiService implements INativeApiService {
 			if (this._isTestMode) return Promise.resolve('test123');
 
 			await systemPreferences.promptTouchID('test');
-			return execSync(`security find-generic-password -a "Fortibit" -s "${utf8ToHex(dbPath)}" -w`).toString('utf-8').trim();
+			return execSync(
+				`security find-generic-password -a "${this._configService.appConfig.name}" -s "${utf8ToHex(dbPath)}" -w`,
+			)
+				.toString('utf-8')
+				.trim();
 		} catch {
 			throw new Error('Could not verify identity with Touch ID.');
 		}
 	}
 
 	saveCredential(dbPath: string, password: string): void {
-		execSync(`security add-generic-password -a "Fortibit" -s "${utf8ToHex(dbPath)}" -w ${password}`);
+		execSync(
+			`security add-generic-password -a "${this._configService.appConfig.name}" -s "${utf8ToHex(dbPath)}" -w ${password}`,
+		);
 	}
 
 	removeCredential(dbPath: string): void {
-		execSync(`security delete-generic-password -a "Fortibit" -s "${utf8ToHex(dbPath)}"`);
+		execSync(
+			`security delete-generic-password -a "${this._configService.appConfig.name}" -s "${utf8ToHex(dbPath)}"`,
+		);
 	}
 
 	listCredentials(): Promise<string[]> {
-		const credentials = execSync(`security dump-keychain | awk '/"acct"<blob>="Fortibit"/ {found=1} /"svce"<blob>/ && found {print $0; found=0}' | awk -F'=' '/"svce"<blob>/ {gsub(/"/, "", $2); print $2}'`)
-			.toString('utf-8').split('\n').filter(x => Boolean(x));
+		const credentials = execSync(
+			`security dump-keychain | awk '/"acct"<blob>="${this._configService.appConfig.name}"/ {found=1} /"svce"<blob>/ && found {print $0; found=0}' | awk -F'=' '/"svce"<blob>/ {gsub(/"/, "", $2); print $2}'`,
+		)
+			.toString('utf-8')
+			.split('\n')
+			.filter((x) => Boolean(x));
 
-		return Promise.resolve(credentials.map(x => hexToUtf8(x)));
+		return Promise.resolve(credentials.map((x) => hexToUtf8(x)));
 	}
 
 	pressPhraseKey(char: string): void {

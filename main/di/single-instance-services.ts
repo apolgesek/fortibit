@@ -72,9 +72,12 @@ export class SingleInstanceServices extends ServiceCollection {
 
 	configureServices() {
 		this.set(IMessageBroker, new MessageBroker());
-		this.set(INativeApiService, this.getNativeApiService());
 		this.set(ISendInputService, this.getSendInputService());
 		this.set(IConfigService, new ConfigService());
+		this.set(
+			INativeApiService,
+			this.getNativeApiService(this.get(IConfigService)),
+		);
 		this.set(
 			IEncryptionEventWrapper,
 			new EncryptionEventWrapper(this.get(IConfigService)),
@@ -228,12 +231,12 @@ export class SingleInstanceServices extends ServiceCollection {
 		);
 	}
 
-	getNativeApiService(): INativeApiService {
+	getNativeApiService(configService: IConfigService): INativeApiService {
 		switch (process.platform) {
 			case 'win32':
-				return new Win32ApiService();
+				return new Win32ApiService(configService);
 			case 'darwin':
-				return new DarwinApiService();
+				return new DarwinApiService(configService);
 			default:
 				throw new Error(`Unsupported platform: ${process.platform}`);
 		}

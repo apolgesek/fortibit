@@ -1,15 +1,18 @@
+import { ProcessArgument } from '@root/main/process-argument.enum';
+import { IConfigService } from '@root/main/services/config';
 import { INativeApiService } from '@root/main/services/native';
 import { ChildProcess, fork } from 'child_process';
+import { app } from 'electron';
 import { join } from 'path';
 import { MessageEventType } from './message-event-type.enum';
-import { ProcessArgument } from '@root/main/process-argument.enum';
-import { app } from 'electron';
+import { hexToUtf8, utf8ToHex } from '../utils';
 
 class NativeCore {
-	private static _instance: any;
+	private static _instance;
 
 	static getInstance() {
 		if (!NativeCore._instance) {
+			// eslint-disable-next-line @typescript-eslint/no-require-imports
 			this._instance = require('bindings')('NativeCore');
 		}
 
@@ -18,7 +21,7 @@ class NativeCore {
 }
 
 class NativeAuthProcess {
-	static getInstance(): ChildProcess {
+	static getInstance(configService: IConfigService): ChildProcess {
 		const nativeAuthModulePath = join(
 			global['__basedir'],
 			'main',
@@ -27,11 +30,18 @@ class NativeAuthProcess {
 			'win32',
 			'auth.service.js',
 		);
-		return fork(nativeAuthModulePath, [], { silent: false });
+		return fork(nativeAuthModulePath, [], {
+			silent: false,
+			env: { CREDENTIAL_PREFIX: configService.appConfig.name },
+		});
 	}
 }
 
 export class Win32ApiService implements INativeApiService {
+	constructor(
+		@IConfigService private readonly _configService: IConfigService,
+	) {}
+
 	private readonly _isTestMode = Boolean(
 		app.commandLine.hasSwitch(ProcessArgument.E2E),
 	);
@@ -87,7 +97,7 @@ export class Win32ApiService implements INativeApiService {
 		return new Promise((resolve) => {
 			if (this._isTestMode) return resolve('test123');
 
-			const nativeAuth = NativeAuthProcess.getInstance();
+			const nativeAuth = NativeAuthProcess.getInstance(this._configService);
 			nativeAuth.once('message', (result) => {
 				resolve(result.toString());
 			});
@@ -95,31 +105,31 @@ export class Win32ApiService implements INativeApiService {
 			nativeAuth.send({
 				type: MessageEventType.GetPassword,
 				windowHandleHex,
-				dbPath,
+				dbPath: utf8ToHex(dbPath),
 			});
 		});
 	}
 
 	saveCredential(dbPath: string, password: string): void {
-		NativeAuthProcess.getInstance().send({
+		NativeAuthProcess.getInstance(this._configService).send({
 			type: MessageEventType.SavePassword,
-			dbPath,
+			dbPath: utf8ToHex(dbPath),
 			password,
 		});
 	}
 
 	removeCredential(dbPath: string): void {
-		NativeAuthProcess.getInstance().send({
+		NativeAuthProcess.getInstance(this._configService).send({
 			type: MessageEventType.RemovePassword,
-			dbPath,
+			dbPath: utf8ToHex(dbPath),
 		});
 	}
 
 	listCredentials(): Promise<string[]> {
 		return new Promise((resolve) => {
-			const nativeAuth = NativeAuthProcess.getInstance();
+			const nativeAuth = NativeAuthProcess.getInstance(this._configService);
 			nativeAuth.once('message', (result: string[]) => {
-				resolve(result);
+				resolve(result.map((r) => hexToUtf8(r)));
 			});
 
 			nativeAuth.send({ type: MessageEventType.ListPaths });

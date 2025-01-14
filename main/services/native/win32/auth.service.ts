@@ -22,7 +22,7 @@ type ListPathsEvent = EventPayload;
 
 class Main {
 	private readonly _messageListener: () => void;
-	private readonly _credentialPrefix = 'fbit:';
+	private readonly _credentialPrefix = process.env.CREDENTIAL_PREFIX + '/';
 
 	constructor() {
 		this._messageListener = this.execute.bind(this);
