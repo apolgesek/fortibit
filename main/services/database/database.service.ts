@@ -125,8 +125,8 @@ export class DatabaseService implements IDatabaseService {
 		this.sendRecentlyOpenedFiles();
 	}
 
-	public getFilePath(windowId: number): string {
-		return this._fileMap.get(windowId)!.file;
+	public getFilePath(windowId: number): string | undefined {
+		return this._fileMap.get(windowId)?.file;
 	}
 
 	public async saveDatabase(
@@ -212,7 +212,7 @@ export class DatabaseService implements IDatabaseService {
 			this.getVaultPassword(windowId) as string,
 			window.key as string,
 		);
-		const tmpFileName = getHashCode(this.getFilePath(window.browserWindow.id));
+		const tmpFileName = getHashCode(this.getFilePath(window.browserWindow.id) as string);
 
 		this._fileService.writeSync(
 			join(
@@ -256,7 +256,7 @@ export class DatabaseService implements IDatabaseService {
 		const window = this._windowService.getWindowByWebContentsId(windowId);
 		const key = this._windowService.getSecureKey();
 		const fileData = this._fileService.readSync(
-			this.getFilePath(windowId),
+			this.getFilePath(windowId) as string,
 			'base64',
 		);
 		const payload = await this._encryptionEventService.decryptVaultData(
@@ -292,7 +292,7 @@ export class DatabaseService implements IDatabaseService {
 			this._windowService
 				.getWindowByWebContentsId(windowId)
 				.browserWindow.getNativeWindowHandle(),
-			this.getFilePath(windowId),
+			this.getFilePath(windowId) as string,
 		);
 
 		if (password) {
@@ -317,7 +317,7 @@ export class DatabaseService implements IDatabaseService {
 	public checkRecoveryFileExists(windowId): string | undefined {
 		const path = this.getRecoveryFilePath(windowId);
 
-		if (this._fileService.existsSync(path)) {
+		if (path && this._fileService.existsSync(path)) {
 			return path;
 		}
 	}
@@ -402,6 +402,8 @@ export class DatabaseService implements IDatabaseService {
 
 	private getRecoveryFilePath(windowId: number): string {
 		const path = this.getFilePath(windowId);
+		if (!path) return '';
+		
 		const tmpFileName = getHashCode(path);
 
 		return join(

@@ -12,7 +12,7 @@ export interface IDatabaseService {
 
 	getVaultPassword(windowId: number): string | null;
 	setVaultPassword(windowId: number, value: string | null): void;
-	getFilePath(windowId: number): string;
+	getFilePath(windowId: number): string | undefined;
 	setDatabaseEntry(windowId: number, filePath: string);
 	saveDatabase(
 		windowId: number,

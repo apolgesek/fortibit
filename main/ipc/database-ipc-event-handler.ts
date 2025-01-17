@@ -145,7 +145,7 @@ export class DatabaseIpcEventHandler implements IIpcEventHandler {
 		ipcMain.handle(
 			IpcChannel.ToggleBiometricsUnlock,
 			async (event: IpcMainInvokeEvent, isEnabled) => {
-				const path = this._databaseService.getFilePath(event.sender.id);
+				const path = this._databaseService.getFilePath(event.sender.id) as string;
 				if (isEnabled) {
 					this._nativeApiService.saveCredential(
 						path,
