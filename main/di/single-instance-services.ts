@@ -72,12 +72,12 @@ export class SingleInstanceServices extends ServiceCollection {
 
 	configureServices() {
 		this.set(IMessageBroker, new MessageBroker());
-		this.set(ISendInputService, this.getSendInputService());
 		this.set(IConfigService, new ConfigService());
 		this.set(
 			INativeApiService,
 			this.getNativeApiService(this.get(IConfigService)),
 		);
+		this.set(ISendInputService, this.getSendInputService());
 		this.set(
 			IEncryptionEventWrapper,
 			new EncryptionEventWrapper(this.get(IConfigService)),

@@ -1,7 +1,8 @@
 /* before running this script for the first time run "npm config edit" command and check
 	"msvs_version" and "python" directory configs
+	for python 3.12 onwards it may be required to run pip install setuptools command
 	
-	use --verbose argument to get detailed logs including errors
+	use --verbose argument and detached: true spawn option to get detailed logs including errors
 */
 
 const { spawn } = require('child_process');
