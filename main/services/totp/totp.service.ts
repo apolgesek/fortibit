@@ -3,6 +3,7 @@ import jsQR from 'jsqr';
 import { PNG } from 'pngjs';
 import { IWindowService } from '../window';
 import { ITotpService } from './totp-service.model';
+import { base32String } from '@shared-renderer/regex';
 
 export class TotpService implements ITotpService {
 	constructor(
@@ -35,7 +36,7 @@ export class TotpService implements ITotpService {
 			return;
 		}
 
-		const secret = code.data.match(/secret=(([2-7A-Z]{8})+)/);
+		const secret = code.data.match(new RegExp(`secret=(${base32String})`));
 
 		if (!secret) {
 			dialog.showMessageBox(window, {

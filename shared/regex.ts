@@ -1,0 +1,1 @@
+export const base32String = '[2-7A-Za-z]{16,64}';

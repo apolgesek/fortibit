@@ -41,7 +41,7 @@ import { ValidationErrorComponent } from '@app/shared/components/validation-erro
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { Configuration } from '@config/configuration';
-import { Entry, HistoryEntry, PasswordEntry } from '@shared-renderer/index';
+import { base32String, Entry, HistoryEntry, PasswordEntry } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -153,7 +153,7 @@ export class EntryDialogComponent
 			notes: [''],
 			autotypeExp: [''],
 			icon: [''],
-			otpCode: ['', Validators.pattern(/^([2-7A-Z]{8})+$/)],
+			otpCode: ['', Validators.pattern(new RegExp(`^${base32String}$`))],
 		}),
 		card: this.fb.group({
 			cardholderName: [''],
