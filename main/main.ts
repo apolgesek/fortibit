@@ -1,3 +1,4 @@
+import { Logger } from '@root/main/core/logger/logger';
 import { IpcChannel } from '@shared-renderer/index';
 import {
 	app,
@@ -8,20 +9,10 @@ import {
 	nativeTheme,
 	shell,
 } from 'electron';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { platform } from 'os';
 import { basename, join } from 'path';
 import { SingleInstanceServices } from './di';
-import { ProcessArgument } from './process-argument.enum';
-import { IAutotypeService } from './services/autotype';
-import { IClipboardService } from './services/clipboard';
-import { IConfigService } from './services/config';
-import { IDatabaseService } from './services/database';
-import { IPerformanceService } from './services/performance/performance-service.model';
-import { IWindowService } from './services/window';
-import { getDateString } from './util';
-import { IDatabaseIpcEventHandler } from './ipc/database-ipc-event-handler';
-import { IWindowIpcEventHandler } from './ipc/window-ipc-event-handler';
 import {
 	IAutotypeIpcEventHandler,
 	IClipboardIpcEventHandler,
@@ -34,6 +25,15 @@ import {
 	ITotpIpcEventHandler,
 	IUpdateIpcEventHandler,
 } from './ipc';
+import { IDatabaseIpcEventHandler } from './ipc/database-ipc-event-handler';
+import { IWindowIpcEventHandler } from './ipc/window-ipc-event-handler';
+import { ProcessArgument } from './process-argument.enum';
+import { IAutotypeService } from './services/autotype';
+import { IClipboardService } from './services/clipboard';
+import { IConfigService } from './services/config';
+import { IDatabaseService } from './services/database';
+import { IPerformanceService } from './services/performance/performance-service.model';
+import { IWindowService } from './services/window';
 
 class MainProcess {
 	private readonly _services: SingleInstanceServices;
@@ -113,6 +113,9 @@ class MainProcess {
 
 	constructor() {
 		process.env.TEST_MODE = this._isTestMode ? '1' : '0';
+
+		app.setAppLogsPath(join(app.getPath('appData'), 'fortibit', 'logs'));
+
 		this._services = new SingleInstanceServices();
 		this._fileArg = process.argv.find((x) =>
 			x.endsWith(this._services.get(IConfigService).appConfig.fileExtension),
@@ -276,13 +279,7 @@ class MainProcess {
 		});
 
 		ipcMain.on(IpcChannel.LogError, (_, error) => {
-			const logPath = app.getPath('logs');
-			if (!existsSync(logPath)) mkdirSync(logPath, { recursive: true });
-
-			writeFileSync(
-				join(logPath, `error_log_report_${getDateString()}`),
-				error,
-			);
+			Logger.logError(error);
 		});
 	}
 }

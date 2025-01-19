@@ -4,6 +4,7 @@ import { PNG } from 'pngjs';
 import { IWindowService } from '../window';
 import { ITotpService } from './totp-service.model';
 import { base32String } from '@shared-renderer/regex';
+import { Logger } from '@root/main/core/logger/logger';
 
 export class TotpService implements ITotpService {
 	constructor(
@@ -48,19 +49,24 @@ export class TotpService implements ITotpService {
 	): QRCode | undefined {
 		sources = sources.filter((x) => !x.name.includes(app.getName()));
 
-		for (const source of sources) {
-			const buffer = source.thumbnail.toPNG();
-			const png = PNG.sync.read(buffer);
+		try {
+			for (const source of sources) {
+				const buffer = source.thumbnail.toPNG();
+				const png = PNG.sync.read(buffer);
 
-			const code = jsQR(
-				Uint8ClampedArray.from(png.data),
-				png.width,
-				png.height,
-			);
+				const code = jsQR(
+					Uint8ClampedArray.from(png.data),
+					png.width,
+					png.height,
+				);
 
-			if (code) {
-				return code;
+				if (code) {
+					return code;
+				}
 			}
+		} catch (err) {
+			Logger.logError(err);
+			return;
 		}
 	}
 

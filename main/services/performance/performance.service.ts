@@ -1,5 +1,4 @@
 import { app } from 'electron';
-import { join } from 'path';
 import { performance } from 'perf_hooks';
 import * as winston from 'winston';
 import { ProcessArgument } from '../../process-argument.enum';
@@ -12,8 +11,6 @@ export class PerformanceService implements IPerformanceService {
 	private readonly logger: winston.Logger;
 
 	constructor() {
-		app.setAppLogsPath(join(app.getPath('appData'), 'fortibit', 'logs'));
-
 		const directoryPath = app.getPath('logs');
 		const date = new Date().toISOString().split('T')[0];
 
