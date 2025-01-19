@@ -1,5 +1,5 @@
-import { BaseWindow, desktopCapturer, dialog, screen } from 'electron';
-import jsQR from 'jsqr';
+import { app, BaseWindow, desktopCapturer, dialog, screen } from 'electron';
+import jsQR, { QRCode } from 'jsqr';
 import { PNG } from 'pngjs';
 import { IWindowService } from '../window';
 import { ITotpService } from './totp-service.model';
@@ -20,15 +20,7 @@ export class TotpService implements ITotpService {
 			thumbnailSize: { width, height },
 		});
 
-		if (!sources?.length) {
-			this.showMissingQrCodeError(window);
-
-			return;
-		}
-
-		const buffer = sources[0].thumbnail.toPNG();
-		const png = PNG.sync.read(buffer);
-		const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
+		const code = this.findQrCodeWindow(sources);
 
 		if (!code) {
 			this.showMissingQrCodeError(window);
@@ -49,6 +41,27 @@ export class TotpService implements ITotpService {
 		}
 
 		return secret[1];
+	}
+
+	private findQrCodeWindow(
+		sources: Electron.DesktopCapturerSource[],
+	): QRCode | undefined {
+		sources = sources.filter((x) => !x.name.includes(app.getName()));
+
+		for (const source of sources) {
+			const buffer = source.thumbnail.toPNG();
+			const png = PNG.sync.read(buffer);
+
+			const code = jsQR(
+				Uint8ClampedArray.from(png.data),
+				png.width,
+				png.height,
+			);
+
+			if (code) {
+				return code;
+			}
+		}
 	}
 
 	private showMissingQrCodeError(window: BaseWindow) {
