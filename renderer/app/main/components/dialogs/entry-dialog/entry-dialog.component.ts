@@ -5,11 +5,12 @@ import {
 	ComponentRef,
 	DestroyRef,
 	ElementRef,
+	inject,
+	Input,
 	OnDestroy,
 	OnInit,
 	Type,
 	ViewChild,
-	inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -41,7 +42,12 @@ import { ValidationErrorComponent } from '@app/shared/components/validation-erro
 import { valueMatchValidator } from '@app/shared/validators/value-match.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { Configuration } from '@config/configuration';
-import { base32String, Entry, HistoryEntry, PasswordEntry } from '@shared-renderer/index';
+import {
+	base32String,
+	Entry,
+	HistoryEntry,
+	PasswordEntry,
+} from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -97,6 +103,8 @@ export type EntryForm = FormGroup<{
 export class EntryDialogComponent
 	implements IModal, OnInit, AfterViewInit, OnDestroy
 {
+	@Input()
+	public readonly additionalData!: IAdditionalData<EntryDialogDataPayload>;
 	@ViewChild('entryForm') entryForm: ElementRef;
 
 	public config: Configuration;
@@ -105,7 +113,6 @@ export class EntryDialogComponent
 	public formPartialComponent: Type<any> = PasswordEntryPartialFormComponent;
 
 	public readonly ref!: ComponentRef<EntryDialogComponent>;
-	public readonly additionalData!: IAdditionalData<EntryDialogDataPayload>;
 	public readonly isControlInvalid = isControlInvalid;
 	public readonly entryTypes: Entry['type'][] = ['password', 'card'];
 
@@ -135,7 +142,7 @@ export class EntryDialogComponent
 		type: [
 			{
 				value: 'password' as Entry['type'],
-				disabled: Boolean(this.entryManager.editedEntry) || this.isReadOnly,
+				disabled: Boolean(this.editedEntry) || this.isReadOnly,
 			},
 		],
 		title: ['', Validators.required],
@@ -167,12 +174,16 @@ export class EntryDialogComponent
 
 	private lastTrigger: 'click' | 'keydown';
 
+	private get editedEntry(): Entry {
+		return this.additionalData?.payload?.entry;
+	}
+
 	get newEntryForm() {
 		return this._newEntryForm;
 	}
 
 	get header(): string {
-		if (this.entryManager.editedEntry) {
+		if (this.editedEntry) {
 			if (!this.isReadOnly) {
 				return 'Edit entry';
 			} else {
@@ -184,9 +195,7 @@ export class EntryDialogComponent
 	}
 
 	get entryGroupName(): string {
-		return this.entryManager.editedEntry
-			? this.editedGroupName
-			: this.selectedGroupName;
+		return this.editedEntry ? this.editedGroupName : this.selectedGroupName;
 	}
 
 	get title() {
@@ -194,8 +203,8 @@ export class EntryDialogComponent
 	}
 
 	private get editedGroupName(): string {
-		return this.entryManager.editedEntry.groupId !== GroupId.AllItems
-			? this.entryManager.editedEntry.group
+		return this.editedEntry.groupId !== GroupId.AllItems
+			? this.editedEntry.group
 			: this.groupManager.groups.find((g) => g.id === GroupId.Root).name;
 	}
 
@@ -260,7 +269,7 @@ export class EntryDialogComponent
 
 	async restore() {
 		await this.entryManager.saveEntry({
-			...this.entryManager.editedEntry,
+			...this.editedEntry,
 			icon: null,
 		} as PasswordEntry);
 		this.notificationService.add({
@@ -307,9 +316,9 @@ export class EntryDialogComponent
 		this.saveLocked = true;
 		let compareResult: CompareResult;
 
-		if (this.entryManager.editedEntry?.id) {
+		if (this.editedEntry?.id) {
 			compareResult = await this.entryTypeHandler.comparer.compare(
-				this.entryManager.editedEntry,
+				this.editedEntry,
 				this.newEntryForm.value,
 				this.additionalData.payload,
 			);
@@ -325,7 +334,10 @@ export class EntryDialogComponent
 			this.newEntryForm.value,
 		);
 
-		await this.entryManager.saveEntry(entry, compareResult?.changes);
+		await this.entryManager.saveEntry(
+			entry,
+			compareResult?.changes as (keyof Entry)[],
+		);
 
 		this.saveLocked = false;
 		this.close();
@@ -340,7 +352,7 @@ export class EntryDialogComponent
 	}
 
 	private async prefillForm() {
-		if (this.entryManager.editedEntry) {
+		if (this.editedEntry) {
 			this.fillExistingEntry();
 		} else {
 			this.fillNewEntry();
@@ -349,11 +361,11 @@ export class EntryDialogComponent
 
 	private fillExistingEntry() {
 		this.newEntryForm.patchValue({
-			id: this.entryManager.editedEntry.id,
-			groupId: this.entryManager.editedEntry.groupId,
-			creationDate: this.entryManager.editedEntry.creationDate,
-			title: this.entryManager.editedEntry.title,
-			type: this.entryManager.editedEntry.type,
+			id: this.editedEntry.id,
+			groupId: this.editedEntry.groupId,
+			creationDate: this.editedEntry.creationDate,
+			title: this.editedEntry.title,
+			type: this.editedEntry.type,
 		});
 	}
 

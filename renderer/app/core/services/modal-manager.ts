@@ -73,18 +73,21 @@ export class ModalManager {
 
 		if (this.openedModals.length > 0) {
 			modalRef.showBackdrop = false;
+
+			this.openedModals.forEach((modal) => {
+				modal.injector.get(ModalRef).visible = false;
+			});
 		}
 
 		const componentRef = this.appViewContainer
 			.getRootViewContainer()
 			.createComponent(component, { injector });
-		const componentInstance = componentRef.instance as IModal;
 
 		modalRef.ref = componentRef;
 		modalRef.onClose = new Subject<void>();
 		modalRef.onActionResult = new Subject<boolean>();
 		// set component properties
-		componentInstance.additionalData = additionalData;
+		componentRef.setInput('additionalData', additionalData);
 		this.openedModals.push(componentRef);
 
 		this.renderer.addClass(this.document.body, this.bodyClass);
@@ -93,6 +96,16 @@ export class ModalManager {
 	}
 
 	close<T>(componentRef: ComponentRef<T>) {
+		if (this.openedModals.length > 1) {
+			// set previous modal visible again
+			this.openedModals.at(-2).injector.get(ModalRef).visible = true;
+			setTimeout(() => this.closeModal(componentRef), 0);
+		} else {
+			this.closeModal(componentRef);
+		}
+	}
+
+	private closeModal<T>(componentRef: ComponentRef<T>) {
 		this.appRef.detachView(componentRef.hostView);
 		componentRef.destroy();
 

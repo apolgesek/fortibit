@@ -181,3 +181,18 @@
 		width: 1.5rem !important;
 	}
 }
+
+.more-options-content {
+	border-radius: 0.25rem;
+	top: 2rem;
+
+	li:first-child {
+		border-top-left-radius: 0.25rem;
+		border-top-right-radius: 0.25rem;
+	}
+
+	li:last-child {
+		border-bottom-left-radius: 0.25rem;
+		border-bottom-right-radius: 0.25rem;
+	}
+}

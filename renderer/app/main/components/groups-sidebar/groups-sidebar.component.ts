@@ -82,7 +82,8 @@ export class GroupsSidebarComponent implements OnInit {
 	}
 
 	ngOnInit() {
-		this.addGroupLabel = this.hotkeyHandler.getContextMenuLabel('AddGroup');
+		const addGroupLabel = this.hotkeyHandler.getContextMenuLabel('AddGroup');
+		this.addGroupLabel = `${addGroupLabel.label} ${addGroupLabel.hotkey}`;
 		this.groupContextMenuRoot = this.contextMenuBuilderService
 			.buildGroupContextMenuItems({ isRoot: true })
 			.getResult();

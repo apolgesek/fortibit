@@ -34,7 +34,7 @@
 						"
 						(mouseenter)="setFocus(item)"
 					>
-						{{ item.label }}
+						{{ item.label }} <span class="secondary">{{ item.hotkey }}</span>
 					</li>
 				} @else {
 					<div class="divider"><hr /></div>

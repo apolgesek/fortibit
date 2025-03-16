@@ -24,7 +24,7 @@
 		<ul *appDropdownMenu class="dropdown-content right" @slideDown>
 			@if (updateAvailable) {
 				<li appMenuItem (activate)="openAboutWindow()" class="update-btn">
-					Update is available <span class="version">{{ updateAvailable }}</span>
+					Install update <span class="version">{{ updateAvailable }}</span>
 				</li>
 			}
 			@if (!updateAvailable) {

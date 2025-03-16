@@ -1,5 +1,6 @@
 import { Logger } from '@root/main/core/logger/logger';
 import { IpcChannel } from '@shared-renderer/index';
+import { randomBytes } from 'crypto';
 import {
 	app,
 	BrowserWindow,
@@ -7,11 +8,12 @@ import {
 	ipcMain,
 	Menu,
 	nativeTheme,
+	Notification,
 	shell,
 } from 'electron';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { platform } from 'os';
-import { basename, join } from 'path';
+import { basename, join, resolve } from 'path';
 import { SingleInstanceServices } from './di';
 import {
 	IAutotypeIpcEventHandler,
@@ -40,6 +42,8 @@ class MainProcess {
 	private readonly _isTestMode = Boolean(
 		app.commandLine.hasSwitch(ProcessArgument.E2E),
 	);
+	private readonly appProtocol = 'fbit';
+	private readonly sessionToken = randomBytes(32).toString('hex');
 
 	private _fileArg: string | undefined;
 
@@ -112,9 +116,16 @@ class MainProcess {
 	}
 
 	constructor() {
-		process.env.TEST_MODE = this._isTestMode ? '1' : '0';
+		app.setAsDefaultProtocolClient(
+			this.appProtocol,
+			process.execPath,
+			app.commandLine.hasSwitch(ProcessArgument.Serve)
+				? [resolve(process.argv[1])]
+				: undefined,
+		);
 
 		app.setAppLogsPath(join(app.getPath('appData'), 'fortibit', 'logs'));
+		process.env.TEST_MODE = this._isTestMode ? '1' : '0';
 
 		this._services = new SingleInstanceServices();
 		this._fileArg = process.argv.find((x) =>
@@ -128,6 +139,12 @@ class MainProcess {
 
 	private registerAppEvents() {
 		app.on('second-instance', (_: Electron.Event, argv) => {
+			const url = argv.find((arg) => arg.startsWith(`${this.appProtocol}://`));
+			if (url) {
+				this.handleUrl(url);
+				return;
+			}
+
 			const filePath = argv.find((x) =>
 				x.endsWith(this._configService.appConfig.fileExtension),
 			);
@@ -155,6 +172,11 @@ class MainProcess {
 		app.on('open-file', (event, path) => {
 			event.preventDefault();
 			this._fileArg = path;
+		});
+
+		app.on('open-url', (event, url) => {
+			event.preventDefault();
+			this.handleUrl(url);
 		});
 
 		app.once('ready', () => this.onReady());
@@ -205,6 +227,21 @@ class MainProcess {
 				this._configService.appConfig.autocompletePasswordOnlyShortcut,
 			);
 		}
+
+		app.setAppUserModelId(process.execPath);
+		ipcMain.on(
+			IpcChannel.ShowNotification,
+			(event: Electron.IpcMainEvent, { threats }) => {
+				const vaultPath = this._databaseService.fileMap.get(
+					event.sender.id,
+				)?.file;
+				new Notification({
+					toastXml: `<?xml version="1.0"?>
+					<toast launch="${this.appProtocol}://?action=click" activationType="protocol"><visual><binding template="ToastGeneric"><text>Reports generated. Detected threats: ${threats}</text><text placement="attribution">${vaultPath}</text></binding></visual><actions><action content="Show reports" arguments="${this.appProtocol}://?action=showReports&amp;windowId=${event.sender.id}&amp;sessionToken=${this.sessionToken}" activationType="protocol"/></actions></toast>
+				`,
+				}).show();
+			},
+		);
 
 		try {
 			this._performanceService.mark('firstWindowLoaded');
@@ -281,6 +318,32 @@ class MainProcess {
 		ipcMain.on(IpcChannel.LogError, (_, error) => {
 			Logger.logError(error);
 		});
+	}
+
+	private handleUrl(url: string) {
+		const parsedUrl = new URL(url);
+
+		const action = parsedUrl.searchParams.get('action');
+		const windowId = parsedUrl.searchParams.get('windowId');
+		const sessionToken = parsedUrl.searchParams.get('sessionToken');
+
+		if (sessionToken !== this.sessionToken) {
+			return;
+		}
+
+		if (!action || !windowId)
+			throw new Error('Invalid URL. Missing action or windowId');
+
+		const browserWindow = this._windowService.getWindowByWebContentsId(
+			parseInt(windowId),
+		).browserWindow;
+
+		browserWindow.show();
+
+		this._windowService.sendMessage(
+			parseInt(windowId),
+			IpcChannel['UrlAction_' + action],
+		);
 	}
 }
 

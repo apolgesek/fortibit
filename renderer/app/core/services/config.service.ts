@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { Configuration } from '@config/configuration';
 import { IpcChannel } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
-import { BehaviorSubject, Observable, forkJoin, from } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, forkJoin, from } from 'rxjs';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class ConfigService {
 	public readonly configLoadedSource$: Observable<Configuration>;
+	public readonly defaultConfigRestored$: Observable<Configuration>;
 
 	public get config(): Configuration {
 		return this.configLoaded.value;
@@ -16,13 +17,16 @@ export class ConfigService {
 
 	private readonly messageBroker = inject(MessageBroker);
 	private readonly configLoaded = new BehaviorSubject<Configuration>(null);
+	private readonly defaultConfigRestored = new Subject<Configuration>();
 
 	constructor() {
 		this.configLoadedSource$ = this.configLoaded.asObservable();
+		this.defaultConfigRestored$ = this.defaultConfigRestored.asObservable();
 	}
 
 	setConfig(config: Partial<Configuration>) {
 		const fullConfig = { ...this.config, ...config };
+		this.configLoaded.next(fullConfig);
 
 		forkJoin([
 			from(
@@ -49,9 +53,14 @@ export class ConfigService {
 					fullConfig,
 				),
 			),
+			from(
+				this.messageBroker.ipcRenderer.invoke(
+					IpcChannel.ChangeScheduledReportsSettings,
+					fullConfig,
+				),
+			),
 		]).subscribe(() => {
-			this.messageBroker.ipcRenderer.send(IpcChannel.ConfigChanged, config);
-			this.configLoaded.next(fullConfig);
+			this.messageBroker.ipcRenderer.send(IpcChannel.ConfigChanged, fullConfig);
 		});
 	}
 
@@ -60,5 +69,6 @@ export class ConfigService {
 			IpcChannel.GetDefaultConfig,
 		);
 		this.setConfig(config);
+		this.defaultConfigRestored.next(config);
 	}
 }

@@ -18,4 +18,5 @@ export const HotkeyLabel = {
 	ZoomOut: 'Zoom out',
 	ResetZoom: 'Reset zoom',
 	History: 'History',
+	CopyTotp: 'Copy TOTP',
 };

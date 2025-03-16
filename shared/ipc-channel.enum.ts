@@ -34,6 +34,7 @@ export enum IpcChannel {
 	ChangeEncryptionSettings = 'app:changeEncryptionSettings',
 	ChangeScreenLockSettings = 'app:changeScreenLockSettings',
 	ChangeWindowsCaptureProtection = 'app:changeWindowsCaptureProtection',
+	ChangeScheduledReportsSettings = 'app:changeScheduledReportsSettings',
 	CheckIconExists = 'app:checkIconExists',
 	TryGetIcon = 'app:tryGetIcon',
 	TryReplaceIcon = 'app:tryReplaceIcon',
@@ -73,4 +74,8 @@ export enum IpcChannel {
 	LogError = 'app:logError',
 	GetDefaultConfig = 'app:getDefaultConfig',
 	ClearRecentlyOpened = 'app:clearRecentlyOpened',
+	ShowNotification = 'app:showNotification',
+	GenerateScheduledReports = 'app:generateScheduledReports',
+	// Url actions
+	UrlAction_showReports = 'app:urlAction_showReports',
 }

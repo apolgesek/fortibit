@@ -81,8 +81,8 @@ input[type='number'] {
 		bottom: 0;
 		border-radius: 0.25rem;
 		background-color: var(--checkbox-bg);
-		-webkit-transition: 0.4s;
-		transition: 0.4s;
+		// -webkit-transition: 0.4s;
+		// transition: 0.4s;
 	}
 
 	.slider:before {
@@ -93,8 +93,8 @@ input[type='number'] {
 		left: 3px;
 		bottom: 3px;
 		background-color: $white;
-		-webkit-transition: 0.4s;
-		transition: 0.4s;
+		// -webkit-transition: 0.4s;
+		// transition: 0.4s;
 		border-radius: 0.25rem;
 	}
 
@@ -204,4 +204,36 @@ input[type='checkbox'] {
 
 .complex-label * {
 	cursor: pointer;
+}
+
+// CONFIG CONTROL STYLES
+app-text-input,
+app-number-input,
+app-toggle-input,
+app-select-input {
+	display: block;
+	width: 100%;
+
+	.inputgroup {
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+		background: none;
+		box-shadow: none;
+		padding: 0;
+
+		input {
+			padding: 0.25rem;
+			background-color: var(--input-modal-bg);
+			height: 1rem;
+		}
+	}
+}
+
+app-number-input {
+	.inputgroup {
+		input[type='number'] {
+			width: 2.5rem;
+		}
+	}
 }

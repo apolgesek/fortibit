@@ -134,6 +134,10 @@ export class MenuBarComponent implements OnInit, AfterViewInit {
 		this.modalService.openWeakPasswordsWindow();
 	}
 
+	openReportsWindow() {
+		this.modalService.openReportsWindow();
+	}
+
 	openChangePasswordWindow() {
 		this.modalService.openPasswordChangeWindow();
 	}

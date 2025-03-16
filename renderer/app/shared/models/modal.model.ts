@@ -1,10 +1,11 @@
 import { ComponentRef } from '@angular/core';
-import { HistoryEntry } from '@shared-renderer/index';
+import { Entry, HistoryEntry } from '@shared-renderer/index';
 
 export interface IModal {
 	ref: ComponentRef<unknown>;
 	additionalData?: IAdditionalData;
 	showBackdrop?: boolean;
+	visible?: boolean;
 	close: () => void;
 }
 
@@ -18,5 +19,6 @@ export type EntryDialogDataPayload = {
 	config?: {
 		readonly: boolean;
 	};
+	entry?: Entry;
 	historyEntry?: HistoryEntry;
 };

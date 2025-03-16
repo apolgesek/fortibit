@@ -10,6 +10,7 @@ export class ModalRef {
 	public ref: ComponentRef<any>;
 	public onClose: Subject<void>;
 	public onActionResult: Subject<boolean>;
+	public visible = true;
 
 	private readonly modalManager = inject(ModalManager);
 

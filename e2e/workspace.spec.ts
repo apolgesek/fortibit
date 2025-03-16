@@ -1,11 +1,13 @@
 /* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
+import { addDays, addMinutes, format } from 'date-fns';
 import { ElectronApplication, Page } from 'playwright';
 import { addEntry } from './helpers/add-entry';
 import { authenticate } from './helpers/auth';
 import { getInvoke } from './helpers/ipc';
-import { beforeEach } from './hooks/before-each';
+import { toggleAutoSave } from './helpers/settings';
 import { afterEach } from './hooks/after-each';
+import { beforeEach } from './hooks/before-each';
 
 test.describe('Workspace > Entry & group', async () => {
 	let app: ElectronApplication;
@@ -69,9 +71,7 @@ test.describe('Workspace > Entry & group', async () => {
 	});
 
 	test('Check entries table - no entries', async () => {
-		const noEntriesText = appWindow.getByText(
-			/there are no entries in this group/i,
-		);
+		const noEntriesText = appWindow.getByText(/no entries in this group/i);
 		await noEntriesText.waitFor({ state: 'visible', timeout: 4000 });
 
 		await expect(noEntriesText).toBeVisible();
@@ -206,8 +206,8 @@ test.describe('Workspace > Entry & group', async () => {
 		await rowEntries.nth(0).click();
 		const boundingBoxSource = await rowEntries.nth(1).boundingBox();
 		await appWindow.mouse.move(
-			boundingBoxSource.x + boundingBoxSource.width / 2,
-			boundingBoxSource.y + boundingBoxSource.height / 2,
+			boundingBoxSource!.x + boundingBoxSource!.width / 2,
+			boundingBoxSource!.y + boundingBoxSource!.height / 2,
 			{ steps: 5 },
 		);
 		await appWindow.keyboard.down('Control');
@@ -377,7 +377,7 @@ test.describe('Workspace > Entry & group', async () => {
 	test('Check weak passwords found', async () => {
 		await addEntry(appWindow, { config: { close: true } });
 		await appWindow.getByText(/tools/i).click();
-		await appWindow.getByText(/report/i).hover();
+		await appWindow.getByText(/security/i).hover();
 		await appWindow.getByText(/weak passwords/i).click();
 		await appWindow
 			.getByText(/weak passwords report/i)
@@ -506,7 +506,7 @@ test.describe('Workspace > Entry & group', async () => {
 
 	test('Check leaked passwords scan no results', async () => {
 		await appWindow.getByText('Tools', { exact: true }).click();
-		await appWindow.getByText(/report/i).click();
+		await appWindow.getByText(/security/i).click();
 		await appWindow.getByText(/leaked passwords/i).click();
 		await appWindow
 			.getByText(/leaked passwords report/i)
@@ -522,7 +522,7 @@ test.describe('Workspace > Entry & group', async () => {
 	test('Check leaked passwords scan detected leaks', async () => {
 		await addEntry(appWindow, { config: { close: true } });
 		await appWindow.getByText(/tools/i).click();
-		await appWindow.getByText(/report/i).click();
+		await appWindow.getByText(/security/i).click();
 		await appWindow.getByText(/leaked passwords/i).click();
 		await appWindow
 			.getByText(/leaked passwords report/i)
@@ -585,7 +585,9 @@ test.describe('Workspace > Entry & group', async () => {
 		).toBeVisible();
 	});
 
-	test('Check secure protocol availability should mark entries', async () => {
+	test('Https check should mark entry and apply button should update url', async () => {
+		test.slow();
+
 		await addEntry(appWindow, {
 			config: { close: true },
 			url: 'http://google.com',
@@ -596,12 +598,19 @@ test.describe('Workspace > Entry & group', async () => {
 		await authenticate(appWindow);
 		await appWindow.getByRole('main').waitFor({ state: 'visible' });
 		await appWindow.getByText(/username1/i).click();
+		const httpsAvailableBox = appWindow.getByText(
+			'https protocol is available',
+		);
 
-		await expect(
-			appWindow.getByText('https protocol is available'),
-		).toBeVisible({
-			timeout: 10_000,
+		await expect(httpsAvailableBox).toBeVisible({
+			timeout: 70_000,
 		});
+
+		await appWindow.getByRole('button', { name: /apply/i }).click();
+		await expect(
+			appWindow.getByRole('complementary').getByText(/https:\/\//i),
+		).toBeVisible();
+		await expect(httpsAvailableBox).toBeHidden();
 	});
 
 	test('Check TOTP is generating when valid secret is saved manually', async () => {
@@ -634,10 +643,68 @@ test.describe('Workspace > Entry & group', async () => {
 		const wasDialogOpen = await app.evaluate(
 			({ BrowserWindow }) =>
 				new Promise<true>((resolve) =>
-					BrowserWindow.getFocusedWindow().once('blur', () => resolve(true)),
+					BrowserWindow.getFocusedWindow()!.once('blur', () => resolve(true)),
 				),
 		);
 		expect(wasDialogOpen).toBeTruthy();
+	});
+
+	test('Check scheduled reports generate at the specified time', async () => {
+		test.slow();
+
+		await addEntry(appWindow, {
+			config: { close: true },
+		});
+
+		await appWindow.keyboard.press('Control+.');
+		await appWindow
+			.getByRole('dialog')
+			.getByText(/enable scheduled reports/i)
+			.click();
+		await appWindow
+			.getByRole('dialog')
+			.getByLabel(/^time:$/i)
+			.click();
+
+		const date = addMinutes(new Date(), 1);
+		const hours = format(date, 'HH').split('');
+		const minutes = format(date, 'mm').split('');
+		const chars = [...hours, ...minutes];
+
+		await appWindow.keyboard.type(chars[0]);
+		await appWindow.keyboard.type(chars[1]);
+		await appWindow.keyboard.type(chars[2]);
+		await appWindow.keyboard.type(chars[3]);
+
+		await appWindow.keyboard.press('Escape');
+
+		await appWindow.waitForTimeout(61_000);
+
+		await appWindow.getByText(/^\s*tools\s*$/i).click();
+		await appWindow.getByText(/security/i).hover();
+		await appWindow.getByText(/reports log/i).click();
+
+		const weakPasswordsLog = appWindow
+			.getByRole('dialog')
+			.getByText(/weak passwords/i);
+		const exposedPasswordsLog = appWindow
+			.getByRole('dialog')
+			.getByText(/exposed passwords/i);
+
+		const expectedDateFormatted = format(addDays(date, 1), 'dd/MM/yy HH:mm');
+		const nextScheduledReportDate = appWindow
+			.getByRole('dialog')
+			.getByText(
+				new RegExp(
+					`next\\s*scheduled\\s*reports\\s*on:\\s*` +
+						`${expectedDateFormatted}`,
+					'i',
+				),
+			);
+
+		await expect(nextScheduledReportDate).toBeVisible();
+		await expect(weakPasswordsLog).toBeVisible();
+		await expect(exposedPasswordsLog).toBeVisible();
 	});
 });
 
@@ -778,7 +845,7 @@ test.describe('Workspace > File', async () => {
 		);
 		await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
 
-		await expect(appWindow.getByText(/vault: .*test_copy.fbit/i)).toBeVisible();
+		await expect(appWindow.getByText(/file: .*test_copy.fbit/i)).toBeVisible();
 	});
 
 	test('Open recent option click should open different vault master password screen', async () => {
@@ -793,18 +860,19 @@ test.describe('Workspace > File', async () => {
 		await appWindow.waitForTimeout(2000);
 
 		await appWindow.getByRole('menubar').getByText(/file/i).click();
-		await appWindow.getByText(/open recent/i).click();
+		await appWindow.getByText(/open recent/i).hover();
 		const option = await appWindow.getByText(/1:.*\.fbit/i).innerText();
 		await appWindow.getByText(option).click();
 
 		await expect(
 			appWindow.getByText(
-				new RegExp(`vault: .*${option.replace(/\d: /, '')}`, 'i'),
+				new RegExp(`file: .*${option.replace(/\d: /, '')}`, 'i'),
 			),
 		).toBeVisible();
 	});
 
 	test('Save option click should save updated vault', async () => {
+		await toggleAutoSave(appWindow);
 		await addEntry(appWindow, { config: { close: true } });
 		await appWindow.getByRole('menubar').getByText(/file/i).click();
 		await appWindow
@@ -894,7 +962,6 @@ test.describe('Workspace > File', async () => {
 			.getByRole('menubar')
 			.getByText(/export/i)
 			.click();
-		await appWindow.getByRole('menubar').getByText(/csv/i).click();
 		await appWindow.waitForTimeout(2000);
 		const invoke = await getInvoke(appWindow);
 		await invoke.evaluate((invoke) =>

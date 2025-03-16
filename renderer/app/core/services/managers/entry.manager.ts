@@ -1,7 +1,9 @@
-import { Injectable, NgZone, inject } from '@angular/core';
+import { inject, Injectable, NgZone } from '@angular/core';
+import { DbManager } from '@app/core/database';
 import { GroupId } from '@app/core/enums';
-import { EntryRepository, EntryPredicateFn } from '@app/core/repositories';
+import { EntryPredicateFn, EntryRepository } from '@app/core/repositories';
 import { HistoryEntry } from '@shared-renderer/history-entry.model';
+import { Entry, IpcChannel, PasswordEntry } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
 import {
 	BehaviorSubject,
@@ -15,12 +17,10 @@ import {
 	switchMap,
 } from 'rxjs';
 import { NotificationService } from '../notification.service';
+import { IProcessor, PasswordProcessor } from '../processors';
 import { SearchService } from '../search.service';
 import { GroupManager } from './group.manager';
-import { DbManager } from '@app/core/database';
 import { HistoryManager } from './history.manager';
-import { Entry, IpcChannel, PasswordEntry } from '@shared-renderer/index';
-import { IProcessor, PasswordProcessor } from '../processors';
 
 type SearchResults = {
 	passwords: Entry[];
@@ -40,7 +40,6 @@ export class EntryManager {
 	public readonly markDirtySource: Subject<void>;
 
 	public movedEntries: number[] = [];
-	public editedEntry?: Entry;
 	public entries: Entry[] = [];
 	public selectedEntries: Entry[] = [];
 	public entryHistory: HistoryEntry[];
@@ -154,20 +153,22 @@ export class EntryManager {
 		this.searchService.isGlobalSearchMode = value;
 	}
 
-	async saveEntry(entry: Partial<Entry>, changes?: string[]): Promise<number> {
+	async saveEntry<T extends Entry>(
+		entry: Partial<T>,
+		changes?: (keyof T)[],
+	): Promise<number> {
 		let id: number;
 		const entryProcessor = this.processors[entry.type];
 
 		if (entry.id) {
-			const editedEntry = { ...this.editedEntry };
-
-			entryProcessor.beforeUpdate(entry, this.editedEntry, changes);
+			const editedEntry = await this.entryRepository.get(entry.id);
+			entryProcessor.beforeUpdate(entry, editedEntry, changes);
 
 			id = await this.entryRepository.update(entry);
 			this.entries = await this.getEntries();
-			this.selectedEntries = [{ ...editedEntry, ...entry } as Entry];
+			this.selectedEntries = [this.entries.find((x) => x.id === id)];
 
-			entryProcessor.afterUpdate(entry, this.editedEntry, changes);
+			entryProcessor.afterUpdate(entry, editedEntry, changes);
 
 			const historyEntry: HistoryEntry = {
 				entry: editedEntry,

@@ -1,7 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, ComponentRef, OnInit, inject } from '@angular/core';
-import { IAdditionalData, IModal } from '@app/shared';
-import { ModalComponent } from '@app/shared/components/modal/modal.component';
-import { bufferTime, from } from 'rxjs';
+import { ReportType } from '@app/core/enums';
 import {
 	EntryManager,
 	ModalRef,
@@ -9,23 +8,30 @@ import {
 	NotificationService,
 	ReportService,
 } from '@app/core/services';
-import { MessageBroker } from 'injection-tokens';
-import { CommonModule } from '@angular/common';
-import { ReportType } from '@app/core/enums';
-import { FeatherModule } from 'angular-feather';
+import { IAdditionalData, IModal } from '@app/shared';
+import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { ExposedPasswordsTableComponent } from '@app/shared/components/tables/exposed-passwords-table/exposed-passwords-table.component';
 import {
 	ExposedPasswordEntry,
 	IpcChannel,
 	PasswordEntry,
 	Report,
 } from '@shared-renderer/index';
+import { FeatherModule } from 'angular-feather';
+import { MessageBroker } from 'injection-tokens';
+import { bufferTime, from } from 'rxjs';
 
 @Component({
 	selector: 'app-exposed-passwords-dialog',
 	templateUrl: './exposed-passwords-dialog.component.html',
 	styleUrls: ['./exposed-passwords-dialog.component.scss'],
 	standalone: true,
-	imports: [CommonModule, FeatherModule, ModalComponent],
+	imports: [
+		CommonModule,
+		FeatherModule,
+		ModalComponent,
+		ExposedPasswordsTableComponent,
+	],
 })
 export class ExposedPasswordsDialogComponent implements IModal, OnInit {
 	ref: ComponentRef<ExposedPasswordsDialogComponent>;
@@ -70,10 +76,12 @@ export class ExposedPasswordsDialogComponent implements IModal, OnInit {
 						return;
 					}
 
+					const reportedEntries =
+						await this.reportService.getExposedEntries(result);
 					await this.reportService.addReport({
-						creationDate: new Date(),
+						creationDate: +new Date(),
 						type: ReportType.ExposedPasswords,
-						payload: result.data as string,
+						payload: JSON.stringify(reportedEntries),
 					});
 
 					await this.getLastReport();

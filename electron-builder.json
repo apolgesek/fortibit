@@ -38,6 +38,11 @@
 			"from": "dist",
 			"to": "app/renderer",
 			"filter": ["**/*"]
+		},
+		{
+			"from": "assets",
+			"to": "app/assets",
+			"filter": ["**/*"]
 		}
 	],
 	"mac": {

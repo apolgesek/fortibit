@@ -18,7 +18,7 @@ export class ConfirmExitDialogComponent implements IModal {
 	private readonly modalRef = inject(ModalRef);
 
 	async saveChanges() {
-		const result = await this.workspaceService.saveDatabase();
+		await this.workspaceService.saveDatabase();
 
 		setTimeout(() => {
 			this.executeTask();

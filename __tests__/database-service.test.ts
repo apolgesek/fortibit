@@ -214,7 +214,7 @@ jest.mock('@root/main/services/window', () => {
 function setup() {
 	const messageBroker = new MessageBroker();
 	const configService = new ConfigService();
-	const nativeApiService = new Win32ApiService();
+	const nativeApiService = new Win32ApiService(configService);
 	const performanceService = new PerformanceService();
 	const downloadService = new DownloadService();
 	const fileService = new FileService();

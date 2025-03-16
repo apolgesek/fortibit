@@ -4,6 +4,7 @@ import { join } from 'path';
 import { ProcessArgument } from '../../process-argument.enum';
 import { IConfigService } from '../config';
 import { IEncryptionEventWrapper } from './encryption-event-wrapper.model';
+import { argv } from 'process';
 
 export class EncryptionEventWrapper implements IEncryptionEventWrapper {
 	constructor(
@@ -45,6 +46,7 @@ export class EncryptionEventWrapper implements IEncryptionEventWrapper {
 				ENCRYPTION_KEY: this.decryptKey(encryptedKey),
 				LEAKED_PASSWORDS_API_URL:
 					this._configService.appConfig.leakedPasswordsUrl,
+				PROXY_ENABLED: argv.includes('--proxy') ? '1' : '0',
 			},
 		});
 	}

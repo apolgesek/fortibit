@@ -8,10 +8,19 @@ import { PredicateFn } from '../../repositories/report-repository.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReportManager {
-	public readonly markDirtySource: Subject<void> = new Subject();
+	public readonly markDirtySource = new Subject<void>();
+	private readonly maxReports = 20;
 	private readonly reportRepository: ReportRepository = new ReportRepository(
 		inject(DbManager),
 	);
+
+	async get(id: number): Promise<Report | undefined> {
+		return this.reportRepository.get(id);
+	}
+
+	async getAll(): Promise<Report[]> {
+		return this.reportRepository.getAll();
+	}
 
 	async getAllByPredicate(fn: PredicateFn): Promise<Report[] | undefined> {
 		return this.reportRepository.getAllByPredicate(fn);
@@ -22,12 +31,11 @@ export class ReportManager {
 	}
 
 	async add(item: Report): Promise<number> {
-		this.markDirty();
-		return this.reportRepository.add(item);
-	}
+		const id = await this.reportRepository.add(item);
 
-	async delete(id: number): Promise<void> {
-		return this.reportRepository.delete(id);
+		this.markDirty();
+
+		return id;
 	}
 
 	private markDirty() {

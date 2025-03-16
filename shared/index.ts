@@ -1,4 +1,5 @@
 export * from './card-entry.model';
+export * from './config-entry.model';
 export * from './entry-group';
 export * from './entry.model';
 export * from './exposed-password-entry.model';

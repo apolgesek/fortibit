@@ -1,4 +1,4 @@
-﻿<div class="modal">
+﻿<div class="modal" [style.display]="isVisible ? 'block' : 'none'">
 	<div data-prevent-entry-deselect class="modal-body" [ngClass]="bodyClass">
 		<ng-content></ng-content>
 	</div>

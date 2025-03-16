@@ -18,9 +18,11 @@ export class ContextMenuBuilderService {
 	buildGroupContextMenuItems(
 		configuration: { isRoot: boolean } = { isRoot: false },
 	): this {
+		const addEntryOption = this.hotkeyHandler.getContextMenuLabel('AddEntry');
 		this.contextMenuItems = [
 			{
-				label: this.hotkeyHandler.getContextMenuLabel('AddEntry'),
+				label: addEntryOption.label,
+				hotkey: addEntryOption.hotkey,
 				command: () => {
 					this.modalService.openNewEntryWindow();
 				},
@@ -28,15 +30,20 @@ export class ContextMenuBuilderService {
 		];
 
 		if (!configuration.isRoot) {
+			const editOption = this.hotkeyHandler.getContextMenuLabel('Edit');
+			const removeOption = this.hotkeyHandler.getContextMenuLabel('Remove');
+
 			this.contextMenuItems.push(
 				{
-					label: this.hotkeyHandler.getContextMenuLabel('Edit'),
+					label: editOption.label,
+					hotkey: editOption.hotkey,
 					command: () => {
 						this.modalService.openGroupWindow('edit');
 					},
 				},
 				{
-					label: this.hotkeyHandler.getContextMenuLabel('Remove'),
+					label: removeOption.label,
+					hotkey: removeOption.hotkey,
 					command: () => this.modalService.openDeleteGroupWindow(),
 				},
 			);
@@ -61,8 +68,10 @@ export class ContextMenuBuilderService {
 	}
 
 	buildRemoveEntryContextMenuItem(): this {
+		const removeOption = this.hotkeyHandler.getContextMenuLabel('Remove');
 		this.contextMenuItems.push({
-			label: this.hotkeyHandler.getContextMenuLabel('Remove'),
+			label: removeOption.label,
+			hotkey: removeOption.hotkey,
 			command: () => {
 				this.modalService.openDeleteEntryWindow();
 			},
@@ -72,8 +81,15 @@ export class ContextMenuBuilderService {
 	}
 
 	buildCopyUsernameEntryContextMenuItem(): this {
+		const copyUsernameOption =
+			this.hotkeyHandler.getContextMenuLabel('CopyUsername');
 		this.contextMenuItems.push({
-			label: this.hotkeyHandler.getContextMenuLabel('CopyUsername'),
+			label: copyUsernameOption.label,
+			hotkey: copyUsernameOption.hotkey,
+			disabled: () => {
+				const entry = this.entryManager.selectedEntries[0] as PasswordEntry;
+				return !entry?.username;
+			},
 			command: () => {
 				this.clipboardService.copyEntryDetails(
 					this.entryManager.selectedEntries[0] as PasswordEntry,
@@ -86,8 +102,11 @@ export class ContextMenuBuilderService {
 	}
 
 	buildCopyPasswordEntryContextMenuItem(): this {
+		const copyPasswordOption =
+			this.hotkeyHandler.getContextMenuLabel('CopyPassword');
 		this.contextMenuItems.push({
-			label: this.hotkeyHandler.getContextMenuLabel('CopyPassword'),
+			label: copyPasswordOption.label,
+			hotkey: copyPasswordOption.hotkey,
 			command: () => {
 				this.clipboardService.copyEntryDetails(
 					this.entryManager.selectedEntries[0] as PasswordEntry,
@@ -99,9 +118,31 @@ export class ContextMenuBuilderService {
 		return this;
 	}
 
-	buildEditEntryContextMenuItem(): this {
+	buildCopyTotpEntryContextMenuItem(): this {
+		const copyTotpOption = this.hotkeyHandler.getContextMenuLabel('CopyTotp');
 		this.contextMenuItems.push({
-			label: this.hotkeyHandler.getContextMenuLabel('Edit'),
+			label: copyTotpOption.label,
+			hotkey: copyTotpOption.hotkey,
+			disabled: () => {
+				const entry = this.entryManager.selectedEntries[0] as PasswordEntry;
+				return !entry?.otpAuth;
+			},
+			command: () => {
+				this.clipboardService.copyEntryDetails(
+					this.entryManager.selectedEntries[0] as PasswordEntry,
+					'otpAuth',
+				);
+			},
+		});
+
+		return this;
+	}
+
+	buildEditEntryContextMenuItem(): this {
+		const editOption = this.hotkeyHandler.getContextMenuLabel('Edit');
+		this.contextMenuItems.push({
+			label: editOption.label,
+			hotkey: editOption.hotkey,
 			command: () => {
 				this.modalService.openEditEntryWindow();
 			},
@@ -111,8 +152,10 @@ export class ContextMenuBuilderService {
 	}
 
 	buildMoveEntryContextMenuItem(): this {
+		const moveOption = this.hotkeyHandler.getContextMenuLabel('MoveEntry');
 		this.contextMenuItems.push({
-			label: this.hotkeyHandler.getContextMenuLabel('MoveEntry'),
+			label: moveOption.label,
+			hotkey: moveOption.hotkey,
 			command: () => {
 				this.modalService.openMoveEntryWindow();
 			},

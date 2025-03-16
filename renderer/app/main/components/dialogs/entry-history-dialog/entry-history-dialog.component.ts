@@ -11,9 +11,10 @@ import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { HistoryEntry } from '@shared-renderer/history-entry.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Entry } from '@shared-renderer/entry.model';
 
 export type EntryHistoryDialogDataPayload = {
-	id: number;
+	entry: Entry;
 };
 
 @Component({

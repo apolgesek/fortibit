@@ -4,7 +4,7 @@
 	position: absolute;
 	z-index: 991;
 	display: block;
-	min-width: 200px;
+	min-width: 220px;
 	background-color: var(--context-menu-bg);
 	color: var(--primary-text);
 	top: 0;
@@ -26,6 +26,7 @@
 	margin: 0;
 
 	li {
+		display: flex;
 		padding: 0.4rem 0.5rem;
 		color: var(--primary-text);
 		font-size: 0.875rem;

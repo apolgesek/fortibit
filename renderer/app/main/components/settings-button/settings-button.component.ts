@@ -100,7 +100,9 @@ export class SettingsButtonComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnInit(): void {
-		this.settingsLabel = this.hotkeyHandler.getContextMenuLabel('OpenSettings');
+		const openSettingsLabel =
+			this.hotkeyHandler.getContextMenuLabel('OpenSettings');
+		this.settingsLabel = `${openSettingsLabel.label} ${openSettingsLabel.hotkey}`;
 		this.messageBroker.ipcRenderer.send(IpcChannel.GetUpdateState);
 	}
 

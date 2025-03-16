@@ -29,11 +29,9 @@ import { MoveEntryDialogComponent } from '@app/main/components/dialogs/move-entr
 import { PasswordChangeDialogComponent } from '@app/main/components/dialogs/password-change-dialog/password-change-dialog.component';
 import { SettingsDialogComponent } from '@app/main/components/dialogs/settings-dialog/settings-dialog.component';
 import { WeakPasswordsDialogComponent } from '@app/main/components/dialogs/weak-passwords-dialog/weak-passwords-dialog.component';
-import {
-	HistoryEntry,
-	PasswordEntry,
-	IpcChannel,
-} from '@shared-renderer/index';
+import { ReportsLogDialogComponent } from '@app/main/components/dialogs/reports-log-dialog/reports-log-dialog.component';
+import { ReportDetailsDialogComponent } from '@app/main/components/dialogs/report-details-dialog/report-details-dialog.component';
+import { HistoryEntry, IpcChannel, Entry } from '@shared-renderer/index';
 import { MessageBroker } from 'injection-tokens';
 import { EntryManager } from './managers/entry.manager';
 import { ModalRef } from './modal-ref';
@@ -68,24 +66,19 @@ export class ModalService {
 	}
 
 	async openNewEntryWindow(): Promise<ModalRef> {
-		this.entryManager.editedEntry = null;
 		return this.openEntryWindow();
 	}
 
-	async openEditEntryWindow(entry?: PasswordEntry): Promise<ModalRef> {
-		this.entryManager.editedEntry =
-			entry ?? this.entryManager.selectedEntries[0];
-		return this.openEntryWindow();
+	async openEditEntryWindow(entry?: Entry): Promise<ModalRef> {
+		return this.openEntryWindow(entry ?? this.entryManager.selectedEntries[0]);
 	}
 
-	async openHistoryEntryWindow(entry: HistoryEntry): Promise<ModalRef> {
-		this.entryManager.editedEntry = entry.entry;
-
+	async openHistoryEntryWindow(historyEntry: HistoryEntry): Promise<ModalRef> {
 		let decryptedPassword = '';
-		if (this.entryManager.editedEntry.type === 'password') {
+		if (historyEntry.entry.type === 'password') {
 			decryptedPassword = await this.messageBroker.ipcRenderer.invoke(
 				IpcChannel.DecryptPassword,
-				this.entryManager.editedEntry.password,
+				historyEntry.entry.password,
 			);
 		}
 
@@ -95,7 +88,8 @@ export class ModalService {
 				payload: {
 					decryptedPassword,
 					config: { readonly: true },
-					historyEntry: entry,
+					historyEntry,
+					entry: historyEntry.entry,
 				},
 			},
 		);
@@ -135,17 +129,28 @@ export class ModalService {
 		return this.modalManager.open(WeakPasswordsDialogComponent);
 	}
 
+	openReportsWindow(): ModalRef {
+		return this.modalManager.open(ReportsLogDialogComponent);
+	}
+
+	openReportDetailsWindow(reportId: number): ModalRef {
+		return this.modalManager.open(ReportDetailsDialogComponent, {
+			payload: {
+				reportId,
+			},
+		});
+	}
+
 	openEntryHistoryWindow(): ModalRef {
 		const selectedEntry = this.entryManager.selectedEntries[0];
 		if (selectedEntry.type !== 'password') {
 			return;
 		}
 
-		this.entryManager.editedEntry = selectedEntry;
 		return this.modalManager.open<EntryHistoryDialogDataPayload>(
 			EntryHistoryDialogComponent,
 			{
-				payload: { id: this.entryManager.editedEntry.id },
+				payload: { entry: selectedEntry },
 			},
 		);
 	}
@@ -179,20 +184,20 @@ export class ModalService {
 		this.modalManager.close(ref);
 	}
 
-	private async openEntryWindow(): Promise<ModalRef> {
+	private async openEntryWindow(entry?: Entry): Promise<ModalRef> {
 		let decryptedPassword;
 
-		if (this.entryManager.editedEntry?.type === 'password') {
+		if (entry?.type === 'password') {
 			decryptedPassword = await this.messageBroker.ipcRenderer.invoke(
 				IpcChannel.DecryptPassword,
-				this.entryManager.editedEntry.password,
+				entry.password,
 			);
 		}
 
 		return this.modalManager.open<EntryDialogDataPayload>(
 			EntryDialogComponent,
 			{
-				payload: { decryptedPassword },
+				payload: { decryptedPassword, entry },
 			},
 		);
 	}

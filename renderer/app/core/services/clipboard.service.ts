@@ -16,11 +16,18 @@ type CopyText = {
 	providedIn: 'root',
 })
 export class ClipboardService {
-	private config: Configuration;
-
 	private readonly messageBroker = inject(MessageBroker);
 	private readonly notificationService = inject(NotificationService);
 	private readonly configService = inject(ConfigService);
+	private readonly entryPropertyMessageMap: Partial<
+		Record<keyof PasswordEntry, string>
+	> = {
+		username: 'Username copied',
+		password: 'Password copied',
+		otpAuth: 'TOTP copied',
+	};
+
+	private config: Configuration;
 
 	constructor() {
 		this.configService.configLoadedSource$.subscribe(
@@ -53,13 +60,14 @@ export class ClipboardService {
 			);
 		}
 
+		if (value === null || value === undefined || value === '') {
+			return;
+		}
+
 		this.copyText({
 			value: value as string,
-			description:
-				property.substring(0, 1).toUpperCase() +
-				property.substring(1) +
-				' copied',
-			clearTimeMs: this.config.clipboardClearTimeMs,
+			description: this.entryPropertyMessageMap[property],
+			clearTimeMs: this.config.clipboardClearSeconds * 1_000,
 			showCount: true,
 		});
 	}

@@ -23,7 +23,7 @@ export class ClipboardService implements IClipboardService {
 
 		this._clearClipboardTimeout = setTimeout(() => {
 			this.clear();
-		}, this._configService.appConfig.clipboardClearTimeMs);
+		}, this._configService.appConfig.clipboardClearSeconds * 1000);
 
 		return true;
 	}

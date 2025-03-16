@@ -74,6 +74,10 @@ export class PasswordEntryPartialFormComponent
 
 	private config: Configuration;
 
+	private get editedEntry(): PasswordEntry {
+		return this.additionalData.payload?.entry as PasswordEntry;
+	}
+
 	ngOnInit(): void {
 		this.passwordForm = (
 			this.controlContainer.control as EntryForm
@@ -119,7 +123,7 @@ export class PasswordEntryPartialFormComponent
 
 	copyPassword() {
 		this.clipboardService.copyEntryDetails(
-			this.entryManager.editedEntry as PasswordEntry,
+			this.editedEntry as PasswordEntry,
 			'password',
 		);
 	}
@@ -141,7 +145,7 @@ export class PasswordEntryPartialFormComponent
 	}
 
 	private async prefillForm() {
-		if (this.entryManager.editedEntry) {
+		if (this.editedEntry) {
 			this.fillExistingEntry();
 		} else {
 			await this.fillNewEntry();
@@ -167,7 +171,7 @@ export class PasswordEntryPartialFormComponent
 
 	private fillExistingEntry() {
 		const password = this.additionalData.payload.decryptedPassword;
-		const entry = this.entryManager.editedEntry as PasswordEntry;
+		const entry = this.editedEntry;
 
 		this.passwordForm.patchValue({
 			username: entry.username,

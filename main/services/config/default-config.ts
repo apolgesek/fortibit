@@ -15,7 +15,7 @@ export const getDefaultConfig = (): Partial<Configuration> => {
 			numbers: true,
 		},
 		idleSeconds: 600,
-		clipboardClearTimeMs: 15000,
+		clipboardClearSeconds: 15,
 		lockOnSystemLock: true,
 		displayIcons: true,
 		biometricsAuthenticationEnabled: false,
@@ -28,5 +28,15 @@ export const getDefaultConfig = (): Partial<Configuration> => {
 		autocompleteShortcut: platform() === 'win32' ? 'Alt+\\' : 'Option+\\',
 		showInsecureUrlPrompt: true,
 		theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
+		scheduledReports: {
+			enabled: false,
+			time: '21:00',
+			frequency: {
+				type: 'daily',
+				oneIn: 1,
+				dayOfMonth: 1,
+				weekDayIndex: 1,
+			},
+		},
 	};
 };

@@ -1,0 +1,49 @@
+<div class="inputgroup">
+	<label class="label" [attr.for]="id">{{ label }}:</label>
+
+	@switch (type) {
+		@case ('time') {
+			<input
+				[attr.id]="id"
+				type="text"
+				style="width: 160px"
+				appTimeMask
+				[attr.aria-invalid]="ngControl.control.invalid"
+				[attr.aria-describedby]="id + '-invalid'"
+				[(ngModel)]="value"
+				(ngModelChange)="onModelChange()"
+				[disabled]="isDisabled"
+			/>
+		}
+		@case ('hotkey') {
+			<input
+				[attr.id]="id"
+				type="text"
+				style="width: 160px"
+				appHotkeyBinder
+				[attr.aria-invalid]="ngControl.control.invalid"
+				[attr.aria-describedby]="id + '-invalid'"
+				[(ngModel)]="value"
+				(ngModelChange)="onModelChange()"
+				[disabled]="isDisabled"
+			/>
+		}
+		@default {
+			<input
+				[attr.id]="id"
+				type="text"
+				[attr.aria-invalid]="ngControl.control.invalid"
+				[attr.aria-describedby]="id + '-invalid'"
+				[(ngModel)]="value"
+				(ngModelChange)="onModelChange()"
+				[disabled]="isDisabled"
+			/>
+		}
+	}
+</div>
+
+<app-validation-error
+	[attr.id]="id + '-invalid'"
+	[control]="ngControl.control"
+	[errors]="errors"
+></app-validation-error>

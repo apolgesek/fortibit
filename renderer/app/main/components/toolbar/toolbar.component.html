@@ -4,6 +4,11 @@
 			data-prevent-entry-deselect
 			type="button"
 			[disabled]="!isAddPossible"
+			[appTooltip]="
+				!isAddPossible
+					? 'Action not allowed<br /> for the selected group'
+					: null
+			"
 			class="secondary-btn add-entry"
 			id="add-entry"
 			(click)="openAddEntryWindow()"

@@ -1,3 +1,5 @@
+export * from './config-repository';
+export * from './config-repository.model';
 export * from './entry-repository';
 export * from './entry-repository.model';
 export * from './group-repository';

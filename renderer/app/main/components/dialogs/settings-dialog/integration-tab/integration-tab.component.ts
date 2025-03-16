@@ -7,9 +7,9 @@ import {
 	NotificationService,
 	WorkspaceService,
 } from '@app/core/services';
+import { ToggleInputComponent } from '@app/shared/components/config-controls/toggle-input/toggle-input.component';
 import { masterPasswordValidator } from '@app/shared/validators/master-password.validator';
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
-import { Product } from '@config/product';
 import { IpcChannel } from '@shared-renderer/index';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
@@ -18,7 +18,12 @@ import { first } from 'rxjs';
 @Component({
 	selector: 'app-integration-tab',
 	standalone: true,
-	imports: [CommonModule, ReactiveFormsModule, FeatherModule],
+	imports: [
+		CommonModule,
+		ReactiveFormsModule,
+		FeatherModule,
+		ToggleInputComponent,
+	],
 	templateUrl: './integration-tab.component.html',
 	styleUrls: ['./integration-tab.component.scss'],
 })
@@ -38,7 +43,7 @@ export class IntegrationTabComponent implements OnInit {
 	private readonly notificationService = inject(NotificationService);
 
 	private readonly _integrationForm = this.formBuilder.group({
-		biometricsAuthenticationEnabled: [false],
+		biometricsAuthenticationEnabled: this.formBuilder.control(false),
 		password: this.formBuilder.control('', {
 			validators: Validators.required,
 			asyncValidators: masterPasswordValidator(this.messageBroker),
@@ -70,12 +75,8 @@ export class IntegrationTabComponent implements OnInit {
 
 		this.integrationForm.controls.biometricsAuthenticationEnabled.valueChanges
 			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe((value) => {
-				const configPartial = {
-					biometricsAuthenticationEnabled: value,
-				} as Partial<Product>;
-
-				this.configService.setConfig(configPartial);
+			.subscribe(() => {
+				this.configService.setConfig(this._integrationForm.getRawValue());
 			});
 	}
 

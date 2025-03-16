@@ -38,6 +38,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	ChevronUp,
+	Clock,
 	Code,
 	Copy,
 	Edit,
@@ -102,7 +103,6 @@ function initializeApp(
 			...preloadIcons(svgService, [
 				'icons/welcome.svg',
 				'icons/windows-hello.svg',
-				'icons/history.svg',
 			]),
 		];
 
@@ -180,6 +180,7 @@ const icons = {
 	Lock,
 	Move,
 	MoreVertical,
+	Clock,
 };
 
 bootstrapApplication(AppComponent, {

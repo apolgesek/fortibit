@@ -4,7 +4,7 @@ import { IConfigService, getDefaultConfig } from '@root/main/services/config';
 import { Product } from '@root/product';
 import deepmerge from 'deepmerge';
 import { app } from 'electron';
-import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFile } from 'fs';
 import { writeFileSync } from 'fs-extra';
 import { pickBy } from 'lodash';
 import * as os from 'os';
@@ -123,7 +123,7 @@ export class ConfigService implements IConfigService {
 					productInformation.autocompleteUsernameOnlyShortcut,
 				autocompletePasswordOnlyShortcut:
 					productInformation.autocompletePasswordOnlyShortcut,
-				clipboardClearTimeMs: productInformation.clipboardClearTimeMs,
+				clipboardClearSeconds: productInformation.clipboardClearSeconds,
 				biometricsAuthenticationEnabled:
 					productInformation.biometricsAuthenticationEnabled,
 				encryption: {
@@ -144,6 +144,7 @@ export class ConfigService implements IConfigService {
 				protectWindowsFromCapture: productInformation.protectWindowsFromCapture,
 				autosaveEnabled: productInformation.autosaveEnabled,
 				organizationName: null,
+				scheduledReports: productInformation.scheduledReports,
 			}) as Configuration,
 			{
 				customMerge: () => {
@@ -158,7 +159,7 @@ export class ConfigService implements IConfigService {
 	set(settings: Partial<Configuration>) {
 		this._appConfig = { ...this._appConfig, ...settings };
 
-		writeFileSync(
+		writeFile(
 			this._productPath,
 			JSON.stringify(this._appConfig, (key: keyof Configuration, value) => {
 				if (EXCLUDED_CONFIG_KEYS.includes(key)) {
@@ -167,6 +168,11 @@ export class ConfigService implements IConfigService {
 
 				return value;
 			}),
+			(error) => {
+				if (error) {
+					console.error(error);
+				}
+			},
 		);
 	}
 }

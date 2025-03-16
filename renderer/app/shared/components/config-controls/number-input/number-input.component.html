@@ -1,0 +1,19 @@
+<div class="inputgroup">
+	<label class="label" [attr.for]="id">{{ label }}:</label>
+	<input
+		[attr.id]="id"
+		type="number"
+		appInputMask
+		[maxLength]="maxLength"
+		[attr.aria-invalid]="ngControl.control.invalid"
+		[attr.aria-describedby]="id + '-invalid'"
+		[(ngModel)]="value"
+		(ngModelChange)="onModelChange()"
+		[disabled]="isDisabled"
+	/>
+</div>
+<app-validation-error
+	[attr.id]="id + '-invalid'"
+	[control]="ngControl.control"
+	[errors]="errors"
+></app-validation-error>

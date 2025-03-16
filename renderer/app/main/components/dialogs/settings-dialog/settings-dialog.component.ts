@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component, ComponentRef, inject } from '@angular/core';
+import { Component, ComponentRef, inject, Input } from '@angular/core';
 import { ConfigService, ModalRef } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { TabComponent } from '@app/shared/components/tab/tab.component';
@@ -34,8 +34,9 @@ enum Tab {
 	],
 })
 export class SettingsDialogComponent implements IModal {
+	@Input() public readonly additionalData!: IAdditionalData;
+
 	public readonly ref!: ComponentRef<SettingsDialogComponent>;
-	public readonly additionalData!: IAdditionalData;
 	public readonly tab = Tab;
 
 	private readonly modalRef = inject(ModalRef);

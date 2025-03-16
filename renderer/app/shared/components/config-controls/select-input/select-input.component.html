@@ -1,0 +1,36 @@
+<!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
+<!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
+<div class="inputgroup">
+	<label class="label" [attr.for]="id">{{ label }}:</label>
+	<div #sort="appDropdown" appDropdown [select]="true" class="dropdown">
+		<div
+			(click)="$event.stopPropagation()"
+			style="position: relative; width: 100%"
+		>
+			<button
+				id="sort-by"
+				class="filter-option fit"
+				appDropdownToggle
+				appMenuItem
+			>
+				{{ options[value] }}
+				<i-feather name="chevron-down"></i-feather>
+			</button>
+			<div *appDropdownMenu class="dropdown-content select right">
+				@for (option of options | keyvalue; track option.key) {
+					<li
+						[ngClass]="{
+							selected: value === option.key,
+						}"
+						appMenuItem
+						closeMode="subtree"
+						class="option-item"
+						(activate)="writeValue(option.key); onChange(option.key)"
+					>
+						{{ option.value }}
+					</li>
+				}
+			</div>
+		</div>
+	</div>
+</div>

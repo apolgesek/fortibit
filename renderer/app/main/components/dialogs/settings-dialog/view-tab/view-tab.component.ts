@@ -2,6 +2,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ConfigService } from '@app/core/services';
+import { ToggleInputComponent } from '@app/shared/components/config-controls/toggle-input/toggle-input.component';
 import { Product } from '@config/product';
 import { FeatherModule } from 'angular-feather';
 
@@ -10,7 +11,7 @@ import { FeatherModule } from 'angular-feather';
 	templateUrl: './view-tab.component.html',
 	styleUrls: ['./view-tab.component.scss'],
 	standalone: true,
-	imports: [ReactiveFormsModule, FeatherModule],
+	imports: [ReactiveFormsModule, FeatherModule, ToggleInputComponent],
 })
 export class ViewTabComponent implements OnInit {
 	private readonly formBuilder = inject(FormBuilder);
@@ -18,8 +19,8 @@ export class ViewTabComponent implements OnInit {
 	private readonly configService = inject(ConfigService);
 
 	private readonly _viewForm = this.formBuilder.group({
-		darkTheme: [false],
-		displayIcons: [false],
+		darkTheme: this.formBuilder.control(false),
+		displayIcons: this.formBuilder.control(false),
 	});
 
 	get viewForm() {
@@ -35,14 +36,12 @@ export class ViewTabComponent implements OnInit {
 		this.viewForm.valueChanges
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe((form) => {
-				if (this.viewForm.valid) {
-					const configPartial = {
-						displayIcons: form.displayIcons,
-						theme: form.darkTheme ? 'dark' : 'light',
-					} as Partial<Product>;
+				const configPartial = {
+					displayIcons: form.displayIcons,
+					theme: form.darkTheme ? 'dark' : 'light',
+				} as Partial<Product>;
 
-					this.configService.setConfig(configPartial);
-				}
+				this.configService.setConfig(configPartial);
 			});
 	}
 }

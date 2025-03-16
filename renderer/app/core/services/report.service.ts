@@ -29,6 +29,16 @@ export class ReportService {
 	private readonly entryManager = inject(EntryManager);
 	private readonly groupManager = inject(GroupManager);
 
+	private _reports: Report[] = [];
+
+	get reports() {
+		return this._reports;
+	}
+
+	async loadReports(): Promise<void> {
+		this._reports = await this.reportManager.getAll();
+	}
+
 	async scanForLeaks(): Promise<ScanResult> {
 		const blob = await exportDB(this.db.context);
 
@@ -61,24 +71,7 @@ export class ReportService {
 			return;
 		}
 
-		const reportPayload = JSON.parse(report.payload);
-		const reportIds: number[] = JSON.parse(report.payload).map((x) => x.id);
-
-		const entries = (await this.entryManager.getAllByPredicate((x) =>
-			reportIds.includes(x.id),
-		)) as PasswordEntry[];
-		const groups = await this.groupManager.getAll();
-
-		const reportedEntries = entries.map((e) => ({
-			id: e.id,
-			groupName: groups.find((x) => x.id === e.groupId).name,
-			title: e.title,
-			username: e.username,
-			occurrences: reportPayload.find((x) => x.id === e.id)
-				.occurrences as number,
-		}));
-
-		return { report, entries: reportedEntries };
+		return { report, entries: JSON.parse(report.payload) };
 	}
 
 	async scanForWeakPasswords(): Promise<ScanResult> {
@@ -113,31 +106,80 @@ export class ReportService {
 			return;
 		}
 
-		const reportPayload = JSON.parse(report.payload);
-		const reportIds: number[] = JSON.parse(report.payload).map((x) => x.id);
+		return { report, entries: JSON.parse(report.payload) };
+	}
+
+	async generateReports(): Promise<void> {
+		const exposedPasswords = await this.scanForLeaks();
+		const weakPasswords = await this.scanForWeakPasswords();
+		const creationDate = new Date();
+
+		const exposedEntries = await this.getExposedEntries(exposedPasswords);
+		const weakEntries = await this.getWeakEntries(weakPasswords);
+
+		if (exposedPasswords.data) {
+			await this.addReport({
+				type: ReportType.ExposedPasswords,
+				payload: JSON.stringify(exposedEntries),
+				scheduled: true,
+				creationDate: +creationDate,
+			});
+		}
+
+		if (weakPasswords.data) {
+			await this.addReport({
+				type: ReportType.WeakPasswords,
+				payload: JSON.stringify(weakEntries),
+				scheduled: true,
+				creationDate: +creationDate,
+			});
+		}
+
+		if (exposedPasswords.data || weakPasswords.data) {
+			this.messageBroker.ipcRenderer.send(IpcChannel.ShowNotification, {
+				threats: exposedEntries.length + weakEntries.length,
+			});
+		}
+	}
+
+	async addReport(report: Partial<Report>): Promise<number> {
+		const reportId = await this.reportManager.add(report as Report);
+		this.loadReports();
+
+		return reportId;
+	}
+
+	async getExposedEntries(result: ScanResult) {
+		const reportPayload = JSON.parse(result.data as string);
+		const reportIds: number[] = reportPayload.map((x) => x.id);
+
+		const entries = (await this.entryManager.getAllByPredicate((x) =>
+			reportIds.includes(x.id),
+		)) as PasswordEntry[];
+		const groups = await this.groupManager.getAll();
+
+		return entries.map((e) => ({
+			id: e.id,
+			groupName: groups.find((x) => x.id === e.groupId).name,
+			title: e.title,
+			username: e.username,
+			occurrences: reportPayload.find((x) => x.id === e.id)
+				.occurrences as number,
+		}));
+	}
+
+	async getWeakEntries(result: ScanResult) {
+		const reportPayload = JSON.parse(result.data as string);
+		const reportIds: number[] = reportPayload.map((x) => x.id);
 		const entries = (await this.entryManager.getAllByPredicate((x) =>
 			reportIds.includes(x.id),
 		)) as PasswordEntry[];
 
-		const reportedEntries = entries.map((e) => ({
+		return entries.map((e) => ({
 			id: e.id,
 			title: e.title,
 			username: e.username,
 			score: reportPayload.find((x) => x.id === e.id).score as number,
 		}));
-
-		return { report, entries: reportedEntries };
-	}
-
-	async addReport(report: Partial<Report>): Promise<number> {
-		const reports = await this.reportManager.getAllByPredicate(
-			(x) => x.type === report.type,
-		);
-
-		if (reports.length >= 1) {
-			await this.reportManager.delete(reports.shift().id);
-		}
-
-		return this.reportManager.add(report as Report);
 	}
 }
