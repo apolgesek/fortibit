@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	ChangeDetectorRef,
@@ -8,19 +9,20 @@ import {
 	OnInit,
 	inject,
 } from '@angular/core';
-import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
-import { FeatherModule } from 'angular-feather';
-import { LinkPipe } from '@app/shared/pipes/link.pipe';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
 	ClipboardService,
 	ConfigService,
+	EntryManager,
 	ModalService,
 } from '@app/core/services';
-import { MessageBroker } from 'injection-tokens';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Configuration } from '@config/configuration';
 import { TooltipDirective } from '@app/shared/directives/tooltip.directive';
-import { CommonModule } from '@angular/common';
+import { LinkPipe } from '@app/shared/pipes/link.pipe';
+import { Configuration } from '@config/configuration';
+import { IpcChannel, PasswordEntry } from '@shared-renderer/index';
+import { FeatherModule } from 'angular-feather';
+import { MessageBroker } from 'injection-tokens';
+import cloneDeep from 'lodash/cloneDeep';
 import * as OTPAuth from 'otpauth';
 
 @Component({
@@ -38,6 +40,7 @@ export class PasswordEntryDetailsComponent implements OnInit, OnChanges {
 	public secondsLeft = 0;
 
 	private readonly configService = inject(ConfigService);
+	private readonly entryManager = inject(EntryManager);
 	private readonly modalService = inject(ModalService);
 	private readonly messageBroker = inject(MessageBroker);
 	private readonly clipboardService = inject(ClipboardService);
@@ -132,5 +135,17 @@ export class PasswordEntryDetailsComponent implements OnInit, OnChanges {
 			description: 'One time password copied',
 			showCount: false,
 		});
+	}
+
+	async applyHttps() {
+		const entry = cloneDeep(this.entry);
+
+		if (entry.url.startsWith('http://')) {
+			entry.url = entry.url.replace(/^http:\/\//, 'https://');
+		} else {
+			entry.url = `https://${entry.url}`;
+		}
+
+		await this.entryManager.saveEntry(entry, ['url']);
 	}
 }

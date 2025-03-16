@@ -1,4 +1,4 @@
-import { Component, ComponentRef, inject } from '@angular/core';
+import { Component, ComponentRef, inject, Input } from '@angular/core';
 import { ModalRef, WorkspaceService } from '@app/core/services';
 import { NotificationService } from '@app/core/services/notification.service';
 import { IAdditionalData, IModal } from '@app/shared';
@@ -24,8 +24,10 @@ export type ImportDatabaseMetadataDialogDataPayload = {
 	imports: [ModalComponent],
 })
 export class ImportDatabaseMetadataDialogComponent implements IModal {
-	ref!: ComponentRef<ImportDatabaseMetadataDialogComponent>;
+	@Input()
 	additionalData?: IAdditionalData<ImportDatabaseMetadataDialogDataPayload>;
+
+	ref!: ComponentRef<ImportDatabaseMetadataDialogComponent>;
 	isConfirmButtonLocked = false;
 
 	private readonly workspaceService = inject(WorkspaceService);

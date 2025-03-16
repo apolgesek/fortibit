@@ -5,16 +5,20 @@ export class WindowsHotkeyHandler extends HotkeyHandler {
 	protected keyMap: (event: KeyboardEvent) => string[] = (
 		event: KeyboardEvent,
 	) => {
-		return [event.ctrlKey, event.shiftKey, event.key].map((x, idx) => {
-			switch (idx) {
-				case 0:
-					return x ? 'ctrl' : null;
-				case 1:
-					return x ? 'shift' : null;
-				case 2:
-					return (x as string).toLowerCase();
-			}
-		});
+		return [event.ctrlKey, event.shiftKey, event.altKey, event.key].map(
+			(x, idx) => {
+				switch (idx) {
+					case 0:
+						return x ? 'ctrl' : null;
+					case 1:
+						return x ? 'shift' : null;
+					case 2:
+						return x ? 'alt' : null;
+					case 3:
+						return (x as string).toLowerCase();
+				}
+			},
+		);
 	};
 
 	constructor() {
@@ -31,6 +35,9 @@ export class WindowsHotkeyHandler extends HotkeyHandler {
 		});
 		this.registerHotkey('Ctrl+E', this.editEntry, { labelId: 'Edit' });
 		this.registerHotkey('Ctrl+F', this.findEntries, { labelId: 'FindInGroup' });
+		this.registerHotkey('Ctrl+Alt+F', this.findGlobalEntries, {
+			labelId: 'FindInVault',
+		});
 		this.registerHotkey('Ctrl+G', this.openGenerator, { labelId: 'Generator' });
 		this.registerHotkey('Ctrl+H', this.openHistory, { labelId: 'History' });
 		this.registerHotkey('Ctrl+L', this.lockDatabase, { labelId: 'Lock' });
@@ -49,14 +56,14 @@ export class WindowsHotkeyHandler extends HotkeyHandler {
 		this.registerHotkey('Ctrl+=', this.zoomIn, { labelId: 'ZoomIn' });
 		this.registerHotkey('Ctrl+0', this.resetZoom, { labelId: 'ResetZoom' });
 
-		this.registerHotkey('Ctrl+Shift+C', this.copyPassword, {
+		this.registerHotkey('Ctrl+Shift+P', this.copyPassword, {
 			labelId: 'CopyPassword',
-		});
-		this.registerHotkey('Ctrl+Shift+F', this.findGlobalEntries, {
-			labelId: 'FindInVault',
 		});
 		this.registerHotkey('Ctrl+Shift+U', this.copyUsername, {
 			labelId: 'CopyUsername',
+		});
+		this.registerHotkey('Ctrl+Shift+T', this.copyTotp, {
+			labelId: 'CopyTotp',
 		});
 	}
 }

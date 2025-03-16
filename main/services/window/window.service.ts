@@ -5,6 +5,7 @@ import { IConfigService } from '@root/main/services/config';
 import { INativeApiService } from '@root/main/services/native';
 import { IPerformanceService } from '@root/main/services/performance';
 import { IpcChannel } from '@shared-renderer/index';
+import { CronJob } from 'cron';
 import { randomBytes } from 'crypto';
 import {
 	app,
@@ -35,6 +36,7 @@ export class WindowService implements IWindowService {
 		app.commandLine.hasSwitch(ProcessArgument.E2E),
 	);
 	private readonly _windows: IWindow[] = [];
+	private readonly _scheduleReportsJob: CronJob;
 	private _idleTimer: NodeJS.Timeout | null;
 
 	get windows(): IWindow[] {
@@ -53,7 +55,9 @@ export class WindowService implements IWindowService {
 		@IPerformanceService
 		private readonly _performanceService: IPerformanceService,
 		@INativeApiService private readonly _nativeApiService: INativeApiService,
-	) {}
+	) {
+		this._scheduleReportsJob = this.createScheduledReportsJob();
+	}
 
 	getWindow(index: number): BrowserWindow | undefined {
 		return this._windows[index]?.browserWindow;
@@ -188,7 +192,7 @@ export class WindowService implements IWindowService {
 				protocol: 'file:',
 				href: join(
 					global['__basedir'],
-					this._isTestMode ? 'dist' : 'renderer',
+					this._isTestMode ? '../dist' : 'renderer',
 					'index.html',
 				),
 				hash: path ?? '',
@@ -263,6 +267,34 @@ export class WindowService implements IWindowService {
 		}
 	}
 
+	changeScheduledReportSetting(form: Partial<Configuration>): void {
+		if (form.scheduledReports?.enabled) {
+			if (this._scheduleReportsJob.isActive) {
+				return;
+			}
+
+			this._scheduleReportsJob.start();
+		} else {
+			this._scheduleReportsJob.stop();
+		}
+	}
+
+	private createScheduledReportsJob() {
+		return new CronJob(
+			'0 * * * * *',
+			() => {
+				this.vaultWindows.forEach((w) => {
+					this.sendMessage(
+						w.browserWindow,
+						IpcChannel.GenerateScheduledReports,
+					);
+				});
+			},
+			null,
+			this._configService.appConfig.scheduledReports.enabled,
+		);
+	}
+
 	private enablePreviewFeatures(win: IWindow): void {
 		if (win?.browserWindow?.isDestroyed()) {
 			return;
@@ -319,23 +351,23 @@ export class WindowService implements IWindowService {
 		if (this._configService.appConfig.theme === config.theme) return;
 
 		if (config.theme === 'dark') {
-			nativeTheme.themeSource = 'dark';
-
 			this.windows.forEach((w) =>
 				w.browserWindow.setTitleBarOverlay({
-					color: '#191d1e',
+					color: 'rgba(0, 0, 0, 0)',
 					symbolColor: '#dadada',
 				}),
 			);
-		} else {
-			nativeTheme.themeSource = 'light';
 
+			nativeTheme.themeSource = 'dark';
+		} else {
 			this.windows.forEach((w) =>
 				w.browserWindow.setTitleBarOverlay({
-					color: '#fcfcfc',
+					color: 'rgba(255, 255, 255, 0)',
 					symbolColor: '#364f63',
 				}),
 			);
+
+			nativeTheme.themeSource = 'light';
 		}
 
 		this.windows.forEach((w) => {
@@ -363,11 +395,7 @@ export class WindowService implements IWindowService {
 				contextIsolation: true,
 				nodeIntegrationInSubFrames: false,
 				nodeIntegrationInWorker: false,
-				preload: join(
-					global['__basedir'],
-					this._isTestMode ? 'dist' : 'renderer',
-					'preload.js',
-				),
+				preload: join(global['__basedir'], 'renderer', 'preload.js'),
 				webSecurity: !this._isDevMode,
 				devTools: this._isDevMode,
 				backgroundThrottling: false,
@@ -380,8 +408,8 @@ export class WindowService implements IWindowService {
 			titleBarOverlay: {
 				color:
 					this._configService.appConfig.theme === 'light'
-						? '#fcfcfc'
-						: '#191d1e',
+						? 'rgba(255, 255, 255, 0)'
+						: 'rgba(0, 0, 0, 0)',
 				symbolColor:
 					this._configService.appConfig.theme === 'light'
 						? '#191d1e'

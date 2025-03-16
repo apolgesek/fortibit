@@ -10,6 +10,7 @@ import {
 	renameSync,
 } from 'fs-extra';
 import { zipObject } from 'lodash';
+import fetch from 'node-fetch';
 import { arch, platform } from 'os';
 import { join, parse } from 'path';
 import { pipeline } from 'stream/promises';

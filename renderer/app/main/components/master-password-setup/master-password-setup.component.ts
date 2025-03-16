@@ -7,6 +7,7 @@ import { valueMatchValidator } from '@app/shared/validators/value-match.validato
 import { isControlInvalid, markAllAsDirty } from '@app/utils';
 import { FeatherModule } from 'angular-feather';
 import { ValidationErrorComponent } from '../../../shared/components/validation-error/validation-error.component';
+import { ConfigManager } from '@app/core/services/managers/config.manager';
 
 @Component({
 	selector: 'app-master-password-setup',
@@ -28,6 +29,7 @@ export class MasterPasswordSetupComponent {
 	private readonly fb = inject(FormBuilder);
 	private readonly workspaceService = inject(WorkspaceService);
 	private readonly groupManager = inject(GroupManager);
+	private readonly configManager = inject(ConfigManager);
 	private readonly _masterPasswordForm = this.fb.group(
 		{
 			newPassword: [
@@ -58,6 +60,7 @@ export class MasterPasswordSetupComponent {
 			{ forceNew: true },
 		);
 
+		await this.configManager.add({ nextScheduledReportsDate: null });
 		await this.groupManager.setupGroups();
 
 		if (result.status) {

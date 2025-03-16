@@ -1,3 +1,4 @@
+import { ConfigEntry } from './config-entry.model';
 import { EntryGroup } from './entry-group';
 import { HistoryEntry } from './history-entry.model';
 import { PasswordEntry } from './password-entry.model';
@@ -10,5 +11,6 @@ export type VaultSchema = {
 		groups: EntryGroup[];
 		history: HistoryEntry[];
 		reports: Report[];
+		config: ConfigEntry[];
 	};
 };

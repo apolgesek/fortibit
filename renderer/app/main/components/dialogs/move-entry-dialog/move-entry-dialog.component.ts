@@ -6,6 +6,7 @@ import {
 	ComponentRef,
 	DestroyRef,
 	ElementRef,
+	Input,
 	OnInit,
 	ViewChild,
 	inject,
@@ -39,14 +40,13 @@ import {
 	imports: [CommonModule, ModalComponent, ScrollingModule],
 })
 export class MoveEntryDialogComponent implements IModal, OnInit, AfterViewInit {
+	@Input() public readonly additionalData?: IAdditionalData;
+
 	@ViewChild('searchPhrase') public searchText: ElementRef;
 	public groups$: Observable<EntryGroup[]>;
 
 	public readonly ref: ComponentRef<unknown>;
-	public readonly additionalData?: IAdditionalData;
-	private readonly searchPhrase: BehaviorSubject<string> = new BehaviorSubject(
-		'',
-	);
+	private readonly searchPhrase = new BehaviorSubject<string>('');
 
 	private readonly destroyRef = inject(DestroyRef);
 	private readonly modalRef = inject(ModalRef);

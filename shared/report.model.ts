@@ -1,6 +1,7 @@
 export type Report = {
 	id: number;
-	creationDate: Date;
+	creationDate: number;
 	type: number;
 	payload: string;
+	scheduled: boolean;
 };

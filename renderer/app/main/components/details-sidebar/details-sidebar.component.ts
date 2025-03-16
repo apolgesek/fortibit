@@ -141,7 +141,7 @@ export class DetailsSidebarComponent implements OnInit {
 	}
 
 	async toggleStarred(entry: Entry) {
-		await this.entryManager.saveEntry({
+		await this.entryManager.saveEntry<Entry>({
 			...entry,
 			isStarred: !entry.isStarred,
 		});

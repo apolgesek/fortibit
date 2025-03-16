@@ -6,14 +6,16 @@ import {
 	NotificationService,
 	WorkspaceService,
 } from '@app/core/services';
-import { HotkeyBinderDirective } from '@app/main/directives/hotkey-binder.directive';
+import { NumberInputComponent } from '@app/shared/components/config-controls/number-input/number-input.component';
+import { TextInputComponent } from '@app/shared/components/config-controls/text-input/text-input.component';
+import { ToggleInputComponent } from '@app/shared/components/config-controls/toggle-input/toggle-input.component';
+import { SelectInputComponent } from '@app/shared/components/config-controls/select-input/select-input.component';
 import { isControlInvalid } from '@app/utils';
-import { Configuration } from '@config/configuration';
+import { WeekDayIndex } from '@config/product';
 import { IpcChannel } from '@shared-renderer/ipc-channel.enum';
 import { FeatherModule } from 'angular-feather';
 import { MessageBroker } from 'injection-tokens';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { ValidationErrorComponent } from '../../../../../shared/components/validation-error/validation-error.component';
+import { asapScheduler, observeOn } from 'rxjs';
 
 @Component({
 	selector: 'app-general-tab',
@@ -23,8 +25,10 @@ import { ValidationErrorComponent } from '../../../../../shared/components/valid
 	imports: [
 		ReactiveFormsModule,
 		FeatherModule,
-		HotkeyBinderDirective,
-		ValidationErrorComponent,
+		ToggleInputComponent,
+		NumberInputComponent,
+		TextInputComponent,
+		SelectInputComponent,
 	],
 })
 export class GeneralTabComponent implements OnInit {
@@ -37,28 +41,45 @@ export class GeneralTabComponent implements OnInit {
 	private readonly configService = inject(ConfigService);
 	private readonly workspaceService = inject(WorkspaceService);
 
-	private readonly debounceTimeMs = 500;
 	private readonly _passwordForm = this.formBuilder.group({
-		toggle: this.formBuilder.group({
-			autoSave: [false],
-			autoType: [false],
-			lockOnSystemLock: [false],
-			saveOnLock: [false],
-			showInsecureUrlPrompt: [false],
-			protectWindowsFromCapture: [false],
-		}),
-		input: this.formBuilder.group({
-			idleTime: [
-				0,
-				Validators.compose([Validators.required, Validators.min(60)]),
-			],
-			clipboardTime: [
-				0,
-				Validators.compose([Validators.required, Validators.min(0)]),
-			],
-			autotypeShortcut: [''],
-			autotypePasswordOnlyShortcut: [''],
-			autotypeUsernameOnlyShortcut: [''],
+		autosaveEnabled: this.formBuilder.control(false),
+		autoTypeEnabled: this.formBuilder.control(false),
+		lockOnSystemLock: this.formBuilder.control(false),
+		saveOnLock: this.formBuilder.control(false),
+		showInsecureUrlPrompt: this.formBuilder.control(false),
+		protectWindowsFromCapture: this.formBuilder.control(false),
+		idleSeconds: this.formBuilder.control(
+			0,
+			Validators.compose([Validators.required, Validators.min(60)]),
+		),
+		clipboardClearSeconds: this.formBuilder.control(
+			0,
+			Validators.compose([Validators.required, Validators.min(0)]),
+		),
+		autocompleteShortcut: this.formBuilder.control(''),
+		autocompletePasswordOnlyShortcut: this.formBuilder.control(''),
+		autocompleteUsernameOnlyShortcut: this.formBuilder.control(''),
+		scheduledReports: this.formBuilder.group({
+			enabled: this.formBuilder.control(false),
+			time: this.formBuilder.control({ value: '', disabled: true }),
+			frequency: this.formBuilder.group({
+				type: this.formBuilder.control<'daily' | 'weekly' | 'monthly'>({
+					value: 'daily',
+					disabled: true,
+				}),
+				oneIn: this.formBuilder.control<number>(
+					{ value: null, disabled: true },
+					[Validators.required, Validators.min(1), Validators.max(365)],
+				),
+				weekDayIndex: this.formBuilder.control<WeekDayIndex>(
+					{ value: null, disabled: true },
+					[Validators.required, Validators.min(1), Validators.max(6)],
+				),
+				dayOfMonth: this.formBuilder.control<number>(
+					{ value: null, disabled: true },
+					[Validators.required, Validators.min(1), Validators.max(31)],
+				),
+			}),
 		}),
 	});
 
@@ -75,73 +96,108 @@ export class GeneralTabComponent implements OnInit {
 	}
 
 	ngOnInit() {
-		// unlike other settings tabs this one must listen to confif changes made by Restore button
-		this.configService.configLoadedSource$
+		this.configService.defaultConfigRestored$
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe((config) => {
-				this.passwordForm.setValue(
+				this.passwordForm.patchValue(
 					{
-						toggle: {
-							autoSave: config.autosaveEnabled,
-							autoType: config.autoTypeEnabled,
-							lockOnSystemLock: config.lockOnSystemLock,
-							saveOnLock: config.saveOnLock,
-							showInsecureUrlPrompt: config.showInsecureUrlPrompt,
-							protectWindowsFromCapture: config.protectWindowsFromCapture,
-						},
-						input: {
-							idleTime: config.idleSeconds,
-							clipboardTime: config.clipboardClearTimeMs / 1000,
-							autotypeShortcut: config.autocompleteShortcut,
-							autotypePasswordOnlyShortcut:
-								config.autocompletePasswordOnlyShortcut,
-							autotypeUsernameOnlyShortcut:
-								config.autocompleteUsernameOnlyShortcut,
+						autosaveEnabled: config.autosaveEnabled,
+						autoTypeEnabled: config.autoTypeEnabled,
+						lockOnSystemLock: config.lockOnSystemLock,
+						saveOnLock: config.saveOnLock,
+						showInsecureUrlPrompt: config.showInsecureUrlPrompt,
+						protectWindowsFromCapture: config.protectWindowsFromCapture,
+						idleSeconds: config.idleSeconds,
+						clipboardClearSeconds: config.clipboardClearSeconds,
+						autocompleteShortcut: config.autocompleteShortcut,
+						autocompletePasswordOnlyShortcut:
+							config.autocompletePasswordOnlyShortcut,
+						autocompleteUsernameOnlyShortcut:
+							config.autocompleteUsernameOnlyShortcut,
+						scheduledReports: {
+							enabled: config.scheduledReports.enabled,
+							time: config.scheduledReports.time,
+							frequency: {
+								type: config.scheduledReports.frequency?.type,
+								dayOfMonth: config.scheduledReports.frequency.dayOfMonth,
+								weekDayIndex: config.scheduledReports.frequency.weekDayIndex,
+								oneIn: config.scheduledReports.frequency.oneIn,
+							},
 						},
 					},
 					{ emitEvent: false },
 				);
+
+				this.toggleScheduledReportsFormGroupEnabled(
+					config.scheduledReports.enabled,
+					false,
+				);
+
+				this.updateScheduledReportFormGroupFromFrequency(
+					config.scheduledReports.frequency.type,
+					false,
+				);
 			});
 
-		this.passwordForm.controls.toggle.valueChanges
-			.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-			.subscribe((form) => {
-				if (this.passwordForm.controls.toggle.invalid) {
+		this.passwordForm.patchValue(this.configService.config);
+		this.toggleScheduledReportsFormGroupEnabled(
+			this.configService.config.scheduledReports.enabled,
+		);
+		this.updateScheduledReportFormGroupFromFrequency(
+			this.configService.config.scheduledReports.frequency.type,
+		);
+
+		this.passwordForm.controls.scheduledReports.controls.enabled.valueChanges
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe((enabled) => {
+				const scheduledReports = this.passwordForm.controls.scheduledReports;
+				scheduledReports.controls.time.setValue('21:00', { emitEvent: false });
+				scheduledReports.controls.frequency.controls.type.setValue('daily', {
+					emitEvent: false,
+				});
+				scheduledReports.controls.frequency.controls.oneIn.setValue(1, {
+					emitEvent: false,
+				});
+				scheduledReports.controls.frequency.controls.weekDayIndex.setValue(0, {
+					emitEvent: false,
+				});
+				scheduledReports.controls.frequency.controls.dayOfMonth.setValue(1, {
+					emitEvent: false,
+				});
+
+				this.configService.setConfig({
+					scheduledReports: {
+						enabled: enabled,
+						time: scheduledReports.controls.time.getRawValue(),
+						frequency: scheduledReports.controls.frequency.getRawValue(),
+					},
+				});
+
+				this.toggleScheduledReportsFormGroupEnabled(enabled);
+			});
+
+		this.passwordForm.controls.scheduledReports.controls.frequency.controls.type.valueChanges
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe((type) => {
+				this.updateScheduledReportFormGroupFromFrequency(type);
+			});
+
+		this.passwordForm.valueChanges
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(() => {
+				if (this.passwordForm.invalid) {
 					return;
 				}
 
-				const configPartial = {
-					autosaveEnabled: form.autoSave,
-					autoTypeEnabled: form.autoType,
-					lockOnSystemLock: form.lockOnSystemLock,
-					saveOnLock: form.saveOnLock,
-					showInsecureUrlPrompt: form.showInsecureUrlPrompt,
-					protectWindowsFromCapture: form.protectWindowsFromCapture,
-				} as Partial<Configuration>;
-
-				this.configService.setConfig(configPartial);
+				this.configService.setConfig(this.passwordForm.getRawValue());
 			});
 
-		this.passwordForm.controls.input.valueChanges
-			.pipe(
-				debounceTime(this.debounceTimeMs),
-				distinctUntilChanged(),
-				takeUntilDestroyed(this.destroyRef),
-			)
-			.subscribe((form) => {
-				if (this.passwordForm.controls.input.invalid) {
-					return;
+		this.passwordForm.controls.scheduledReports.valueChanges
+			.pipe(observeOn(asapScheduler), takeUntilDestroyed(this.destroyRef))
+			.subscribe((value) => {
+				if (value.enabled) {
+					this.workspaceService.scheduleNext();
 				}
-
-				const configPartial = {
-					idleSeconds: form.idleTime,
-					clipboardClearTimeMs: form.clipboardTime * 1000,
-					autocompleteShortcut: form.autotypeShortcut,
-					autocompletePasswordOnlyShortcut: form.autotypePasswordOnlyShortcut,
-					autocompleteUsernameOnlyShortcut: form.autotypeUsernameOnlyShortcut,
-				} as Partial<Configuration>;
-
-				this.configService.setConfig(configPartial);
 			});
 	}
 
@@ -168,13 +224,57 @@ export class GeneralTabComponent implements OnInit {
 		}
 	}
 
-	onNumberChange(event: Event, path: string, maxLength: number) {
-		const input = event.target as HTMLInputElement;
-		const value = input.value.toString();
+	private toggleScheduledReportsFormGroupEnabled(
+		enabled: boolean,
+		emitEvent = true,
+	) {
+		const scheduledReports = this.passwordForm.controls.scheduledReports;
 
-		if (value.length >= maxLength) {
-			input.valueAsNumber = parseInt(value.slice(0, maxLength), 10);
-			this.passwordForm.get(path).setValue(input.value);
+		if (!enabled) {
+			scheduledReports.controls.time.disable({ emitEvent });
+			scheduledReports.controls.frequency.disable({ emitEvent });
+		} else {
+			scheduledReports.controls.time.enable({ emitEvent });
+			scheduledReports.controls.frequency.enable({ emitEvent });
+			scheduledReports.controls.frequency.controls.type.enable({ emitEvent });
+		}
+	}
+
+	private updateScheduledReportFormGroupFromFrequency(
+		frequency: 'daily' | 'weekly' | 'monthly',
+		emitEvent = true,
+	) {
+		const scheduledReports = this.passwordForm.controls.scheduledReports;
+		scheduledReports.controls.frequency.controls.oneIn.disable({ emitEvent });
+		scheduledReports.controls.frequency.controls.weekDayIndex.disable({
+			emitEvent,
+		});
+		scheduledReports.controls.frequency.controls.dayOfMonth.disable({
+			emitEvent,
+		});
+
+		if (scheduledReports.controls.enabled.value === false) {
+			return;
+		}
+
+		switch (frequency) {
+			case 'daily':
+				scheduledReports.controls.frequency.controls.oneIn.enable({
+					emitEvent,
+				});
+				break;
+			case 'weekly':
+				scheduledReports.controls.frequency.controls.weekDayIndex.enable({
+					emitEvent,
+				});
+				break;
+			case 'monthly':
+				scheduledReports.controls.frequency.controls.dayOfMonth.enable({
+					emitEvent,
+				});
+				break;
+			default:
+				break;
 		}
 	}
 }

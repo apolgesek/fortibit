@@ -1,51 +1,49 @@
 /* eslint-disable playwright/valid-describe-callback */
 import { expect, test } from '@playwright/test';
-import PATH from 'path';
-import {
-	ElectronApplication,
-	Page,
-	_electron as electron,
-} from 'playwright-core';
-import { ProcessArgument } from '../main/process-argument.enum';
+import { ElectronApplication, Page } from 'playwright-core';
 import { authenticate } from './helpers/auth';
-import { setupTestFiles } from './helpers/file';
 import { getInvoke } from './helpers/ipc';
-
-let app: ElectronApplication;
-let firstWindow: Page;
-
-test.beforeEach(async () => {
-	setupTestFiles();
-
-	app = await electron.launch({
-		args: [PATH.join(__dirname, '../main.js'), `--${ProcessArgument.E2E}`],
-		colorScheme: 'no-preference',
-		env: { E2E_FILES_PATH: 'C:\\Users\\icema\\fortibit\\e2e\\files' },
-	});
-	firstWindow = await app.firstWindow();
-	const invoke = await getInvoke(firstWindow);
-	await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
-});
-
-test.afterEach(async () => {
-	await app.evaluate((process) => process.app.exit());
-});
+import { afterEach } from './hooks/after-each';
+import { beforeEach } from './hooks/before-each';
 
 test.describe('Master password', async () => {
+	let app: ElectronApplication;
+	let appWindow: Page;
+
+	test.beforeEach(async () => {
+		const { appInstance, windowInstance } = await beforeEach(false);
+
+		app = appInstance;
+		appWindow = windowInstance;
+	});
+
+	test.afterEach(async () => {
+		await afterEach(app);
+	});
+
 	test('Check no password entered error message', async () => {
-		await firstWindow.getByPlaceholder(/password/i).focus();
-		await firstWindow.getByLabel(/unlock/i).click();
-		const notification = firstWindow.getByRole('alert');
+		await appWindow.getByPlaceholder(/password/i).focus();
+		await appWindow.getByLabel(/unlock/i).click();
+		const notification = appWindow.getByRole('alert');
 
 		await expect(notification).toHaveText(/password is required/i);
 	});
 
 	test('Check windows hello screen dispayed', async () => {
-		await authenticate(firstWindow);
-		await firstWindow.getByRole('main').waitFor({ state: 'visible' });
-		await firstWindow.keyboard.press('Control+.');
-		const dialog = firstWindow.getByRole('dialog');
+		await authenticate(appWindow);
+		await appWindow.getByRole('main').waitFor({ state: 'visible' });
+		await appWindow.keyboard.press('Control+.');
+		const dialog = appWindow.getByRole('dialog');
 		await dialog.getByRole('button', { name: /integration/i }).click();
+		await appWindow
+			.getByRole('dialog')
+			.getByText(/windows hello/i)
+			.click();
+
+		await appWindow
+			.getByRole('dialog')
+			.getByPlaceholder(/master password/i)
+			.fill('test123');
 
 		const addCredentialButton = dialog.getByRole('button', {
 			name: /add credential/i,
@@ -56,29 +54,27 @@ test.describe('Master password', async () => {
 			await addCredentialButton.click();
 		}
 
-		await firstWindow.keyboard.press('Control+L');
-		await firstWindow
-			.getByRole('button', { name: /unlock with windows hello/i })
-			.click();
-		const overlay = firstWindow.locator('.biometrics-overlay');
+		await appWindow.keyboard.press('Control+L');
+		await appWindow.getByRole('link', { name: /windows hello/i }).click();
+		const overlay = appWindow.locator('.biometrics-overlay');
 
 		await expect(overlay).toBeVisible();
 		expect(await overlay.innerText()).toMatch(/waiting for windows hello/i);
 	});
 
 	test('Check wrong password entered error message', async () => {
-		await firstWindow.getByPlaceholder(/password/i).focus();
-		await firstWindow.keyboard.insertText('wr0ng_password');
-		await firstWindow.keyboard.press('Enter');
-		await firstWindow.waitForTimeout(1 * 1000); // wait to make sure this notification replaces the startup dummy one
-		const notification = firstWindow.getByRole('alert');
+		await appWindow.getByPlaceholder(/password/i).focus();
+		await appWindow.keyboard.insertText('wr0ng_password');
+		await appWindow.keyboard.press('Enter');
+		await appWindow.waitForTimeout(1 * 1000); // wait to make sure this notification replaces the startup dummy one
+		const notification = appWindow.getByRole('alert');
 
 		await expect(notification).toHaveText(/password is incorrect/i);
 	});
 
 	test('Check settings modal open when not authenticated', async () => {
-		await firstWindow.getByRole('button', { name: /settings/i }).click();
-		const dialogHeader = firstWindow
+		await appWindow.getByRole('button', { name: /settings/i }).click();
+		const dialogHeader = appWindow
 			.getByRole('dialog')
 			.getByRole('heading', { name: /settings/i });
 
@@ -86,13 +82,12 @@ test.describe('Master password', async () => {
 	});
 
 	test('Check new vault screen displayed on button click', async () => {
-		await firstWindow.getByRole('button', { name: /create new/i }).click();
-		const dialogHeader = firstWindow.getByRole('heading', {
+		await appWindow.getByRole('button', { name: /create new/i }).click();
+		const dialogHeader = appWindow.getByRole('heading', {
 			name: /create new vault/i,
 		});
-		const passwordInput = firstWindow.getByPlaceholder(/new password/i);
-		const repeatPasswordInput =
-			firstWindow.getByPlaceholder(/repeat password/i);
+		const passwordInput = appWindow.getByPlaceholder(/new password/i);
+		const repeatPasswordInput = appWindow.getByPlaceholder(/repeat password/i);
 
 		await expect(dialogHeader).toBeVisible();
 		await expect(passwordInput).toBeVisible();
@@ -100,26 +95,25 @@ test.describe('Master password', async () => {
 	});
 
 	test('Check new vault created', async () => {
-		await firstWindow.getByRole('button', { name: /create new/i }).click();
-		const passwordInput = firstWindow.getByPlaceholder(/new password/i);
-		const repeatPasswordInput =
-			firstWindow.getByPlaceholder(/repeat password/i);
+		await appWindow.getByRole('button', { name: /create new/i }).click();
+		const passwordInput = appWindow.getByPlaceholder(/new password/i);
+		const repeatPasswordInput = appWindow.getByPlaceholder(/repeat password/i);
 
 		const password = 'test_password';
 		await passwordInput.type(password);
 		await repeatPasswordInput.type(password);
 
-		await firstWindow.getByRole('button', { name: /save/i }).click();
+		await appWindow.getByRole('button', { name: /save/i }).click();
 		// give electron time to open native window
-		await firstWindow.waitForTimeout(3_000);
-		const invoke = await getInvoke(firstWindow);
+		await appWindow.waitForTimeout(3_000);
+		const invoke = await getInvoke(appWindow);
 		await invoke.evaluate((invoke) =>
 			invoke('app:sendInput', 'test_' + Date.now()),
 		);
 		await invoke.evaluate((invoke) => invoke('app:sendInput', 13));
 
-		await expect(firstWindow.getByRole('alert')).toHaveText(/database saved/i);
-		await expect(firstWindow.getByRole('main')).toBeVisible();
+		await expect(appWindow.getByRole('alert')).toHaveText(/database saved/i);
+		await expect(appWindow.getByRole('main')).toBeVisible();
 
 		await invoke.evaluate((invoke) => invoke('app:testCleanup'));
 	});

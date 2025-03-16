@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, OnInit, inject } from '@angular/core';
+import { Component, ComponentRef, Input, OnInit, inject } from '@angular/core';
 import { ReportType } from '@app/core/enums';
 import {
 	EntryManager,
@@ -10,6 +10,7 @@ import {
 } from '@app/core/services';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
+import { WeakPasswordsTableComponent } from '@app/shared/components/tables/weak-passwords-table/weak-passwords-table.component';
 import {
 	IpcChannel,
 	PasswordEntry,
@@ -25,11 +26,17 @@ import { bufferTime, from } from 'rxjs';
 	templateUrl: './weak-passwords-dialog.component.html',
 	styleUrls: ['./weak-passwords-dialog.component.scss'],
 	standalone: true,
-	imports: [CommonModule, FeatherModule, ModalComponent],
+	imports: [
+		CommonModule,
+		FeatherModule,
+		ModalComponent,
+		WeakPasswordsTableComponent,
+	],
 })
 export class WeakPasswordsDialogComponent implements IModal, OnInit {
+	@Input() additionalData?: IAdditionalData;
+
 	ref: ComponentRef<WeakPasswordsDialogComponent>;
-	additionalData?: IAdditionalData;
 	result: WeakPasswordEntry[] = [];
 	weakPasswordsFound: WeakPasswordEntry[] = [];
 	scanInProgress: boolean;
@@ -69,10 +76,12 @@ export class WeakPasswordsDialogComponent implements IModal, OnInit {
 						return;
 					}
 
+					const reportedEntries =
+						await this.reportService.getWeakEntries(result);
 					await this.reportService.addReport({
-						creationDate: new Date(),
+						creationDate: +new Date(),
 						type: ReportType.WeakPasswords,
-						payload: result.data as string,
+						payload: JSON.stringify(reportedEntries),
 					});
 
 					await this.getLastReport();

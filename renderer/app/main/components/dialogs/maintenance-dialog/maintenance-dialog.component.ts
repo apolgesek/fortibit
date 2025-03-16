@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ComponentRef, inject } from '@angular/core';
+import { Component, ComponentRef, inject, Input } from '@angular/core';
 import {
 	AbstractControl,
 	FormBuilder,
@@ -19,6 +19,7 @@ import { HistoryManager } from '@app/core/services/managers/history.manager';
 import { IAdditionalData, IModal } from '@app/shared';
 import { ModalComponent } from '@app/shared/components/modal/modal.component';
 import { ValidationErrorComponent } from '@app/shared/components/validation-error/validation-error.component';
+import { InputMaskDirective } from '@app/shared/directives/input-mask.directive';
 import { isControlInvalid } from '@app/utils';
 import { FeatherModule } from 'angular-feather';
 import { Observable, forkJoin, from, switchMap, tap, timer } from 'rxjs';
@@ -39,14 +40,16 @@ type ToggleableGroup<T extends ToggleableControls<T>> = FormGroup<T>;
 		ReactiveFormsModule,
 		FeatherModule,
 		ValidationErrorComponent,
+		InputMaskDirective,
 	],
 })
 export class MaintenanceDialogComponent implements IModal {
+	@Input() additionalData?: IAdditionalData;
+
 	public readonly isControlInvalid = isControlInvalid;
 	public cleaningInProgress = false;
 
 	ref: ComponentRef<unknown>;
-	additionalData?: IAdditionalData;
 	showBackdrop?: boolean;
 
 	private readonly modalRef = inject(ModalRef);
@@ -58,11 +61,11 @@ export class MaintenanceDialogComponent implements IModal {
 
 	private readonly _maintenanceForm = this.formBuilder.group({
 		historyDays: this.formBuilder.group({
-			enabled: [true],
-			value: [30, Validators.required],
+			enabled: this.formBuilder.control(true),
+			value: this.formBuilder.control(30, Validators.required),
 		}),
 		emptyRecycleBin: this.formBuilder.group({
-			enabled: [true],
+			enabled: this.formBuilder.control(true),
 		}),
 	});
 
@@ -121,16 +124,6 @@ export class MaintenanceDialogComponent implements IModal {
 
 	close() {
 		this.modalRef.close();
-	}
-
-	onNumberChange(event: Event, controlName: string, maxLength: number) {
-		const input = event.target as HTMLInputElement;
-		const value = input.value.toString();
-
-		if (value.length >= maxLength) {
-			input.valueAsNumber = parseInt(value.slice(0, maxLength), 10);
-			this.maintenanceForm.get(controlName).setValue(input.value);
-		}
 	}
 
 	onKeyDown(event: KeyboardEvent) {

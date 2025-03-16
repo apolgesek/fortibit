@@ -81,7 +81,6 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 			let shouldPreventDefault = true;
 
 			if (typeof hotkeyDef.config?.preventDefault === 'function') {
-				console.log(document.activeElement);
 				shouldPreventDefault = hotkeyDef.config?.preventDefault();
 			} else if (typeof hotkeyDef.config?.preventDefault === 'boolean') {
 				shouldPreventDefault = hotkeyDef.config?.preventDefault;
@@ -93,15 +92,18 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 		}
 	}
 
-	public getContextMenuLabel(label: HotkeyLabelKey): string {
+	public getContextMenuLabel(label: HotkeyLabelKey): {
+		label: string;
+		hotkey: string;
+	} {
 		for (const key in this.hotkeys) {
 			if (Object.prototype.hasOwnProperty.call(this.hotkeys, key)) {
 				const element = this.hotkeys[key];
 				if (label === element.config?.labelId) {
-					return `${HotkeyLabel[element.config.labelId]} (${key
-						.split('+')
-						.map(capitalizeFirstLetter)
-						.join('+')})`;
+					return {
+						label: HotkeyLabel[element.config.labelId],
+						hotkey: `(${key.split('+').map(capitalizeFirstLetter).join('+')})`,
+					};
 				}
 			}
 		}
@@ -190,6 +192,20 @@ export abstract class HotkeyHandler implements IHotkeyHandler {
 			this.clipboardService.copyEntryDetails(
 				this.entryManager.selectedEntries[0],
 				'username',
+			);
+		}
+	}
+
+	@noOpenModal
+	@authenticated
+	public copyTotp() {
+		if (
+			this.entryManager.selectedEntries.length === 1 &&
+			this.entryManager.selectedEntries[0].type === 'password'
+		) {
+			this.clipboardService.copyEntryDetails(
+				this.entryManager.selectedEntries[0],
+				'otpAuth',
 			);
 		}
 	}

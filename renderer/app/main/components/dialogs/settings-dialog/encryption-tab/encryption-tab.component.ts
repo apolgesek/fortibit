@@ -2,41 +2,33 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfigService } from '@app/core/services';
+import { NumberInputComponent } from '@app/shared/components/config-controls/number-input/number-input.component';
+import { ToggleInputComponent } from '@app/shared/components/config-controls/toggle-input/toggle-input.component';
 import { isControlInvalid } from '@app/utils';
-import { Product } from '@config/product';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { ValidationErrorComponent } from '../../../../../shared/components/validation-error/validation-error.component';
 
 @Component({
 	selector: 'app-encryption-tab',
 	templateUrl: './encryption-tab.component.html',
 	styleUrls: ['./encryption-tab.component.scss'],
 	standalone: true,
-	imports: [ReactiveFormsModule, ValidationErrorComponent],
+	imports: [ReactiveFormsModule, NumberInputComponent, ToggleInputComponent],
 })
 export class EncryptionTabComponent implements OnInit {
 	public readonly isControlInvalid = isControlInvalid;
-	private readonly debounceTimeMs = 500;
-
 	private readonly configService = inject(ConfigService);
 	private readonly formBuilder = inject(FormBuilder);
 	private readonly destroyRef = inject(DestroyRef);
 
 	private readonly _encryptionForm = this.formBuilder.group({
-		passwordLength: [
-			0,
-			{
-				validators: [
-					Validators.required,
-					Validators.min(6),
-					Validators.max(32),
-				],
-			},
-		],
-		lowercase: [false],
-		uppercase: [false],
-		specialChars: [false],
-		numbers: [false],
+		passwordLength: this.formBuilder.control(null, [
+			Validators.required,
+			Validators.min(6),
+			Validators.max(32),
+		]),
+		lowercase: this.formBuilder.control(false),
+		uppercase: this.formBuilder.control(false),
+		specialChars: this.formBuilder.control(false),
+		numbers: this.formBuilder.control(false),
 	});
 
 	get encryptionForm() {
@@ -53,37 +45,15 @@ export class EncryptionTabComponent implements OnInit {
 		});
 
 		this.encryptionForm.valueChanges
-			.pipe(
-				debounceTime(this.debounceTimeMs),
-				distinctUntilChanged(),
-				takeUntilDestroyed(this.destroyRef),
-			)
-			.subscribe((form) => {
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(() => {
 				if (this.encryptionForm.invalid) {
 					return;
 				}
 
-				const configPartial = {
-					encryption: {
-						passwordLength: form.passwordLength,
-						lowercase: form.lowercase,
-						uppercase: form.uppercase,
-						specialChars: form.specialChars,
-						numbers: form.numbers,
-					},
-				} as Partial<Product>;
-
-				this.configService.setConfig(configPartial);
+				this.configService.setConfig({
+					encryption: this.encryptionForm.getRawValue(),
+				});
 			});
-	}
-
-	onNumberChange(event: Event, path: string, maxLength: number) {
-		const input = event.target as HTMLInputElement;
-		const value = input.value.toString();
-
-		if (value.length >= maxLength) {
-			input.valueAsNumber = parseInt(value.slice(0, maxLength), 10);
-			this.encryptionForm.get(path).setValue(input.value);
-		}
 	}
 }

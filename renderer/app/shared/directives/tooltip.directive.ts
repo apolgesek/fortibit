@@ -1,5 +1,6 @@
 import { AppViewContainer } from '@app/core/services';
 import {
+	AfterViewInit,
 	ApplicationRef,
 	ComponentRef,
 	Directive,
@@ -7,6 +8,7 @@ import {
 	EmbeddedViewRef,
 	HostListener,
 	Input,
+	OnDestroy,
 	Renderer2,
 	inject,
 } from '@angular/core';
@@ -17,13 +19,27 @@ import { DOCUMENT } from '@angular/common';
 	selector: '[appTooltip]',
 	standalone: true,
 })
-export class TooltipDirective {
+export class TooltipDirective implements AfterViewInit, OnDestroy {
 	@Input('appTooltip') public tooltipText: string;
 	// default is relative to parent positioning
 	@Input() public container: 'default' | 'body' = 'default';
+	@Input() public static = false;
+	@Input() public set show(value: boolean) {
+		if (value) {
+			if (this.componentRef) {
+				return;
+			}
+
+			this.createTooltipComponent();
+		} else {
+			if (this.componentRef) {
+				this.destroyTooltipComponent();
+			}
+		}
+	}
 
 	private componentRef!: ComponentRef<TooltipComponent>;
-	private timeout: any;
+	private timeout: number;
 	private mouseEntered = false;
 	private observer: MutationObserver;
 
@@ -36,6 +52,10 @@ export class TooltipDirective {
 	@HostListener('focusin', ['$event'])
 	@HostListener('mouseenter', ['$event'])
 	public onMouseEnter() {
+		if (this.static) {
+			return;
+		}
+
 		if (this.mouseEntered) {
 			return;
 		}
@@ -45,7 +65,7 @@ export class TooltipDirective {
 			return;
 		}
 
-		this.timeout = setTimeout(() => {
+		this.timeout = window.setTimeout(() => {
 			this.createTooltipComponent();
 		}, 500);
 	}
@@ -53,12 +73,27 @@ export class TooltipDirective {
 	@HostListener('focusout', ['$event'])
 	@HostListener('mouseleave', ['$event'])
 	public onMouseLeave() {
+		if (this.static) {
+			return;
+		}
+
 		this.mouseEntered = false;
 		if (this.componentRef) {
 			this.destroyTooltipComponent();
 		} else {
 			clearTimeout(this.timeout);
 			this.timeout = null;
+		}
+	}
+
+	ngAfterViewInit(): void {
+		if (this.static && this.show) {
+			this.createTooltipComponent();
+		}
+	}
+	ngOnDestroy(): void {
+		if (this.componentRef) {
+			this.destroyTooltipComponent();
 		}
 	}
 

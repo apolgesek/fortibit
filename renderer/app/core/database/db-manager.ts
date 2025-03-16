@@ -6,6 +6,7 @@ import {
 	HistoryEntry,
 	Entry,
 	Report,
+	ConfigEntry,
 } from '../../../../shared/index';
 
 export type IDbContext = Dexie;
@@ -17,12 +18,14 @@ export class DbManager {
 	groups: IDbTable<EntryGroup, number>;
 	reports: IDbTable<Report, number>;
 	history: IDbTable<HistoryEntry, number>;
+	config: IDbTable<ConfigEntry, number>;
 
 	readonly schemas = {
 		entries: '++id,groupId,title,username,cardholderName',
 		groups: '++id',
 		reports: '++id,type,creationDate',
 		history: '++id,entryId,entry.lastModificationDate',
+		config: '++id',
 	};
 
 	// name must be unique to ensure stable access with multiple vaults open at the same time
@@ -45,6 +48,7 @@ export class DbManager {
 		this.groups = this.instance.table('groups');
 		this.reports = this.instance.table('reports');
 		this.history = this.instance.table('history');
+		this.config = this.instance.table('config');
 	}
 
 	public async delete(): Promise<void> {

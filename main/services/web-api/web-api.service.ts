@@ -8,6 +8,7 @@ import { getDomain } from '../../util';
 import { IConfigService } from '../config';
 import { IWindowService } from '../window';
 import { IWebApiService } from './web-api-service.model';
+import fetch from 'node-fetch';
 
 type UrlEntries = {
 	windowId: number;
@@ -113,7 +114,7 @@ export class WebApiService implements IWebApiService {
 		);
 
 		if (response.ok) {
-			return response.json();
+			return response.json() as Promise<string[]>;
 		} else {
 			return Promise.reject({
 				message: `Failed to check domains at ${path}`,

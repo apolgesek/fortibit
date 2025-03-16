@@ -24,9 +24,9 @@ export interface IWindowService {
 	onUnlock(windowId: number): void;
 	getThumbnailIconPath(): string;
 	toggleTheme(config: Configuration);
+	changeScheduledReportSetting(form: Partial<Configuration>): void;
 
 	sendMessage(window: BrowserWindow, channel: IpcChannel, ...args: any[]): void;
 	sendMessage(windowId: number, channel: IpcChannel, ...args: any[]): void;
-
 	sendMessageToAll(channel: IpcChannel, ...args: any[]): void;
 }

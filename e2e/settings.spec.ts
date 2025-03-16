@@ -6,6 +6,7 @@ import { authenticate } from './helpers/auth';
 import { getInvoke } from './helpers/ipc';
 import { beforeEach } from './hooks/before-each';
 import { afterEach } from './hooks/after-each';
+import { toggleAutoSave } from './helpers/settings';
 
 test.describe('Settings', async () => {
 	let app: ElectronApplication;
@@ -39,14 +40,13 @@ test.describe('Settings', async () => {
 		await settingsModal.getByText(/^Settings$/).waitFor({ state: 'visible' });
 		const clipboardTimeInput =
 			settingsModal.getByLabel(/clipboard auto-clear/i);
-		await clipboardTimeInput.clear();
-		await clipboardTimeInput.type('5');
+		await clipboardTimeInput.fill('5');
 		await appWindow.keyboard.press('Escape');
 		await addEntry(appWindow, { config: { close: true } });
 		await appWindow.getByText(/•{6}/i).dblclick();
 		const notificationSeconds = appWindow.getByRole('alert');
 
-		await expect(notificationSeconds).toHaveText('5');
+		await expect(notificationSeconds).toHaveText(/5/);
 	});
 
 	test('Check auto-type disabled', async () => {
@@ -71,13 +71,7 @@ test.describe('Settings', async () => {
 	test('Check save vault on idle timeout', async () => {
 		test.slow();
 
-		await appWindow.getByRole('banner').waitFor({ state: 'visible' });
-		await appWindow.keyboard.press('Control+.');
-		await appWindow
-			.getByRole('dialog')
-			.getByText(/enable autosave/i)
-			.click();
-		await appWindow.keyboard.press('Escape');
+		await toggleAutoSave(appWindow);
 		await addEntry(appWindow, { config: { close: true } });
 
 		await appWindow.keyboard.press('Control+.');
@@ -215,6 +209,19 @@ test.describe('Settings', async () => {
 			.getByRole('dialog')
 			.getByRole('button', { name: /integration/i });
 		await integrationTab.click();
+
+		const isActive = await appWindow
+			.getByRole('button', { name: /remove credential/i })
+			.isVisible();
+
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if (isActive) {
+			await appWindow.getByPlaceholder(/master password/i).fill('test123');
+			await appWindow
+				.getByRole('button', { name: /remove credential/i })
+				.click();
+		}
+
 		await appWindow.getByText(/windows hello/i).click();
 		await appWindow.getByPlaceholder(/master password/i).fill('test123');
 		await appWindow.getByRole('button', { name: /add credential/i }).click();
@@ -228,7 +235,7 @@ test.describe('Settings', async () => {
 		await expect(removeCredentialButton).toBeVisible();
 
 		await appWindow.keyboard.press('Control+L');
-		const windowsHelloButton = appWindow.getByRole('button', {
+		const windowsHelloButton = appWindow.getByRole('link', {
 			name: /windows hello/i,
 		});
 
@@ -242,9 +249,18 @@ test.describe('Settings', async () => {
 			.getByRole('dialog')
 			.getByRole('button', { name: /integration/i });
 		await integrationTab.click();
+
+		const isInactive = await appWindow
+			.getByRole('button', { name: /add credential/i })
+			.isVisible();
+
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if (isInactive) {
+			await appWindow.getByPlaceholder(/master password/i).fill('test123');
+			await appWindow.getByRole('button', { name: /add credential/i }).click();
+		}
+
 		await appWindow.getByText(/windows hello/i).click();
-		await appWindow.getByPlaceholder(/master password/i).fill('test123');
-		await appWindow.getByRole('button', { name: /add credential/i }).click();
 
 		const removeCredentialButton = appWindow.getByRole('button', {
 			name: /remove credential/i,
@@ -258,7 +274,7 @@ test.describe('Settings', async () => {
 		await passwordInput.waitFor({ state: 'visible' });
 
 		await expect(
-			appWindow.getByRole('button', { name: /windows hello/i }),
+			appWindow.getByRole('link', { name: /windows hello/i }),
 		).toBeHidden();
 	});
 

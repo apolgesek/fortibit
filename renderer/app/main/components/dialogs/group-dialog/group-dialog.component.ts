@@ -2,6 +2,7 @@ import {
 	Component,
 	ComponentRef,
 	DestroyRef,
+	Input,
 	OnInit,
 	inject,
 } from '@angular/core';
@@ -41,8 +42,9 @@ export type GroupDialogDataPayload = {
 	],
 })
 export class GroupDialogComponent implements IModal, OnInit {
-	public readonly ref!: ComponentRef<GroupDialogComponent>;
+	@Input()
 	public readonly additionalData!: IAdditionalData<GroupDialogDataPayload>;
+	public readonly ref!: ComponentRef<GroupDialogComponent>;
 	public readonly isControlInvalid = isControlInvalid;
 
 	public title: 'Add group' | 'Edit group' = 'Add group';

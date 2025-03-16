@@ -3,7 +3,7 @@ import {
 	ConfigService,
 	EXCLUDED_CONFIG_KEYS,
 } from '@root/main/services/config/config.service';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFile, writeFileSync } from 'fs';
 import { join } from 'path';
 
 jest.mock('@root/main/services/config', () => {
@@ -37,7 +37,7 @@ jest.mock('electron', () => {
 });
 
 describe('Config service', () => {
-	test('Should load app config', () => {
+	beforeAll(() => {
 		// Arrange
 		const productJsonContent = JSON.stringify({
 			autosaveEnabled: false,
@@ -54,8 +54,12 @@ describe('Config service', () => {
 		writeFileSync(
 			join(__dirname, 'config', 'product.json'),
 			productJsonContent,
+			{ encoding: 'utf-8' },
 		);
+	});
 
+	test('Should load app config', () => {
+		// Arrange
 		global['__basedir'] = join(__dirname, 'config');
 		const service = new ConfigService();
 
@@ -69,7 +73,7 @@ describe('Config service', () => {
 		expect(service.appConfig.encryption.specialChars).toBe(false);
 	});
 
-	test('Should set app config', () => {
+	test('Should set app config', async () => {
 		// Arrange
 		global['__basedir'] = join(__dirname, 'config');
 		const service = new ConfigService();
@@ -94,12 +98,18 @@ describe('Config service', () => {
 		expect(service.appConfig.encryption.specialChars).toBe(false);
 		expect(service.appConfig.lockOnSystemLock).toBe(true);
 
-		const savedConfig: Configuration = JSON.parse(
-			readFileSync(join(__dirname, 'config', 'product.json')).toString(),
-		);
+		readFile(
+			join(__dirname, 'config', 'product.json'),
+			{
+				encoding: 'utf-8',
+			},
+			(err, data) => {
+				const savedConfig: Configuration = JSON.parse(data);
 
-		EXCLUDED_CONFIG_KEYS.forEach((key) => {
-			expect(savedConfig[key]).not.toBeDefined();
-		});
+				EXCLUDED_CONFIG_KEYS.forEach((key) => {
+					expect(savedConfig[key]).not.toBeDefined();
+				});
+			},
+		);
 	});
 });

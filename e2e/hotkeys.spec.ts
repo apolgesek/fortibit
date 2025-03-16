@@ -96,7 +96,7 @@ test.describe('Hotkeys after auth', async () => {
 	test('Check should copy password', async () => {
 		await addEntry(appWindow, { config: { close: true } });
 		await appWindow.getByRole('main').getByRole('listitem').first().click();
-		await appWindow.keyboard.press('Control+Shift+C');
+		await appWindow.keyboard.press('Control+Shift+P');
 		const notification = await appWindow.getByRole('alert').innerText();
 
 		expect(notification).toMatch(/password copied/i);

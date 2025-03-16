@@ -3,7 +3,10 @@ import { HotkeyLabel } from '../services/hotkey/hotkey-label';
 export interface IHotkeyHandler {
 	isMultiselectionKeyDown: (event: Event) => boolean;
 	intercept: (event: KeyboardEvent) => void;
-	getContextMenuLabel: (label: keyof typeof HotkeyLabel) => string;
+	getContextMenuLabel: (label: keyof typeof HotkeyLabel) => {
+		label: string;
+		hotkey: string;
+	};
 	get hotkeysMap(): { [key in keyof Partial<typeof HotkeyLabel>]: string };
 
 	saveDatabase: () => void;
@@ -15,6 +18,7 @@ export interface IHotkeyHandler {
 	addEntry: () => void;
 	copyPassword: () => void;
 	copyUsername: () => void;
+	copyTotp: () => void;
 	selectAllEntries: () => void;
 	findEntries: () => void;
 	findGlobalEntries: () => void;

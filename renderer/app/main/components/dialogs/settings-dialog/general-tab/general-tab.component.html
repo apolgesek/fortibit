@@ -1,148 +1,136 @@
 <form [formGroup]="passwordForm">
 	<div class="change-password">
 		<div class="section-header">Workspace settings</div>
-		<div formGroupName="toggle" class="inputgroup checkbox">
-			<label class="label" for="autosave">Enable autosave:</label>
-			<label class="switch">
-				<input id="autosave" type="checkbox" formControlName="autoSave" />
-				<span class="slider"></span>
-			</label>
-		</div>
+		<app-toggle-input
+			formControlName="autosaveEnabled"
+			label="Enable autosave"
+		></app-toggle-input>
 		<div class="section-header">Clipboard settings</div>
-		<div formGroupName="input" class="inputgroup">
-			<label class="label" for="clipboardTime"
-				>Clipboard auto-clear time (seconds):</label
-			>
-			<input
-				id="clipboardTime"
-				type="number"
-				[attr.aria-invalid]="
-					isControlInvalid(passwordForm.get('input.clipboardTime'))
-				"
-				aria-describedby="clipboard-time-invalid"
-				class="number"
-				formControlName="clipboardTime"
-				(input)="onNumberChange($event, 'input.clipboardTime', 4)"
-			/>
-		</div>
-		<app-validation-error
-			id="clipboard-time-invalid"
-			controlName="clipboardTime"
-			errors="Please enter at least 0 seconds"
-		></app-validation-error>
-		<div class="section-header">Auto-type settings</div>
-		<div formGroupName="toggle" class="inputgroup checkbox">
-			<label class="label" for="auto-type">Enable auto-type:</label>
-			<label class="switch">
-				<input id="auto-type" type="checkbox" formControlName="autoType" />
-				<span class="slider"></span>
-			</label>
-		</div>
-		<div formGroupName="input" class="inputgroup">
-			<label class="label" for="autotypeShortcut">Autotype hotkey:</label>
-			<input
-				style="width: 160px"
-				appHotkeyBinder
-				id="autotypeShortcut"
-				type="text"
-				formControlName="autotypeShortcut"
-			/>
-		</div>
-		<div formGroupName="input" class="inputgroup">
-			<label class="label" for="autotypeUsernameOnlyShortcut"
-				>Autotype username only hotkey:</label
-			>
-			<input
-				style="width: 160px"
-				appHotkeyBinder
-				id="autotypeUsernameOnlyShortcut"
-				type="text"
-				formControlName="autotypeUsernameOnlyShortcut"
-			/>
-		</div>
-		<div formGroupName="input" class="inputgroup">
-			<label class="label" for="autotypePasswordOnlyShortcut"
-				>Autotype password only hotkey:</label
-			>
-			<input
-				style="width: 160px"
-				appHotkeyBinder
-				id="autotypePasswordOnlyShortcut"
-				type="text"
-				formControlName="autotypePasswordOnlyShortcut"
-			/>
-		</div>
-		<div class="section-header">Links</div>
-		<div formGroupName="toggle" class="inputgroup checkbox">
-			<label class="label" for="insecureUrl"
-				>Warn against opening unsecured websites:</label
-			>
-			<label class="switch">
-				<input
-					id="insecureUrl"
-					type="checkbox"
-					formControlName="showInsecureUrlPrompt"
-				/>
-				<span class="slider"></span>
-			</label>
-		</div>
-		<div class="section-header">Lock database after inactive time</div>
-		<div formGroupName="input" class="inputgroup">
-			<label class="label" for="idleTime">Idle time lock (seconds):</label>
-			<input
-				id="idleTime"
-				type="number"
-				[attr.aria-invalid]="
-					isControlInvalid(passwordForm.get('input.idleTime'))
-				"
-				aria-describedby="idle-time-invalid"
-				class="number"
-				formControlName="idleTime"
-				(input)="onNumberChange($event, 'input.idleTime', 4)"
-			/>
-		</div>
-		<app-validation-error
-			id="idle-time-invalid"
-			controlName="idleTime"
-			errors="Please enter at least 60 seconds"
+		<app-number-input
+			formControlName="clipboardClearSeconds"
+			label="Clipboard auto-clear time (seconds)"
+			errors="Value must be at least 0"
+			[maxLength]="4"
 		>
-		</app-validation-error>
-		<div formGroupName="toggle" class="inputgroup checkbox">
-			<label class="label" for="lockOnSystemLock"
-				>Lock database when locking the computer:</label
-			>
-			<label class="switch">
-				<input
-					id="lockOnSystemLock"
-					type="checkbox"
-					formControlName="lockOnSystemLock"
-				/>
-				<span class="slider"></span>
-			</label>
-		</div>
-		<div formGroupName="toggle" class="inputgroup checkbox">
-			<label class="label" for="saveOnLock"
-				>Save database before it gets locked due to inactivity:</label
-			>
-			<label class="switch">
-				<input id="saveOnLock" type="checkbox" formControlName="saveOnLock" />
-				<span class="slider"></span>
-			</label>
-		</div>
+		</app-number-input>
+		<div class="section-header">Auto-type settings</div>
+		<app-toggle-input
+			formControlName="autoTypeEnabled"
+			label="Enable auto-type"
+		></app-toggle-input>
+		<app-text-input
+			formControlName="autocompleteShortcut"
+			label="Autotype hotkey"
+			type="hotkey"
+		></app-text-input>
+		<app-text-input
+			formControlName="autocompleteUsernameOnlyShortcut"
+			label="Autotype username only hotkey"
+			type="hotkey"
+		></app-text-input>
+		<app-text-input
+			formControlName="autocompletePasswordOnlyShortcut"
+			label="Autotype password only hotkey"
+			type="hotkey"
+		></app-text-input>
+		<div class="section-header">Links</div>
+		<app-toggle-input
+			formControlName="showInsecureUrlPrompt"
+			label="Warn against opening unsecured websites"
+		></app-toggle-input>
+		<div class="section-header">Lock database after inactive time</div>
+		<app-number-input
+			formControlName="idleSeconds"
+			label="Idle time lock (seconds)"
+			[maxLength]="4"
+			errors="Value must be at least 60"
+		></app-number-input>
+		<app-toggle-input
+			formControlName="lockOnSystemLock"
+			label="Lock database when locking the computer"
+		></app-toggle-input>
+		<app-toggle-input
+			formControlName="saveOnLock"
+			label="Save database before it gets locked due to inactivity"
+		></app-toggle-input>
 		<div class="section-header">Other</div>
-		<div formGroupName="toggle" class="inputgroup checkbox">
-			<label class="label" for="protectWindowsFromCapture"
-				>Do not allow window screenshots:</label
-			>
-			<label class="switch">
-				<input
-					id="protectWindowsFromCapture"
-					type="checkbox"
-					formControlName="protectWindowsFromCapture"
-				/>
-				<span class="slider"></span>
-			</label>
-		</div>
+		<app-toggle-input
+			formControlName="protectWindowsFromCapture"
+			label="Do not allow window screenshots"
+		></app-toggle-input>
+		@if (!isLocked) {
+			<div class="section-header">Reports</div>
+			<ng-container formGroupName="scheduledReports">
+				<app-toggle-input
+					formControlName="enabled"
+					label="Enable scheduled reports"
+				></app-toggle-input>
+
+				@if (passwordForm.controls.scheduledReports.controls.time.enabled) {
+					<app-text-input
+						formControlName="time"
+						label="Time"
+						type="time"
+					></app-text-input>
+				}
+
+				<ng-container formGroupName="frequency">
+					@if (
+						passwordForm.controls.scheduledReports.controls.frequency.controls
+							.type.enabled
+					) {
+						<app-select-input
+							formControlName="type"
+							label="Frequency"
+							[options]="{
+								daily: 'Daily',
+								weekly: 'Weekly',
+								monthly: 'Monthly',
+							}"
+						></app-select-input>
+					}
+
+					@if (
+						passwordForm.controls.scheduledReports.controls.frequency.controls
+							.oneIn.enabled
+					) {
+						<app-number-input
+							formControlName="oneIn"
+							label="One in (days)"
+							[maxLength]="3"
+							errors="Value must be between 1 and 365"
+						>
+						</app-number-input>
+					}
+
+					@if (
+						passwordForm.controls.scheduledReports.controls.frequency.controls
+							.dayOfMonth.enabled
+					) {
+						<app-number-input
+							formControlName="dayOfMonth"
+							label="On day"
+							[maxLength]="2"
+							errors="Value must be between 1 and 31"
+						>
+						</app-number-input>
+					}
+
+					@if (
+						passwordForm.controls.scheduledReports.controls.frequency.controls
+							.weekDayIndex.enabled
+					) {
+						<app-number-input
+							formControlName="weekDayIndex"
+							label="On week day (0-Sunday)"
+							[maxLength]="1"
+							errors="Value must be between 0 and 6"
+						>
+						</app-number-input>
+					}
+				</ng-container>
+			</ng-container>
+		}
 		<div class="section-header">Restore default settings</div>
 		<div class="restore">
 			<a href="#" (click)="restoreDefaults(); (false)"

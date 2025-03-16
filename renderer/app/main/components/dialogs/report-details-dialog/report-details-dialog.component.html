@@ -1,0 +1,40 @@
+<app-modal>
+	<div class="dialog-header">
+		<h2>Reports log</h2>
+		<a
+			href="#"
+			role="button"
+			aria-label="Close"
+			class="close-dialog"
+			(click)="close(); (false)"
+			>&times;
+		</a>
+	</div>
+	<div class="dialog-message">
+		<div style="margin-bottom: 1rem">
+			Date: {{ report.creationDate | date: 'dd/MM/yyyy HH:mm' }}
+		</div>
+
+		@if (report.type === reportType.ExposedPasswords) {
+			<app-exposed-passwords-table
+				[entries]="entries"
+				(activated)="editEntry($event)"
+			></app-exposed-passwords-table>
+		} @else if (report.type === reportType.WeakPasswords) {
+			<app-weak-passwords-table
+				[entries]="entries"
+				(activated)="editEntry($event)"
+			></app-weak-passwords-table>
+		}
+	</div>
+	<div class="footer-container">
+		<button
+			type="button"
+			class="text-btn"
+			(click)="close()"
+			(keyup.enter)="close()"
+		>
+			Close
+		</button>
+	</div>
+</app-modal>

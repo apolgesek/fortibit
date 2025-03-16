@@ -23,7 +23,6 @@
 .list-item {
 	@include font-medium;
 	display: flex;
-	width: 100%;
 	padding: 0.5rem;
 	font-size: 1rem;
 	cursor: pointer;

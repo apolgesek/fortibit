@@ -5,16 +5,20 @@ export class DarwinHotkeyHandler extends HotkeyHandler {
 	protected keyMap: (event: KeyboardEvent) => string[] = (
 		event: KeyboardEvent,
 	) => {
-		return [event.metaKey, event.shiftKey, event.key].map((x, idx) => {
-			switch (idx) {
-				case 0:
-					return x ? '⌘' : null;
-				case 1:
-					return x ? 'shift' : null;
-				case 2:
-					return (x as string).toLowerCase();
-			}
-		});
+		return [event.metaKey, event.shiftKey, event.altKey, event.key].map(
+			(x, idx) => {
+				switch (idx) {
+					case 0:
+						return x ? '⌘' : null;
+					case 1:
+						return x ? 'shift' : null;
+					case 2:
+						return x ? 'alt' : null;
+					case 3:
+						return (x as string).toLowerCase();
+				}
+			},
+		);
 	};
 
 	constructor() {
@@ -31,6 +35,9 @@ export class DarwinHotkeyHandler extends HotkeyHandler {
 		});
 		this.registerHotkey('⌘+E', this.editEntry, { labelId: 'Edit' });
 		this.registerHotkey('⌘+F', this.findEntries, { labelId: 'FindInGroup' });
+		this.registerHotkey('⌘+Alt+F', this.findGlobalEntries, {
+			labelId: 'FindInVault',
+		});
 		this.registerHotkey('⌘+G', this.openGenerator, { labelId: 'Generator' });
 		this.registerHotkey('⌘+H', this.openHistory, { labelId: 'History' });
 		this.registerHotkey('⌘+L', this.lockDatabase, { labelId: 'Lock' });
@@ -45,14 +52,14 @@ export class DarwinHotkeyHandler extends HotkeyHandler {
 		this.registerHotkey('⌘+=', this.zoomIn, { labelId: 'ZoomIn' });
 		this.registerHotkey('⌘+0', this.resetZoom, { labelId: 'ResetZoom' });
 
-		this.registerHotkey('⌘+Shift+C', this.copyPassword, {
+		this.registerHotkey('⌘+Shift+P', this.copyPassword, {
 			labelId: 'CopyPassword',
-		});
-		this.registerHotkey('⌘+Shift+F', this.findGlobalEntries, {
-			labelId: 'FindInVault',
 		});
 		this.registerHotkey('⌘+Shift+U', this.copyUsername, {
 			labelId: 'CopyUsername',
+		});
+		this.registerHotkey('⌘+Shift+T', this.copyTotp, {
+			labelId: 'CopyTotp',
 		});
 	}
 }

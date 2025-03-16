@@ -30,7 +30,6 @@ import { fromEvent } from 'rxjs';
 })
 export class ModalComponent implements AfterViewInit, OnDestroy {
 	@HostBinding('attr.role') public readonly role = 'dialog';
-
 	@Input() public options!: IAdditionalData;
 	@Input() public bodyClass!: string;
 	@ViewChild('backdrop') public backdrop!: ElementRef;
@@ -44,6 +43,10 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
 	private readonly modalManager = inject(ModalManager);
 	private readonly modalRef = inject(ModalRef);
 	private readonly destroyRef = inject(DestroyRef);
+
+	public get isVisible(): boolean {
+		return this.modalRef.visible;
+	}
 
 	constructor() {
 		this.showBackdrop = this.modalRef.showBackdrop;

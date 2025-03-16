@@ -6,6 +6,7 @@ import {
 	OnInit,
 	inject,
 } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
 	selector: 'app-tooltip',
@@ -21,8 +22,10 @@ export class TooltipComponent implements OnInit, AfterViewInit {
 	public text: string;
 	public triggerElement: HTMLElement;
 	public container: 'default' | 'body';
+	public html: SafeHtml;
 	private readonly marginPx = 5;
 	private readonly element = inject(ElementRef);
+	private readonly sanitizer = inject(DomSanitizer);
 
 	ngOnInit() {
 		if (!this.triggerElement) {
@@ -32,6 +35,8 @@ export class TooltipComponent implements OnInit, AfterViewInit {
 		if (!this.container) {
 			throw new Error('Container not specified for a tooltip');
 		}
+
+		this.html = this.sanitizer.bypassSecurityTrustHtml(this.text);
 	}
 
 	ngAfterViewInit() {

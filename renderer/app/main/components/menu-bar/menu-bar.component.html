@@ -189,7 +189,7 @@
 							class="submenu-open"
 							[disabled]="isLocked"
 						>
-							Report <i-feather name="chevron-right"></i-feather>
+							Security <i-feather name="chevron-right"></i-feather>
 						</li>
 						<div
 							*appDropdownMenu
@@ -209,6 +209,8 @@
 							>
 								Weak passwords
 							</li>
+							<div class="divider"><hr /></div>
+							<li appMenuItem (activate)="openReportsWindow()">Reports log</li>
 						</div>
 					</div>
 					<li

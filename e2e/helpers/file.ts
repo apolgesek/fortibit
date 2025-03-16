@@ -1,8 +1,12 @@
-import { copyFileSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
 export function setupTestFiles() {
 	const configPath = join(process.env.APPDATA, 'Electron', 'config');
+
+	if (!existsSync(configPath)) {
+		mkdirSync(configPath, { recursive: true });
+	}
 
 	copyFileSync('./e2e/files/templates/test.fbit', './e2e/files/test.fbit');
 	copyFileSync('./e2e/files/templates/test.fbit', './e2e/files/test_copy.fbit');

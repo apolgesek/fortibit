@@ -1,4 +1,4 @@
-import { Component, ComponentRef, inject } from '@angular/core';
+import { Component, ComponentRef, inject, Input } from '@angular/core';
 import {
 	AbstractControl,
 	FormBuilder,
@@ -31,10 +31,11 @@ import { ValidationErrorComponent } from '../../../../shared/components/validati
 	],
 })
 export class PasswordChangeDialogComponent implements IModal {
+	@Input() additionalData?: IAdditionalData;
+
 	public readonly isControlInvalid = isControlInvalid;
 
 	ref: ComponentRef<unknown>;
-	additionalData?: IAdditionalData;
 	showBackdrop?: boolean;
 
 	private readonly fb = inject(FormBuilder);

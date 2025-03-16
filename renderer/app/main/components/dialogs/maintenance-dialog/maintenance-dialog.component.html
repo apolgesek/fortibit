@@ -50,15 +50,15 @@
 						class="number"
 						formControlName="value"
 						(keydown)="onKeyDown($event)"
-						(paste)="$event.preventDefault()"
-						(input)="onNumberChange($event, 'historyDays', 3)"
+						appInputMask
+						[maxLength]="3"
 					/>
+					<app-validation-error
+						id="history-days-invalid"
+						formControlName="value"
+						errors="Invalid value"
+					></app-validation-error>
 				</div>
-				<app-validation-error
-					id="history-days-invalid"
-					controlName="historyDays.value"
-					errors="Invalid value"
-				></app-validation-error>
 				<div
 					class="inputgroup"
 					style="margin-top: 2rem"

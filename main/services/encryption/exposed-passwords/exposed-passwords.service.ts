@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import { IExposedPasswordsService } from './exposed-passwords-service.model';
 
 export class ExposedPasswordsService implements IExposedPasswordsService {
@@ -9,7 +10,7 @@ export class ExposedPasswordsService implements IExposedPasswordsService {
 			const result = await Promise.all(
 				entries.map((e) => this.find(e, apiUrl)),
 			);
-			return Promise.resolve(result.flat());
+			return Promise.resolve(result.flat().filter((e) => e.occurrences > 0));
 		} catch (err) {
 			return Promise.reject(err);
 		}

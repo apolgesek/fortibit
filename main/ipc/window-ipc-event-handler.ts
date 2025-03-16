@@ -131,5 +131,12 @@ export class WindowIpcEventHandler implements IIpcEventHandler {
 				);
 			},
 		);
+
+		ipcMain.handle(
+			IpcChannel.ChangeScheduledReportsSettings,
+			(_, form: Partial<Configuration>) => {
+				this._windowService.changeScheduledReportSetting(form);
+			},
+		);
 	}
 }

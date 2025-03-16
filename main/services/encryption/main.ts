@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { bootstrap } from 'global-agent';
 import { Entry, VaultSchema } from '../../../shared';
 import { IEncryptionService } from './encryption-service.model';
 import { EncryptionService } from './encryption.service';
@@ -17,6 +18,13 @@ import { ExposedPasswordsService } from './exposed-passwords/exposed-passwords.s
 import { InMemoryEncryptionService } from './in-memory-encryption.service';
 import { MessageEventType } from './message-event-type.enum';
 import { WeakPasswordsService } from './weak-passwords/weak-passwords.service';
+
+if (process.env.PROXY_ENABLED === '1') {
+	process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+	process.env.GLOBAL_AGENT_HTTP_PROXY = 'http://127.0.0.1:8080';
+
+	bootstrap();
+}
 
 // include only intended props excluding database engine generated and private ones
 function normalizeEntity<T extends object>(e: T): Partial<T> {
@@ -90,6 +98,7 @@ class Main {
 		const historyStore = stores.find((x) => x.tableName === 'history');
 		const groupsStore = stores.find((x) => x.tableName === 'groups');
 		const reportsStore = stores.find((x) => x.tableName === 'reports');
+		const configStore = stores.find((x) => x.tableName === 'config');
 
 		for (const entry of entriesStore.rows) {
 			switch (entry.type) {
@@ -125,6 +134,7 @@ class Main {
 				groups: groupsStore.rows.map(normalizeEntity),
 				history: historyStore.rows.map(normalizeEntity),
 				reports: reportsStore.rows.map(normalizeEntity),
+				config: configStore.rows.map(normalizeEntity),
 			},
 		};
 
@@ -276,6 +286,7 @@ class Main {
 			const weakPasswords = await this._weakPasswordsService.getAll(entries);
 			await sendAsync({ data: JSON.stringify(weakPasswords) });
 		} catch (err) {
+			console.log(err);
 			await sendAsync({ error: err });
 		}
 	}

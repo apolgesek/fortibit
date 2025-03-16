@@ -70,6 +70,7 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 
 	public config: Configuration;
 	public passwordVisible = false;
+	public isCapsLockOn = false;
 
 	private readonly formBuilder = inject(FormBuilder);
 	private readonly messageBroker = inject(MessageBroker);
@@ -228,5 +229,9 @@ export class MasterPasswordComponent implements OnInit, OnDestroy {
 			IpcChannel.DecryptDatabase,
 			this.loginForm.value.password,
 		);
+	}
+
+	detectCapsLock(event: KeyboardEvent) {
+		this.isCapsLockOn = event.getModifierState('CapsLock');
 	}
 }

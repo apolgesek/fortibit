@@ -4,32 +4,37 @@ import { DbManager } from '@app/core/database';
 import { FileNamePipe } from '@app/shared/pipes/file-name.pipe';
 import { UiUtil } from '@app/utils';
 import { Configuration } from '@config/configuration';
+import { ScheduledReportsSettings } from '@config/product';
 import {
-	PasswordEntry,
-	IpcChannel,
-	VaultSchema,
 	Entry,
+	IpcChannel,
+	PasswordEntry,
+	VaultSchema,
 } from '@shared-renderer/index';
+import { addDays, addMonths, isBefore, nextDay, setDay } from 'date-fns';
 import { exportDB, importInto } from 'dexie-export-import';
 import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
 import { MessageBroker } from 'injection-tokens';
 import { Observable, Subject, map, merge } from 'rxjs';
 import { GroupId } from '../enums';
 import { ConfigService } from './config.service';
+import { ConfigManager } from './managers/config.manager';
 import { EntryManager } from './managers/entry.manager';
 import { GroupManager } from './managers/group.manager';
 import { HistoryManager } from './managers/history.manager';
 import { ReportManager } from './managers/report.manager';
 import { ModalService } from './modal.service';
 import { NotificationService } from './notification.service';
-import { SearchService } from './search.service';
 import { IProcessor, PasswordProcessor } from './processors';
+import { ReportService } from './report.service';
+import { SearchService } from './search.service';
 
 enum DirtyMarkType {
 	Entry,
 	Group,
 	History,
 	Report,
+	Config,
 }
 
 @Injectable({ providedIn: 'root' })
@@ -39,9 +44,9 @@ export class WorkspaceService {
 	public file?: { filePath: string; filename: string };
 	public isLocked = true;
 	public isBiometricsAuthenticationInProgress = false;
-
 	private config: Configuration;
 	private _zoomFactor = 1;
+	private timerRef: number;
 
 	get zoomFactor(): number {
 		return Math.round(this._zoomFactor * 100);
@@ -58,6 +63,8 @@ export class WorkspaceService {
 	private readonly groupManager = inject(GroupManager);
 	private readonly historyManager = inject(HistoryManager);
 	private readonly reportManager = inject(ReportManager);
+	private readonly configManager = inject(ConfigManager);
+	private readonly reportService = inject(ReportService);
 	private readonly dbManager = inject(DbManager);
 	private readonly notificationService = inject(NotificationService);
 	private readonly searchService = inject(SearchService);
@@ -67,6 +74,31 @@ export class WorkspaceService {
 	private readonly router = inject(Router);
 
 	constructor() {
+		this.messageBroker.ipcRenderer.on(
+			IpcChannel.GenerateScheduledReports,
+			() => {
+				this.zone.run(async () => {
+					if (this.isLocked) {
+						return;
+					}
+
+					if (await this.shouldGenerateReports()) {
+						this.reportService.generateReports();
+					}
+				});
+			},
+		);
+
+		this.messageBroker.ipcRenderer.on(IpcChannel.UrlAction_showReports, () => {
+			this.zone.run(() => {
+				if (this.isLocked) {
+					return;
+				}
+
+				this.modalService.openReportsWindow();
+			});
+		});
+
 		this.configService.configLoadedSource$.pipe().subscribe((config) => {
 			this.config = config as Configuration;
 		});
@@ -78,6 +110,7 @@ export class WorkspaceService {
 				map(() => DirtyMarkType.History),
 			),
 			this.reportManager.markDirtySource.pipe(map(() => DirtyMarkType.Report)),
+			this.configManager.markDirtySource.pipe(map(() => DirtyMarkType.Config)),
 		)
 			.pipe()
 			.subscribe(() => {
@@ -132,7 +165,6 @@ export class WorkspaceService {
 
 		this.groupManager.selectedGroup = null;
 		this.entryManager.entryHistory = null;
-		this.entryManager.editedEntry = null;
 		// this.file = null;
 		this.isSynced = true;
 
@@ -182,6 +214,8 @@ export class WorkspaceService {
 				this.modalService.openRecoveryWindow(path);
 			}, 1000);
 		}
+
+		await this.reportService.loadReports();
 	}
 
 	async saveDatabase(
@@ -245,7 +279,7 @@ export class WorkspaceService {
 					tables: keys.map((table) => {
 						return {
 							name: table,
-							rowCount: parsedVault.tables[table].length,
+							rowCount: parsedVault.tables[table]?.length ?? 0,
 							schema: this.dbManager.schemas[table],
 						};
 					}),
@@ -275,6 +309,11 @@ export class WorkspaceService {
 			clearTablesBeforeImport: true,
 		});
 		await this.groupManager.getGroupsTree();
+		await this.configManager.getConfig();
+
+		if (!this.configManager.configEntry?.nextScheduledReportsDate) {
+			this.scheduleNext();
+		}
 
 		this.setDatabaseLoaded();
 	}
@@ -404,6 +443,90 @@ export class WorkspaceService {
 
 		// navigation is needed when being on New Vault page
 		this.router.navigate(['/home']);
+	}
+
+	private async shouldGenerateReports(): Promise<boolean> {
+		const config = await this.configManager.getConfig();
+		if (
+			this.config.scheduledReports.enabled &&
+			!config.nextScheduledReportsDate
+		) {
+			this.scheduleNext();
+
+			return false;
+		}
+
+		if ((config.nextScheduledReportsDate ?? 0) > +new Date()) {
+			return false;
+		}
+
+		this.scheduleNext();
+
+		return true;
+	}
+
+	scheduleNext() {
+		const nextDate = this.getNextDate(this.config.scheduledReports);
+		this.configManager.update({
+			id: 1,
+			nextScheduledReportsDate: +nextDate,
+		});
+	}
+
+	private getNextDate(settings: ScheduledReportsSettings): Date {
+		switch (settings.frequency?.type) {
+			case 'daily':
+				return this.getNextDay(settings);
+			case 'weekly':
+				return this.getNextWeek(settings);
+			case 'monthly':
+				return this.getNextMonth(settings);
+			default:
+				throw new Error('Invalid frequency type');
+		}
+	}
+
+	private getNextDay(settings: ScheduledReportsSettings): Date {
+		const frequency = settings.frequency;
+		const [hours, minutes] = settings.time!.split(':').map(Number);
+
+		const startDate = new Date();
+		startDate.setHours(hours, minutes, 0, 0);
+
+		if (frequency!.oneIn === 1 && isBefore(new Date(), startDate)) {
+			return startDate;
+		}
+
+		return addDays(startDate, frequency?.oneIn ?? 0);
+	}
+
+	private getNextWeek(settings: ScheduledReportsSettings): Date {
+		const frequency = settings.frequency;
+		const [hours, minutes] = settings.time!.split(':').map(Number);
+
+		const startDate = setDay(new Date(), frequency?.weekDayIndex ?? 0);
+		startDate.setHours(hours, minutes, 0, 0);
+
+		if (isBefore(new Date(), startDate)) {
+			return startDate;
+		}
+
+		return nextDay(startDate, frequency?.weekDayIndex ?? 0);
+	}
+
+	private getNextMonth(settings: ScheduledReportsSettings): Date {
+		const frequency = settings.frequency;
+		const [hours, minutes] = settings.time!.split(':').map(Number);
+
+		const startDate = new Date();
+		startDate.setDate(frequency?.dayOfMonth ?? 0);
+		startDate.setHours(hours, minutes, 0, 0);
+
+		if (isBefore(new Date(), startDate)) {
+			return startDate;
+		} else {
+			return addMonths(startDate, 1);
+		}
 	}
 
 	private handleDatabaseSaved(res: any) {

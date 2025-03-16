@@ -215,3 +215,24 @@ code {
 		min-height: 1.25rem !important;
 	}
 }
+
+.text-danger {
+	color: var(--error-text);
+}
+
+.pill {
+	display: inline-block;
+	padding: 0.25rem 0.5rem;
+	border-radius: 0.25rem;
+	font-size: 0.75rem;
+
+	&.warning {
+		background-color: var(--pill-warning-bg);
+		color: var(--pill-warning-text);
+	}
+}
+
+.secondary {
+	margin-left: auto;
+	color: var(--dropdown-text--disabled);
+}

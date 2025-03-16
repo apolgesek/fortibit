@@ -67,7 +67,12 @@
 							<span class="sr-only">More options</span>
 							<i-feather name="more-vertical"></i-feather>
 						</button>
-						<ul *appDropdownMenu class="dropdown-content right" @slideDown>
+						<ul
+							*appDropdownMenu
+							class="dropdown-content more-options-content right"
+							@slideDown
+						>
+							<li appMenuItem (activate)="openMoveEntryWindow()">Move</li>
 							<li appMenuItem (activate)="scanQrCode(entry)">Scan QR code</li>
 						</ul>
 					</div>
@@ -81,8 +86,7 @@
 					href="#"
 					(click)="openEntryHistoryWindow(); (false)"
 					class="show-history"
-				>
-					<app-svg src="assets/icons/history.svg" />&nbsp;Show history</a
+					>Show history</a
 				>
 			}
 

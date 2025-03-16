@@ -257,6 +257,7 @@ export class EntriesTableComponent implements OnInit {
 		return this.contextMenuBuilderService
 			.buildCopyUsernameEntryContextMenuItem()
 			.buildCopyPasswordEntryContextMenuItem()
+			.buildCopyTotpEntryContextMenuItem()
 			.buildSeparator()
 			.buildEditEntryContextMenuItem()
 			.buildMoveEntryContextMenuItem()

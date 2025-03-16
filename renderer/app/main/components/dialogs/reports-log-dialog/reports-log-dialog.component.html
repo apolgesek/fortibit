@@ -1,0 +1,86 @@
+<app-modal>
+	<div class="dialog-header">
+		<h2>Reports log</h2>
+		<a
+			href="#"
+			role="button"
+			aria-label="Close"
+			class="close-dialog"
+			(click)="close(); (false)"
+			>&times;
+		</a>
+	</div>
+	<div class="dialog-message">
+		@if (nextScheduledReportsDate) {
+			<div style="display: flex; align-items: center; margin-bottom: 1rem">
+				Next scheduled reports on:
+				{{ nextScheduledReportsDate | date: 'dd/MM/yy HH:mm' }}
+				@if (isNextScheduledReportsDatePastDue) {
+					<span class="pill warning">Awaiting</span>
+				}
+			</div>
+		}
+		@if (reports?.length > 0) {
+			<div class="table">
+				<div class="table-header">
+					<div class="cell index">#</div>
+					<div class="cell">Date</div>
+					<div class="cell">Type</div>
+					<div class="cell">Details</div>
+					<div class="cell text-right index">Action</div>
+				</div>
+				@for (item of reports; track item; let i = $index) {
+					<div class="history-entry row">
+						<div class="cell index">#{{ i + 1 }}</div>
+						<div class="cell">
+							{{ item.date | date: 'dd/MM/yy HH:mm' }}
+						</div>
+						<div
+							class="cell"
+							style="
+								display: flex;
+								align-items: center;
+								justify-content: space-between;
+							"
+						>
+							{{ item.type }}
+							@if (item.scheduled) {
+								<i-feather name="clock"></i-feather>
+							}
+						</div>
+						<div
+							class="cell"
+							[ngClass]="{
+								'text-danger':
+									item.metadata.severity === severity.ActionRequired,
+							}"
+						>
+							@if (item.metadata.severity === severity.ActionRequired) {
+								Action required
+							} @else {
+								No action required
+							}
+						</div>
+						<div class="cell text-right index">
+							<a href="#" (click)="openReportDetailsWindow(item); (false)"
+								>View</a
+							>
+						</div>
+					</div>
+				}
+			</div>
+		} @else {
+			There are no reports.
+		}
+	</div>
+	<div class="footer-container">
+		<button
+			type="button"
+			class="text-btn"
+			(click)="close()"
+			(keyup.enter)="close()"
+		>
+			Close
+		</button>
+	</div>
+</app-modal>

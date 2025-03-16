@@ -1,0 +1,52 @@
+@import 'themes/light/variables';
+@import 'mixins';
+
+.filter-option {
+	display: flex;
+	width: 100px;
+	background-color: var(--primary-bg);
+	color: var(--primary-text);
+	border-radius: 0.25rem !important;
+	padding: 0.5rem;
+	border: 1px solid transparent;
+
+	i-feather {
+		margin: 0 0 0 auto !important;
+	}
+
+	&:focus:not(:hover) {
+		outline: 2px solid $barberry !important;
+	}
+
+	&.expanded {
+		border-color: var(--border-color);
+		background-color: var(--primary-bg) !important;
+	}
+}
+
+.expanded {
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+
+	+ .dropdown-content {
+		border-bottom-left-radius: 0.25rem !important;
+		border-bottom-right-radius: 0.25rem !important;
+	}
+}
+
+.option-item {
+	display: flex;
+	align-items: center;
+	list-style-type: none;
+	padding: 0.5rem;
+
+	i {
+		margin-left: 0.5rem;
+	}
+
+	&:hover,
+	&:focus,
+	&.selected {
+		background-color: var(--tabset-btn-bg);
+	}
+}

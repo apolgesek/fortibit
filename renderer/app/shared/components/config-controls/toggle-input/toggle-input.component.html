@@ -1,0 +1,13 @@
+<div class="inputgroup checkbox">
+	<label class="label" [attr.for]="id">{{ label }}:</label>
+	<label class="switch">
+		<input
+			[attr.id]="id"
+			type="checkbox"
+			[(ngModel)]="value"
+			(ngModelChange)="onModelChange()"
+			[disabled]="isDisabled"
+		/>
+		<span class="slider"></span>
+	</label>
+</div>
